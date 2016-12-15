@@ -1,6 +1,11 @@
 package de.volzo.despat;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.TextureView;
@@ -29,8 +34,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        cameraController = new CameraController(this, textureView);
-        cameraController.takeImage();
+        initialize();
     }
 
     @Override
@@ -47,4 +51,27 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
 
     }
+
+    public void initialize() {
+        checkPermissions();
+
+        cameraController = new CameraController(this, textureView);
+        cameraController.takeImage();
+    }
+
+    public void checkPermissions() {
+
+        Activity activity = this;
+
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1337);
+        }
+    }
+
 }
