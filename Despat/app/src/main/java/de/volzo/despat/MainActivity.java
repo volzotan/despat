@@ -23,6 +23,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
+
+        System.loadLibrary("opencv_java3");
     }
 
     @Override
