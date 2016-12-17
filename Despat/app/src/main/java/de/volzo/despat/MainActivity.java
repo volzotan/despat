@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         checkPermissions();
 
         cameraController = new CameraController(this, textureView);
-        cameraController.takeImage();
+        cameraController.startPreview();
     }
 
     public void checkPermissions() {

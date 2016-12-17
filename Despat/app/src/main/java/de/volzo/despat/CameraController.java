@@ -60,12 +60,16 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
         SurfaceTexture surfaceTexture = tv.getSurfaceTexture();
         camera.setPreviewTexture(surfaceTexture);
-        camera.startPreview();
+        camera.setDisplayOrientation(90);
     }
 
     public void takeImage() {
         // camera.setOneShotPreviewCallback(this);
         camera.takePicture(this, this, this);
+    }
+
+    public void startPreview() {
+        camera.startPreview();
     }
 
     public void cleanup() {
