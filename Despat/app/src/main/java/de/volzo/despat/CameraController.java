@@ -65,6 +65,12 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
     public void takeImage() {
         // camera.setOneShotPreviewCallback(this);
+        camera.startPreview();
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         camera.takePicture(this, this, this);
     }
 
@@ -123,7 +129,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
-
+        Log.d(TAG, "preview frame");
     }
 
     @Override

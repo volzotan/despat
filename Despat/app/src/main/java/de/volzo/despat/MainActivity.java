@@ -3,16 +3,23 @@ package de.volzo.despat;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.TextureView;
 
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
     CameraController cameraController;
+    Recognizer recognizer;
 
     TextureView textureView;
 
@@ -23,8 +30,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
-
-        System.loadLibrary("opencv_java3");
     }
 
     @Override
@@ -37,6 +42,15 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         initialize();
+
+//        recognizer = new Recognizer();
+//        File dir = Environment.getExternalStorageDirectory();
+//        File imageFullPath = new File(dir, "foobar" + ".jpg");
+//        Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);
+//
+//        Canvas canvas = textureView.lockCanvas();
+//        canvas.drawBitmap(res.bitmap, new Matrix(), new Paint());
+//        textureView.unlockCanvasAndPost(canvas);
     }
 
     @Override
@@ -59,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         cameraController = new CameraController(this, textureView);
         cameraController.startPreview();
+        cameraController.takeImage();
     }
 
     public void checkPermissions() {
