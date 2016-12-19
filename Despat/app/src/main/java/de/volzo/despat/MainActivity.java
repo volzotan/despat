@@ -13,9 +13,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
+
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
@@ -24,14 +29,33 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     Recognizer recognizer;
 
     TextureView textureView;
+    MainActivity activity = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        checkPermissions();
+
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
+
+        Button takePhoto = (Button) findViewById(R.id.bt_takePhoto);
+        takePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.takePhoto();
+            }
+        });
+
+        Button btStartRec = (Button) findViewById(R.id.bt_startRecognizer);
+        btStartRec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.startRecognizer();
+            }
+        });
     }
 
     @Override
@@ -45,13 +69,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         initialize();
 
-        recognizer = new Recognizer();
-        File dir = Environment.getExternalStorageDirectory();
-        File imageFullPath = new File(dir, "foobar" + ".jpg");
-        Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);
 
-        ImageView imageView = (ImageView) findViewById(R.id.imageView);
-        imageView.setImageBitmap(res.bitmap);
 
 //        Canvas canvas = textureView.lockCanvas();
 //
@@ -83,14 +101,33 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     public void initialize() {
-        checkPermissions();
+
+    }
+
+    public void takePhoto() {
 
 //        cameraController2 = new CameraController2(this, textureView);
 //        cameraController2.openCamera();
 //        cameraController2.takePicture();
 
-//        cameraController = new CameraController(this, textureView);
-//        cameraController.takeImage();
+        cameraController = new CameraController(this, textureView);
+        cameraController.takeImage();
+    }
+
+    public void startRecognizer() {
+        recognizer = new Recognizer();
+        File dir = Environment.getExternalStorageDirectory();
+        File imageFullPath = new File(dir, "foobar" + ".jpg");
+        Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);
+
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        imageView.setImageBitmap(res.bitmap);
+
+        PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+
+        TextView tvStatus = (TextView) findViewById(R.id.tv_status);
+        tvStatus.setText("n: " + res.coordinates.length);
+
     }
 
     public void checkPermissions() {

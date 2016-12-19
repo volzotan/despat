@@ -10,6 +10,26 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="de.volzo.despat.MainActivity">
 
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
+
+
+    <Button
+        android:text="Take Photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bt_takePhoto" />
+
+    <Button
+        android:text="Start Rec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bt_startRecognizer"
+        android:layout_below="@+id/bt_takePhoto"
+        android:layout_toEndOf="@+id/tv_status" />
+
     <de.volzo.despat.support.FixedAspectRatioFrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -22,10 +42,9 @@
             android:text="texture_view" />
 
     </de.volzo.despat.support.FixedAspectRatioFrameLayout>
-
     <de.volzo.despat.support.FixedAspectRatioFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/imageView"
@@ -35,4 +54,7 @@
             android:text="image_view" />
 
     </de.volzo.despat.support.FixedAspectRatioFrameLayout>
+
+
+
 </RelativeLayout>
