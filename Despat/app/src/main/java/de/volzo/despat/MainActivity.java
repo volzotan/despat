@@ -19,6 +19,7 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
     CameraController cameraController;
+    CameraController2 cameraController2;
     Recognizer recognizer;
 
     TextureView textureView;
@@ -71,9 +72,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void initialize() {
         checkPermissions();
 
-        cameraController = new CameraController(this, textureView);
-        cameraController.startPreview();
-        cameraController.takeImage();
+        cameraController2 = new CameraController2(this, textureView);
+        cameraController2.openCamera();
+        cameraController2.takePicture();
+
+//        cameraController = new CameraController(this, textureView);
+//        cameraController.startPreview();
+//        cameraController.takeImage();
     }
 
     public void checkPermissions() {
