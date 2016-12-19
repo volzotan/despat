@@ -78,6 +78,10 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
         camera.startPreview();
     }
 
+    public void stopPreview() {
+        camera.stopPreview();
+    }
+
     public void cleanup() {
         camera.stopPreview();
         camera.release();
@@ -94,7 +98,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
         }
 
-        Log.v( TAG, "::imageCallback: picture retrieved ("+bytes.length+" bytes), storing.." );
+        Log.d( TAG, "::imageCallback: picture retrieved ("+bytes.length+" bytes), storing.." );
         //String myname = outdir.concat("img").concat(String.valueOf(counter++)).concat(".yuv");
 
         File dir = Environment.getExternalStorageDirectory(); //context.getFilesDir();

@@ -41,6 +41,9 @@ import java.util.List;
 
 public class CameraController2 {
 
+    // TODO: untested, not yet working
+    // https://inducesmile.com/android/android-camera2-api-example-tutorial/
+
     private static final String TAG = CameraController2.class.getName();
 
     Context context;

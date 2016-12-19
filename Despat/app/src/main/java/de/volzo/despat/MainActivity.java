@@ -13,6 +13,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.TextureView;
+import android.widget.ImageView;
 
 import java.io.File;
 
@@ -44,13 +45,25 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         initialize();
 
-//        recognizer = new Recognizer();
-//        File dir = Environment.getExternalStorageDirectory();
-//        File imageFullPath = new File(dir, "foobar" + ".jpg");
-//        Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);
-//
+        recognizer = new Recognizer();
+        File dir = Environment.getExternalStorageDirectory();
+        File imageFullPath = new File(dir, "foobar" + ".jpg");
+        Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);
+
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        imageView.setImageBitmap(res.bitmap);
+
 //        Canvas canvas = textureView.lockCanvas();
-//        canvas.drawBitmap(res.bitmap, new Matrix(), new Paint());
+//
+//        Matrix mat = new Matrix();
+//        float scaledWidth = canvas.getWidth()/(float) res.bitmap.getWidth();
+//        float scaledHeight = canvas.getHeight()/(float) res.bitmap.getHeight();
+//        mat.postScale(scaledWidth, scaledHeight);
+//        //
+//        // mat.postRotate(90f);
+//        //mat.postTranslate();
+//
+//        canvas.drawBitmap(res.bitmap, mat, new Paint());
 //        textureView.unlockCanvasAndPost(canvas);
     }
 
@@ -72,12 +85,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void initialize() {
         checkPermissions();
 
-        cameraController2 = new CameraController2(this, textureView);
-        cameraController2.openCamera();
-        cameraController2.takePicture();
+//        cameraController2 = new CameraController2(this, textureView);
+//        cameraController2.openCamera();
+//        cameraController2.takePicture();
 
 //        cameraController = new CameraController(this, textureView);
-//        cameraController.startPreview();
 //        cameraController.takeImage();
     }
 

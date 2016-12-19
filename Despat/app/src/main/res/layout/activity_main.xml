@@ -22,4 +22,17 @@
             android:text="texture_view" />
 
     </de.volzo.despat.support.FixedAspectRatioFrameLayout>
+
+    <de.volzo.despat.support.FixedAspectRatioFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:text="image_view" />
+
+    </de.volzo.despat.support.FixedAspectRatioFrameLayout>
 </RelativeLayout>
