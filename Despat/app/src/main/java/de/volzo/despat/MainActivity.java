@@ -12,8 +12,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewManager;
+import android.widget.ActionMenuView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,9 +26,12 @@ import android.widget.TextView;
 import java.io.File;
 
 import de.volzo.despat.support.Config;
+import de.volzo.despat.support.FixedAspectRatioFrameLayout;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
+
+    public static final String TAG = MainActivity.class.getName();
 
     CameraController cameraController;
     CameraController2 cameraController2;
@@ -37,10 +45,21 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.i(TAG, "application init");
+
         checkPermissions();
+        Config.init();
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
+
+        Button startPreview = (Button) findViewById(R.id.bt_startPreview);
+        startPreview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.startPreview();
+            }
+        });
 
         Button takePhoto = (Button) findViewById(R.id.bt_takePhoto);
         takePhoto.setOnClickListener(new View.OnClickListener() {
@@ -64,13 +83,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         super.onDestroy();
 
         if (cameraController != null) cameraController.cleanup();
+        Log.i(TAG, "application exit");
     }
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         initialize();
-
-
 
 //        Canvas canvas = textureView.lockCanvas();
 //
@@ -105,20 +123,37 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     }
 
+    public void startPreview() {
+
+        if (cameraController == null) {
+            cameraController = new CameraController(this, textureView);
+        }
+        cameraController.startPreview();
+    }
+
     public void takePhoto() {
 
 //        cameraController2 = new CameraController2(this, textureView);
 //        cameraController2.openCamera();
 //        cameraController2.takePicture();
 
-        cameraController = new CameraController(this, textureView);
+        if (cameraController == null) {
+            cameraController = new CameraController(this, textureView);
+        }
         cameraController.takeImage();
     }
 
     public void startRecognizer() {
+        // remove the textureView from the preview
+        FixedAspectRatioFrameLayout aspectRatioLayout = (FixedAspectRatioFrameLayout) findViewById(R.id.aspectratio_layout);
+        aspectRatioLayout.removeView(findViewById(R.id.textureView));
+        textureView = new TextureView(this);
+        textureView.setId(R.id.textureView);
+        aspectRatioLayout.addView(textureView);
+
         recognizer = new Recognizer();
 
-        File dir = Config.FOLDER;
+        File dir = Config.IMAGE_FOLDER;
         File imageFullPath = new File(dir, "foobar" + ".jpg");
 
         Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);

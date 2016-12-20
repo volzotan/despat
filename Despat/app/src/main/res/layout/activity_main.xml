@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -10,29 +10,46 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="de.volzo.despat.MainActivity">
 
-    <TextView
-        android:id="@+id/tv_status"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content">
 
+        <Button
+            android:text="Start Preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_startPreview" />
 
-    <Button
-        android:text="Take Photo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/bt_takePhoto" />
+        <Button
+            android:text="Take Photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_takePhoto"
+            android:layout_below="@+id/bt_startPreview"
+            android:layout_toEndOf="@+id/tv_status" />
 
-    <Button
-        android:text="Start Rec"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/bt_startRecognizer"
-        android:layout_below="@+id/bt_takePhoto"
-        android:layout_toEndOf="@+id/tv_status" />
+        <Button
+            android:text="Start Rec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_startRecognizer"
+            android:layout_below="@+id/bt_takePhoto"
+            android:layout_toEndOf="@+id/tv_status" />
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/bt_startRecognizer"
+            android:text="uninitialized"/>
+
+    </RelativeLayout>
 
     <de.volzo.despat.support.FixedAspectRatioFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:id="@+id/aspectratio_layout">
 
         <TextureView
             android:id="@+id/textureView"
@@ -40,11 +57,6 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:text="texture_view" />
-
-    </de.volzo.despat.support.FixedAspectRatioFrameLayout>
-    <de.volzo.despat.support.FixedAspectRatioFrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/imageView"
@@ -55,6 +67,4 @@
 
     </de.volzo.despat.support.FixedAspectRatioFrameLayout>
 
-
-
-</RelativeLayout>
+</FrameLayout>

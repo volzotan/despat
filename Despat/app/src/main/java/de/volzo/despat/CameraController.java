@@ -62,7 +62,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
         SurfaceTexture surfaceTexture = tv.getSurfaceTexture();
         camera.setPreviewTexture(surfaceTexture);
-        camera.setDisplayOrientation(90);
+        // camera.setDisplayOrientation(90);
     }
 
     public void takeImage() {
@@ -103,7 +103,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
         Log.d( TAG, "::imageCallback: picture retrieved ("+bytes.length+" bytes), storing.." );
         //String myname = outdir.concat("img").concat(String.valueOf(counter++)).concat(".yuv");
 
-        File dir = Config.FOLDER;
+        File dir = Config.IMAGE_FOLDER;
         File imageFullPath = new File(dir, "foobar" + ".jpg");
 
         if (param.getPictureFormat() == ImageFormat.JPEG) {
