@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
 
+import de.volzo.despat.support.Config;
+
 /**
  * Created by volzotan on 02.12.16.
  */
@@ -101,7 +103,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
         Log.d( TAG, "::imageCallback: picture retrieved ("+bytes.length+" bytes), storing.." );
         //String myname = outdir.concat("img").concat(String.valueOf(counter++)).concat(".yuv");
 
-        File dir = Environment.getExternalStorageDirectory(); //context.getFilesDir();
+        File dir = Config.FOLDER;
         File imageFullPath = new File(dir, "foobar" + ".jpg");
 
         if (param.getPictureFormat() == ImageFormat.JPEG) {

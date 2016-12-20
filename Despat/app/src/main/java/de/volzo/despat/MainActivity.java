@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import java.io.File;
 
+import de.volzo.despat.support.Config;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -116,8 +117,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void startRecognizer() {
         recognizer = new Recognizer();
-        File dir = Environment.getExternalStorageDirectory();
+
+        File dir = Config.FOLDER;
         File imageFullPath = new File(dir, "foobar" + ".jpg");
+
         Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);
 
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
