@@ -2,29 +2,27 @@ package de.volzo.despat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewManager;
-import android.widget.ActionMenuView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
 
+import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -76,6 +74,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 activity.startRecognizer();
             }
         });
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String path = intent.getStringExtra("path");
+                Log.d("image taken", "path: " + path);
+
+            }
+        }, new IntentFilter(Broadcast.PICTURE_TAKEN));
     }
 
     @Override
@@ -165,7 +173,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         TextView tvStatus = (TextView) findViewById(R.id.tv_status);
         tvStatus.setText("n: " + res.coordinates.length);
-
     }
 
     public void checkPermissions() {

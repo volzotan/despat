@@ -1,19 +1,23 @@
 package de.volzo.despat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Environment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.TextureView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
+import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 
 /**
@@ -29,6 +33,8 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
     private Camera camera;
     private Camera.Parameters param;
     private int[] pictureSize;
+
+    boolean shutdownAfterPictureTaken = true;
 
 
     public CameraController(Context context, TextureView textureView) {
@@ -67,6 +73,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
     public void takeImage() {
         // camera.setOneShotPreviewCallback(this);
+
         camera.startPreview();
         try {
             Thread.sleep(1000);
@@ -86,7 +93,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
     public void cleanup() {
         camera.stopPreview();
-        camera.release();
+        // camera.release();
     }
 
     @Override
@@ -97,7 +104,6 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
             // if the current phone doesn't support raw data, bytes will be empty
             Log.d(TAG, "image data empty");
             return;
-
         }
 
         Log.d( TAG, "::imageCallback: picture retrieved ("+bytes.length+" bytes), storing.." );
@@ -114,6 +120,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
                 fos.close();
             } catch (Exception e) {
                 Log.e(TAG, "saving JPEG failed ", e);
+                return;
             }
         } else {
             // try to store YUV data
@@ -125,11 +132,25 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
                 // fos.close();
 
-                Log.v(TAG, "::imageCallback: picture stored successfully as " + imageFullPath.getCanonicalPath());
-
             } catch (Exception e) {
                 Log.e(TAG, "saving YUV failed ", e);
+                return;
             }
+        }
+
+        try {
+            Log.d(TAG, "::imageCallback: picture stored successfully as " + imageFullPath.getCanonicalPath());
+
+            Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
+            intent.putExtra("path", imageFullPath);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+            if (shutdownAfterPictureTaken) {
+                this.cleanup();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "accessing image path failed ", e);
+            return;
         }
     }
 

@@ -73,6 +73,7 @@ public class Recognizer {
         recognizerResultset.coordinates = coordinates;
 
         Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
+        Imgproc.cvtColor(cvimage2, cvimage2, Imgproc.COLOR_BGR2RGB);
         Bitmap resultBitmap = Bitmap.createBitmap(cvimage2.width(), cvimage2.height(), conf);
         Utils.matToBitmap(cvimage2, resultBitmap);
         recognizerResultset.bitmap = resultBitmap;
