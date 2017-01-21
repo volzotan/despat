@@ -58,9 +58,6 @@ public class Recognizer {
         float timestop = (System.currentTimeMillis() - timestart) / 1000f;
         System.out.println("runtime: " + Math.round(timestop) + "s");
 
-        // showim(cvimage2);
-        // Imgcodecs.imwrite("result.jpg", cvimage2);
-
         double[][] coordinates = new double[rects.length][2];
         for (int i=0; i<rects.length; i++) {
             Rect rect = rects[i];
@@ -70,21 +67,30 @@ public class Recognizer {
         }
 
         RecognizerResultset recognizerResultset = new RecognizerResultset();
-        recognizerResultset.coordinates = coordinates;
-
-        Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
-        Imgproc.cvtColor(cvimage2, cvimage2, Imgproc.COLOR_BGR2RGB);
-        Bitmap resultBitmap = Bitmap.createBitmap(cvimage2.width(), cvimage2.height(), conf);
-        Utils.matToBitmap(cvimage2, resultBitmap);
-        recognizerResultset.bitmap = resultBitmap;
+        recognizerResultset.setCoordinates(coordinates);
+        recognizerResultset.setBitmap(cvimage2);
 
         return recognizerResultset;
+
+        // Imgcodecs.imwrite("result.jpg", cvimage2);
     }
 
     class RecognizerResultset {
 
         public double[][] coordinates;
         public Bitmap bitmap;
+
+        void setCoordinates(double[][] coordinates) {
+            this.coordinates = coordinates;
+        }
+
+        void setBitmap(Mat image) {
+            Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
+            Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
+            Bitmap resultBitmap = Bitmap.createBitmap(image.width(), image.height(), conf);
+            Utils.matToBitmap(image, resultBitmap);
+            this.bitmap = resultBitmap;
+        }
 
         public RecognizerResultset() {}
     }

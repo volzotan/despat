@@ -11,12 +11,15 @@ import java.io.File;
 import java.io.InputStream;
 
 public class Recognizer {
-    public static void main(String[] args) {
+
+    public Recognizer() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
+
+
+    public RecognizerResultset run(File image) {
 
         long timestart = System.currentTimeMillis();
-
-        File image = new File("pedestriancrossing3.jpg");
 
         HOGDescriptor hog = new HOGDescriptor();
         hog.setSVMDetector(HOGDescriptor.getDefaultPeopleDetector());
@@ -46,11 +49,20 @@ public class Recognizer {
         float timestop = (System.currentTimeMillis() - timestart) / 1000f;
         System.out.println("runtime: " + Math.round(timestop) + "s");
 
-        // showim(cvimage2);
-        Imgcodecs.imwrite("result.jpg", cvimage2);
+        double[][] coordinates = new double[rects.length][2];
+        for (int i=0; i<rects.length; i++) {
+            Rect rect = rects[i];
+
+            coordinates[i][0] = rect.x + (rect.width / 2);
+            coordinates[i][1] = rect.y + (rect.height / 10);
+        }
+
+        RecognizerResultset recognizerResultset = new RecognizerResultset();
+        recognizerResultset.setCoordinates(coordinates);
+        recognizerResultset.setBitmap(cvimage2);
+
+        return recognizerResultset;
     }
-
-
 
     public static void showim(Mat img) {
         Imgproc.resize(img, img, new Size(640, 480));
@@ -70,6 +82,21 @@ public class Recognizer {
         }
     }
 
+    class RecognizerResultset {
 
+        public double[][] coordinates;
+        public Mat matrix;
 
+        void setCoordinates(double[][] coordinates) {
+            this.coordinates = coordinates;
+        }
+
+        void setBitmap(Mat image) {
+            Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
+
+            this.matrix = image;
+        }
+
+        public RecognizerResultset() {}
+    }
 }
