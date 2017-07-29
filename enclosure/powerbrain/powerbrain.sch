@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="8.2.1">
+<eagle version="8.2.2">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -6391,8 +6391,8 @@ Source:  FDD4141.pdf</description>
 <part name="GND25" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="FRAME4" library="SparkFun-Retired" deviceset="FRAME-A3" device=""/>
 <part name="F2" library="SparkFun-PowerIC" deviceset="PTC" device="SMD-W"/>
-<part name="VD3" library="SparkFun-Passives" deviceset="RESISTOR" device="1206" value="10k"/>
-<part name="VD4" library="SparkFun-Passives" deviceset="RESISTOR" device="1206" value="6.2k"/>
+<part name="VD1" library="SparkFun-Passives" deviceset="RESISTOR" device="1206" value="10k"/>
+<part name="VD2" library="SparkFun-Passives" deviceset="RESISTOR" device="1206" value="6.2k"/>
 <part name="J1" library="SparkFun-Connectors" deviceset="M02" device="LOCK"/>
 <part name="BL1" library="SparkFun-Passives" deviceset="INDUCTOR" device="NPI75"/>
 <part name="GND6" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
@@ -6421,6 +6421,7 @@ Source:  FDD4141.pdf</description>
 <part name="U2" library="TPS61090" deviceset="TPS61090" device="" value=""/>
 <part name="SUPPLY7" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
 <part name="J2" library="SparkFun-Connectors" deviceset="M03" device="PTH"/>
+<part name="J4" library="SparkFun-Connectors" deviceset="M02" device="LOCK"/>
 </parts>
 <sheets>
 <sheet>
@@ -6459,8 +6460,8 @@ Source:  FDD4141.pdf</description>
 <instance part="GND25" gate="1" x="114.3" y="114.3" rot="R90"/>
 <instance part="FRAME4" gate="G$1" x="0" y="0"/>
 <instance part="F2" gate="G$1" x="43.18" y="208.28" rot="R90"/>
-<instance part="VD3" gate="G$1" x="38.1" y="86.36" rot="R90"/>
-<instance part="VD4" gate="G$1" x="38.1" y="71.12" rot="R90"/>
+<instance part="VD1" gate="G$1" x="38.1" y="86.36" rot="R90"/>
+<instance part="VD2" gate="G$1" x="38.1" y="71.12" rot="R90"/>
 <instance part="J1" gate="G$1" x="91.44" y="43.18"/>
 <instance part="BL1" gate="G$1" x="325.12" y="210.82"/>
 <instance part="GND6" gate="1" x="38.1" y="60.96"/>
@@ -6489,6 +6490,7 @@ Source:  FDD4141.pdf</description>
 <instance part="U2" gate="G$1" x="266.7" y="187.96"/>
 <instance part="SUPPLY7" gate="G$1" x="347.98" y="187.96" rot="R270"/>
 <instance part="J2" gate="J$1" x="88.9" y="81.28"/>
+<instance part="J4" gate="G$1" x="78.74" y="43.18"/>
 </instances>
 <busses>
 </busses>
@@ -6667,7 +6669,7 @@ Source:  FDD4141.pdf</description>
 <pinref part="J3" gate="G$1" pin="6"/>
 </segment>
 <segment>
-<pinref part="VD4" gate="G$1" pin="1"/>
+<pinref part="VD2" gate="G$1" pin="1"/>
 <wire x1="38.1" y1="66.04" x2="38.1" y2="63.5" width="0.1524" layer="91"/>
 <pinref part="GND6" gate="1" pin="GND"/>
 </segment>
@@ -6747,8 +6749,8 @@ Source:  FDD4141.pdf</description>
 </net>
 <net name="VD_DIRECT" class="0">
 <segment>
-<pinref part="VD3" gate="G$1" pin="1"/>
-<pinref part="VD4" gate="G$1" pin="2"/>
+<pinref part="VD1" gate="G$1" pin="1"/>
+<pinref part="VD2" gate="G$1" pin="2"/>
 <wire x1="38.1" y1="81.28" x2="38.1" y2="78.74" width="0.1524" layer="91"/>
 <wire x1="38.1" y1="78.74" x2="38.1" y2="76.2" width="0.1524" layer="91"/>
 <wire x1="38.1" y1="78.74" x2="35.56" y2="78.74" width="0.1524" layer="91"/>
@@ -6971,7 +6973,7 @@ Source:  FDD4141.pdf</description>
 </net>
 <net name="BATT_VCC" class="2">
 <segment>
-<pinref part="VD3" gate="G$1" pin="2"/>
+<pinref part="VD1" gate="G$1" pin="2"/>
 <wire x1="38.1" y1="91.44" x2="38.1" y2="96.52" width="0.1524" layer="91"/>
 <label x="38.1" y="96.52" size="1.778" layer="95"/>
 </segment>
@@ -6980,6 +6982,9 @@ Source:  FDD4141.pdf</description>
 <wire x1="101.6" y1="45.72" x2="101.6" y2="50.8" width="0.1524" layer="91"/>
 <label x="101.6" y="50.8" size="1.778" layer="95"/>
 <pinref part="J1" gate="G$1" pin="2"/>
+<pinref part="J4" gate="G$1" pin="2"/>
+<wire x1="86.36" y1="45.72" x2="99.06" y2="45.72" width="0.1524" layer="91"/>
+<junction x="99.06" y="45.72"/>
 </segment>
 <segment>
 <pinref part="BR1" gate="G$1" pin="2"/>
@@ -7073,6 +7078,9 @@ Source:  FDD4141.pdf</description>
 <wire x1="104.14" y1="43.18" x2="99.06" y2="43.18" width="0.1524" layer="91"/>
 <pinref part="J1" gate="G$1" pin="1"/>
 <label x="104.14" y="43.18" size="1.778" layer="95"/>
+<pinref part="J4" gate="G$1" pin="1"/>
+<wire x1="99.06" y1="43.18" x2="86.36" y2="43.18" width="0.1524" layer="91"/>
+<junction x="99.06" y="43.18"/>
 </segment>
 <segment>
 <wire x1="101.6" y1="20.32" x2="99.06" y2="20.32" width="0.1524" layer="91"/>

@@ -106,7 +106,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
             return;
         }
 
-        Log.d( TAG, "::imageCallback: picture retrieved ("+bytes.length+" bytes), storing.." );
+        Log.d( TAG, "imageCallback: picture retrieved ("+bytes.length+" bytes), storing.." );
         //String myname = outdir.concat("img").concat(String.valueOf(counter++)).concat(".yuv");
 
         File dir = Config.IMAGE_FOLDER;
@@ -139,10 +139,10 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
         }
 
         try {
-            Log.d(TAG, "::imageCallback: picture stored successfully as " + imageFullPath.getCanonicalPath());
+            Log.d(TAG, "imageCallback: picture stored successfully as " + imageFullPath.getCanonicalPath());
 
             Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
-            intent.putExtra("path", imageFullPath);
+            intent.putExtra("path", imageFullPath.getAbsolutePath());
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
             if (shutdownAfterPictureTaken) {

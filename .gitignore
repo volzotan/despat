@@ -1,5 +1,6 @@
 /DespatPlayground/testimages
-/enclosure/powerbrain/*.b$*
-/enclosure/powerbrain/*.s$*
-/enclosure/powerbrain/*.lck
-/enclosure/powerbrain/*.pro
+/enclosure/**/*.b#?
+/enclosure/**/*.s#?
+/enclosure/*/*.lck
+/enclosure/**/*.pro
+/datasets/*
