@@ -6418,7 +6418,7 @@ Source:  FDD4141.pdf</description>
 <part name="GND2" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="J3" library="SparkFun-Connectors" deviceset="AVR_SPI_PRG_6" device="PTH" value=""/>
 <part name="GND4" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="U2" library="TPS61090" deviceset="TPS61090" device=""/>
+<part name="U2" library="TPS61090" deviceset="TPS61090" device="" value=""/>
 <part name="SUPPLY7" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
 <part name="J2" library="SparkFun-Connectors" deviceset="M03" device="PTH"/>
 </parts>
@@ -7120,6 +7120,11 @@ Source:  FDD4141.pdf</description>
 <pinref part="BR2" gate="G$1" pin="1"/>
 <wire x1="302.26" y1="228.6" x2="302.26" y2="231.14" width="0.1524" layer="91"/>
 <label x="302.26" y="231.14" size="1.778" layer="95" rot="R90"/>
+</segment>
+<segment>
+<pinref part="U2" gate="G$1" pin="SYNC"/>
+<wire x1="248.92" y1="185.42" x2="238.76" y2="185.42" width="0.1524" layer="91"/>
+<label x="238.76" y="185.42" size="1.778" layer="95" rot="R180"/>
 </segment>
 </net>
 <net name="B_SW" class="0">

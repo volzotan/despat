@@ -44,10 +44,12 @@ public class Recognizer {
                     new Scalar(0, 0, 255), 2);
         }
 
-        System.out.println("hits: " + rects.length);
-
         float timestop = (System.currentTimeMillis() - timestart) / 1000f;
-        System.out.println("runtime: " + Math.round(timestop) + "s");
+
+        RecognizerResultset recognizerResultset = new RecognizerResultset();
+        recognizerResultset.setPath(image);
+        recognizerResultset.setBitmap(cvimage2);
+        recognizerResultset.setRuntime(timestop);
 
         double[][] coordinates = new double[rects.length][2];
         for (int i=0; i<rects.length; i++) {
@@ -57,9 +59,7 @@ public class Recognizer {
             coordinates[i][1] = rect.y + (rect.height / 10);
         }
 
-        RecognizerResultset recognizerResultset = new RecognizerResultset();
         recognizerResultset.setCoordinates(coordinates);
-        recognizerResultset.setBitmap(cvimage2);
 
         return recognizerResultset;
     }
@@ -84,19 +84,35 @@ public class Recognizer {
 
     class RecognizerResultset {
 
+        private Mat matrix;
+
+        public File path;
         public double[][] coordinates;
-        public Mat matrix;
+        public double runtime;
+
+
+        void setBitmap(Mat image) {
+            //Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
+
+            this.matrix = image;
+        }
+
+        Mat getBitmap() {
+            return matrix;
+        }
+
+        public RecognizerResultset() {}
+
+        void setPath(File path) {
+            this.path = path;
+        }
 
         void setCoordinates(double[][] coordinates) {
             this.coordinates = coordinates;
         }
 
-        void setBitmap(Mat image) {
-            Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
-
-            this.matrix = image;
+        void setRuntime(double runtime) {
+            this.runtime = runtime;
         }
-
-        public RecognizerResultset() {}
     }
 }

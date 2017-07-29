@@ -3,6 +3,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.io.FileFilter;
 
 /**
  * Created by volzotan on 21.01.17.
@@ -12,11 +13,37 @@ public class Main {
     public static void main(String[] args) {
         Recognizer recognizer = new Recognizer();
 
-        File image = new File("/Users/volzotan/Desktop/export_pedestrian_2_muenster/DSCF7415.jpg");
-        Recognizer.RecognizerResultset res = recognizer.run(image);
+        File[] foo = findAllFiles(new File("/Users/volzotan/Desktop/export_pedestrian_3_muenster/"), ".jpg");
 
-        Mat resimage = res.matrix;
-        Imgproc.cvtColor(resimage, resimage, Imgproc.COLOR_BGR2RGB);
-        Imgcodecs.imwrite("result.jpg", resimage);
+        for (int i=0;i<foo.length;i++) {
+
+            File image = new File(foo[i].getAbsolutePath());
+            Recognizer.RecognizerResultset res = recognizer.run(image);
+
+            System.out.format("image: %20s ; hits: %03d ; runtime: %2.3f%n", res.path.getName(), res.coordinates.length, res.runtime);
+
+            Mat resimage = res.getBitmap();
+            Imgcodecs.imwrite("result"+i+".jpg", resimage);
+        }
+    }
+
+    public static File[] findAllFiles(File directory, String filterSuffix) {
+        FileFilter filter = new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                String pathnamestr = pathname.getAbsolutePath();
+
+                if (pathnamestr.length() > 4) {
+                    String suffix = pathnamestr.substring(pathnamestr.length()-4);
+                    if (suffix.equals(filterSuffix)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
+
+        File[] files = directory.listFiles(filter);
+        return files;
     }
 }
