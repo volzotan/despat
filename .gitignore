@@ -1,6 +1,6 @@
 /DespatPlayground/testimages
 /enclosure/**/*.b#?
 /enclosure/**/*.s#?
-/enclosure/*/*.lck
+/enclosure/**/*.lck
 /enclosure/**/*.pro
 /datasets/*

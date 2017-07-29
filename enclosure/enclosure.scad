@@ -1,6 +1,6 @@
-sizeBot    = [150, 75, 20];
-sizeTop    = [150, 75, 25];
-lensHole   = [110, 75/2];
+sizeBot    = [155, 75, 20];
+sizeTop    = [155, 75, 25];
+lensHole   = [127, 75/2];
 
 lidDepth   = 1;
 lidWall    = 0.8;
@@ -13,7 +13,7 @@ wb         = 1.2;
 bottom();
 translate([0, 80, 0]) top();
 
-% translate([17, 5, 5]) phone();
+% translate([20, 4, 5+0]) phone();
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -44,13 +44,16 @@ module top() {
         }
     }
     
+    // translate([34, 3, 8]) 
+    translate([sizeTop[0]-3, 55, 8]) rotate([0, -90, 0]) import("/Users/volzotan/GIT/despat/enclosure/dht22.stl");
+    
     % translate([]) {
-        translate([10, 5, 14]) cube([30, 65, 1.2]);
-        translate([53+20*0, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-        translate([53+20*1, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-        translate([53+20*2, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-        translate([53+20*3, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-        translate([53+20*4, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+        translate([16, 5, 5]) cube([25.4, 65, 1.2]);
+        translate([54+20*0, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+        translate([54+20*1, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+        translate([54+20*2, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+        translate([54+20*3, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+        translate([54+20*4, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
     }
 }
 
@@ -101,7 +104,10 @@ module bottom() {
 
 module phone() {
     //cube([154, 75, 10]); // Moto Z
-    block(124.8, 64.8, 12.3, crad=3);
+    block(130, 67, 12.3, crad=10);
+    translate([65, -0.5, 7]) cube([17, 2, 1.5]);
+    translate([65+17+10, -1, 7]) cube([9, 2, 1.5]);
+    translate([130-23, 67/2, -1]) cylinder($fn=32, h=3, d=13);
 }
 
 module block(width, depth, height, crad=3, red=0) {
@@ -112,3 +118,14 @@ module block(width, depth, height, crad=3, red=0) {
         translate([width-crad-red, depth-crad-red]) cylinder($fn=32, h=height, r=crad);
     }
 }
+
+// Phone Moto E Measurement
+
+// Max: [130, 67, 12.5]
+// About 1-1.5mm curvature on top and bottom sides
+// Distance middle usb port to edge: 33.5
+// length usb port: 8.1 (long side of port facing down)
+// corner radius: 10mm
+// curvature bottom: 12.5-8.5
+// button positions from bottom: 65 [17] 10 [9] 29
+// camera diameter: 13, camera center distance from top: 23
