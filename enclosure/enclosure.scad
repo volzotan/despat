@@ -45,7 +45,7 @@ module top() {
     }
     
     // translate([34, 3, 8]) 
-    translate([sizeTop[0]-3, 55, 8]) rotate([0, -90, 0]) import("/Users/volzotan/GIT/despat/enclosure/dht22.stl");
+    translate([sizeTop[0]-3, 55, 8]) rotate([0, -90, 0]) import("dht22.stl");
     
     % translate([]) {
         translate([16, 5, 5]) cube([25.4, 65, 1.2]);
