@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         Recognizer recognizer = new Recognizer();
 
-        File[] foo = findAllFiles(new File("/Users/volzotan/Desktop/export_pedestrian_3_muenster/"), ".jpg");
+        File[] foo = findAllFiles(new File("../datasets/ulm/5000px"), ".jpg");
 
         for (int i=0;i<foo.length;i++) {
 
@@ -23,7 +23,7 @@ public class Main {
             System.out.format("image: %20s ; hits: %03d ; runtime: %2.3f%n", res.path.getName(), res.coordinates.length, res.runtime);
 
             Mat resimage = res.getBitmap();
-            Imgcodecs.imwrite("result"+i+".jpg", resimage);
+            Imgcodecs.imwrite("result/result"+i+".jpg", resimage);
         }
     }
 
