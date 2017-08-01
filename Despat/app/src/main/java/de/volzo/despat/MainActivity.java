@@ -48,6 +48,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         checkPermissions();
         Config.init();
 
+        PowerbrainConnector powerbrain = new PowerbrainConnector(this);
+        powerbrain.connect();
+
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 

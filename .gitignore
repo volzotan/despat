@@ -1,4 +1,7 @@
-/DespatPlayground/testimages
+**/.idea
+/DespatPlayground/result
+/DespatPlayground/out
+/Despat/out
 /enclosure/**/*.b#?
 /enclosure/**/*.s#?
 /enclosure/**/*.lck
