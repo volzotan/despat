@@ -6728,6 +6728,8 @@ DPDT SMT slide switch, AYZ0202, SWCH-08179</description>
 <part name="J4" library="SparkFun-Connectors" deviceset="M02" device="LOCK"/>
 <part name="RUSB3" library="SparkFun-Passives" deviceset="RESISTOR" device="1206"/>
 <part name="S2" library="SparkFun-Electromechanical" deviceset="SWITCH-SPDT" device="SMD2"/>
+<part name="C1" library="SparkFun-Passives" deviceset="CAP" device="1206" value="0.1uF"/>
+<part name="GND3" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -6801,6 +6803,8 @@ DPDT SMT slide switch, AYZ0202, SWCH-08179</description>
 <instance part="J4" gate="G$1" x="78.74" y="43.18"/>
 <instance part="RUSB3" gate="G$1" x="53.34" y="228.6" rot="R90"/>
 <instance part="S2" gate="1" x="154.94" y="106.68"/>
+<instance part="C1" gate="G$1" x="22.86" y="68.58"/>
+<instance part="GND3" gate="1" x="22.86" y="60.96"/>
 </instances>
 <busses>
 </busses>
@@ -7004,6 +7008,11 @@ DPDT SMT slide switch, AYZ0202, SWCH-08179</description>
 <wire x1="104.14" y1="83.82" x2="96.52" y2="83.82" width="0.1524" layer="91"/>
 <pinref part="J2" gate="J$1" pin="3"/>
 </segment>
+<segment>
+<pinref part="GND3" gate="1" pin="GND"/>
+<pinref part="C1" gate="G$1" pin="2"/>
+<wire x1="22.86" y1="63.5" x2="22.86" y2="66.04" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="RX" class="0">
 <segment>
@@ -7063,9 +7072,13 @@ DPDT SMT slide switch, AYZ0202, SWCH-08179</description>
 <pinref part="VD2" gate="G$1" pin="2"/>
 <wire x1="38.1" y1="81.28" x2="38.1" y2="78.74" width="0.1524" layer="91"/>
 <wire x1="38.1" y1="78.74" x2="38.1" y2="76.2" width="0.1524" layer="91"/>
-<wire x1="38.1" y1="78.74" x2="35.56" y2="78.74" width="0.1524" layer="91"/>
+<wire x1="38.1" y1="78.74" x2="22.86" y2="78.74" width="0.1524" layer="91"/>
 <junction x="38.1" y="78.74"/>
-<label x="35.56" y="78.74" size="1.778" layer="95" rot="R180"/>
+<label x="10.16" y="78.74" size="1.778" layer="95" rot="R90"/>
+<pinref part="C1" gate="G$1" pin="1"/>
+<wire x1="22.86" y1="78.74" x2="10.16" y2="78.74" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="73.66" x2="22.86" y2="78.74" width="0.1524" layer="91"/>
+<junction x="22.86" y="78.74"/>
 </segment>
 <segment>
 <pinref part="U$3" gate="G$1" pin="PF0(ADC0)"/>
