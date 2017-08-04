@@ -12,6 +12,10 @@ import de.volzo.despat.support.Broadcast;
 
 public class ShutterService extends IntentService {
 
+    public ShutterService() {
+        super("ShutterService");
+    }
+
     @Override
     protected void onHandleIntent(Intent workIntent) {
         String dataString = workIntent.getDataString();
@@ -21,6 +25,10 @@ public class ShutterService extends IntentService {
         Intent localIntent = new Intent(Broadcast.PICTURE_TAKEN)
                 .putExtra(Broadcast.DATA_PICTURE_PATH, "narf");
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+
+        // Release the wake lock provided by the WakefulBroadcastReceiver.
+        DespatWakefulReceiver.completeWakefulIntent(intent);
+
     }
 
 }

@@ -22,6 +22,8 @@ import java.io.File;
 
 public class Recognizer {
 
+    private long[] computationTime = new long[3];
+
     public Recognizer() {
         System.loadLibrary("opencv_java3");
     }
@@ -33,10 +35,15 @@ public class Recognizer {
         HOGDescriptor hog = new HOGDescriptor();
         hog.setSVMDetector(HOGDescriptor.getDefaultPeopleDetector());
 
+        computationTime[0] = System.currentTimeMillis() - timestart; // init descriptor
+
         Mat cvimage = Imgcodecs.imread(image.getAbsolutePath());
         Mat cvimage2 = cvimage.clone();
         MatOfRect foundLocations = new MatOfRect();
         MatOfDouble foundWeights = new MatOfDouble();
+
+        computationTime[1] = System.currentTimeMillis() - timestart; // read image
+
 //        hog.detectMultiScale(cvimage, foundLocations, foundWeights,
 //                1,
 //                new Size(4, 4),
@@ -47,6 +54,8 @@ public class Recognizer {
 
         Rect[] rects = foundLocations.toArray();
 
+        computationTime[2] = System.currentTimeMillis() - timestart; // computation
+
         for (Rect rect : rects) {
             Imgproc.rectangle(cvimage2, new Point(rect.x, rect.y),
                     new Point(rect.x+rect.width, rect.y+rect.height),
@@ -54,9 +63,6 @@ public class Recognizer {
         }
 
         System.out.println("hits: " + rects.length);
-
-        float timestop = (System.currentTimeMillis() - timestart) / 1000f;
-        System.out.println("runtime: " + Math.round(timestop) + "s");
 
         double[][] coordinates = new double[rects.length][2];
         for (int i=0; i<rects.length; i++) {
@@ -66,9 +72,15 @@ public class Recognizer {
             coordinates[i][1] = rect.y + (rect.height / 10);
         }
 
+        computationTime[3] = System.currentTimeMillis() - timestart; // drawing boxes
+
         RecognizerResultset recognizerResultset = new RecognizerResultset();
         recognizerResultset.setCoordinates(coordinates);
         recognizerResultset.setBitmap(cvimage2);
+        recognizerResultset.setComputationTime(computationTime);
+
+        float timestop = (System.currentTimeMillis() - timestart) / 1000f;
+        System.out.println("runtime: " + Math.round(timestop) + "s");
 
         return recognizerResultset;
 
@@ -79,6 +91,9 @@ public class Recognizer {
 
         public double[][] coordinates;
         public Bitmap bitmap;
+        public long[] computationTime;
+
+        public RecognizerResultset() {}
 
         void setCoordinates(double[][] coordinates) {
             this.coordinates = coordinates;
@@ -92,6 +107,9 @@ public class Recognizer {
             this.bitmap = resultBitmap;
         }
 
-        public RecognizerResultset() {}
+        void setComputationTime(long[] computationTime) {
+            this.computationTime = computationTime;
+        }
+
     }
 }
