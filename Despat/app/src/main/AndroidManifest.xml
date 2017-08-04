@@ -22,6 +22,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".PreviewActivity"></activity>
+
+        <service android:name=".services.ShutterService"
+            android:exported="false" />
+
+        <service android:name=".services.RecognitionService"
+            android:exported="false" />
     </application>
 
 </manifest>

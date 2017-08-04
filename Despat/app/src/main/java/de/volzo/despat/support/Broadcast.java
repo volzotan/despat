@@ -5,5 +5,6 @@ package de.volzo.despat.support;
  */
 
 public class Broadcast {
-    public static final String PICTURE_TAKEN = "picture_taken";
+    public static final String PICTURE_TAKEN        = "de.volzo.despat.PICTURE_TAKEN";
+    public static final String DATA_PICTURE_PATH    = "de.volzo.despat.DATA_PICTURE_PATH";
 }

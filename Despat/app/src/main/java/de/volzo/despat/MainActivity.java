@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 
 import java.io.File;
 
+import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
+        // receiver old
         LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -87,6 +90,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
             }
         }, new IntentFilter(Broadcast.PICTURE_TAKEN));
+
+        // receiver new
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Broadcast.PICTURE_TAKEN);
+        registerReceiver(broadcastReceiver, filter);
     }
 
     @Override
@@ -162,6 +170,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         textureView.setId(R.id.textureView);
         aspectRatioLayout.addView(textureView);
 
+        Intent mServiceIntent = new Intent(this, RecognitionService.class);
+        mServiceIntent.setData(Uri.parse("foobar.jpg"));
+        this.startService(mServiceIntent);
+
         recognizer = new Recognizer();
 
         File dir = Config.IMAGE_FOLDER;
@@ -177,6 +189,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         TextView tvStatus = (TextView) findViewById(R.id.tv_status);
         tvStatus.setText("n: " + res.coordinates.length);
     }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "photo taken");
+        }
+    };
 
     public void checkPermissions() {
 

@@ -17,6 +17,21 @@ public class Config {
 
     public static final File IMAGE_FOLDER = new File(Environment.getExternalStorageDirectory(), ("despat"));
 
+    /*
+    image folder
+    store images?
+    image rollover number
+
+    powerbrain
+        usb device id
+        baud rate
+
+    intervals
+        image taking interval
+        server reporting interval
+
+    */
+
     public static void init() {
         // check if all folders are existing
         if (!IMAGE_FOLDER.isDirectory()) {
