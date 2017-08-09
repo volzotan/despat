@@ -10,6 +10,7 @@ import android.hardware.Camera;
 import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.TextureView;
 
 import java.io.File;
@@ -28,27 +29,27 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
     private static final String TAG = CameraController.class.getName();
 
-    Context context;
+    private Context context;
 
     private Camera camera;
     private Camera.Parameters param;
     private int[] pictureSize;
 
-    boolean shutdownAfterPictureTaken = true;
+    private boolean shutdownAfterPictureTaken = true;
 
 
-    public CameraController(Context context, TextureView textureView) {
+    public CameraController(Context context, SurfaceTexture surfaceTexture) {
         this.context = context;
         try {
             camera = Camera.open();
-            setupCamera(textureView);
+            setupCamera(surfaceTexture);
         } catch (Exception e) {
             Log.e(TAG, "onCreate: ", e );
         }
     }
 
     // initialize camera
-    private void setupCamera( TextureView tv ) throws java.io.IOException {
+    private void setupCamera(SurfaceTexture surfaceTexture) throws java.io.IOException {
 
         param = camera.getParameters();
         List<Camera.Size> pvsizes = param.getSupportedPreviewSizes();
@@ -65,8 +66,6 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
         param.setPreviewSize(1280, 960);
 
         camera.setParameters(param);
-
-        SurfaceTexture surfaceTexture = tv.getSurfaceTexture();
         camera.setPreviewTexture(surfaceTexture);
         // camera.setDisplayOrientation(90);
     }
@@ -76,7 +75,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
 
         camera.startPreview();
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1000); // TODO
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -106,7 +105,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
             return;
         }
 
-        Log.d( TAG, "imageCallback: picture retrieved ("+bytes.length+" bytes), storing.." );
+        Log.d( TAG, "imageCallback: picture retrieved ("+bytes.length+" bytes)" );
         //String myname = outdir.concat("img").concat(String.valueOf(counter++)).concat(".yuv");
 
         File dir = Config.IMAGE_FOLDER;

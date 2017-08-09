@@ -24,7 +24,7 @@ public class SystemController {
     public void wifi(boolean activated) {
         // http://stackoverflow.com/questions/3930990
 
-        WifiManager wifiManager = (WifiManager)this.context.getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager) this.context.getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(activated);
     }
 
