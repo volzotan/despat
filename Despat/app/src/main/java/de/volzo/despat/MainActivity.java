@@ -2,7 +2,6 @@ package de.volzo.despat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -117,7 +116,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
-        startCapturing.callOnClick();
+        File dir = Config.IMAGE_FOLDER;
+        ImageRollover imgroll = new ImageRollover(dir);
+        Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
+
+//        startCapturing.callOnClick();
+//
+//        cameraController = new CameraController(this, null);
+//        cameraController.generateFilename(Config.IMAGE_FOLDER);
     }
 
     @Override

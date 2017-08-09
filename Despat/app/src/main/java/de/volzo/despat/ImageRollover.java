@@ -20,6 +20,42 @@ public class ImageRollover {
         this.dir = dir;
     }
 
+    public String getUnusedFilename(String fileextension) {
+        int max = 0;
+
+        if (fileextension.charAt(0) != '.') {
+            fileextension = "." + fileextension;
+        }
+
+        File[] listOfFiles = dir.listFiles();
+
+        for (File file : listOfFiles) {
+            if (file.isFile()) {
+                String name = file.getName();
+
+                if (!name.endsWith(fileextension)) {
+                    continue;
+                }
+
+                int index = -1;
+
+                try {
+                    index = Integer.parseInt(name.substring(0, name.length()-fileextension.length()));
+                } catch (NumberFormatException nfe) {
+                    // do nothing
+                }
+
+                max = Math.max(max, index);
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(max);
+        sb.append(fileextension);
+
+        return sb.toString();
+    }
+
     public void run() {
         Log.d(TAG, "imageRollover running");
 
