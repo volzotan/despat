@@ -39,6 +39,10 @@ public class PowerbrainConnector {
         context.registerReceiver(broadcastReceiver, filter);
     }
 
+    public void disconnect() {
+        context.unregisterReceiver(broadcastReceiver);
+    }
+
     UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() { //Defining a Callback which triggers whenever data is read.
         @Override
         public void onReceivedData(byte[] arg0) {
@@ -141,5 +145,7 @@ public class PowerbrainConnector {
 
     }
 
-    public int getBatteryState() {}
+    public int getBatteryState() {
+        return -1; // TODO
+    }
 }

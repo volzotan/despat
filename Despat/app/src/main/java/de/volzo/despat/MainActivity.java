@@ -24,6 +24,7 @@ import android.widget.TextView;
 import java.io.File;
 
 import de.volzo.despat.services.RecognitionService;
+import de.volzo.despat.services.ScheduleReceiver;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public static final String TAG = MainActivity.class.getName();
 
+    PowerbrainConnector powerbrain;
     CameraController cameraController;
     CameraController2 cameraController2;
     Recognizer recognizer;
@@ -50,11 +52,21 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         checkPermissions();
         Config.init();
 
-        PowerbrainConnector powerbrain = new PowerbrainConnector(this);
+        powerbrain = new PowerbrainConnector(this);
         powerbrain.connect();
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
+
+        Button startCapturing = (Button) findViewById(R.id.bt_startCapturing);
+        startCapturing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent shutterIntent = new Intent(activity, ScheduleReceiver.class);
+                shutterIntent.setAction(Broadcast.SHUTTER_SERVICE);
+                sendBroadcast(shutterIntent);
+            }
+        });
 
         Button startPreview = (Button) findViewById(R.id.bt_startPreview);
         startPreview.setOnClickListener(new View.OnClickListener() {
@@ -80,6 +92,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
+        Button btSleep = (Button) findViewById(R.id.bt_sleep);
+        btSleep.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO
+            }
+        });
+
         // receiver old
         LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
             @Override
@@ -95,13 +115,27 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
+
+        File dir = Config.IMAGE_FOLDER;
+        ImageRollover imgroll = new ImageRollover(dir);
+        Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
+
+//        startCapturing.callOnClick();
+//
+//        cameraController = new CameraController(this, null);
+//        cameraController.generateFilename(Config.IMAGE_FOLDER);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
+        // Broadcast Receiver
+        unregisterReceiver(broadcastReceiver);
+        if (powerbrain != null) {powerbrain.disconnect();}
+
         if (cameraController != null) cameraController.cleanup();
+
         Log.i(TAG, "application exit");
     }
 
@@ -145,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void startPreview() {
 
         if (cameraController == null) {
-            cameraController = new CameraController(this, textureView);
+            cameraController = new CameraController(this, textureView.getSurfaceTexture());
         }
         cameraController.startPreview();
     }
@@ -157,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        cameraController2.takePicture();
 
         if (cameraController == null) {
-            cameraController = new CameraController(this, textureView);
+            cameraController = new CameraController(this, textureView.getSurfaceTexture());
         }
         cameraController.takeImage();
     }

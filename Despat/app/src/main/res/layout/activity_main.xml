@@ -16,6 +16,12 @@
         android:orientation="vertical">
 
         <Button
+            android:text="Start Capturing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_startCapturing" />
+
+        <Button
             android:text="Start Preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,6 +38,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bt_startRecognizer" />
+
+        <Button
+            android:text="Sleep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_sleep" />
 
         <TextView
             android:id="@+id/tv_status"
