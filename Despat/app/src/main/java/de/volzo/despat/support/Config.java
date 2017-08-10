@@ -16,6 +16,7 @@ public class Config {
     public static final String TAG = Config.class.getName();
 
     public static final File IMAGE_FOLDER = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final String SERVER_ADDRESS = "http://grinzold.de:9000";
 
     /*
     image folder
@@ -39,5 +40,7 @@ public class Config {
             Log.i(TAG, "Directory IMAGE_FOLDER ( " + IMAGE_FOLDER.getAbsolutePath() + " ) missing. creating...");
             IMAGE_FOLDER.mkdirs();
         }
+
+        // ...
     }
 }

@@ -48,17 +48,17 @@ public class CameraController2 {
 
     public static final String TAG = CameraController2.class.getName();
 
-    Context context;
-    TextureView textureView;
+    private Context context;
+    private TextureView textureView;
 
-    CameraManager cameraManager;
-    CameraCharacteristics cameraCharacteristics;
-    Size imageDimension;
+    private CameraManager cameraManager;
+    private CameraCharacteristics cameraCharacteristics;
+    private Size imageDimension;
 
-    CameraDevice cameraDevice;
+    private CameraDevice cameraDevice;
 
-    CaptureRequest.Builder captureRequestBuilder;
-    CameraCaptureSession cameraCaptureSession;
+    private CaptureRequest.Builder captureRequestBuilder;
+    private CameraCaptureSession cameraCaptureSession;
 
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;

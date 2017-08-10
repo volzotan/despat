@@ -2,6 +2,7 @@ package de.volzo.despat;
 
 import android.content.Context;
 import android.net.wifi.WifiManager;
+import android.provider.Settings;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -19,6 +20,10 @@ public class SystemController {
 
     public void flightmode(boolean activated) {
         // http://stackoverflow.com/questions/13766909
+
+        // is flight mode enabled?
+        boolean alreadyEnabled = Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+
     }
 
     public void wifi(boolean activated) {

@@ -34,14 +34,15 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
     public static final String TAG = MainActivity.class.getName();
+    MainActivity activity = this;
 
+    ImageRollover imgroll;
     PowerbrainConnector powerbrain;
     CameraController cameraController;
     CameraController2 cameraController2;
     Recognizer recognizer;
 
     TextureView textureView;
-    MainActivity activity = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         checkPermissions();
         Config.init();
+
+        File dir = Config.IMAGE_FOLDER;
+        imgroll = new ImageRollover(dir);
+        Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
 
         powerbrain = new PowerbrainConnector(this);
         powerbrain.connect();
@@ -116,10 +121,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
-
-        File dir = Config.IMAGE_FOLDER;
-        ImageRollover imgroll = new ImageRollover(dir);
-        Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
 
         try {
             cameraController2 = new CameraController2(this, textureView);
