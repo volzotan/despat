@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraAccessException;
 import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         }, new IntentFilter(Broadcast.PICTURE_TAKEN));
 
-        // receiver new
+        // receiver new // TODO debug
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
@@ -119,6 +120,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         File dir = Config.IMAGE_FOLDER;
         ImageRollover imgroll = new ImageRollover(dir);
         Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
+
+        try {
+            cameraController2 = new CameraController2(this, textureView);
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "fail", e);
+            e.printStackTrace();
+        }
 
 //        startCapturing.callOnClick();
 //
