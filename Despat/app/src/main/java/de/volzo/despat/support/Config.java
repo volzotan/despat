@@ -15,8 +15,9 @@ public class Config {
 
     public static final String TAG = Config.class.getName();
 
-    public static final File IMAGE_FOLDER = new File(Environment.getExternalStorageDirectory(), ("despat"));
-    public static final String SERVER_ADDRESS = "http://grinzold.de:9000";
+    public static final File IMAGE_FOLDER           = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final boolean PHONE_HOME          = true;
+    public static final String SERVER_ADDRESS       = "http://grinzold.de:5000";
 
     /*
     image folder

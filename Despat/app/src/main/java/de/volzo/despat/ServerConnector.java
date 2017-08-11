@@ -24,6 +24,9 @@ public class ServerConnector {
 
     /*
 
+    device_id               String
+    timestamp               human readable
+
     number_images           123
     free_space_internal     123.0
     free_space_external     -1.0
