@@ -2,6 +2,7 @@ from flask import Flask, json, g, render_template, redirect, request, flash, abo
 from werkzeug.utils import secure_filename
 import sqlite3
 import sys, os
+import datetime
 
 app = Flask(__name__)
 
@@ -12,18 +13,16 @@ app.config.from_pyfile('corodiak.config')
 
 @app.route("/")
 def root():
-    db = get_db()
-    cur = db.execute('select title, text from entries order by id desc')
-    entries = cur.fetchall()
+    entries = query_db("select title, text from entries order by id desc") 
     return render_template('show_entries.html', entries=entries)
 
 
 @app.route("/overview")
 def overview():
     db = get_db()
-    cur = db.execute('select * from entries order by id desc')
-    events = cur.fetchall()
-    return render_template('overview.html', events=events)
+    cur = db.execute('select * from status order by id desc')
+    status_messages = cur.fetchall()
+    return render_template('overview.html', status_messages=status_messages)
 
 
 @app.route("/command")
@@ -45,6 +44,19 @@ def command():
 @app.route("/status", methods=['POST'])
 def status():
     content = request.json
+
+    # insert into db
+    values = [  content["device_id"], 
+                datetime.datetime.now(), #content["timestamp"], 
+                content["number_images"], 
+                content["free_space_internal"], 
+                content["free_space_external"], 
+                content["battery_internal"],
+                content["battery_external"]]
+    db = get_db()
+    db.execute('insert into status (deviceId, timestamp, numberImages, freeSpaceInternal, freeSpaceExternal, batteryInternal, batteryExternal) values (?, ?, ?, ?, ?, ?, ?)', values)
+    db.commit()
+
     print(content)
     return "status"
 
@@ -58,18 +70,26 @@ def image():
     if (free_space < app.config["MIN_FREE_SPACE"]):
         abort(500, "no free space left") # 507 Insufficient storage
 
+    # TODO: get device id from session
+    device_id = "123"
+
     if 'file' not in request.files:
         app.logger.warn("image file missing in requeest")
         #flash('No file part')
         abort(400, "image file missing in request")
-    file = request.files["file"]
-    if file.filename == "":
+    imagefile = request.files["file"]
+    if imagefile.filename == "":
         app.logger.warn("empty image filename in request")
         abort(400, "empty image filename in request")
         return redirect(request.url)
-    filename = secure_filename(file.filename)
-    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-    app.logger.debug("uploaded: {}".format(filename))
+    filename = device_id + "_" + secure_filename(imagefile.filename)
+    unique_filename = get_unique_filename(app.config["UPLOAD_FOLDER"], filename)
+    full_filename = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
+    if full_filename is None:
+        app.logger.error("no new filenames available anymore")
+        abort(500, "no filename available")
+    imagefile.save(full_filename)
+    app.logger.debug("uploaded: {}".format(unique_filename))
     return ("", 204)
 
 
@@ -78,6 +98,23 @@ def sync():
     return "sync"
 
 # --------------------------------------------------------------------------- #
+
+def get_unique_filename(path, filename):
+    full_filename = os.path.join(path, filename)
+    if (os.path.exists(full_filename)):
+        index = filename.rfind(".")
+        extension = ""
+        if (index > -1):
+            extension = filename[index:]
+            filename = filename[:index]
+        for i in range(2, 9999):
+            new_filename = filename + "_" + str(i) + extension
+            new_full_filename = os.path.join(path, new_filename)
+            if (not os.path.exists(new_full_filename)):
+                return new_filename
+        return None
+    return filename
+
 
 def connect_db():
     rv = sqlite3.connect(app.config["DATABASE"])
@@ -88,6 +125,13 @@ def get_db():
     if not hasattr(g, 'sqlite_db'):
         g.sqlite_db = connect_db()
     return g.sqlite_db
+
+# as taken from http://flask.pocoo.org/docs/0.12/patterns/sqlite3/
+def query_db(query, args=(), one=False):
+    cur = get_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
 
 @app.teardown_appcontext
 def close_db(error):

@@ -1,10 +1,59 @@
 {% extends "layout.html" %}
 {% block body %}
-  <ul class="entries">
-  {% for entry in entries %}
-    <li><h2>{{ entry.title }}</h2>{{ entry.text|safe }}</li>
-  {% else %}
-    <li><em>Unbelievable.  No entries here so far</em></li>
-  {% endfor %}
-  </ul>
+
+<table class="table table-sm table-bordered table-striped ">
+  <thead class="thead-inverse">
+    <tr>
+      <th>#</th>
+      <th>deviceId</th>
+      <th>timestamp</th>
+      <th>number images</th>
+      <th>free space int</th>
+      <th>free space ext</th>
+      <th>battery int</th>
+      <th>battery ext</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for msg in status_messages %}
+    <tr>
+      <td>{{ msg.id }}</td>
+      <td>{{ msg.deviceId }}</td>
+      <td>{{ msg.timestamp }}</td>
+      <td>{{ msg.numberImages }}</td>
+      <td>{{ msg.freeSpaceInternal }}</td>
+      <td>{{ msg.freeSpaceExternal }}</td>
+      <td>{{ msg.batteryInternal }}</td>
+      <td>{{ msg.batteryExternal }}</td>
+    </tr>
+    {% else %}
+    
+    {% endfor %}
+  </tbody>
+</table>
+
+<table class="table table-sm table-bordered table-striped ">
+  <thead class="thead-inverse">
+    <tr>
+      <th>#</th>
+      <th>deviceId</th>
+      <th>timestamp</th>
+      <th>eventtype</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for msg in event_messages %}
+    <tr>
+      <td>{{ msg.id }}</td>
+      <td>{{ msg.deviceId }}</td>
+      <td>{{ msg.timestamp }}</td>
+      <td>{{ msg.eventtype }}</td>
+    </tr>
+    {% else %}
+    
+    {% endfor %}
+  </tbody>
+</table>
+
+
 {% endblock %}

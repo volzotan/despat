@@ -14,8 +14,9 @@ create table status (
   timestamp numeric not null,
 
   numberImages integer not null,
-  freeSpace real not null,
+  freeSpaceInternal real,
+  freeSpaceExternal real,
 
-  batteryInternal real not null,
-  batteryExternal real not null
+  batteryInternal real,
+  batteryExternal real
 );
