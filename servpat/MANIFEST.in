@@ -1,3 +1,0 @@
-graft servpat/templates
-graft servpat/static
-include servpat/schema.sql
