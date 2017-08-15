@@ -27,12 +27,13 @@
         <activity android:name=".PreviewActivity">
         </activity>
 
-
         <receiver
-            android:name=".services.ScheduleReceiver"
-            android:process=":remote">
+            android:name=".Orchestrator">
+            <!-- android:process=":remote"> -->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.intent.action.SCREEN_ON" />
             </intent-filter>
         </receiver>
 

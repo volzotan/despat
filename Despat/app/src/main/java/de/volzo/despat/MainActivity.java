@@ -25,7 +25,6 @@ import android.widget.TextView;
 import java.io.File;
 
 import de.volzo.despat.services.RecognitionService;
-import de.volzo.despat.services.ScheduleReceiver;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
@@ -56,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         File dir = Config.IMAGE_FOLDER;
         imgroll = new ImageRollover(dir);
-        Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
+        //Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
 
         powerbrain = new PowerbrainConnector(this);
         powerbrain.connect();
@@ -68,8 +67,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         startCapturing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent shutterIntent = new Intent(activity, ScheduleReceiver.class);
-                shutterIntent.setAction(Broadcast.SHUTTER_SERVICE);
+                Intent shutterIntent = new Intent(activity, Orchestrator.class);
+                shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
                 sendBroadcast(shutterIntent);
             }
         });
@@ -126,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //
 //        cameraController = new CameraController(this, null);
 //        cameraController.generateFilename(Config.IMAGE_FOLDER);
+
     }
 
     @Override
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         initialize();
 
-
+        // FIXME
         try {
             cameraController2 = new CameraController2(this, textureView);
         } catch (CameraAccessException e) {

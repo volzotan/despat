@@ -17,6 +17,7 @@ import de.volzo.despat.support.Broadcast;
 public class ShutterService extends IntentService {
 
     public static final String TAG = ShutterService.class.getName();
+    public static final int REQUEST_CODE = 1234;
 
     private CameraController cameraController;
 
@@ -26,6 +27,9 @@ public class ShutterService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+
+        Log.d(TAG, "SHUTTER SERVICE invoked");
+
         //String dataString = workIntent.getDataString();
 
         // ...
