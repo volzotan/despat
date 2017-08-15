@@ -143,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        initialize();
 
         // FIXME
         try {
@@ -152,19 +151,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             Log.e(TAG, "fail", e);
             e.printStackTrace();
         }
-
-//        Canvas canvas = textureView.lockCanvas();
-//
-//        Matrix mat = new Matrix();
-//        float scaledWidth = canvas.getWidth()/(float) res.bitmap.getWidth();
-//        float scaledHeight = canvas.getHeight()/(float) res.bitmap.getHeight();
-//        mat.postScale(scaledWidth, scaledHeight);
-//        //
-//        // mat.postRotate(90f);
-//        //mat.postTranslate();
-//
-//        canvas.drawBitmap(res.bitmap, mat, new Paint());
-//        textureView.unlockCanvasAndPost(canvas);
     }
 
     @Override
@@ -179,10 +165,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-
-    }
-
-    public void initialize() {
 
     }
 
