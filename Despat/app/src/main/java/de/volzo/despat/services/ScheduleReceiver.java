@@ -27,16 +27,22 @@ public class ScheduleReceiver extends BroadcastReceiver {
             return;
         }
 
-        Class classToSchedule = null;
 
         Log.d(TAG, "Received: " + intent.getAction());
         switch (action) {
             case Broadcast.SHUTTER_SERVICE:
-                classToSchedule = ShutterService.class;
                 break;
 
             case Broadcast.RECOGNITION_SERVICE:
-                classToSchedule = RecognitionService.class;
+
+                ComponentName serviceComponent = new ComponentName(context, RecognitionService.class);
+                JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+                builder.setMinimumLatency(3* 1000); // wait at least
+                builder.setOverrideDeadline(5 * 1000); // maximum delay
+                //builder.setRequiresDeviceIdle(true); // device should be idle
+                JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+                jobScheduler.schedule(builder.build());
+
                 break;
 
             case Broadcast.UPLOAD_SERVICE:
@@ -48,15 +54,6 @@ public class ScheduleReceiver extends BroadcastReceiver {
                 return;
         }
 
-
         Log.i(TAG, "Starting service: " + action);
-
-        ComponentName serviceComponent = new ComponentName(context, classToSchedule);
-        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
-        builder.setMinimumLatency(3* 1000); // wait at least
-        builder.setOverrideDeadline(5 * 1000); // maximum delay
-        //builder.setRequiresDeviceIdle(true); // device should be idle
-        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
-        jobScheduler.schedule(builder.build());
     }
 }

@@ -122,13 +122,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
-        try {
-            cameraController2 = new CameraController2(this, textureView);
-        } catch (CameraAccessException e) {
-            Log.e(TAG, "fail", e);
-            e.printStackTrace();
-        }
-
 //        startCapturing.callOnClick();
 //
 //        cameraController = new CameraController(this, null);
@@ -151,6 +144,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         initialize();
+
+
+        try {
+            cameraController2 = new CameraController2(this, textureView);
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "fail", e);
+            e.printStackTrace();
+        }
 
 //        Canvas canvas = textureView.lockCanvas();
 //

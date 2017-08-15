@@ -28,7 +28,9 @@
         </activity>
 
 
-        <receiver android:name=".services.ScheduleReceiver">
+        <receiver
+            android:name=".services.ScheduleReceiver"
+            android:process=":remote">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -36,13 +38,17 @@
 
         <service android:name=".services.ShutterService"
             android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-        />
+            />
 
         <service android:name=".services.RecognitionService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE"
-        />
+            />
+
+        <service android:name=".services.HeartbeatService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            />
 
     </application>
 

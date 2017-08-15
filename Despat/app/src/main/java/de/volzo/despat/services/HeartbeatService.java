@@ -11,6 +11,7 @@ public class HeartbeatService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
+        jobFinished(jobParameters, false); // <-- needs to be called from volley callback
         return false;
     }
 
