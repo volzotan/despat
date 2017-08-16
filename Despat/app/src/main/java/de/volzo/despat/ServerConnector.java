@@ -1,10 +1,13 @@
 package de.volzo.despat;
 
+import android.content.Context;
 import android.util.JsonWriter;
 import android.util.Log;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import de.volzo.despat.support.Config;
 
@@ -16,24 +19,31 @@ public class ServerConnector {
 
     public static final String TAG = ServerConnector.class.getName();
 
+    private Context context;
     private String serverAddress;
+    SimpleDateFormat dateFormat
 
-    public ServerConnector() {
-        serverAddress = Config.SERVER_ADDRESS;
+
+    public ServerConnector(Context context) {
+        this.context = context;
+        this.serverAddress = Config.SERVER_ADDRESS;
+
+        dateFormat =  new SimpleDateFormat(Config.dateFormat);
     }
+
 
     /*
 
-    device_id               String
+    deviceId                String
     timestamp               human readable
 
-    number_images           123
-    free_space_internal     123.0
-    free_space_external     -1.0
+    numberImages            123
+    freeSpaceInternal       123.0
+    freeSpaceExternal       -1.0
 
-    battery_internal        0 - 100
-    battery_external        0 - 100
-    state_charging          true
+    batteryInternal         0 - 100
+    batteryExternal         0 - 100
+    stateCharging           true
 
     */
     public void sendStatus(ServerMessage msg) {
@@ -41,9 +51,11 @@ public class ServerConnector {
             Writer writer = new StringWriter();
             JsonWriter jsonWriter = new JsonWriter(writer);
             jsonWriter.beginObject();
-            jsonWriter.name("battery_internal").value(100);
-            jsonWriter.name("battery_external").value(99);
-            jsonWriter.name("state_charging").value(true);
+            jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
+            jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
+            jsonWriter.name("batteryInternal").value(100);
+            jsonWriter.name("batteryExternal").value(99);
+            jsonWriter.name("stateCharging").value(true);
             jsonWriter.endObject();
             jsonWriter.close();
 
@@ -55,13 +67,13 @@ public class ServerConnector {
 
     public class ServerMessage {
 
-        int number_images;
-        float free_space_internal;
-        float free_space_external;
+        int numberImages;
+        float freeSpaceInternal;
+        float freeSpaceExternal;
 
-        int battery_internal;
-        int battery_external;
-        boolean state_charging;
+        int batteryInternal;
+        int batteryExternal;
+        boolean stateCharging;
     }
 
 }

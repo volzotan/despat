@@ -1,9 +1,9 @@
 package de.volzo.despat.support;
 
-
-import android.app.Application;
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
+import android.provider.Settings.Secure;
 
 import java.io.File;
 
@@ -18,6 +18,8 @@ public class Config {
     public static final File IMAGE_FOLDER           = new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final boolean PHONE_HOME          = true;
     public static final String SERVER_ADDRESS       = "http://grinzold.de:5000";
+
+    public static final String dateFormat           = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
 
     /*
     image folder
@@ -43,5 +45,9 @@ public class Config {
         }
 
         // ...
+    }
+
+    public static String getUniqueDeviceId(Context context) {
+        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
 }
