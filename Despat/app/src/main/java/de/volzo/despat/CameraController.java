@@ -78,7 +78,7 @@ public class CameraController implements Camera.PreviewCallback, Camera.PictureC
         // camera.setDisplayOrientation(90);
     }
 
-    public void takeImage() {
+    public void takePicture() {
         // camera.setOneShotPreviewCallback(this);
 
         camera.startPreview();

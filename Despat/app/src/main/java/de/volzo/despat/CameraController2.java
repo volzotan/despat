@@ -288,7 +288,7 @@ public class CameraController2 {
                 public void onConfigureFailed(CameraCaptureSession session) {
                 }
             }, mBackgroundHandler);
-
+            Log.d(TAG, "takePicture complete");
         } catch (CameraAccessException cae) {
             Log.e(TAG, "camera access denied", cae);
         }

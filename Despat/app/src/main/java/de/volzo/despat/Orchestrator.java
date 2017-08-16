@@ -14,6 +14,7 @@ import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
+import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 15.08.17.
@@ -54,41 +55,45 @@ public class Orchestrator extends BroadcastReceiver {
             case Broadcast.SHUTTER_SERVICE:
                 if (operation == OPERATION_START) {
 
+                    // start the Shutter Service
+                    Intent shutterServiceIntent = new Intent(context, ShutterService.class);
+                    context.startService(shutterServiceIntent);
+
+                    // trigger the next invocation
                     long now = System.currentTimeMillis(); // alarm is set right away
 
                     Intent shutterIntent = new Intent(context, Orchestrator.class);
                     shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
                     shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
-                    shutterIntent.putExtra("invocationTime", now);
 
                     PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
                                 ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-                    // as of API lvl 19, all repeating alarms are inexact
-                    // https://developer.android.com/reference/android/app/AlarmManager.html#setRepeating(int,%20long,%20long,%20android.app.PendingIntent)
+                    long nextExecution = ((now + Config.SHUTTER_INTERVAL) / 1000) * 1000;
 
-                    long lastExecution = intent.getLongExtra("invocationTime", -1);
-                    long correctionFactor = 0;
-                    if (lastExecution > 0) {
-                        correctionFactor = -1 * (now - lastExecution - Config.SHUTTER_INTERVAL);
-                        // Log.d(TAG, "correctionFactor: " + correctionFactor);
-                    }
+                    // as of API lvl 19, all repeating alarms are inexact,
+                    // so a single alarm that is scheduling the next one
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
 
-                    long delay = now + Config.SHUTTER_INTERVAL + correctionFactor;
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, delay, alarmIntent);
+                    Util.startNotification(context, -1);
+
                 } else if (operation == OPERATION_STOP) {
+
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                     PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
                             ShutterService.REQUEST_CODE, new Intent(context, Orchestrator.class), PendingIntent.FLAG_CANCEL_CURRENT);
                     alarmManager.cancel(alarmIntent);
+
+                    Util.stopNotification(context);
+
                 } else {
                     Log.w(TAG, "no operation command provided");
                 }
                 break;
 
             case Broadcast.RECOGNITION_SERVICE:
+
                 if (operation == OPERATION_START) {
                     ComponentName serviceComponent = new ComponentName(context, RecognitionService.class);
                     JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
@@ -97,8 +102,9 @@ public class Orchestrator extends BroadcastReceiver {
                     //builder.setRequiresDeviceIdle(true); // device should be idle
                     JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
                     jobScheduler.schedule(builder.build());
+
                 } else if (operation == OPERATION_STOP) {
-                    // TOOD
+                    // TODO
                 } else {
                     Log.w(TAG, "no operation command provided");
                 }

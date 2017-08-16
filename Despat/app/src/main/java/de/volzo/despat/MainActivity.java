@@ -2,11 +2,14 @@ package de.volzo.despat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.net.Uri;
@@ -25,7 +28,6 @@ import android.widget.TextView;
 import java.io.File;
 
 import de.volzo.despat.services.RecognitionService;
-import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
@@ -197,10 +199,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        cameraController2.openCamera();
 //        cameraController2.takePicture();
 
-        if (cameraController == null) {
-            cameraController = new CameraController(this, textureView.getSurfaceTexture());
+        if (cameraController2 == null) {
+            try {
+                cameraController2 = new CameraController2(this, textureView);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
         }
-        cameraController.takeImage();
+        cameraController2.takePicture();
     }
 
     public void startRecognizer() {
