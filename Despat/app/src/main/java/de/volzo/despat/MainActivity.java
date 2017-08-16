@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             public void onClick(View view) {
                 Intent shutterIntent = new Intent(activity, Orchestrator.class);
                 shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
+                shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
                 sendBroadcast(shutterIntent);
             }
         });
