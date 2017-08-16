@@ -8,6 +8,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import de.volzo.despat.CameraController;
+import de.volzo.despat.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 
 /**
@@ -33,13 +34,13 @@ public class ShutterService extends IntentService {
         //String dataString = workIntent.getDataString();
 
         // ...
-        if (cameraController == null) {
-            cameraController = new CameraController(this, new SurfaceTexture(0));
-        }
-
-        // pass Callback from this function to CameraController to get notified
-
-        cameraController.takeImage();
+//        if (cameraController == null) {
+//            cameraController = new CameraController(this, new SurfaceTexture(0));
+//        }
+//
+//        // pass Callback from this function to CameraController to get notified
+//
+//        cameraController.takeImage();
 
         // notify
         Intent localIntent = new Intent(Broadcast.PICTURE_TAKEN).putExtra(Broadcast.DATA_PICTURE_PATH, "narf");

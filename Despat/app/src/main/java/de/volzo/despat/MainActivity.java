@@ -25,6 +25,7 @@ import android.widget.TextView;
 import java.io.File;
 
 import de.volzo.despat.services.RecognitionService;
+import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
@@ -67,9 +68,22 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         startCapturing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "startCapturing");
                 Intent shutterIntent = new Intent(activity, Orchestrator.class);
                 shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
                 shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
+                sendBroadcast(shutterIntent);
+            }
+        });
+
+        Button stopCapturing = (Button) findViewById(R.id.bt_stopCapturing);
+        stopCapturing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "stopCapturing");
+                Intent shutterIntent = new Intent(activity, Orchestrator.class);
+                shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
+                shutterIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
                 sendBroadcast(shutterIntent);
             }
         });

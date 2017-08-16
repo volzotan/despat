@@ -16,6 +16,8 @@ public class Config {
 
     public static final String TAG = Config.class.getName();
 
+    public static long SHUTTER_INTERVAL             = 6000;
+
     public static final File IMAGE_FOLDER           = new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final boolean PHONE_HOME          = true;
     public static final String SERVER_ADDRESS       = "http://grinzold.de:5000";
@@ -54,7 +56,7 @@ public class Config {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
 
-    public String setDeviceName(Context context, String deviceName) {
+    public void setDeviceName(Context context, String deviceName) {
         SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("deviceName", deviceName);

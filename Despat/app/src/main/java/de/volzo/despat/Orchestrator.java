@@ -13,6 +13,7 @@ import android.util.Log;
 import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.Config;
 
 /**
  * Created by volzotan on 15.08.17.
@@ -25,9 +26,6 @@ public class Orchestrator extends BroadcastReceiver {
     public static final int OPERATION_START     = 1;
     public static final int OPERATION_STOP      = 2;
 
-    AlarmManager alarmManager;
-    PendingIntent alarmIntent;
-
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -39,10 +37,13 @@ public class Orchestrator extends BroadcastReceiver {
 
         if (action != null && action.length() > 0) switch (action) {
             case "android.intent.action.BOOT_COMPLETED":
+                // TODO
                 break;
             case "android.intent.action.SCREEN_OFF":
+                // TODO
                 break;
             case "android.intent.action.SCREEN_ON":
+                // TODO
                 break;
             default:
                 Log.e(TAG, "invoked by unknown action");
@@ -52,20 +53,36 @@ public class Orchestrator extends BroadcastReceiver {
         switch (service) {
             case Broadcast.SHUTTER_SERVICE:
                 if (operation == OPERATION_START) {
-                    Intent shutterIntent = new Intent(context, ShutterService.class);
-                    if (alarmIntent == null) {
-                        alarmIntent = PendingIntent.getBroadcast(context,
+
+                    long now = System.currentTimeMillis(); // alarm is set right away
+
+                    Intent shutterIntent = new Intent(context, Orchestrator.class);
+                    shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
+                    shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
+                    shutterIntent.putExtra("invocationTime", now);
+
+                    PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
                                 ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+                    // as of API lvl 19, all repeating alarms are inexact
+                    // https://developer.android.com/reference/android/app/AlarmManager.html#setRepeating(int,%20long,%20long,%20android.app.PendingIntent)
+
+                    long lastExecution = intent.getLongExtra("invocationTime", -1);
+                    long correctionFactor = 0;
+                    if (lastExecution > 0) {
+                        correctionFactor = -1 * (now - lastExecution - Config.SHUTTER_INTERVAL);
+                        // Log.d(TAG, "correctionFactor: " + correctionFactor);
                     }
-                    long firstMillis = System.currentTimeMillis(); // alarm is set right away
-                    if (alarmManager == null){
-                        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                    }
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, 60 * 1000, alarmIntent);
+
+                    long delay = now + Config.SHUTTER_INTERVAL + correctionFactor;
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, delay, alarmIntent);
                 } else if (operation == OPERATION_STOP) {
-                    if (alarmManager!= null) {
-                        alarmManager.cancel(alarmIntent);
-                    }
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
+                            ShutterService.REQUEST_CODE, new Intent(context, Orchestrator.class), PendingIntent.FLAG_CANCEL_CURRENT);
+                    alarmManager.cancel(alarmIntent);
                 } else {
                     Log.w(TAG, "no operation command provided");
                 }

@@ -3,6 +3,7 @@ package de.volzo.despat;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -38,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.volzo.despat.support.Config;
+
 import static de.volzo.despat.R.id.textureView;
 
 /**
@@ -50,6 +53,7 @@ public class CameraController2 {
 
     private Context context;
     private TextureView textureView;
+    private File filename;
 
     private CameraManager cameraManager;
     private CameraCharacteristics cameraCharacteristics;
@@ -177,6 +181,116 @@ public class CameraController2 {
             mBackgroundHandler = null;
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void takePicture() {
+        if (cameraDevice == null) {
+            Log.e(TAG, "cameraDevice is null");
+            return;
+        }
+
+        if (cameraManager == null) { // ?
+            cameraManager =  (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        }
+
+        try {
+            CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
+            Size[] jpegSizes = null;
+            if (characteristics != null) {
+                jpegSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
+            }
+            int width = 640;
+            int height = 480;
+            if (jpegSizes != null && 0 < jpegSizes.length) {
+                width = jpegSizes[0].getWidth();
+                height = jpegSizes[0].getHeight();
+            }
+            ImageReader reader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 1);
+            List<Surface> outputSurfaces = new ArrayList<Surface>(2);
+            outputSurfaces.add(reader.getSurface());
+            outputSurfaces.add(new Surface(textureView.getSurfaceTexture()));
+            final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            captureBuilder.addTarget(reader.getSurface());
+            captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+
+            // Orientation
+            //int rotation = Configuration.ORIENTATION_LANDSCAPE; //getWindowManager().getDefaultDisplay().getRotation();
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90); //ORIENTATIONS.get(rotation));
+
+            //final File file = new File(Environment.getExternalStorageDirectory()+"/pic.jpg");
+            File dir = Config.IMAGE_FOLDER;
+            final File imageFullPath;
+            if (filename != null) {
+                imageFullPath = new File(dir, this.filename + ".jpg");
+            } else {
+                ImageRollover imgroll = new ImageRollover(dir);
+                imageFullPath = new File(dir, imgroll.getUnusedFilename(".jpg"));
+            }
+
+            ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
+                @Override
+                public void onImageAvailable(ImageReader reader) {
+                    Image image = null;
+                    try {
+                        image = reader.acquireLatestImage();
+                        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                        byte[] bytes = new byte[buffer.capacity()];
+                        buffer.get(bytes);
+                        save(bytes);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (image != null) {
+                            image.close();
+                        }
+                    }
+                }
+                private void save(byte[] bytes) throws IOException {
+                    OutputStream output = null;
+                    try {
+                        output = new FileOutputStream(imageFullPath);
+                        output.write(bytes);
+                    } finally {
+                        if (null != output) {
+                            output.close();
+                        }
+                    }
+                }
+            };
+
+            reader.setOnImageAvailableListener(readerListener, mBackgroundHandler);
+
+            final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+                    super.onCaptureCompleted(session, request, result);
+                    Log.i(TAG, "Saved:" + imageFullPath);
+                    try {
+                        createPreview(textureView);
+                    } catch (CameraAccessException cae) {
+                        Log.e(TAG, "captureListener failed");
+                    }
+                }
+            };
+            cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
+                @Override
+                public void onConfigured(CameraCaptureSession session) {
+                    try {
+                        session.capture(captureBuilder.build(), captureListener, mBackgroundHandler);
+                    } catch (CameraAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+                @Override
+                public void onConfigureFailed(CameraCaptureSession session) {
+                }
+            }, mBackgroundHandler);
+
+        } catch (CameraAccessException cae) {
+            Log.e(TAG, "camera access denied", cae);
         }
     }
 

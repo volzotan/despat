@@ -37,9 +37,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".services.ShutterService"
-            android:exported="false"
-            />
+        <service android:name=".services.ShutterService" />
 
         <service android:name=".services.RecognitionService"
             android:exported="false"
