@@ -1,6 +1,7 @@
 package de.volzo.despat.support;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
 import android.provider.Settings.Secure;
@@ -20,6 +21,8 @@ public class Config {
     public static final String SERVER_ADDRESS       = "http://grinzold.de:5000";
 
     public static final String dateFormat           = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+
+    private static final String SHAREDPREFNAME      = "de.volzo.despat.DEFAULT_PREFERENCES";
 
     /*
     image folder
@@ -50,4 +53,17 @@ public class Config {
     public static String getUniqueDeviceId(Context context) {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
+
+    public String setDeviceName(Context context, String deviceName) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("deviceName", deviceName);
+        editor.apply();
+    }
+
+    public String getDeviceName(Context context) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        return settings.getString("deviceName", null);
+    }
+
 }

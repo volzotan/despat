@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import de.volzo.despat.support.Config;
 
@@ -21,14 +22,14 @@ public class ServerConnector {
 
     private Context context;
     private String serverAddress;
-    SimpleDateFormat dateFormat
+    SimpleDateFormat dateFormat;
 
 
     public ServerConnector(Context context) {
         this.context = context;
         this.serverAddress = Config.SERVER_ADDRESS;
 
-        dateFormat =  new SimpleDateFormat(Config.dateFormat);
+        this.dateFormat =  new SimpleDateFormat(Config.dateFormat, new Locale("de", "DE"));
     }
 
 

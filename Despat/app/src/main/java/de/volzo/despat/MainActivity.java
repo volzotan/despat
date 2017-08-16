@@ -121,8 +121,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
-//        startCapturing.callOnClick();
-//
+        startCapturing.callOnClick();
+
 //        cameraController = new CameraController(this, null);
 //        cameraController.generateFilename(Config.IMAGE_FOLDER);
 
