@@ -4,6 +4,9 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.os.StatFs;
+
+import java.io.File;
 
 import de.volzo.despat.R;
 
@@ -22,7 +25,7 @@ public class Util {
                 .setContentText("Number of images: " + numberOfImages)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                .setOngoing(true) // Again, THIS is the important line. This method lets the notification to stay.
+                .setOngoing(true)
                 .build();
 
         notificationManager.notify(NOTIFICATION_IDENTIFIER, notification);
@@ -31,6 +34,14 @@ public class Util {
     public static void stopNotification(Context context) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION_IDENTIFIER);
+    }
+
+    public static float getFreeSpaceOnDevice(File dir) {
+        StatFs stat = new StatFs(dir.getPath());
+        long bytesAvailable = 0;
+        bytesAvailable = (long) stat.getBlockSizeLong() * (long) stat.getAvailableBlocksLong();
+
+        return bytesAvailable / (1024.f * 1024.f);
     }
 
 }

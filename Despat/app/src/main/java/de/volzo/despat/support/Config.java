@@ -56,16 +56,16 @@ public class Config {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
 
-    public void setDeviceName(Context context, String deviceName) {
+    public static void setDeviceName(Context context, String deviceName) {
         SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("deviceName", deviceName);
         editor.apply();
     }
 
-    public String getDeviceName(Context context) {
+    public static String getDeviceName(Context context) {
         SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
-        return settings.getString("deviceName", null);
+        return settings.getString("deviceName", android.os.Build.MODEL);
     }
 
 }

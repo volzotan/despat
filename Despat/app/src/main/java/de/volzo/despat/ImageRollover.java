@@ -5,6 +5,8 @@ import android.util.Log;
 
 import java.io.File;
 
+import de.volzo.despat.support.Util;
+
 /**
  * Created by volzotan on 20.12.16.
  */
@@ -19,17 +21,9 @@ public class ImageRollover {
 
     public ImageRollover(File dir) {
         this.dir = dir;
-        float freeSpace = getFreeSpaceOnDevice();
+        float freeSpace = Util.getFreeSpaceOnDevice(dir);
 
         Log.i(TAG, "free space in " + dir.getAbsolutePath() + " : " + freeSpace + " MB");
-    }
-
-    public float getFreeSpaceOnDevice() {
-        StatFs stat = new StatFs(this.dir.getPath());
-        long bytesAvailable = 0;
-        bytesAvailable = (long) stat.getBlockSizeLong() * (long) stat.getAvailableBlocksLong();
-
-        return bytesAvailable / (1024.f * 1024.f);
     }
 
     public String getUnusedFilename(String fileextension) {
