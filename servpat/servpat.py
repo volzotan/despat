@@ -1,13 +1,35 @@
-from flask import Flask, json, g, render_template, redirect, request, flash, abort
+from flask import Flask, json, g, render_template, redirect, request, Response, flash, abort
 from werkzeug.utils import secure_filename
+from functools import wraps
 import sqlite3
 import sys, os
 import datetime
 
 app = Flask(__name__)
 
-app.config.from_pyfile('default.config')
-app.config.from_pyfile('corodiak.config')
+app.config.from_pyfile("default.config")
+app.config.from_pyfile("corodiak.config")
+
+# --------------------------------------------------------------------------- #
+
+# as taken from: http://flask.pocoo.org/snippets/8/
+def check_auth(username, password):
+    return username == 'admin' and password == 'secret'
+
+
+def authenticate():
+    return Response("access denied", 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not app.config["AUTH_DISABLED"]:
+            if not auth or not check_auth(auth.username, auth.password):
+                return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 # --------------------------------------------------------------------------- #
 
@@ -26,6 +48,7 @@ def overview():
 
 
 @app.route("/command")
+@requires_auth
 def command():
     data = {
         "command": "SLEEP",
@@ -42,12 +65,13 @@ def command():
 
 
 @app.route("/status", methods=['POST'])
+@requires_auth
 def status():
     content = request.json
 
     # insert into db
     values = [  content["device_id"], 
-                datetime.datetime.now(), #content["timestamp"], 
+                datetime.datetime.now(), #content["timestamp"], # TODO
                 content["number_images"], 
                 content["free_space_internal"], 
                 content["free_space_external"], 
@@ -62,6 +86,7 @@ def status():
 
 
 @app.route("/image", methods=['POST'])
+@requires_auth
 def image():
 
     # check free space on server
@@ -94,6 +119,7 @@ def image():
 
 
 @app.route("/sync")
+@requires_auth
 def sync():
     return "sync"
 
@@ -121,10 +147,12 @@ def connect_db():
     rv.row_factory = sqlite3.Row
     return rv
 
+
 def get_db():
     if not hasattr(g, 'sqlite_db'):
         g.sqlite_db = connect_db()
     return g.sqlite_db
+
 
 # as taken from http://flask.pocoo.org/docs/0.12/patterns/sqlite3/
 def query_db(query, args=(), one=False):
@@ -133,16 +161,19 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
+
 @app.teardown_appcontext
 def close_db(error):
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
+
 
 def init_db():
     db = get_db()
     with app.open_resource('schema.sql', mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
+
 
 # @app.cli.command('initdb')
 # def initdb_command():
