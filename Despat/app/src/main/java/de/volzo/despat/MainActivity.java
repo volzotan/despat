@@ -25,7 +25,9 @@ import android.widget.TextView;
 import java.io.File;
 
 import de.volzo.despat.services.RecognitionService;
+import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.Camera;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -37,8 +39,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     ImageRollover imgroll;
     PowerbrainConnector powerbrain;
-    CameraController cameraController;
-    CameraController2 cameraController2;
+    Camera camera;
     Recognizer recognizer;
 
     TextureView textureView;
@@ -87,11 +88,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        Button startPreview = (Button) findViewById(R.id.bt_startPreview);
-        startPreview.setOnClickListener(new View.OnClickListener() {
+        Button startCamera = (Button) findViewById(R.id.bt_startCamera);
+        startCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activity.startPreview();
+                activity.startCamera();
             }
         });
 
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
-        startCapturing.callOnClick();
+//        startCapturing.callOnClick();
 
 //        cameraController = new CameraController(this, null);
 //        cameraController.generateFilename(Config.IMAGE_FOLDER);
@@ -148,9 +149,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         // Broadcast Receiver
         unregisterReceiver(broadcastReceiver);
-        if (powerbrain != null) {powerbrain.disconnect();}
 
-        if (cameraController != null) cameraController.cleanup();
+        if (powerbrain != null) {powerbrain.disconnect();}
+        if (camera != null) camera.closeCamera();
+
+        if (!ShutterService.isRunning(this)) {
+            // TODO
+        }
 
         Log.i(TAG, "application exit");
     }
@@ -160,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         // FIXME
         try {
-            cameraController2 = new CameraController2(this, textureView);
+            camera = new CameraController2(this, textureView);
         } catch (CameraAccessException e) {
             Log.e(TAG, "fail", e);
             e.printStackTrace();
@@ -182,28 +187,22 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     }
 
-    public void startPreview() {
+    public void startCamera() {
 
-        if (cameraController == null) {
-            cameraController = new CameraController(this, textureView.getSurfaceTexture());
-        }
-        cameraController.startPreview();
+        if (camera != null) camera.closeCamera();
+        if (camera == null) camera = new CameraController2(this, textureView.getSurfaceTexture());
+
     }
 
     public void takePhoto() {
-
-//        cameraController2 = new CameraController2(this, textureView);
-//        cameraController2.openCamera();
-//        cameraController2.takePicture();
-
-        if (cameraController2 == null) {
+        if (camera == null) {
             try {
-                cameraController2 = new CameraController2(this, textureView);
+                camera = new CameraController2(this, textureView);
             } catch (CameraAccessException e) {
                 e.printStackTrace();
             }
         }
-        cameraController2.takePicture();
+        camera.takePhoto();
     }
 
     public void startRecognizer() {

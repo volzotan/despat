@@ -84,6 +84,7 @@ public class Orchestrator extends BroadcastReceiver {
                     PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
                             ShutterService.REQUEST_CODE, new Intent(context, Orchestrator.class), PendingIntent.FLAG_CANCEL_CURRENT);
                     alarmManager.cancel(alarmIntent);
+                    alarmIntent.cancel();
 
                     Util.stopNotification(context);
 

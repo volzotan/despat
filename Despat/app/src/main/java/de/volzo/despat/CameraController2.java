@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -39,15 +40,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.volzo.despat.support.Camera;
 import de.volzo.despat.support.Config;
 
+import static de.volzo.despat.R.id.text;
 import static de.volzo.despat.R.id.textureView;
 
 /**
  * Created by volzotan on 19.12.16.
  */
 
-public class CameraController2 {
+public class CameraController2 implements Camera {
 
     public static final String TAG = CameraController2.class.getName();
 
@@ -71,10 +74,10 @@ public class CameraController2 {
         this.context = context;
         this.textureView = textureView;
 
-        openCamera(context);
+        openCamera();
     }
 
-    public void openCamera(Context context) throws CameraAccessException {
+    public void openCamera() throws CameraAccessException {
         try {
             cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
 
@@ -86,6 +89,8 @@ public class CameraController2 {
             StreamConfigurationMap map = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
             imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
+
+            Size[] foo = map.getOutputSizes(SurfaceTexture.class);
 
             cameraManager.openCamera(cameraId, cameraStateCallback, null);
         } catch (CameraAccessException e) {
@@ -126,7 +131,12 @@ public class CameraController2 {
         try {
             SurfaceTexture texture = textureView.getSurfaceTexture();
             assert texture != null;
-            texture.setDefaultBufferSize(imageDimension.getWidth(), imageDimension.getHeight());
+            texture.setDefaultBufferSize(640, 480); // imageDimension.getWidth(), imageDimension.getHeight());
+
+//            Matrix mat = new Matrix();
+//            mat.postRotate(-90.0f);
+//            mat.postTranslate(0.0f, 1340.0f);
+//            textureView.setTransform(mat);
 
             Surface surface = new Surface(texture);
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
@@ -294,15 +304,15 @@ public class CameraController2 {
         }
     }
 
-//    public void closeCamera() {
-//        if (cameraDevice != null) {
-//            cameraDevice.close();
-//            cameraDevice = null;
-//        }
+    public void closeCamera() {
+        if (cameraDevice != null) {
+            cameraDevice.close();
+            cameraDevice = null;
+        }
 //        if (imageReader != null) {
 //            imageReader.close();
 //            imageReader = null;
 //        }
-//    }
+    }
 
 }
