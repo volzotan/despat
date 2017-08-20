@@ -194,7 +194,7 @@ public class CameraController2 implements Camera {
         }
     }
 
-    public void takePicture() {
+    public void takePhoto() {
         if (cameraDevice == null) {
             Log.e(TAG, "cameraDevice is null");
             return;

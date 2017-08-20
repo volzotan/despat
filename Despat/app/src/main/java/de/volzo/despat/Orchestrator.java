@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import de.volzo.despat.services.HeartbeatService;
 import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
@@ -73,7 +74,7 @@ public class Orchestrator extends BroadcastReceiver {
                     long nextExecution = ((now + Config.SHUTTER_INTERVAL) / 1000) * 1000;
 
                     // as of API lvl 19, all repeating alarms are inexact,
-                    // so a single alarm that is scheduling the next one
+                    // so a single alarm needs to schedule the next one
                     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
 
                     Util.startNotification(context, -1);
@@ -94,7 +95,6 @@ public class Orchestrator extends BroadcastReceiver {
                 break;
 
             case Broadcast.RECOGNITION_SERVICE:
-
                 if (operation == OPERATION_START) {
                     ComponentName serviceComponent = new ComponentName(context, RecognitionService.class);
                     JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
@@ -112,7 +112,17 @@ public class Orchestrator extends BroadcastReceiver {
                 break;
 
             case Broadcast.UPLOAD_SERVICE:
-                // TODO
+                if (operation == OPERATION_START) {
+                    ComponentName serviceComponent = new ComponentName(context, HeartbeatService.class);
+                    JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+                    builder.setPeriodic(5000); // Minium interval is 15m
+                    JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+                    jobScheduler.schedule(builder.build());
+                } else if (operation == OPERATION_STOP) {
+                    // TODO
+                } else {
+                    Log.w(TAG, "no operation command provided");
+                }
                 break;
 
             default:

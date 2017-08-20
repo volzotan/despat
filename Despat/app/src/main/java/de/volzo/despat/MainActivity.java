@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         //Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
 
         powerbrain = new PowerbrainConnector(this);
-        powerbrain.connect();
+        // powerbrain.connect();
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
@@ -136,6 +137,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
+        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
+        heartbeatIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
+        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
+        sendBroadcast(heartbeatIntent);
+
 //        startCapturing.callOnClick();
 
 //        cameraController = new CameraController(this, null);
@@ -144,14 +150,24 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        cleanup();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        cleanup();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        // Broadcast Receiver
-        unregisterReceiver(broadcastReceiver);
-
-        if (powerbrain != null) {powerbrain.disconnect();}
-        if (camera != null) camera.closeCamera();
+        cleanup();
 
         if (!ShutterService.isRunning(this)) {
             // TODO
@@ -187,10 +203,35 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     }
 
+    public void cleanup() {
+
+        Log.d(TAG, "cleanup. unregistering all receivers");
+
+        if (powerbrain != null) {
+            powerbrain.disconnect();
+            powerbrain = null;
+        }
+        if (camera != null) camera.closeCamera();
+
+        // Broadcast Receiver
+        try {
+            unregisterReceiver(broadcastReceiver);
+        } catch (IllegalArgumentException iae) {
+            // ignore. cleanup is called multiple times, unregisterReceiver
+            // succeeds only on first call
+        }
+    }
+
     public void startCamera() {
 
         if (camera != null) camera.closeCamera();
-        if (camera == null) camera = new CameraController2(this, textureView.getSurfaceTexture());
+        try {
+            if (camera == null)
+                camera = new CameraController2(this, textureView);
+        } catch (CameraAccessException cae) {
+            Log.e(TAG, "starting Camera failed", cae);
+            Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
+        }
 
     }
 

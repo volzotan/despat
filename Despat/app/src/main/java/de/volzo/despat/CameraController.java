@@ -83,7 +83,7 @@ public class CameraController implements de.volzo.despat.support.Camera, Camera.
         startPreview();
     }
 
-    public void takePicture() {
+    public void takePhoto() {
         // camera.setOneShotPreviewCallback(this);
 
         camera.startPreview();

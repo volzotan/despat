@@ -30,8 +30,11 @@ public class PowerbrainConnector {
 
     public PowerbrainConnector(Context context) {
         this.context = context;
-        usbManager = (UsbManager) context.getSystemService(context.USB_SERVICE);
+        initialize();
+    }
 
+    public void initialize() {
+        usbManager = (UsbManager) context.getSystemService(context.USB_SERVICE);
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_USB_PERMISSION);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
@@ -40,7 +43,11 @@ public class PowerbrainConnector {
     }
 
     public void disconnect() {
-        context.unregisterReceiver(broadcastReceiver);
+        try {
+            context.unregisterReceiver(broadcastReceiver);
+        } catch (IllegalArgumentException iae) {
+            Log.w(TAG, "trying to unregister not registered receiver");
+        }
     }
 
     UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() { //Defining a Callback which triggers whenever data is read.

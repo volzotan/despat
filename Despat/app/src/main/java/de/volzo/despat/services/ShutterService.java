@@ -20,7 +20,7 @@ import de.volzo.despat.support.Broadcast;
 public class ShutterService extends IntentService {
 
     public static final String TAG = ShutterService.class.getName();
-    public static final int REQUEST_CODE = 1234;
+    public static final int REQUEST_CODE = 0x1200;
 
     private CameraController cameraController2;
 
@@ -33,9 +33,8 @@ public class ShutterService extends IntentService {
 
         Log.d(TAG, "SHUTTER SERVICE invoked");
 
-        //String dataString = workIntent.getDataString();
+        // TODO: acquire Wake Lock?
 
-        // ...
 //        if (cameraController == null) {
 //            cameraController = new CameraController(this, new SurfaceTexture(0));
 //        }
@@ -56,8 +55,7 @@ public class ShutterService extends IntentService {
         shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
         shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
 
-        boolean alarmUp = (PendingIntent.getBroadcast(context, REQUEST_CODE,
-                shutterIntent, PendingIntent.FLAG_NO_CREATE) != null);
+        boolean alarmUp = (PendingIntent.getBroadcast(context, REQUEST_CODE, shutterIntent, PendingIntent.FLAG_NO_CREATE) != null);
 
         return alarmUp;
     }
