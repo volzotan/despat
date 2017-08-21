@@ -29,33 +29,34 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.Camera;
+import de.volzo.despat.support.Broadcast;;
+import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 
-import static de.volzo.despat.R.id.text;
-import static de.volzo.despat.R.id.textureView;
 
 /**
  * Created by volzotan on 19.12.16.
  */
 
-public class CameraController2 implements Camera {
+public class CameraController2 implements CameraAdapter {
 
     public static final String TAG = CameraController2.class.getName();
+
+    private int mode;
+
+    public static final int OPEN                = 0x0;
+    public static final int OPEN_AND_PREVIEW    = 0x1;
+    public static final int OPEN_AND_TAKE_PHOTO = 0x2;
 
     private Context context;
     private TextureView textureView;
@@ -72,9 +73,11 @@ public class CameraController2 implements Camera {
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
 
-    public CameraController2(Context context, TextureView textureView) throws CameraAccessException {
+    public CameraController2(Context context, TextureView textureView, int mode) throws CameraAccessException {
         this.context = context;
         this.textureView = textureView;
+
+        this.mode = mode;
 
         openCamera();
     }
@@ -162,6 +165,7 @@ public class CameraController2 implements Camera {
             };
 
             cameraDevice.createCaptureSession(Arrays.asList(surface), cameraCaptureSessionCallback, null);
+
         } catch (CameraAccessException e) {
             Log.d(TAG, "creating preview failed", e);
             throw e;
@@ -232,8 +236,8 @@ public class CameraController2 implements Camera {
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90); //ORIENTATIONS.get(rotation));
 
             final File imageFullPath;
-            ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER);
-            imageFullPath = imgroll.getUnusedFullFilename(".jpg");
+            ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, ".jpg");
+            imageFullPath = imgroll.getUnusedFullFilename();
 
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override

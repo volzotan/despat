@@ -16,15 +16,16 @@ public class Config {
 
     public static final String TAG = Config.class.getName();
 
-    public static long SHUTTER_INTERVAL             = 6000;
+    public static long SHUTTER_INTERVAL                     = 6000;
 
-    public static final File IMAGE_FOLDER           = new File(Environment.getExternalStorageDirectory(), ("despat"));
-    public static final boolean PHONE_HOME          = true;
-    public static final String SERVER_ADDRESS       = "http://grinzold.de:5000";
+    public static final File IMAGE_FOLDER                   = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;
+    public static final boolean PHONE_HOME                  = true;
+    public static final String SERVER_ADDRESS               = "http://grinzold.de:5000";
 
-    public static final String dateFormat           = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+    public static final String dateFormat                   = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
 
-    private static final String SHAREDPREFNAME      = "de.volzo.despat.DEFAULT_PREFERENCES";
+    private static final String SHAREDPREFNAME              = "de.volzo.despat.DEFAULT_PREFERENCES";
 
     /*
     image folder

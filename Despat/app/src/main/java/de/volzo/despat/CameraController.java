@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 
 import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 
 /**
@@ -32,7 +33,7 @@ import de.volzo.despat.support.Config;
  *
  */
 
-public class CameraController implements de.volzo.despat.support.Camera, Camera.PreviewCallback, Camera.PictureCallback, Camera.ShutterCallback {
+public class CameraController implements CameraAdapter, Camera.PreviewCallback, Camera.PictureCallback, Camera.ShutterCallback {
 
     private static final String TAG = CameraController.class.getName();
 
@@ -43,7 +44,6 @@ public class CameraController implements de.volzo.despat.support.Camera, Camera.
     private Camera.Parameters param;
     private int[] pictureSize;
 
-    private String filename;
     private boolean shutdownAfterPictureTaken = true;
 
 
@@ -122,12 +122,9 @@ public class CameraController implements de.volzo.despat.support.Camera, Camera.
 
         File dir = Config.IMAGE_FOLDER;
         File imageFullPath;
-        if (filename != null) {
-            imageFullPath = new File(dir, this.filename + ".jpg");
-        } else {
-            ImageRollover imgroll = new ImageRollover(dir);
-            imageFullPath = new File(dir, imgroll.getUnusedFilename(".jpg"));
-        }
+        ImageRollover imgroll = new ImageRollover(dir, ".jpg");
+        imageFullPath = new File(dir, imgroll.getUnusedFilename());
+
 
         if (param.getPictureFormat() == ImageFormat.JPEG) {
             // it's already JPEG
@@ -179,14 +176,6 @@ public class CameraController implements de.volzo.despat.support.Camera, Camera.
     @Override
     public void onShutter() {
         Log.d(TAG, "shutter released");
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getFilename() {
-        return filename;
     }
 }
 

@@ -28,10 +28,10 @@
             android:id="@+id/bt_stopCapturing" />
 
         <Button
-            android:text="Start Camera"
+            android:text="Toggle Camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/bt_startCamera" />
+            android:id="@+id/bt_toggleCamera" />
 
         <Button
             android:text="Take Photo"

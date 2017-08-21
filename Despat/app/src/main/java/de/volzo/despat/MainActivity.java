@@ -28,9 +28,10 @@ import java.io.File;
 import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.Camera;
+import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
+import de.volzo.despat.support.Util;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -38,9 +39,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public static final String TAG = MainActivity.class.getName();
     MainActivity activity = this;
 
-    ImageRollover imgroll;
     PowerbrainConnector powerbrain;
-    Camera camera;
+    CameraAdapter camera;
     Recognizer recognizer;
 
     TextureView textureView;
@@ -54,6 +54,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         checkPermissions();
         Config.init();
+
+        // kill all services remaining from prior app starts
+        Intent killIntent = new Intent(activity, Orchestrator.class);
+        killIntent.putExtra("service", Broadcast.ALL_SERVICES);
+        killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
+        sendBroadcast(killIntent);
 
         powerbrain = new PowerbrainConnector(this);
         powerbrain.connect();
@@ -85,11 +91,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        Button startCamera = (Button) findViewById(R.id.bt_startCamera);
-        startCamera.setOnClickListener(new View.OnClickListener() {
+        Button toggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
+        toggleCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activity.startCamera();
+                if (camera== null){
+                    activity.startCamera();
+                } else {
+                    camera.closeCamera();
+                    camera = null;
+                }
             }
         });
 
@@ -97,7 +108,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         takePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activity.takePhoto();
+
+                //activity.takePhoto();
+
+                //Intent shutterIntent = new Intent(activity, ShutterService.class);
+               //activity.startService(shutterIntent);
+
+                try {
+                    CameraAdapter cam = new CameraController2(activity, null, CameraController2.OPEN_AND_TAKE_PHOTO);
+                } catch (CameraAccessException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -122,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                String path = intent.getStringExtra("path");
+                String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
                 Log.d("image taken", "path: " + path);
 
             }
@@ -178,14 +199,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-
-        // FIXME
-        try {
-            camera = new CameraController2(this, null);
-        } catch (CameraAccessException e) {
-            Log.e(TAG, "fail", e);
-            e.printStackTrace();
-        }
+        // startCamera();
     }
 
     @Override
@@ -227,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         if (camera != null) camera.closeCamera();
         try {
             if (camera == null)
-                camera = new CameraController2(this, textureView);
+                camera = new CameraController2(this, textureView, CameraController2.OPEN_AND_PREVIEW);
         } catch (CameraAccessException cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -238,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void takePhoto() {
         if (camera == null) {
             try {
-                camera = new CameraController2(this, textureView);
+                camera = new CameraController2(this, textureView, CameraController2.OPEN_AND_PREVIEW);
             } catch (CameraAccessException e) {
                 e.printStackTrace();
             }

@@ -12,6 +12,8 @@ public class HeartbeatService extends JobService {
 
     private static final String TAG = HeartbeatService.class.getName();
 
+    public static final int JOB_ID  = 0x1300;
+
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
 
