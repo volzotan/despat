@@ -55,12 +55,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         checkPermissions();
         Config.init();
 
-        File dir = Config.IMAGE_FOLDER;
-        imgroll = new ImageRollover(dir);
-        //Log.e(TAG, imgroll.getUnusedFilename(".jpg"));
-
         powerbrain = new PowerbrainConnector(this);
-        // powerbrain.connect();
+        powerbrain.connect();
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
@@ -142,12 +138,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
         sendBroadcast(heartbeatIntent);
 
+
 //        startCapturing.callOnClick();
-
-//        cameraController = new CameraController(this, null);
-//        cameraController.generateFilename(Config.IMAGE_FOLDER);
-
     }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "photo taken");
+        }
+    };
 
     @Override
     protected void onPause() {
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         // FIXME
         try {
-            camera = new CameraController2(this, textureView);
+            camera = new CameraController2(this, null);
         } catch (CameraAccessException e) {
             Log.e(TAG, "fail", e);
             e.printStackTrace();
@@ -273,13 +273,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         TextView tvStatus = (TextView) findViewById(R.id.tv_status);
         tvStatus.setText("n: " + res.coordinates.length);
     }
-
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "photo taken");
-        }
-    };
 
     public void checkPermissions() {
 

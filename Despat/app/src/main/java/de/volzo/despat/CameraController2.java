@@ -2,6 +2,7 @@ package de.volzo.despat;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
@@ -23,6 +24,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Camera;
 import de.volzo.despat.support.Config;
 
@@ -56,7 +59,6 @@ public class CameraController2 implements Camera {
 
     private Context context;
     private TextureView textureView;
-    private File filename;
 
     private CameraManager cameraManager;
     private CameraCharacteristics cameraCharacteristics;
@@ -129,16 +131,16 @@ public class CameraController2 implements Camera {
 
     private void createPreview(TextureView textureView) throws CameraAccessException {
         try {
-            SurfaceTexture texture = textureView.getSurfaceTexture();
-            assert texture != null;
-            texture.setDefaultBufferSize(640, 480); // imageDimension.getWidth(), imageDimension.getHeight());
+
+            SurfaceTexture surfaceTexture = getSurfaceTexture(textureView);
+            surfaceTexture.setDefaultBufferSize(640, 480); // imageDimension.getWidth(), imageDimension.getHeight());
 
 //            Matrix mat = new Matrix();
 //            mat.postRotate(-90.0f);
 //            mat.postTranslate(0.0f, 1340.0f);
 //            textureView.setTransform(mat);
 
-            Surface surface = new Surface(texture);
+            Surface surface = new Surface(surfaceTexture);
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.addTarget(surface);
 
@@ -216,10 +218,11 @@ public class CameraController2 implements Camera {
                 width = jpegSizes[0].getWidth();
                 height = jpegSizes[0].getHeight();
             }
-            ImageReader reader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 1);
+            ImageReader reader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); // TODO: number of buffers 1 or 2?
             List<Surface> outputSurfaces = new ArrayList<Surface>(2);
             outputSurfaces.add(reader.getSurface());
-            outputSurfaces.add(new Surface(textureView.getSurfaceTexture()));
+            SurfaceTexture surfaceTexture = getSurfaceTexture(this.textureView);
+            outputSurfaces.add(new Surface(surfaceTexture));
             final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             captureBuilder.addTarget(reader.getSurface());
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
@@ -228,15 +231,9 @@ public class CameraController2 implements Camera {
             //int rotation = Configuration.ORIENTATION_LANDSCAPE; //getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90); //ORIENTATIONS.get(rotation));
 
-            //final File file = new File(Environment.getExternalStorageDirectory()+"/pic.jpg");
-            File dir = Config.IMAGE_FOLDER;
             final File imageFullPath;
-            if (filename != null) {
-                imageFullPath = new File(dir, this.filename + ".jpg");
-            } else {
-                ImageRollover imgroll = new ImageRollover(dir);
-                imageFullPath = new File(dir, imgroll.getUnusedFilename(".jpg"));
-            }
+            ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER);
+            imageFullPath = imgroll.getUnusedFullFilename(".jpg");
 
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
@@ -259,13 +256,13 @@ public class CameraController2 implements Camera {
                     }
                 }
                 private void save(byte[] bytes) throws IOException {
-                    OutputStream output = null;
+                    FileOutputStream fos = new FileOutputStream(imageFullPath);
                     try {
-                        output = new FileOutputStream(imageFullPath);
-                        output.write(bytes);
+                        fos.write(bytes);
+                        fos.close();
                     } finally {
-                        if (null != output) {
-                            output.close();
+                        if (fos != null) {
+                            fos.close();
                         }
                     }
                 }
@@ -278,6 +275,11 @@ public class CameraController2 implements Camera {
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
                     Log.i(TAG, "Saved:" + imageFullPath);
+
+                    Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
+                    intent.putExtra("path", imageFullPath.getAbsolutePath());
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
                     try {
                         createPreview(textureView);
                     } catch (CameraAccessException cae) {
@@ -313,6 +315,14 @@ public class CameraController2 implements Camera {
 //            imageReader.close();
 //            imageReader = null;
 //        }
+    }
+
+    private SurfaceTexture getSurfaceTexture(TextureView tv) {
+        if (tv != null) {
+            return tv.getSurfaceTexture();
+        } else {
+            return new SurfaceTexture(0);
+        }
     }
 
 }

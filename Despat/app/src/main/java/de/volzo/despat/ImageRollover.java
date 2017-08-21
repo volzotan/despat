@@ -23,10 +23,10 @@ public class ImageRollover {
         this.dir = dir;
         float freeSpace = Util.getFreeSpaceOnDevice(dir);
 
-        Log.i(TAG, "free space in " + dir.getAbsolutePath() + " : " + freeSpace + " MB");
+        Log.d(TAG, "free space in " + dir.getAbsolutePath() + " : " + freeSpace + " MB");
     }
 
-    public String getUnusedFilename(String fileextension) {
+    public String getUnusedFilename(String fileextension) { // TODO: rewrite
         int max = 0;
 
         if (fileextension.charAt(0) != '.') {
@@ -60,6 +60,10 @@ public class ImageRollover {
         sb.append(fileextension);
 
         return sb.toString();
+    }
+
+    public File getUnusedFullFilename(String fileextension) {
+        return new File(this.dir, getUnusedFilename(fileextension));
     }
 
     public void run() {
