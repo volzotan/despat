@@ -1,6 +1,6 @@
-sizeBot    = [155, 75, 20];
-sizeTop    = [155, 75, 25];
-lensHole   = [127, 75/2];
+sizeBot    = [155, 80, 20];
+sizeTop    = [155, 80, 25];
+lensHole   = [127, 80/2];
 
 lidDepth   = 1;
 lidWall    = 0.8;
@@ -11,11 +11,32 @@ w          = 2.0;
 wb         = 1.2;
 
 bottom();
-translate([0, 80, 0]) top();
+translate([0, 85, 0]) top();
+translate([sizeBot[0]/2-(44/2), -.1, 4]) rotate([90, 0, 0]) socket();
+% translate([sizeBot[0]/2-(44/2), -30, 4]) rotate([0, 0, 0]) socket();
+% translate([63.5, -5-2, 30]) rotate([-90, 0, 0]) DIN912screw(8);
 
-% translate([20, 4, 5+0]) phone();
+% translate([20, 6.5, 5+0]) phone();
+
+translate([127, 40, -10]) uvfilter();
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+module socket() {
+    width = 44;
+    depth = 16;
+    difference() {
+        block(width, depth, 7);
+        
+        translate([(width)/2-14, depth/2, -1]) cylinder($fn=32, h=20, d=5.3);
+        translate([(width)/2+14, depth/2, -1]) cylinder($fn=32, h=20, d=5.3);
+        translate([(width)/2-14, depth/2, 1.8]) cylinder($fn=32, h=20, d=9);
+        translate([(width)/2+14, depth/2, 1.8]) cylinder($fn=32, h=20, d=9);
+        
+        translate([(width)/2, depth/2, -10]) cylinder($fn=32, h=20, d=7);
+        translate([(width)/2, depth/2, -1]) cylinder($fn=6, h=1+6, d=13.15);  // +1 safety margin for long fastening screws
+    }
+}
 
 module top() {
     bottomRounding = 3;
@@ -94,13 +115,45 @@ module bottom() {
         
         // socket screw holes
         translate([sizeBot[0]/2, 10-1, 12]) rotate([90, 0, 0]) {
-            translate([-12, 0, 0]) cylinder($fn=32, h=10, d=5.3);
-            translate([12, 0, 0]) cylinder($fn=32, h=10, d=5.3);
+            translate([-14, 0, 0]) cylinder($fn=32, h=10, d=5.3);
+            translate([+14, 0, 0]) cylinder($fn=32, h=10, d=5.3);
         }
+    }
+    
+    // nuts
+    
+    % translate([sizeBot[0]/2, w+4+0.2, 12]) rotate([90, 0, 0]) { 
+        translate([-14, 0, 0]) M5nut();
+        translate([+14, 0, 0]) M5nut();
     }
 }
 
 // *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+
+module uvfilter() {
+    color("grey") {
+        cylinder($fn=64, h=3.6, d=39.10);
+        cylinder($fn=64, h=5.6, d=36.90);
+    }
+}
+
+module M5nut() {
+    color("grey") difference() {
+        cylinder($fn=6, h=4, d=9.5);
+        translate([0, 0, -1]) cylinder($fn=32, d=5, h=6);
+    }
+}
+
+module DIN912screw(length) {
+    difference() {
+        union() {
+            cylinder($fn=32, h=5, d=8.5);
+            translate([0, 0, 5]) cylinder($fn=32, h=length, d=5);
+            cylinder($fn=32, h=5, d=8.5);
+        }
+        translate([0, 0, -1]) cylinder($fn=6, h=3, d=5);
+    }
+}
 
 module phone() {
     //cube([154, 75, 10]); // Moto Z
