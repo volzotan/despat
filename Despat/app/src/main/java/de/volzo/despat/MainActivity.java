@@ -108,16 +108,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onClick(View view) {
 
-                //activity.takePhoto();
+                activity.takePhoto();
 
                 //Intent shutterIntent = new Intent(activity, ShutterService.class);
                //activity.startService(shutterIntent);
 
-                try {
-                    CameraAdapter cam = new CameraController2(activity, null, CameraController2.OPEN_AND_TAKE_PHOTO);
-                } catch (CameraAccessException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    CameraAdapter cam = new CameraController2(activity, null, CameraController2.OPEN_AND_TAKE_PHOTO);
+//                } catch (CameraAccessException e) {
+//                    e.printStackTrace();
+//                }
             }
         });
 
@@ -129,11 +129,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        Button btSleep = (Button) findViewById(R.id.bt_sleep);
-        btSleep.setOnClickListener(new View.OnClickListener() {
+        Button btKill = (Button) findViewById(R.id.bt_kill);
+        btKill.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO
+
+                Intent killIntent = new Intent(activity, Orchestrator.class);
+                killIntent.putExtra("service", Broadcast.ALL_SERVICES);
+                killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
+                sendBroadcast(killIntent);
+
             }
         });
 
@@ -198,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        // startCamera();
+        startCamera();
     }
 
     @Override

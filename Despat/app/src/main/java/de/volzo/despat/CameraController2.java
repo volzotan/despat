@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -73,6 +74,7 @@ public class CameraController2 implements CameraAdapter {
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
 
+
     public CameraController2(Context context, TextureView textureView, int mode) throws CameraAccessException {
         this.context = context;
         this.textureView = textureView;
@@ -98,6 +100,16 @@ public class CameraController2 implements CameraAdapter {
             Size[] foo = map.getOutputSizes(SurfaceTexture.class);
 
             cameraManager.openCamera(cameraId, cameraStateCallback, null);
+
+//            Handler h = new Handler();
+//            h.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    Log.e(TAG, "foo");
+//                    takePhoto();
+//                }
+//            }, 2000);
+
         } catch (CameraAccessException e) {
             Log.d(TAG, "opening camera failed", e);
             throw e;
@@ -136,12 +148,18 @@ public class CameraController2 implements CameraAdapter {
         try {
 
             SurfaceTexture surfaceTexture = getSurfaceTexture(textureView);
-            surfaceTexture.setDefaultBufferSize(640, 480); // imageDimension.getWidth(), imageDimension.getHeight());
+            int width = 640; //imageDimension.getWidth();
+            int height = 480; //imageDimension.getHeight();
+            surfaceTexture.setDefaultBufferSize(width, height);
 
-//            Matrix mat = new Matrix();
-//            mat.postRotate(-90.0f);
-//            mat.postTranslate(0.0f, 1340.0f);
-//            textureView.setTransform(mat);
+            // Lowly camera API developers haven't deemed it necessary to integrate automatic screen rotation and aspect ratio
+            if (textureView != null) {
+                Matrix mat = new Matrix();
+                mat.postScale(height / (float) width, width / (float) height);
+                mat.postRotate(-90);
+                mat.postTranslate(0, 1300.0f); // TODO
+                textureView.setTransform(mat);
+            }
 
             Surface surface = new Surface(surfaceTexture);
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
@@ -177,6 +195,7 @@ public class CameraController2 implements CameraAdapter {
             Log.e(TAG, "updatePreview error, return");
         }
         captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+
         try {
             cameraCaptureSession.setRepeatingRequest(captureRequestBuilder.build(), null, mBackgroundHandler);
         } catch (CameraAccessException e) {
@@ -281,7 +300,7 @@ public class CameraController2 implements CameraAdapter {
                     Log.i(TAG, "Saved:" + imageFullPath);
 
                     Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
-                    intent.putExtra("path", imageFullPath.getAbsolutePath());
+                    intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
                     try {

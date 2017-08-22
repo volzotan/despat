@@ -12,8 +12,9 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:background="@color/black">
 
         <Button
             android:text="Start Capturing"
@@ -23,39 +24,33 @@
 
         <Button
             android:text="Stop Capturing"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/bt_stopCapturing" />
 
         <Button
             android:text="Toggle Camera"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/bt_toggleCamera" />
 
         <Button
             android:text="Take Photo"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/bt_takePhoto" />
 
         <Button
-            android:text="Start Rcgnzr"
-            android:layout_width="wrap_content"
+            android:text="Start Recognizer"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/bt_startRecognizer" />
 
         <Button
-            android:text="Sleep"
-            android:layout_width="wrap_content"
+            android:text="Kill Services"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/bt_sleep" />
-
-        <TextView
-            android:id="@+id/tv_status"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="uninitialized"/>
+            android:id="@+id/bt_kill" />
 
     </LinearLayout>
 
@@ -78,6 +73,14 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:text="image_view" />
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:padding="5dp"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:gravity="right"
+            android:text="uninitialized"/>
 
     </de.volzo.despat.support.FixedAspectRatioFrameLayout>
 
