@@ -31,7 +31,6 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
-import de.volzo.despat.support.Util;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -154,10 +153,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
-        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
-        heartbeatIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
-        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
-        sendBroadcast(heartbeatIntent);
+//        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
+//        heartbeatIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
+//        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
+//        sendBroadcast(heartbeatIntent);
 
 
 //        startCapturing.callOnClick();

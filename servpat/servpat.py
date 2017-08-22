@@ -181,7 +181,7 @@ def init_db():
 #     init_db()
 #     print('Initialized the database.')
 
-def install_secret_key(app, filename='secret_key'):
+def install_secret_key(app, filename="secret_key"):
     """Configure the SECRET_KEY from a file
     in the instance directory.
 
@@ -192,7 +192,7 @@ def install_secret_key(app, filename='secret_key'):
     """
     filename = os.path.join(app.instance_path, filename)
     try:
-        app.config['SECRET_KEY'] = open(filename, 'rb').read()
+        app.config["SECRET_KEY"] = open(filename, "rb").read()
     except IOError:
         print("Error: No secret key. Create it with:")
         if not os.path.isdir(os.path.dirname(filename)):
@@ -208,3 +208,7 @@ install_secret_key(app)
 image_dir = app.config["UPLOAD_FOLDER"]
 if not os.path.exists(image_dir):
     os.makedirs(image_dir)
+
+if __name__ == '__main__':
+    app.run()
+
