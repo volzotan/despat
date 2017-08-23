@@ -36,10 +36,11 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
     public static final String TAG = MainActivity.class.getName();
+
+    Despat despat;
     MainActivity activity = this;
 
     PowerbrainConnector powerbrain;
-    CameraAdapter camera;
     Recognizer recognizer;
 
     TextureView textureView;
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         setContentView(R.layout.activity_main);
 
         Log.i(TAG, "application init");
+
+        despat = ((Despat) getApplicationContext());
 
         checkPermissions();
         Config.init();
@@ -94,6 +97,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         toggleCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                CameraAdapter camera = despat.getCamera();
+
                 if (camera== null){
                     activity.startCamera();
                 } else {
@@ -229,7 +235,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             powerbrain.disconnect();
             powerbrain = null;
         }
-        if (camera != null) camera.closeCamera();
+
+        despat.closeCamera();
 
         // Broadcast Receiver
         try {
@@ -242,10 +249,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void startCamera() {
 
-        if (camera != null) camera.closeCamera();
+        despat.closeCamera();
         try {
-            if (camera == null)
-                camera = new CameraController2(this, textureView, CameraController2.OPEN_AND_PREVIEW);
+            despat.setCamera(new CameraController2(this, textureView, CameraController2.OPEN_AND_PREVIEW));
         } catch (CameraAccessException cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -254,9 +260,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     public void takePhoto() {
+
+        CameraAdapter camera = despat.getCamera();
         if (camera == null) {
             try {
                 camera = new CameraController2(this, textureView, CameraController2.OPEN_AND_PREVIEW);
+                despat.setCamera(camera);
             } catch (CameraAccessException e) {
                 e.printStackTrace();
             }

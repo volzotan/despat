@@ -12,6 +12,7 @@ import android.util.Log;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.CameraController2;
+import de.volzo.despat.Despat;
 import de.volzo.despat.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.CameraAdapter;
@@ -25,8 +26,6 @@ public class ShutterService extends IntentService {
     public static final String TAG = ShutterService.class.getName();
     public static final int REQUEST_CODE = 0x1200;
 
-    private CameraAdapter camera;
-
     public ShutterService() {
         super(ShutterService.class.getName());
     }
@@ -38,20 +37,24 @@ public class ShutterService extends IntentService {
 
         // TODO: acquire Wake Lock?
 
-        try {
-            if (camera == null) {
-                camera = new CameraController2(this, null, CameraController2.OPEN_AND_PREVIEW); // CameraController2.OPEN_AND_TAKE_PHOTO);
-            }
-            //this.wait(500); // FIXME
-            //camera.takePhoto();
 
-            Handler h = new Handler();
-            h.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    camera.closeCamera();
-                }
-            }, 1000);
+        Despat despat = ((Despat) getApplicationContext());
+        CameraAdapter camera = despat.getCamera();
+
+        try {
+
+            if (camera == null) {
+                camera = new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
+                despat.setCamera(camera);
+            }
+
+//            Handler h = new Handler();
+//            h.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    camera.closeCamera();
+//                }
+//            }, 1000);
 
         } catch (CameraAccessException cae) {
             Log.e(TAG, "taking photo failed", cae);
