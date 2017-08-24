@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.net.Uri;
@@ -100,11 +101,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
                 CameraAdapter camera = despat.getCamera();
 
-                if (camera== null){
+                if (camera == null){
                     activity.startCamera();
                 } else {
-                    camera.closeCamera();
-                    camera = null;
+                    despat.closeCamera();
                 }
             }
         });
@@ -209,7 +209,19 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
+
         startCamera();
+
+//        CameraAdapter camera = despat.getCamera();
+//
+//        if (camera == null) {
+//            try {
+//                camera = new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
+//            } catch (CameraAccessException e) {
+//                Log.wtf(TAG, e);
+//            }
+//            despat.setCamera(camera);
+//        }
     }
 
     @Override
@@ -251,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            despat.setCamera(new CameraController2(this, textureView, CameraController2.OPEN_AND_PREVIEW));
+            despat.setCamera(new CameraController2(this, textureView, CameraController2.OPEN_PREVIEW));
         } catch (CameraAccessException cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -262,15 +274,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void takePhoto() {
 
         CameraAdapter camera = despat.getCamera();
-        if (camera == null) {
+
+        if (camera == null || camera.getState() == CameraAdapter.STATE_DEAD) {
             try {
-                camera = new CameraController2(this, textureView, CameraController2.OPEN_AND_PREVIEW);
+                camera = new CameraController2(this, textureView, CameraController2.OPEN_PREVIEW_AND_TAKE_PHOTO);
                 despat.setCamera(camera);
             } catch (CameraAccessException e) {
-                e.printStackTrace();
+                Log.e(TAG, "taking photo failed", e);
             }
+        } else {
+            camera.takePhoto();
         }
-        camera.takePhoto();
     }
 
     public void startRecognizer() {

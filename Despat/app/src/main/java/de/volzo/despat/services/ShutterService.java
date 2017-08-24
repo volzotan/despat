@@ -37,32 +37,35 @@ public class ShutterService extends IntentService {
 
         // TODO: acquire Wake Lock?
 
+        final Context context = this;
 
-        Despat despat = ((Despat) getApplicationContext());
-        CameraAdapter camera = despat.getCamera();
+        Handler mHandler = new Handler(getMainLooper());
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Despat despat = ((Despat) getApplicationContext());
+                CameraAdapter camera = despat.getCamera();
+                
+                try {
 
-        try {
+                    if (camera == null || camera.getState() == CameraAdapter.STATE_DEAD) {
+                        camera = new CameraController2(context, null, CameraController2.OPEN_AND_TAKE_PHOTO);
+                        despat.setCamera(camera);
+                    } else {
+                        camera.takePhoto();
+                    }
 
-            if (camera == null) {
-                camera = new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
-                despat.setCamera(camera);
+                } catch (CameraAccessException cae) {
+                    Log.e(TAG, "taking photo failed", cae);
+                    return;
+                } catch (Exception e) {
+                    Log.e(TAG, "taking photo failed", e);
+                    return;
+                }
             }
+        });
 
-//            Handler h = new Handler();
-//            h.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    camera.closeCamera();
-//                }
-//            }, 1000);
 
-        } catch (CameraAccessException cae) {
-            Log.e(TAG, "taking photo failed", cae);
-            return;
-        } catch (Exception e) {
-            Log.e(TAG, "taking photo failed", e);
-            return;
-        }
 
         // notify
         // Intent localIntent = new Intent(Broadcast.PICTURE_TAKEN).putExtra(Broadcast.DATA_PICTURE_PATH, "narf");

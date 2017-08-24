@@ -17,6 +17,9 @@ public class Despat extends Application {
     }
 
     public void closeCamera() {
-        if (camera != null) camera.closeCamera();
+        if (camera != null) {
+            camera.closeCamera();
+            camera = null;
+        }
     }
 }

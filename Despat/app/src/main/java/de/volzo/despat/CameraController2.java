@@ -55,9 +55,10 @@ public class CameraController2 implements CameraAdapter {
 
     private int mode;
 
-    public static final int OPEN                = 0x0;
-    public static final int OPEN_AND_PREVIEW    = 0x1;
-    public static final int OPEN_AND_TAKE_PHOTO = 0x2;
+    // public static final int OPEN                            = 0x0;
+    public static final int OPEN_PREVIEW                    = 0x1;
+    public static final int OPEN_AND_TAKE_PHOTO             = 0x2;
+    public static final int OPEN_PREVIEW_AND_TAKE_PHOTO     = 0x3;
 
     private Context context;
     private TextureView textureView;
@@ -73,6 +74,8 @@ public class CameraController2 implements CameraAdapter {
 
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
+
+    private ImageReader imageReader;
 
 
     public CameraController2(Context context, TextureView textureView, int mode) throws CameraAccessException {
@@ -97,18 +100,7 @@ public class CameraController2 implements CameraAdapter {
             assert map != null;
             imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
 
-            Size[] foo = map.getOutputSizes(SurfaceTexture.class);
-
             cameraManager.openCamera(cameraId, cameraStateCallback, null);
-
-//            Handler h = new Handler();
-//            h.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    Log.e(TAG, "foo");
-//                    takePhoto();
-//                }
-//            }, 2000);
 
         } catch (CameraAccessException e) {
             Log.d(TAG, "opening camera failed", e);
@@ -182,7 +174,11 @@ public class CameraController2 implements CameraAdapter {
                 }
             };
 
-            cameraDevice.createCaptureSession(Arrays.asList(surface), cameraCaptureSessionCallback, null);
+            if (cameraDevice != null) {
+                cameraDevice.createCaptureSession(Arrays.asList(surface), cameraCaptureSessionCallback, null);
+            } else {
+                Log.e(TAG, "camera device missing");
+            }
 
         } catch (CameraAccessException e) {
             Log.d(TAG, "creating preview failed", e);
@@ -200,6 +196,10 @@ public class CameraController2 implements CameraAdapter {
             cameraCaptureSession.setRepeatingRequest(captureRequestBuilder.build(), null, mBackgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
+        }
+
+        if (mode == OPEN_AND_TAKE_PHOTO || mode == OPEN_PREVIEW_AND_TAKE_PHOTO) {
+            takePhoto();
         }
     }
 
@@ -222,7 +222,7 @@ public class CameraController2 implements CameraAdapter {
     public void takePhoto() {
         if (cameraDevice == null) {
             Log.e(TAG, "cameraDevice is null");
-            return;
+            throw new IllegalStateException();
         }
 
         if (cameraManager == null) { // ?
@@ -241,13 +241,13 @@ public class CameraController2 implements CameraAdapter {
                 width = jpegSizes[0].getWidth();
                 height = jpegSizes[0].getHeight();
             }
-            ImageReader reader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); // TODO: number of buffers 1 or 2?
+            imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); // TODO: number of buffers 1 or 2?
             List<Surface> outputSurfaces = new ArrayList<Surface>(2);
-            outputSurfaces.add(reader.getSurface());
+            outputSurfaces.add(imageReader.getSurface());
             SurfaceTexture surfaceTexture = getSurfaceTexture(this.textureView);
             outputSurfaces.add(new Surface(surfaceTexture));
             final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-            captureBuilder.addTarget(reader.getSurface());
+            captureBuilder.addTarget(imageReader.getSurface());
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
 
             // Orientation
@@ -291,7 +291,7 @@ public class CameraController2 implements CameraAdapter {
                 }
             };
 
-            reader.setOnImageAvailableListener(readerListener, mBackgroundHandler);
+            imageReader.setOnImageAvailableListener(readerListener, mBackgroundHandler);
 
             final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
                 @Override
@@ -304,7 +304,18 @@ public class CameraController2 implements CameraAdapter {
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
                     try {
-                        createPreview(textureView);
+                        if (mode == OPEN_PREVIEW) {
+                            createPreview(textureView);
+                        } else if (mode == OPEN_PREVIEW_AND_TAKE_PHOTO) {
+                            // to prevent a loop, mode needs to be changed to OPEN_PREVIEW
+                            mode = OPEN_PREVIEW;
+                            createPreview(textureView);
+                        }
+                        else if (mode == OPEN_AND_TAKE_PHOTO) {
+                            closeCamera(); // TODO <--
+                        } else {
+                            Log.w(TAG, "no mode!");
+                        }
                     } catch (CameraAccessException cae) {
                         Log.e(TAG, "captureListener failed");
                     }
@@ -334,10 +345,22 @@ public class CameraController2 implements CameraAdapter {
             cameraDevice.close();
             cameraDevice = null;
         }
-//        if (imageReader != null) {
-//            imageReader.close();
-//            imageReader = null;
-//        }
+        if (imageReader != null) {
+            imageReader.close();
+            imageReader = null;
+        }
+    }
+
+    public int getState() {
+        if (cameraDevice == null) {
+            return this.STATE_DEAD;
+        }
+
+        if (textureView == null) {
+            return this.STATE_EMPTY_PREVIEW;
+        } else {
+            return this.STATE_PREVIEW;
+        }
     }
 
     private SurfaceTexture getSurfaceTexture(TextureView tv) {

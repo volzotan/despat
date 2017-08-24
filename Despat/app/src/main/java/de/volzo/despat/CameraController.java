@@ -177,5 +177,9 @@ public class CameraController implements CameraAdapter, Camera.PreviewCallback, 
     public void onShutter() {
         Log.d(TAG, "shutter released");
     }
+
+    public int getState() {
+        return this.STATE_DEAD;
+    }
 }
 
