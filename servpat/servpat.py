@@ -40,6 +40,7 @@ def root():
 
 
 @app.route("/overview")
+@requires_auth
 def overview():
     db = get_db()
     cur = db.execute('select * from status order by id desc')

@@ -1,1 +1,1 @@
-rsync -a --exclude 'UPLOAD' --exclude '__pycache__' --exclude '.DS_Store' --exclude 'upload.sh' . grinzold:/var/www/grinzold/servpat
+rsync -a --exclude 'UPLOAD' --exclude '__pycache__' --exclude '.DS_Store' --exclude 'upload.sh' . grinzold:/var/www/servpat
