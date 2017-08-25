@@ -1,5 +1,5 @@
-sizeBot    = [155, 80, 20];
-sizeTop    = [155, 80, 25];
+sizeBot    = [155, 84, 20];
+sizeTop    = [155, 84, 25];
 lensHole   = [127, 80/2];
 
 lidDepth   = 1;
@@ -11,7 +11,7 @@ w          = 2.0;
 wb         = 1.2;
 
 bottom();
-translate([0, 85, 0]) top();
+translate([0, 90, 0]) top();
 translate([sizeBot[0]/2-(44/2), -.1, 4]) rotate([90, 0, 0]) socket();
 % translate([sizeBot[0]/2-(44/2), -30, 4]) rotate([0, 0, 0]) socket();
 % translate([63.5, -5-2, 30]) rotate([-90, 0, 0]) DIN912screw(8);
@@ -68,19 +68,22 @@ module top() {
     // translate([34, 3, 8]) 
     translate([sizeTop[0]-3, 55, 8]) rotate([0, -90, 0]) import("dht22.stl");
     
-    % translate([]) {
+    // battery holder
+    % translate([60, 3, 21]) cube([79, 78, 21]);
+    
+    // batteries
+    % translate([0, 0, 40]) {
         translate([16, 5, 5]) cube([25.4, 65, 1.2]);
         translate([54+20*0, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
         translate([54+20*1, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
         translate([54+20*2, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
         translate([54+20*3, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-        translate([54+20*4, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
     }
 }
 
 module bottom() {
     bottomRounding = 3;
-    bottomReduction = 2;
+    bottomReduction = 1;
     
     difference() {
         union() {
@@ -120,6 +123,21 @@ module bottom() {
         }
     }
     
+    // nutholder
+    difference() {
+        intersection() {
+            union() {
+                cube([14, 14, 19]);
+            }
+            hull() {
+                block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=bottomReduction);
+                translate([0, 0, bottomRounding]) block(sizeBot[0], sizeBot[1], sizeBot[2]-bottomRounding, crad=crad);
+            }
+        }
+        
+        translate([7, 7, 10]) cylinder($fn=32, d=5.3, h=30);
+    }
+    
     // nuts
     
     % translate([sizeBot[0]/2, w+4+0.2, 12]) rotate([90, 0, 0]) { 
@@ -149,7 +167,6 @@ module DIN912screw(length) {
         union() {
             cylinder($fn=32, h=5, d=8.5);
             translate([0, 0, 5]) cylinder($fn=32, h=length, d=5);
-            cylinder($fn=32, h=5, d=8.5);
         }
         translate([0, 0, -1]) cylinder($fn=6, h=3, d=5);
     }

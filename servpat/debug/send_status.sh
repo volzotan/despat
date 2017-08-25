@@ -1,8 +1,8 @@
-http POST localhost:5000/status         \
-    device_id=httpie                    \
-    number_images=123                   \
-    free_space_internal=100.01          \
-    free_space_external=-1              \
-    battery_internal=75                 \
-    battery_external=-1                 \
-    state_charging=1
+http -a device1:foobar POST zoltep.de/status    \
+    deviceId=httpie                             \
+    numberImages=123                            \
+    freeSpaceInternal=100.01                    \
+    freeSpaceExternal=-1                        \
+    batteryInternal=75                          \
+    batteryExternal=-1                          \
+    stateCharging=1

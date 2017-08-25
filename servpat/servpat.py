@@ -71,18 +71,17 @@ def status():
     content = request.json
 
     # insert into db
-    values = [  content["device_id"], 
+    values = [  content["deviceId"], 
                 datetime.datetime.now(), #content["timestamp"], # TODO
-                content["number_images"], 
-                content["free_space_internal"], 
-                content["free_space_external"], 
-                content["battery_internal"],
-                content["battery_external"]]
+                content["numberImages"], 
+                content["freeSpaceInternal"], 
+                content["freeSpaceExternal"], 
+                content["batteryInternal"],
+                content["batteryExternal"]]
     db = get_db()
     db.execute('insert into status (deviceId, timestamp, numberImages, freeSpaceInternal, freeSpaceExternal, batteryInternal, batteryExternal) values (?, ?, ?, ?, ?, ?, ?)', values)
     db.commit()
 
-    print(content)
     return "status"
 
 

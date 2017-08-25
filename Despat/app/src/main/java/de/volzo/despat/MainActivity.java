@@ -114,17 +114,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         takePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 activity.takePhoto();
-
-                //Intent shutterIntent = new Intent(activity, ShutterService.class);
-               //activity.startService(shutterIntent);
-
-//                try {
-//                    CameraAdapter cam = new CameraController2(activity, null, CameraController2.OPEN_AND_TAKE_PHOTO);
-//                } catch (CameraAccessException e) {
-//                    e.printStackTrace();
-//                }
             }
         });
 
