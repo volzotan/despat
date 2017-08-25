@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -211,17 +212,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
 
         startCamera();
-
-//        CameraAdapter camera = despat.getCamera();
-//
-//        if (camera == null) {
-//            try {
-//                camera = new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
-//            } catch (CameraAccessException e) {
-//                Log.wtf(TAG, e);
-//            }
-//            despat.setCamera(camera);
-//        }
+        
     }
 
     @Override

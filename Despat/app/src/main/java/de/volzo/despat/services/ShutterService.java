@@ -64,12 +64,6 @@ public class ShutterService extends IntentService {
                 }
             }
         });
-
-
-
-        // notify
-        // Intent localIntent = new Intent(Broadcast.PICTURE_TAKEN).putExtra(Broadcast.DATA_PICTURE_PATH, "narf");
-        // LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
     public static boolean isRunning(Context context) {

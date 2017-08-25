@@ -140,7 +140,7 @@ public class CameraController2 implements CameraAdapter {
         try {
 
             SurfaceTexture surfaceTexture = getSurfaceTexture(textureView);
-            int width = 640; //imageDimension.getWidth();
+            int width = 640; //imageDimension.getWidth();   // TODO
             int height = 480; //imageDimension.getHeight();
             surfaceTexture.setDefaultBufferSize(width, height);
 
@@ -149,7 +149,7 @@ public class CameraController2 implements CameraAdapter {
                 Matrix mat = new Matrix();
                 mat.postScale(height / (float) width, width / (float) height);
                 mat.postRotate(-90);
-                mat.postTranslate(0, 1300.0f); // TODO
+                mat.postTranslate(0, textureView.getHeight());
                 textureView.setTransform(mat);
             }
 
