@@ -1,9 +1,19 @@
 package de.volzo.despat;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -15,7 +25,11 @@ import static android.content.Context.BATTERY_SERVICE;
 
 public class SystemController {
 
+    public static final String TAG = SystemController.class.getName();
+
     Context context;
+
+    Location deviceLocation;
 
     public SystemController(Context context) {
         this.context = context;
@@ -32,12 +46,53 @@ public class SystemController {
     public void wifi(boolean activated) {
         // http://stackoverflow.com/questions/3930990
 
-        WifiManager wifiManager = (WifiManager) this.context.getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(activated);
     }
 
-    public void gps(boolean activated) {
+    // Location will be available in class variable a few seconds after calling the getLocation method
+    public void getLocation() {
+        final LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                Log.d(TAG, "location update");
+                deviceLocation = location;
+            }
 
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                Log.d(TAG, "Location Status Changed: " + String.valueOf(status));
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                Log.d(TAG, "Location Provider Enabled: " + provider);
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                Log.d(TAG, "Location Provider Disabled: " + provider);
+            }
+        };
+
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE); // ?
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setSpeedRequired(false);
+        criteria.setCostAllowed(true);
+        criteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
+        criteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
+
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        Looper looper = null;
+
+        try {
+            locationManager.requestSingleUpdate(criteria, locationListener, looper);
+        } catch (SecurityException se) {
+            Log.e(TAG, "missing ACCESS_LOCATION_FINE permission");
+        }
     }
 
     public void display(boolean activated) {

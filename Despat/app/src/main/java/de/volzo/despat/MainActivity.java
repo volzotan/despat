@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
 
         startCamera();
-        
+
     }
 
     @Override
@@ -310,14 +310,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         Activity activity = this;
 
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
+        if (    ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                ) {
 
-
-            ActivityCompat.requestPermissions(activity,
-                    new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1337);
+                ActivityCompat.requestPermissions(activity,
+                                new String[]{Manifest.permission.CAMERA,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.ACCESS_FINE_LOCATION},
+                        1337);
         }
     }
 
