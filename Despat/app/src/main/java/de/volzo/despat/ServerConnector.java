@@ -50,7 +50,6 @@ public class ServerConnector {
         this.dateFormat =  new SimpleDateFormat(Config.dateFormat, new Locale("de", "DE"));
     }
 
-
     /*
 
     deviceId                String

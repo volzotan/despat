@@ -21,7 +21,7 @@ public class Config {
     public static final File IMAGE_FOLDER                   = new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;
     public static final boolean PHONE_HOME                  = true;
-    public static final String SERVER_ADDRESS               = "http://grinzold.de:5000";
+    public static final String SERVER_ADDRESS               = "http://zoltep.de";
 
     public static final String dateFormat                   = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
 
