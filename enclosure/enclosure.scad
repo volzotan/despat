@@ -7,7 +7,7 @@ lidWall    = 0.8;
 lidTol     = 0.4;
 
 crad       = 6;
-w          = 2.0;
+w          = 2.0+.1;
 wb         = 1.2;
 
 bottom();
@@ -181,11 +181,18 @@ module phone() {
 }
 
 module block(width, depth, height, crad=3, red=0) {
+//    hull() {    
+//        translate([crad+red, crad+red]) cylinder($fn=32, h=height, r=crad);
+//        translate([width-crad-red, crad+red]) cylinder($fn=32, h=height, r=crad);
+//        translate([crad+red, depth-crad-red]) cylinder($fn=32, h=height, r=crad);
+//        translate([width-crad-red, depth-crad-red]) cylinder($fn=32, h=height, r=crad);
+//    }
+    
     hull() {    
-        translate([crad+red, crad+red]) cylinder($fn=32, h=height, r=crad);
-        translate([width-crad-red, crad+red]) cylinder($fn=32, h=height, r=crad);
-        translate([crad+red, depth-crad-red]) cylinder($fn=32, h=height, r=crad);
-        translate([width-crad-red, depth-crad-red]) cylinder($fn=32, h=height, r=crad);
+        translate([crad, crad]) cylinder($fn=32, h=height, r=crad-red);
+        translate([width-crad, crad]) cylinder($fn=32, h=height, r=crad-red);
+        translate([crad, depth-crad]) cylinder($fn=32, h=height, r=crad-red);
+        translate([width-crad, depth-crad]) cylinder($fn=32, h=height, r=crad-red);
     }
 }
 
