@@ -33,6 +33,7 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
+import de.volzo.despat.support.Util;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -155,25 +156,27 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
-//        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
-//        heartbeatIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
-//        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
-//        sendBroadcast(heartbeatIntent);
+        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
+        heartbeatIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
+        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
+        sendBroadcast(heartbeatIntent);
 
 
-//        startCapturing.callOnClick();
+        startCapturing.callOnClick();
 
-
-        ServerConnector serverConnector = new ServerConnector(this);
-        ServerConnector.ServerMessage msg = new ServerConnector.ServerMessage();
-        msg.numberImages = 500;
-        serverConnector.sendStatus(msg);
+//        ServerConnector serverConnector = new ServerConnector(this);
+//        ServerConnector.ServerMessage msg = new ServerConnector.ServerMessage();
+//        msg.numberImages = 500;
+//        serverConnector.sendStatus(msg);
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "photo taken");
+
+            despat.setImagesTaken(despat.getImagesTaken() + 1);
+            Util.updateNotification(activity, despat.getImagesTaken());
         }
     };
 
@@ -197,9 +200,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         cleanup();
 
-        if (!ShutterService.isRunning(this)) {
-            // TODO
-        }
+//        if (!ShutterService.isRunning(this)) {
+//            // TODO
+//        }
 
         Log.i(TAG, "application exit");
     }

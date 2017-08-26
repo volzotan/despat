@@ -7,6 +7,7 @@ import de.volzo.despat.support.CameraAdapter;
 public class Despat extends Application {
 
     private CameraAdapter camera;
+    private int imagesTaken = 0;
 
     public void setCamera(CameraAdapter cameraAdapter) {
         this.camera = cameraAdapter;
@@ -21,5 +22,13 @@ public class Despat extends Application {
             camera.closeCamera();
             camera = null;
         }
+    }
+
+    public void setImagesTaken(int imagesTaken) {
+        this.imagesTaken = imagesTaken;
+    }
+
+    public int getImagesTaken() {
+        return this.imagesTaken;
     }
 }

@@ -12,6 +12,7 @@ import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.Volley;
@@ -65,6 +66,7 @@ public class ServerConnector {
     stateCharging           true
 
     */
+
     public void sendStatus(ServerMessage msg) {
         try {
             Writer writer = new StringWriter();
@@ -84,7 +86,9 @@ public class ServerConnector {
             jsonWriter.endObject();
             jsonWriter.close();
 
-            Log.d(TAG, jsonWriter.toString());
+            // Log.d(TAG, writer.toString());
+
+            send(new JSONObject(writer.toString()));
         } catch (Exception e) {
             Log.e(TAG, "sending status failed", e);
         }
@@ -95,7 +99,7 @@ public class ServerConnector {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(context);
 
-        String url = this.serverAddress + "/state";
+        String url = this.serverAddress + "/status";
 
         class CustomRequest extends Request<JSONObject> {
 
@@ -104,24 +108,24 @@ public class ServerConnector {
             private JSONObject payload;
 
             public CustomRequest(String url, Map<String, String> params,
-                                 Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
+                                 Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) {
                 super(Method.POST, url, errorListener);
-                this.listener = reponseListener;
+                this.listener = responseListener;
                 this.params = params;
             }
 
             public CustomRequest(int method, String url, Map<String, String> params,
-                                 Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
+                                 Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) {
                 super(method, url, errorListener);
-                this.listener = reponseListener;
+                this.listener = responseListener;
                 this.params = params;
             }
 
             public CustomRequest(int method, String url, JSONObject payload, Map<String, String> params,
-                                 Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
+                                 Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) {
                 super(method, url, errorListener);
                 this.payload = payload;
-                this.listener = reponseListener;
+                this.listener = responseListener;
                 this.params = params;
             }
 
@@ -132,16 +136,15 @@ public class ServerConnector {
 
             @Override
             public Map<String, String> getHeaders() {
+
+                String username = context.getResources().getString(R.string.server_username);
+                String password = context.getResources().getString(R.string.server_password);
+                String code = username + ":" + password;
+                code = Base64.encodeToString(code.getBytes(), Base64.DEFAULT);
+
                 Map<String, String> params = new HashMap<String, String>();
-                params.put(
-                        "Authorization",
-                        String.format("Basic %s", Base64.encodeToString(
-                                String.format("%s:%s",
-                                        context.getResources().getString(R.string.server_username),
-                                        context.getResources().getString(R.string.server_password)
-                                ).getBytes(), Base64.DEFAULT)
-                        )
-                );
+                params.put("Authorization", "Basic " + code);
+
                 return params;
             }
 
@@ -179,20 +182,42 @@ public class ServerConnector {
             }
         }
 
-        Map<String, String> params = new HashMap<String, String>();
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, url, statusMessage, params, new Response.Listener<JSONObject>() {
-
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onErrorResponse(VolleyError error) {
+
+                Log.e(TAG, String.format("sending data to server failed. HTTP response: %d", error.networkResponse.statusCode));
+
+                NetworkResponse response = error.networkResponse;
+                if (error instanceof ServerError && response != null) {
+                    try {
+                        String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+
+                        try {
+                            JSONObject obj = new JSONObject(res);
+
+                            // error response is a JSON Object ...
+                        } catch (JSONException e2) {
+                            // error response is probably HTML
+
+                            System.out.println(res);
+                        }
+                    } catch (UnsupportedEncodingException e1) {
+                        Log.e(TAG, "parsing error response failed");
+                    }
+                }
+            }
+        };
+
+        Response.Listener successListener = new Response.Listener() {
+            @Override
+            public void onResponse(Object response) {
                 Log.d(TAG, "Success Response: "+ response.toString());
             }
-        }, new Response.ErrorListener() {
+        };
 
-            @Override
-            public void onErrorResponse(VolleyError response) {
-                Log.d("Error Response: ", response.toString());
-            }
-        });
+        Map<String, String> params = new HashMap<String, String>();
+        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, url, statusMessage, params, successListener, errorListener);
         queue.add(jsObjRequest);
     }
 

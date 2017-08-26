@@ -133,7 +133,8 @@ public class Orchestrator extends BroadcastReceiver {
         // so a single alarm needs to schedule the next one
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
 
-        Util.startNotification(context, -1);
+        Despat despat = ((Despat) context.getApplicationContext());
+        Util.startNotification(context, despat.getImagesTaken());
     }
 
     private void shutterServiceStop() {

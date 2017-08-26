@@ -33,6 +33,10 @@ public class Util {
         notificationManager.notify(NOTIFICATION_IDENTIFIER, notification);
     }
 
+    public static void updateNotification(Context context, int numberOfImages) {
+        startNotification(context, numberOfImages);
+    }
+
     public static void stopNotification(Context context) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION_IDENTIFIER);
