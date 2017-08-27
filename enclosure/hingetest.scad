@@ -37,81 +37,82 @@ move = .1;
 //translate([100, 0, 0]) hinge_bottom();
 //translate([100, 0, 0]) hinge_top();
 
-translate([sizeBot[0]/2, -0.1, 32]) rotate([90, 0, 0]) color("grey") grabber();
-translate([sizeBot[0]/2, -0.1, 5]) rotate([90, 0, 0]) latcher();
-translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch();
-translate([sizeBot[0]/2, -3.5, -2]) rotate([90, 0, 0]) latch2();
+//translate([sizeBot[0]/2, -0.1, 32]) rotate([90, 0, 0]) color("grey") grabber();
+//translate([sizeBot[0]/2, -0.1, 5]) rotate([90, 0, 0]) latcher();
+//translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch();
+//translate([sizeBot[0]/2, -3.5, -2]) rotate([90, 0, 0]) latch2();
 
 
-translate([130, 5, -3]) grabber();
-translate([130, 20, -3]) latcher();
+translate([116, 2, -3.5]) grabber();
+translate([130, 0, 0.5]) rotate([0, 90, 0]) latcher();
 translate([130, 54, 0]) latch(print=true);
-translate([145, 30, 0]) latch2();
+translate([135, 30, 0]) latch2();
 
 module latch2() {
     difference() {
         union() {
             hull() {
-                translate([-7+latchTol*2, 0, 0]) rotate([0, 90, 0]) cylinder($fn=32, d=6, h=14-latchTol*4);
-                translate([-7+latchTol*2, 6, -3]) cube([14-latchTol*4, 0.1, 6]);
+                translate([-10+latchTol*2, 0, 0]) rotate([0, 90, 0]) cylinder($fn=32, d=7, h=20-latchTol*4);
+                translate([-10+latchTol*2, 5, -3.5]) cube([20-latchTol*4, 0.1, 7]);
             }
             
             hull() {
-                translate([-7+latchTol*2, 13, 0]) rotate([0, 90, 0]) cylinder($fn=32, d=6, h=4-latchTol*3);
-                translate([-7+latchTol*2, 5, -3]) cube([4-latchTol*3, 0.1, 6]);
+                translate([-10+latchTol*2, 13, 0]) rotate([0, 90, 0]) cylinder($fn=32, d=7, h=6-latchTol*3);
+                translate([-10+latchTol*2, 5, -3.5]) cube([6-latchTol*3, 0.1, 7]);
             }
             
             hull() {
-                translate([3+latchTol, 13, 0]) rotate([0, 90, 0]) cylinder($fn=32, d=6, h=4-latchTol*3);
-                translate([3+latchTol, 5, -3]) cube([4-latchTol*3, 0.1, 6]);
+                translate([4+latchTol, 13, 0]) rotate([0, 90, 0]) cylinder($fn=32, d=7, h=6-latchTol*3);
+                translate([4+latchTol, 5, -3.5]) cube([6-latchTol*3, 0.1, 7]);
             }
         }
         
         translate([+10, 0, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=3.3);
      
-        translate([+10, 12.5, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=2);
+        translate([+10, 12.5, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=2.3);
+        translate([+10+1, 12.5, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=2+1.3, d=5);
         
     }
 }
 
 module latch(print=false) {
-    % translate([12.5, 0, 0]) rotate([0, -90, 0]) DIN912screw(20);
-    % translate([12.5, -40, 0]) rotate([0, -90, 0]) DIN912screw(20);
+    % translate([15, 0, 0]) rotate([0, -90, 0]) DIN912screw(25);
+    % translate([15, -40, 0]) rotate([0, -90, 0]) DIN912screw(25);
     
-    // translate([-10, 0, -10]) rotate([0, 90, 0]) 
+    translate([-10, 0, -13]) rotate([0, 90, 0]) 
     difference() {
         union() {
             hull() {
-                translate([-9+2, 0, 0]) rotate([0, -90, 0]) cylinder($fn=32, d=6, h=2);
-                translate([-9+2, -40, 0]) rotate([0, -90, 0]) cylinder($fn=32, d=6, h=2);
+                translate([-11.5+2, 0, 0]) rotate([0, -90, 0]) cylinder($fn=32, d=7, h=2);
+                translate([-11.5+2, -40, 0]) rotate([0, -90, 0]) cylinder($fn=32, d=7, h=2);
             }
          
             hull() {
-                translate([-9-1.5, -6, -3]) cube([1.5, 6, 6]);
-                translate([-9, -6-3, -3]) cube([0.1, 9, 6]);
+                translate([-11.5-1.5, -6, -3.5]) cube([1.5, 6, 7]);
+                translate([-11.5, -6-3, -3.5]) cube([0.1, 9, 7]);
             }
             
             hull() {
-                translate([-9-1.5, -40, -3]) cube([1.5, 6, 6]);
-                translate([-9, -40, -3]) cube([0.1, 9, 6]);
+                translate([-11.5-1.5, -40, -3.5]) cube([1.5, 6, 7]);
+                translate([-11.5, -40, -3.5]) cube([0.1, 9, 7]);
             }
         }
         translate([+10, 0, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=3.3);
         translate([+10, -40, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=3.3);
         
-        translate([-9, 0, 0]) rotate([0, -90, 0]) cylinder($fn=6, h=10, d=6.6+.1);
-        translate([-9, -40, 0]) rotate([0, -90, 0]) cylinder($fn=6, h=10, d=6.6+.1);
+        translate([-11.5, 0, 0]) rotate([0, -90, 0]) cylinder($fn=6, h=10, d=6.6+.1);
+        translate([-11.5, -40, 0]) rotate([0, -90, 0]) cylinder($fn=6, h=10, d=6.6+.1);
     }
     
-    // translate([-18, 0, 6]) rotate([0, 90, 0]) 
+    translate([-18, 0, 8]) rotate([0, 90, 0]) 
     difference() {
         hull() {
-            translate([+9, 0, 0]) rotate([0, -90, 0]) cylinder($fn=32, d=6, h=2);
-            translate([+9, -40, 0]) rotate([0, -90, 0]) cylinder($fn=32, d=6, h=2);
+            translate([+11.5, 0, 0]) rotate([0, -90, 0]) cylinder($fn=32, d=7, h=2);
+            translate([+11.5, -40, 0]) rotate([0, -90, 0]) cylinder($fn=32, d=7, h=2);
         }    
         
-        translate([+10, -40, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=3.3);
-        translate([+10, 0, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=3.3);
+        translate([+15, -40, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=3.3);
+        translate([+15, 0, 0]) rotate([0, -90, 0]) cylinder($fn=32, h=30, d=3.3);
     }
 }
 
@@ -120,14 +121,16 @@ module latcher() {
     
     difference() {
         union() {
-            translate([-3, 0, 0]) block(6, 16, 3.5, crad=1);
-            translate([-4, 16-6.75, 0]) block(8, 6.75, 3.5, crad=1);
+            translate([-4, 0, 0]) block(8, 16, 3.5, crad=1);
+            
+            translate([-4, 1, 0]) cube([8, 8, 4.5]);
             intersection() {
-                translate([-3, 5, 3.5]) rotate([0, 90, 0]) cylinder($fn=32, d=6, h=6);
-                translate([-3, 0, 0]) cube([6, 16, 10]);
+                translate([-4, 5, 4.5]) rotate([0, 90, 0]) cylinder($fn=32, d=8, h=8);
+                translate([-4, 0, 0]) cube([8, 16, 10]);
             }
         }
-        translate([-4, 5, 3.5]) rotate([0, 90, 0]) cylinder($fn=32, h=30, d=2);
+        
+        translate([-5, 5, 4.5]) rotate([0, 90, 0]) cylinder($fn=32, h=30, d=2.3);
         // translate([ 2.8, 5, 3.5]) rotate([0, 90, 0]) cylinder($fn=32, h=10, d=6);
         
         translate([0, 12.5, -1]) cylinder($fn=32, h=10, d=3.3);
@@ -138,15 +141,15 @@ module latcher() {
 module grabber() {
     difference() {
             hull() {
-                translate([-6+latchTol, 3.5, 4.7]) sphere($fn=32, d=2); //rotate([0, 90, 0]) cylinder($fn=32, d=2, h=14);
-                translate([+6-+latchTol, 3.5, 4.7]) sphere($fn=32, d=2);
-                translate([-7+latchTol, -4, 0]) block(14-latchTol*2, 8, 3, crad=1);
+                translate([-8+latchTol, 4, 5.3]) sphere($fn=32, d=2); //rotate([0, 90, 0]) cylinder($fn=32, d=2, h=14);
+                translate([+8-+latchTol, 4, 5.3]) sphere($fn=32, d=2);
+                translate([-9+latchTol, -4, 0]) block(18-latchTol*2, 8, 4, crad=1);
             }
         translate([0, 0, -1]) cylinder($fn=32, h=10, d=3.3);
-        translate([0, 0, 1.4]) cylinder($fn=32, h=10, d=6);
+        translate([0, 0, 2.4]) cylinder($fn=32, h=10, d=6);
     }
     
-    % translate([0, 0, 4.5]) rotate([180, 0, 0]) DIN912screw(8);
+    % translate([0, 0, 5.5]) rotate([180, 0, 0]) DIN912screw(8);
 }
 
 module hinge_bottom() {
