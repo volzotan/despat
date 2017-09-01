@@ -1,3 +1,5 @@
+include <hinge.scad>
+
 sizeBot    = [155, 84, 20];
 sizeTop    = [155, 84, 25];
 lensHole   = [127, 80/2];
@@ -11,14 +13,22 @@ w          = 2.0+.1;
 wb         = 1.2;
 
 bottom();
-translate([0, 90, 0]) top();
-translate([sizeBot[0]/2-(44/2), -.1, 4]) rotate([90, 0, 0]) socket();
+translate([0, 100-5, 0]) top();
+translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 4]) rotate([90, 0, 180]) socket();
 % translate([sizeBot[0]/2-(44/2), -30, 4]) rotate([0, 0, 0]) socket();
 % translate([63.5, -5-2, 30]) rotate([-90, 0, 0]) DIN912screw(8);
 
-% translate([20, 6.5, 5+0]) phone();
+% translate([20, 9, 5+0]) motoE();
 
 translate([127, 40, -10]) uvfilter();
+
+translate([200, 0, 0]) {
+    bottom();
+    translate([0, sizeTop[1], 44.1]) rotate([180, 0, 0]) top();
+    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 4]) rotate([90, 0, 180]) socket();
+    translate([55, 0, 44]) rotate([0, 180, 0]) color("green") import("hinge.stl");
+    translate([95+55, 0, 44]) rotate([0, 180, 0]) color("green") import("hinge.stl");
+}
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -63,7 +73,14 @@ module top() {
                 }
             }
         }
+        
+        // hinge holes
+        translate([30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+        translate([sizeBot[0]-30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
     }
+    
+    translate([+20+18.2, -5.5, 24]) rotate([0, -90, 0]) hinge_top();
+    translate([-20+sizeTop[0]-2, -5.5, 24]) rotate([0, -90, 0]) hinge_top();
     
     // translate([34, 3, 8]) 
     translate([sizeTop[0]-3, 55, 8]) rotate([0, -90, 0]) import("dht22.stl");
@@ -117,33 +134,40 @@ module bottom() {
         }
         
         // socket screw holes
-        translate([sizeBot[0]/2, 10-1, 12]) rotate([90, 0, 0]) {
+        translate([sizeBot[0]/2, sizeBot[1]+5, 12]) rotate([90, 0, 0]) {
             translate([-14, 0, 0]) cylinder($fn=32, h=10, d=5.3);
             translate([+14, 0, 0]) cylinder($fn=32, h=10, d=5.3);
         }
+        
+        // hinge holes
+        translate([30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+        translate([sizeBot[0]-30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
     }
     
     // nutholder
-    difference() {
-        intersection() {
-            union() {
-                cube([14, 14, 19]);
-            }
-            hull() {
-                block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=bottomReduction);
-                translate([0, 0, bottomRounding]) block(sizeBot[0], sizeBot[1], sizeBot[2]-bottomRounding, crad=crad);
-            }
-        }
-        
-        translate([7, 7, 10]) cylinder($fn=32, d=5.3, h=30);
-    }
+//    difference() {
+//        intersection() {
+//            union() {
+//                cube([14, 14, 19]);
+//            }
+//            hull() {
+//                block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=bottomReduction);
+//                translate([0, 0, bottomRounding]) block(sizeBot[0], sizeBot[1], sizeBot[2]-bottomRounding, crad=crad);
+//            }
+//        }
+//        
+//        translate([7, 7, 10]) cylinder($fn=32, d=5.3, h=30);
+//    }
+    
+    translate([20+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom();
+    translate([-20+sizeBot[0]-2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom();
     
     // nuts
-    
-    % translate([sizeBot[0]/2, w+4+0.2, 12]) rotate([90, 0, 0]) { 
+    % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 12]) rotate([90, 0, 0]) { 
         translate([-14, 0, 0]) M5nut();
         translate([+14, 0, 0]) M5nut();
     }
+    
 }
 
 // *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
@@ -172,12 +196,16 @@ module DIN912screw(length) {
     }
 }
 
-module phone() {
+module motoE() {
     //cube([154, 75, 10]); // Moto Z
     block(130, 67, 12.3, crad=10);
     translate([65, -0.5, 7]) cube([17, 2, 1.5]);
     translate([65+17+10, -1, 7]) cube([9, 2, 1.5]);
     translate([130-23, 67/2, -1]) cylinder($fn=32, h=3, d=13);
+}
+
+module nexus5() {
+    translate([-7, 72, -26]) rotate([0, 0, -90]) import("nexus5.stl");
 }
 
 module block(width, depth, height, crad=3, red=0) {
