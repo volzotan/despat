@@ -1,7 +1,7 @@
 include <hinge.scad>
 
-sizeBot    = [160, 86, 20];
-sizeTop    = [160, 86, 25];
+sizeBot    = [170, 86, 20];
+sizeTop    = [170, 86, 23];
 lensHole   = [sizeBot[0]-25, 25];
 
 lidDepth   = 1;
@@ -9,7 +9,7 @@ lidWall    = 0.8;
 lidTol     = 0.4;
 
 crad       = 6;
-w          = 2.4+.1;
+w          = 3.2+.1;
 wb         = 1.2;
 
 bottom();
@@ -18,22 +18,24 @@ translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 4]) rotate([90, 0, 180]) socke
 % translate([sizeBot[0]/2-(44/2), -30, 4]) rotate([0, 0, 0]) socket();
 % translate([63.5, -5-2, 30]) rotate([-90, 0, 0]) DIN912screw(8);
 
-//% translate([23, 10, 5+0]) nexus5();
+% translate([30, 10, 5+0]) nexus5();
 //% translate([20, 10, 5+0+50]) nexus5();
 
 * translate([127, 40, -10]) uvfilter();
+% translate([5, 36, 4]) usbplug();
 
-translate([200, 0, 0]) {
-    bottom();
-    translate([0, sizeTop[1], 44.1]) rotate([180, 0, 0]) top();
-    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 4]) rotate([90, 0, 180]) socket();
-    translate([55, 0, 44]) rotate([0, 180, 0]) color("green") import("hinge.stl");
-    translate([95+55, 0, 44]) rotate([0, 180, 0]) color("green") import("hinge.stl");
-}
+//translate([200, 0, 0]) {
+//    bottom();
+//    translate([0, sizeTop[1], 44.1]) rotate([180, 0, 0]) top();
+//    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 4]) rotate([90, 0, 180]) socket();
+//    translate([55, 0, 44]) rotate([0, 180, 0]) color("green") import("hinge.stl");
+//    translate([95+55, 0, 44]) rotate([0, 180, 0]) color("green") import("hinge.stl");
+//}
 
 //translate([30, 105, 4]) cube([126, 69, 14]); // jet
-translate([30, 105, 4]) cube([92, 59, 22]); // anker 10.000
+//translate([30, 105, 4]) cube([92, 59, 22]); // anker 10.000
 //translate([30, 105, 4]) cube([98, 8, 22]); // anker 10.000
+//% translate([25, 104, 4]) color("grey") block(142.3, 72.4, 17.5, crad=3); // anker 10.000
 
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -55,8 +57,8 @@ module socket() {
 }
 
 module top() {
-    bottomRounding = 3;
-    bottomReduction = 2;
+    bottomRounding = 2;
+    bottomReduction = 1;
     
     difference() {
         union() {
@@ -84,35 +86,62 @@ module top() {
                 block(sizeTop[0], sizeTop[1], height, crad=crad, red=0.8);
                 translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=0.8+0.8);
             }
+            
+            //inlay
+            intersection() {
+                inlay = [155, 72.4, 23];
+                inlayTol = 0.5;
+                
+                difference() {
+                    translate([sizeTop[0]-150, 0, 0]) {
+                        cube([150, sizeTop[1], 23]);
+                    } 
+                    
+                    trans = [10, (sizeTop[1]-(inlay[1]+inlayTol*2))/2, 0];
+                    translate(trans) block(inlay[0]+inlayTol*2, inlay[1]+inlayTol*2, inlay[2]+inlayTol*2, crad=3);
+                
+                    points = [[0, 0], [sizeTop[1], 0], [sizeTop[1], 20], [sizeTop[1]-20, 30], [20, 30], [0, 20]];
+                    translate([0, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
+                }
+                
+                // outer hull
+                hull() {
+                    block(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=bottomReduction);
+                    translate([0, 0, bottomRounding]) 
+                        block(sizeTop[0], sizeTop[1], sizeTop[2]-bottomRounding, crad=crad);
+                }
+            }
         }
         
         // hinge holes
-        translate([30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
-        translate([sizeBot[0]-30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+        translate([30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=20, d=3.3);
+        translate([sizeBot[0]-30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=20, d=3.3);
+        translate([30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
+        translate([sizeBot[0]-30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
     }
     
-    translate([+20+18.2, -5.5, 24]) rotate([0, -90, 0]) hinge_top();
-    translate([-20+sizeTop[0]-2, -5.5, 24]) rotate([0, -90, 0]) hinge_top();
+    translate([+20+18.2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
+    translate([-20+sizeTop[0]-2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
     
-    // translate([34, 3, 8]) 
-    translate([sizeTop[0]-3, 55, 8]) rotate([0, -90, 0]) import("dht22.stl");
-    
-    // battery holder
-    % translate([60, 3, 21]) cube([79, 78, 21]);
-    
-    // batteries
-    % translate([0, 0, 40]) {
-        translate([16, 5, 5]) cube([25.4, 65, 1.2]);
-        translate([54+20*0, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-        translate([54+20*1, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-        translate([54+20*2, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-        translate([54+20*3, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
-    }
+//    // translate([34, 3, 8]) 
+//    translate([sizeTop[0]-3, 55, 8]) rotate([0, -90, 0]) import("dht22.stl");
+//    
+//    // battery holder
+//    % translate([60, 3, 21]) cube([79, 78, 21]);
+//    
+//    // batteries
+//    % translate([0, 0, 40]) {
+//        translate([16, 5, 5]) cube([25.4, 65, 1.2]);
+//        translate([54+20*0, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+//        translate([54+20*1, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+//        translate([54+20*2, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+//        translate([54+20*3, 70, 14]) rotate([90, 0, 0]) cylinder($fn=32, h=65, d=18);
+//    }
 }
 
 module bottom() {
-    bottomHeight = 3;
-    bottomReduction = 2;
+    bottomHeight = 2;
+    bottomReduction = 1;
     topHeight = 3;
     topReduction = 1;
     topSleeveHeight = 1;
@@ -156,11 +185,11 @@ module bottom() {
             // inlay
             translate([0, 0, 0]) intersection() {
                 difference() {
-                    translate([23, w, 0]) cube([sizeBot[0]-20, sizeBot[1]-2*w, 14]); //20-1]);
-                    translate([23, 10, 6]) color("red") nexus5cavity(10);
+                    translate([30, w, 0]) cube([sizeBot[0]-20, sizeBot[1]-2*w, 20]); //20-1]);
+                    translate([30, 10, 6]) color("red") nexus5cavity(20);
                     * hull() {
-                        translate([23, 9, 15-.1]) color("red") nexus5cavity(0.1);
-                        translate([23-1, w, 20-1]) cube([sizeBot[0]-19, sizeBot[1]-2*w, 1]);
+                        translate([30, 9, 15-.1]) color("red") nexus5cavity(0.1);
+                        translate([30-1, w, 20-1]) cube([sizeBot[0]-19, sizeBot[1]-2*w, 1]);
                     }
                 }
                 hull() {
@@ -247,22 +276,28 @@ module uvfilter() {
     }
 }
 
+module usbplug() {
+    color("grey") {
+        cube([17, 12, 8]);
+    }
+}
+
 module M5nut() {
-    color("grey") difference() {
+    % color("grey") difference() {
         cylinder($fn=6, h=4, d=9.5);
         translate([0, 0, -1]) cylinder($fn=32, d=5, h=6);
     }
 }
 
 module M3nut() {
-    color("grey") difference() {
+    % color("grey") difference() {
         cylinder($fn=6, h=2, d=6.5);
         translate([0, 0, -1]) cylinder($fn=32, d=3, h=6);
     }
 }
 
 module DIN912screw(length) {
-    difference() {
+    % difference() {
         union() {
             cylinder($fn=32, h=5, d=8.5);
             translate([0, 0, 5]) cylinder($fn=32, h=length, d=5);
@@ -297,8 +332,11 @@ module nexus5cavity(height) {
     
     translate([-1, -2, 0]) cube([125, 55.5+14, height]);
     
-    translate([102, -3.9, 0])cube([16, 2, height]);
+    translate([102, -4.9, 0])cube([16, 5, height]);
     translate([82, 67, 0])cube([26, 2, height]);
+    
+    // spring
+    translate([40, -6, 0]) cube([30, 5, height]);
 
 }
 
