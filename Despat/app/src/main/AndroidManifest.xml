@@ -39,6 +39,12 @@
             </intent-filter>
         </receiver>
 
+        <!--
+        <service
+            android:name=".services.ShutterService"
+            android:process="de.volzo.despat.shutter"
+            android:enabled="true"
+            android:exported="true"/> -->
         <service
             android:name=".services.ShutterService"
             android:enabled="true"

@@ -61,10 +61,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         Config.init();
 
         // kill all services remaining from prior app starts
-        Intent killIntent = new Intent(activity, Orchestrator.class);
-        killIntent.putExtra("service", Broadcast.ALL_SERVICES);
-        killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
-        sendBroadcast(killIntent);
+//        Intent killIntent = new Intent(activity, Orchestrator.class);
+//        killIntent.putExtra("service", Broadcast.ALL_SERVICES);
+//        killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
+//        sendBroadcast(killIntent);
 
         powerbrain = new PowerbrainConnector(this);
         powerbrain.connect();
@@ -140,18 +140,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        // receiver old
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
-                Log.d("image taken", "path: " + path);
-
-            }
-        }, new IntentFilter(Broadcast.PICTURE_TAKEN));
-
-        // receiver new // TODO debug
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
@@ -173,7 +161,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "photo taken");
+
+            String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
+            Log.d("image taken", "path: " + path);
 
             despat.setImagesTaken(despat.getImagesTaken() + 1);
             Util.updateNotification(activity, despat.getImagesTaken());

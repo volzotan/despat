@@ -19,7 +19,6 @@ import android.media.ImageReader;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
@@ -295,7 +294,7 @@ public class CameraController2 implements CameraAdapter {
 
                     Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
                     intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath());
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    context.sendBroadcast(intent);
 
                     try {
                         if (mode == OPEN_PREVIEW) {

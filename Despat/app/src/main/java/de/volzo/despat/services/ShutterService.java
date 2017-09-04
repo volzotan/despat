@@ -1,13 +1,17 @@
 package de.volzo.despat.services;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.camera2.CameraAccessException;
 import android.os.IBinder;
 import android.util.Log;
 
 import de.volzo.despat.CameraController2;
 import de.volzo.despat.Despat;
+import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.CameraAdapter;
 
 /**
@@ -36,11 +40,28 @@ public class ShutterService extends Service {
 
         // TODO: acquire Wake Lock?
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
+        registerReceiver(broadcastReceiver, filter);
+
+        // start and release shutter
+        releaseShutter();
+
+        return START_NOT_STICKY;
+    }
+
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            releaseShutter();
+        }
+    };
+
+    public void releaseShutter() {
         Despat despat = ((Despat) getApplicationContext());
         CameraAdapter camera = despat.getCamera();
 
         try {
-
             if (camera == null || camera.getState() == CameraAdapter.STATE_DEAD) {
                 camera = new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
                 despat.setCamera(camera);
@@ -50,13 +71,18 @@ public class ShutterService extends Service {
 
         } catch (CameraAccessException cae) {
             Log.e(TAG, "taking photo failed", cae);
-            return START_NOT_STICKY;
+            // throw cae;
         } catch (Exception e) {
             Log.e(TAG, "taking photo failed", e);
-            return START_NOT_STICKY;
+            // throw e;
         }
+    }
 
-        return START_NOT_STICKY;
+    @Override
+    public void onDestroy() {
+        unregisterReceiver(broadcastReceiver);
+
+        Log.d(TAG, "shutterService destroyed");
     }
 
 //    public static boolean isRunning(Context context) {

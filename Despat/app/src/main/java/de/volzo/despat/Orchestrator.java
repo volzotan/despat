@@ -112,9 +112,16 @@ public class Orchestrator extends BroadcastReceiver {
     }
 
     private void shutterServiceStart() {
+
         // start the Shutter Service
-        Intent shutterServiceIntent = new Intent(context, ShutterService.class);
-        context.startService(shutterServiceIntent);
+        if (!Util.isServiceRunning(context, ShutterService.class)) {
+            Intent shutterServiceIntent = new Intent(context, ShutterService.class);
+            context.startService(shutterServiceIntent);
+        }
+
+        Intent triggerIntent = new Intent();
+        triggerIntent.setAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
+        context.sendBroadcast(triggerIntent);
 
         // trigger the next invocation
         long now = System.currentTimeMillis(); // alarm is set right away
@@ -138,12 +145,18 @@ public class Orchestrator extends BroadcastReceiver {
     }
 
     private void shutterServiceStop() {
+        // alarm Manager
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
                 ShutterService.REQUEST_CODE, new Intent(context, Orchestrator.class), PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.cancel(alarmIntent);
         alarmIntent.cancel();
 
+        // shutter Service
+        Intent shutterServiceIntent = new Intent(context, ShutterService.class);
+        context.stopService(shutterServiceIntent);
+
+        // Notification
         Util.stopNotification(context);
     }
 

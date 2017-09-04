@@ -8,7 +8,7 @@ import android.widget.FrameLayout;
 import de.volzo.despat.R;
 
 /**
- * Created by volzotan on 17.12.16.
+ * TODO: add attribution. Taken from random stackoverflow post.
  */
 
 public class FixedAspectRatioFrameLayout extends FrameLayout
