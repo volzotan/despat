@@ -35,7 +35,7 @@ import de.volzo.despat.support.Config;
 
 public class CameraController implements CameraAdapter, Camera.PreviewCallback, Camera.PictureCallback, Camera.ShutterCallback {
 
-    private static final String TAG = CameraController.class.getName();
+    private static final String TAG = CameraController.class.getSimpleName();
 
     private Context context;
     private SurfaceTexture surfaceTexture;

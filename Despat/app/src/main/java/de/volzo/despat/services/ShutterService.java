@@ -20,7 +20,7 @@ import de.volzo.despat.support.CameraAdapter;
 
 public class ShutterService extends Service {
 
-    public static final String TAG = ShutterService.class.getName();
+    public static final String TAG = ShutterService.class.getSimpleName();
     public static final int REQUEST_CODE = 0x1200;
 
 

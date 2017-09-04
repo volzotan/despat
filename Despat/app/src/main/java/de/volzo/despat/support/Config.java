@@ -14,9 +14,9 @@ import java.io.File;
 
 public class Config {
 
-    public static final String TAG = Config.class.getName();
+    public static final String TAG = Config.class.getSimpleName();
 
-    public static long SHUTTER_INTERVAL                     = 20000; // in ms. should not be shorter than 5.5-6s (5s is android minimum and a few extra ms are needed for scheduling irregularities
+    public static long SHUTTER_INTERVAL                     = 10000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for scheduling irregularities
 
     public static final File IMAGE_FOLDER                   = new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;

@@ -38,7 +38,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
-    public static final String TAG = MainActivity.class.getName();
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     Despat despat;
     MainActivity activity = this;
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         sendBroadcast(heartbeatIntent);
 
 
-        startCapturing.callOnClick();
+//        startCapturing.callOnClick();
 
 //        ServerConnector serverConnector = new ServerConnector(this);
 //        ServerConnector.ServerMessage msg = new ServerConnector.ServerMessage();

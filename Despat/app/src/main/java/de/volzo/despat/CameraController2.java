@@ -44,7 +44,7 @@ import de.volzo.despat.support.Config;
 
 public class CameraController2 implements CameraAdapter {
 
-    public static final String TAG = CameraController2.class.getName();
+    public static final String TAG = CameraController2.class.getSimpleName();
 
     private int mode;
 

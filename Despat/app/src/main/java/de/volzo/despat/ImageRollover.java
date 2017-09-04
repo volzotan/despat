@@ -17,7 +17,7 @@ import de.volzo.despat.support.Util;
 
 public class ImageRollover {
 
-    public static String TAG = ImageRollover.class.getName();
+    public static String TAG = ImageRollover.class.getSimpleName();
 
     private File dir;
     private String fileextension;

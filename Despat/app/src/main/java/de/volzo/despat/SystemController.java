@@ -25,7 +25,7 @@ import static android.content.Context.BATTERY_SERVICE;
 
 public class SystemController {
 
-    public static final String TAG = SystemController.class.getName();
+    public static final String TAG = SystemController.class.getSimpleName();
 
     Context context;
 

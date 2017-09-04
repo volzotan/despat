@@ -15,7 +15,7 @@ import de.volzo.despat.support.Util;
 
 public class HeartbeatService extends JobService {
 
-    private static final String TAG = HeartbeatService.class.getName();
+    private static final String TAG = HeartbeatService.class.getSimpleName();
 
     public static final int JOB_ID  = 0x1300;
 

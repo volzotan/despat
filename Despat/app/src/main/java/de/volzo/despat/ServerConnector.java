@@ -37,7 +37,7 @@ import de.volzo.despat.support.Config;
 
 public class ServerConnector {
 
-    public static final String TAG = ServerConnector.class.getName();
+    public static final String TAG = ServerConnector.class.getSimpleName();
 
     private Context context;
     private String serverAddress;
