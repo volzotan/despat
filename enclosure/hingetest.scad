@@ -32,17 +32,17 @@ move = .1;
 //color("green") bottom();
 //color("green") translate([0, sizeTop[1], 29+move]) rotate([180, 0, 0]) top();
 //
-translate([33, 35.5, 14]) rotate([90, 90, -90]) hinge_bottom();
-translate([33, 35.5, 14+move]) rotate([90, 90, -90]) hinge_top();
+//translate([33, 35.5, 14]) rotate([90, 90, -90]) hinge_bottom();
+//translate([33, 35.5, 14+move]) rotate([90, 90, -90]) hinge_top();
 
 //translate([100, 0, 0]) hinge_bottom();
 //translate([100, 0, 0]) hinge_top();
 
-//translate([sizeBot[0]/2, -0.1, 32]) rotate([90, 0, 0]) color("grey") grabber();
-//translate([sizeBot[0]/2, -0.1, 5]) rotate([90, 0, 0]) latcher();
-//translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch();
-//translate([sizeBot[0]/2, -3.5, -2]) rotate([90, 0, 0]) latch2();
-//translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch3();
+translate([sizeBot[0]/2, -0.1, 32]) rotate([90, 0, 0]) color("grey") grabber();
+translate([sizeBot[0]/2, -0.1, 5]) rotate([90, 0, 0]) latcher();
+translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch();
+translate([sizeBot[0]/2, -3.5, -2]) rotate([90, 0, 0]) latch2();
+translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch3();
 
 //translate([116, 2, -3.5]) grabber();
 //translate([130, 0, 0.5]) rotate([0, 90, 0]) latcher();
