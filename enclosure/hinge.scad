@@ -1,20 +1,20 @@
-// hinge_bottom();
+//hinge_bottom();
 
-module hinge_bottom(screwed=true) {
+module hinge_bottom(screwed=false) {
     diam        = 10;
     hingeTol    = 0.3;
     
     difference() { 
         union() {
-            translate([0, 0, -2]) cylinder($fn=32, d=diam, h=3+2);
-            translate([0, 0, 3*2 + hingeTol*2]) cylinder($fn=32, d=diam, h=3);
-            translate([0, 0, 3*4 + hingeTol*4]) cylinder($fn=32, d=diam, h=3+2);
+            translate([0, 0, -2]) cylinder($fn=64, d=diam, h=3+2);
+            translate([0, 0, 3*2 + hingeTol*2]) cylinder($fn=64, d=diam, h=3);
+            translate([0, 0, 3*4 + hingeTol*4]) cylinder($fn=64, d=diam, h=3+2);
               
             color("red") translate([0, 0, -2]) linear_extrude(height=2*2 + 5*3 + hingeTol*4) polygon(points);
             points = [[0, diam/2], [3.54, -3.54], [13, 5.5], [0.5, 5.5]];
   
             if (screwed) {
-                points = [[0, 0], [10, 0], [15.6, 10-.15]];
+                points = [[0, 0], [10, 0], [15.3, 10-.3]];
                 color("red") translate([18, 5.5, -2]) rotate([0, 0, 180]) linear_extrude(height=20.2) polygon(points);
             }
         }
