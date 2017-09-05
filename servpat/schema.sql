@@ -20,3 +20,13 @@ create table status (
   batteryInternal real,
   batteryExternal real
 );
+
+create table event (
+  id integer primary key autoincrement,
+
+  deviceid text not null,
+  timestamp numeric not null,
+
+  eventtype integer not null,
+  payload text
+);

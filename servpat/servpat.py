@@ -1,4 +1,4 @@
-from flask import Flask, json, g, render_template, redirect, request, Response, flash, abort
+from flask import Flask, json, g, render_template, redirect, url_for, request, Response, flash, abort
 from werkzeug.utils import secure_filename
 from functools import wraps
 import sqlite3
@@ -12,45 +12,26 @@ app.config.from_pyfile("corodiak.config")
 
 # --------------------------------------------------------------------------- #
 
-# as taken from: http://flask.pocoo.org/snippets/8/
-def check_auth(username, password):
-    return username == 'admin' and password == 'secret'
-
-
-def authenticate():
-    return Response("access denied", 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
-
-
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not app.config["AUTH_DISABLED"]:
-            if not auth or not check_auth(auth.username, auth.password):
-                return authenticate()
-        return f(*args, **kwargs)
-    return decorated
-
-# --------------------------------------------------------------------------- #
-
 @app.route("/")
 def root():
-    entries = query_db("select title, text from entries order by id desc") 
-    return render_template('show_entries.html', entries=entries)
+    return redirect(url_for("overview"))
 
 
 @app.route("/overview")
-@requires_auth
 def overview():
     db = get_db()
     cur = db.execute('select * from status order by id desc')
-    status_messages = cur.fetchall()
-    return render_template('overview.html', status_messages=status_messages)
+    data_status = cur.fetchall()
+    cur = db.execute('select * from event order by id desc')
+    data_event = cur.fetchall()
+    return render_template('overview.html', data_status=data_status, data_event=data_event)
 
 
 @app.route("/command")
-@requires_auth
 def command():
+
+    # TODO
+
     data = {
         "command": "SLEEP",
         "params": {
@@ -66,7 +47,6 @@ def command():
 
 
 @app.route("/status", methods=['POST'])
-@requires_auth
 def status():
     content = request.json
 
@@ -82,11 +62,26 @@ def status():
     db.execute('insert into status (deviceId, timestamp, numberImages, freeSpaceInternal, freeSpaceExternal, batteryInternal, batteryExternal) values (?, ?, ?, ?, ?, ?, ?)', values)
     db.commit()
 
-    return "status"
+    return ("", 204)
+
+
+@app.route("/event", methods=['POST'])
+def event():
+    content = request.json
+
+    # insert into db
+    values = [  content["deviceId"], 
+                datetime.datetime.now(), #content["timestamp"], # TODO
+                content["eventtype"],
+                content["payload"]]
+    db = get_db()
+    db.execute('insert into event (deviceId, timestamp, eventtype, payload) values (?, ?, ?, ?)', values)
+    db.commit()
+
+    return ("", 204)
 
 
 @app.route("/image", methods=['POST'])
-@requires_auth
 def image():
 
     # check free space on server
@@ -99,7 +94,7 @@ def image():
     device_id = "123"
 
     if 'file' not in request.files:
-        app.logger.warn("image file missing in requeest")
+        app.logger.warn("image file missing in request")
         #flash('No file part')
         abort(400, "image file missing in request")
     imagefile = request.files["file"]
@@ -119,7 +114,6 @@ def image():
 
 
 @app.route("/sync")
-@requires_auth
 def sync():
     return "sync"
 
