@@ -1,11 +1,5 @@
-drop table if exists entries;
 drop table if exists status;
-
-create table entries (
-  id integer primary key autoincrement,
-  title text not null,
-  'text' text not null
-);
+drop table if exists events;
 
 create table status (
   id integer primary key autoincrement,
@@ -21,7 +15,7 @@ create table status (
   batteryExternal real
 );
 
-create table event (
+create table events (
   id integer primary key autoincrement,
 
   deviceid text not null,

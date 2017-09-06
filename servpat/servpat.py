@@ -8,7 +8,8 @@ import datetime
 app = Flask(__name__)
 
 app.config.from_pyfile("default.config")
-app.config.from_pyfile("corodiak.config")
+app.config.from_pyfile("corodiak.config", silent=True)
+app.config.from_pyfile("grinzold.config", silent=True)
 
 # --------------------------------------------------------------------------- #
 
@@ -17,12 +18,17 @@ def root():
     return redirect(url_for("overview"))
 
 
-@app.route("/overview")
-def overview():
+@app.route("/overview/<option>")
+def overview(option):
     db = get_db()
+
+    if option is not None:
+        pass
+        # TODO last hour ...
+
     cur = db.execute('select * from status order by id desc')
     data_status = cur.fetchall()
-    cur = db.execute('select * from event order by id desc')
+    cur = db.execute('select * from events order by id desc')
     data_event = cur.fetchall()
     return render_template('overview.html', data_status=data_status, data_event=data_event)
 
@@ -75,7 +81,7 @@ def event():
                 content["eventtype"],
                 content["payload"]]
     db = get_db()
-    db.execute('insert into event (deviceId, timestamp, eventtype, payload) values (?, ?, ?, ?)', values)
+    db.execute('insert into events (deviceId, timestamp, eventtype, payload) values (?, ?, ?, ?)', values)
     db.commit()
 
     return ("", 204)
