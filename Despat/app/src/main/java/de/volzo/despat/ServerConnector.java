@@ -297,10 +297,14 @@ public class ServerConnector {
 
     public static class EventType {
 
-        public static final int INIT     = 0x0;
-        public static final int BOOT     = 0x1;
-        public static final int SHUTDOWN = 0x2;
+        public static final int INIT        = 0x0;
+        public static final int BOOT        = 0x1;
+        public static final int SHUTDOWN    = 0x2;
 
+        public static final int START       = 0x10;
+        public static final int STOP        = 0x11;
+
+        public static final int ERROR       = 0x30;
     }
 
 }

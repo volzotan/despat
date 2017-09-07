@@ -1,6 +1,7 @@
 include <hinge.scad>
 
 sizeBot    = [50, 30, 14];
+sizeBot    = [20, 20, 4];
 sizeTop    = [50, 30, 15];
 
 lidDepth   = 1;
@@ -8,7 +9,7 @@ lidWall    = 0.8;
 lidTol     = 0.4;
 
 crad       = 6;
-w          = 2.0 + 0.1;
+w          = 2.4 + 0.1;
 wb         = 1.2;
 
 bottomRounding = 1;
@@ -20,9 +21,17 @@ move = .1;
 
 // print
 
-//bottom();
-//translate([33, 35.5, 14]) rotate([90, 90, -90]) hinge_bottom();
-//
+cylinder($fn=32, d=10, h=14);
+
+//difference() {
+    union() {
+//        bottom();
+//        seal();
+    }
+//    translate([-1, -1, -1]) cube([20, 50, 50]);    
+//}
+//translate([33, 35.5, 14+1]) rotate([90, 90, -90]) hinge_bottom(screwed=true);
+
 //translate([0, 41, 0]) { //translate([-70, 30, 28.1]) rotate([180, 0, 0]) {
 //    top();
 //    translate([33, -5.5, 14]) rotate([0, -90, 0]) hinge_top();
@@ -38,11 +47,11 @@ move = .1;
 //translate([100, 0, 0]) hinge_bottom();
 //translate([100, 0, 0]) hinge_top();
 
-translate([sizeBot[0]/2, -0.1, 32]) rotate([90, 0, 0]) color("grey") grabber();
-translate([sizeBot[0]/2, -0.1, 5]) rotate([90, 0, 0]) latcher();
-translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch();
-translate([sizeBot[0]/2, -3.5, -2]) rotate([90, 0, 0]) latch2();
-translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch3();
+//translate([sizeBot[0]/2, -0.1, 32]) rotate([90, 0, 0]) color("grey") grabber();
+//translate([sizeBot[0]/2, -0.1, 5]) rotate([90, 0, 0]) latcher();
+//translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch();
+//translate([sizeBot[0]/2, -3.5, -2]) rotate([90, 0, 0]) latch2();
+//translate([sizeBot[0]/2, -3.5, 38]) rotate([90, 0, 0]) latch3();
 
 //translate([116, 2, -3.5]) grabber();
 //translate([130, 0, 0.5]) rotate([0, 90, 0]) latcher();
@@ -190,24 +199,58 @@ module top() {
             }
 }
 
+module seal() {
+    color("red") translate([0, 0, sizeBot[2]]) difference() {
+        hull() {
+            block(sizeBot[0], sizeBot[1], 1, crad=crad);
+        }
+        translate([0, 0, -.01]) block(sizeBot[0], sizeBot[1], 3, crad=crad, red=3.2);
+    
+        translate([0, 0, .3]) difference() {
+            block(sizeBot[0], sizeBot[1], 2, crad=crad, red=1.2);
+            translate([0, 0, -.1]) block(sizeBot[0], sizeBot[1], 3, crad=crad, red=1.2 + 0.8);
+        }
+    }
+}
+
 module bottom() {
+    a = 1;
+    c = 2;
+    d = 1;
+    b = sizeBot[2] - a - c - d - wb + .2;
+    
+    x = 1;
+    y = 3.2;
+
     difference() {
-                hull() {
-                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=bottomReduction);
-                    translate([0, 0, bottomRounding]) 
-                        block(sizeBot[0], sizeBot[1], sizeBot[2]-bottomRounding, crad=crad);
-                }
-                
-                translate([0, 0, wb]) hull() {
-                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=bottomReduction+w);
-                    translate([0, 0, bottomRounding]) 
-                        block(sizeBot[0], sizeBot[1], sizeBot[2]-bottomRounding, crad=crad, red=w);
-                }
-                
-                translate([0, 0, sizeBot[2]-lidDepth]) block(sizeBot[0], sizeBot[1], sizeBot[2]-bottomRounding, crad=crad, red=lidWall);
-            //}  
-            translate([sizeBot[0]/2, 5, 8]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
-            }
+        hull() {
+            block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=x);
+            translate([0, 0, a]) 
+                block(sizeBot[0], sizeBot[1], sizeBot[2]-a, crad=crad);
+        }
+        
+        translate([0, 0, wb]) hull() {
+            block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=x+w);
+            translate([0, 0, a]) 
+                block(sizeBot[0], sizeBot[1], b, crad=crad, red=w);
+        }
+        
+        translate([0, 0, wb+a+b-0.1]) hull() {
+            block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=w);
+            translate([0, 0, c]) 
+                block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=y);
+        }
+        
+        translate([0, 0, wb+a+b+c-0.1]) hull() {
+            block(sizeBot[0], sizeBot[1], d, crad=crad, red=y);
+        }
+        
+        *translate([0, 0, sizeBot[2]-lidDepth]) block(sizeBot[0], sizeBot[1], sizeBot[2]-bottomRounding, crad=crad, red=lidWall);
+    //}  
+    translate([sizeBot[0]/2, 5, 8]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+    translate([38, sizeBot[1]+5, 6.5]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+    translate([12, sizeBot[1]+5, 6.5]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+    }
 }
 
 module block(width, depth, height, crad=3, red=0) {

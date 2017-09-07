@@ -13,7 +13,7 @@ w          = 3.2+.1;
 wb         = 1.2;
 
 bottom();
-translate([70, 4.5, 30]) color("green") wedge();
+translate([70, 4.5, 7+10]) color("green") wedge();
 
 //difference() {
 //    bottom();
@@ -26,7 +26,7 @@ translate([70, 4.5, 30]) color("green") wedge();
 //}
 
 //translate([0, 0, sizeBot[2]+5]) seal(); //color("green") seal();
-//translate([0, 100-3+100, 0]) top();
+translate([0, 100-3+10, 0]) top();
 //translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 4]) rotate([90, 0, 180]) socket();
 //% translate([sizeBot[0]/2-(44/2), -30, 4]) rotate([0, 0, 0]) socket();
 //% translate([63.5, -5-2, 30]) rotate([-90, 0, 0]) DIN912screw(8);
@@ -54,7 +54,7 @@ translate([70, 4.5, 30]) color("green") wedge();
 
 module wedge() {
     tol = 0.2;
-    height = 14;
+    height = 12.5;
     
     translate([tol, tol, tol]) cube([40-tol*2, 2-tol*2, height]);
     translate([2+tol, 2-tol, tol]) cube([36-tol*2, 2-tol*2, height]);
@@ -214,12 +214,12 @@ module top() {
         translate([sizeBot[0]-30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
         
         // seal holder screw holes
-        translate([0, 0, sizeTop[2]-6]) { 
-            translate([7, 7]) cylinder($fn=32, d=6.5, h=30);
-            translate([7, sizeBot[1]-7]) cylinder($fn=32, d=6.5, h=30);
-            translate([sizeBot[0]-7, 7]) cylinder($fn=32, d=6.5, h=30);
-            translate([sizeBot[0]-7, sizeBot[1]-7]) cylinder($fn=32, d=6.5, h=30);
-        }
+//        translate([0, 0, sizeTop[2]-6]) { 
+//            translate([7, 7]) cylinder($fn=32, d=6.5, h=30);
+//            translate([7, sizeBot[1]-7]) cylinder($fn=32, d=6.5, h=30);
+//            translate([sizeBot[0]-7, 7]) cylinder($fn=32, d=6.5, h=30);
+//            translate([sizeBot[0]-7, sizeBot[1]-7]) cylinder($fn=32, d=6.5, h=30);
+//        }
     }
     
     translate([+20+18.2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
@@ -331,8 +331,8 @@ module bottom() {
         
         // camera lens
         translate([lensHole[0], lensHole[1], -1]) {
-            down = 39.4+0.8;
-            up   = 36.9+0.8;
+            down = 39.4+0.7;
+            up   = 36.9+0.5;
             cylinder($fn=64, h=1+3.60+0.3, d=down);
             translate([0, 0, 1+3.60+0.3-0.1]) cylinder($fn=64, h=1, d1=down, d=up);
             translate([0, 0, 6-.3]) cylinder($fn=64, h=2, d=up);
