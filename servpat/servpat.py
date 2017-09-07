@@ -8,14 +8,14 @@ import datetime
 app = Flask(__name__)
 
 app.config.from_pyfile("default.config")
-app.config.from_pyfile("corodiak.config", silent=True)
 app.config.from_pyfile("grinzold.config", silent=True)
+app.config.from_pyfile("corodiak.config", silent=True)
 
 # --------------------------------------------------------------------------- #
 
 @app.route("/")
 def root():
-    return redirect(url_for("overview"))
+    return redirect(url_for("overview", option="all"))
 
 
 @app.route("/overview/<option>")
@@ -26,11 +26,12 @@ def overview(option):
         pass
         # TODO last hour ...
 
-    cur = db.execute('select * from status order by id desc')
+    cur = db.execute("select * from status order by id desc")
     data_status = cur.fetchall()
-    cur = db.execute('select * from events order by id desc')
+    cur = db.execute("select * from events order by id desc")
     data_event = cur.fetchall()
-    return render_template('overview.html', data_status=data_status, data_event=data_event)
+
+    return render_template("overview.html", data_status=data_status, data_event=data_event)
 
 
 @app.route("/command")
@@ -47,47 +48,53 @@ def command():
     response = app.response_class(
         response=json.dumps(data),
         status=200,
-        mimetype='application/json'
+        mimetype="application/json"
     )
     return response
 
 
-@app.route("/status", methods=['POST'])
+@app.route("/status", methods=["POST"])
 def status():
-    content = request.json
+    content = request.get_json()
+
+    print(content)
 
     # insert into db
     values = [  content["deviceId"], 
-                datetime.datetime.now(), #content["timestamp"], # TODO
+                content["deviceName"],
+                content["timestamp"], 
                 content["numberImages"], 
                 content["freeSpaceInternal"], 
                 content["freeSpaceExternal"], 
                 content["batteryInternal"],
-                content["batteryExternal"]]
+                content["batteryExternal"],
+                content["stateCharging"]]
+
     db = get_db()
-    db.execute('insert into status (deviceId, timestamp, numberImages, freeSpaceInternal, freeSpaceExternal, batteryInternal, batteryExternal) values (?, ?, ?, ?, ?, ?, ?)', values)
+    db.execute("insert into status (deviceId, deviceName, timestamp, numberImages, freeSpaceInternal, freeSpaceExternal, batteryInternal, batteryExternal, stateCharging) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", values)
     db.commit()
 
     return ("", 204)
 
 
-@app.route("/event", methods=['POST'])
+@app.route("/event", methods=["POST"])
 def event():
     content = request.json
 
     # insert into db
     values = [  content["deviceId"], 
-                datetime.datetime.now(), #content["timestamp"], # TODO
+                content["timestamp"],
                 content["eventtype"],
                 content["payload"]]
+
     db = get_db()
-    db.execute('insert into events (deviceId, timestamp, eventtype, payload) values (?, ?, ?, ?)', values)
+    db.execute("insert into events (deviceId, timestamp, eventtype, payload) values (?, ?, ?, ?)", values)
     db.commit()
 
     return ("", 204)
 
 
-@app.route("/image", methods=['POST'])
+@app.route("/image", methods=["POST"])
 def image():
 
     # check free space on server
@@ -124,6 +131,21 @@ def sync():
     return "sync"
 
 # --------------------------------------------------------------------------- #
+
+@app.template_filter("eventtype")
+def eventtype(e):
+
+    types = {
+        0x0: "APPSTART",
+        0x1: "BOOT",
+        0x2: "SHUTDOWN"
+    }
+
+    try:
+        return types[e]
+    except KeyError as ke:
+        return e
+
 
 def get_unique_filename(path, filename):
     full_filename = os.path.join(path, filename)
@@ -170,7 +192,7 @@ def close_db(error):
 
 def init_db():
     db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
+    with app.open_resource("schema.sql", mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
@@ -209,6 +231,6 @@ image_dir = app.config["UPLOAD_FOLDER"]
 if not os.path.exists(image_dir):
     os.makedirs(image_dir)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()
 

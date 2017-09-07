@@ -1,17 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<a href="{{ url_for('overview', option='last_hour') }}">last hour</a> | 
+<a href="{{ url_for('overview', option='today') }}">today</a>  | 
+<a href="{{ url_for('overview', option='all') }}">all time</a>
+
 <table class="table table-sm table-bordered table-striped ">
   <thead class="thead-inverse">
     <tr>
       <th>#</th>
       <th>deviceId</th>
+      <th>deviceName</th>
       <th>timestamp</th>
       <th>number images</th>
       <th>free space int</th>
       <th>free space ext</th>
       <th>battery int</th>
       <th>battery ext</th>
+      <th>stateCharging</th>
     </tr>
   </thead>
   <tbody>
@@ -19,16 +25,18 @@
     <tr>
       <td>{{ msg.id }}</td>
       <td>{{ msg.deviceId }}</td>
+      <td>{{ msg.deviceName }}</td>
       <td>{{ msg.timestamp }}</td>
       <td>{{ msg.numberImages }}</td>
       <td>{{ msg.freeSpaceInternal }}</td>
       <td>{{ msg.freeSpaceExternal }}</td>
       <td>{{ msg.batteryInternal }}</td>
       <td>{{ msg.batteryExternal }}</td>
+      <td>{{ msg.stateCharging }}</td>
     </tr>
     {% else %}
     <tr>
-      <td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td>
+      <td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -50,7 +58,7 @@
       <td>{{ msg.id }}</td>
       <td>{{ msg.deviceId }}</td>
       <td>{{ msg.timestamp }}</td>
-      <td>{{ msg.eventtype }}</td>
+      <td>{{ msg.eventtype | eventtype }}</td>
       <td>{{ msg.payload }}</td>
     </tr>
     {% else %}

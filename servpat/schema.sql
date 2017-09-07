@@ -5,6 +5,7 @@ create table status (
   id integer primary key autoincrement,
 
   deviceid text not null,
+  deviceName text,
   timestamp numeric not null,
 
   numberImages integer not null,
@@ -12,7 +13,9 @@ create table status (
   freeSpaceExternal real,
 
   batteryInternal real,
-  batteryExternal real
+  batteryExternal real,
+
+  stateCharging integer
 );
 
 create table events (
