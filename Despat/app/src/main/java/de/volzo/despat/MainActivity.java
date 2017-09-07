@@ -156,6 +156,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        ServerConnector.ServerMessage msg = new ServerConnector.ServerMessage();
 //        msg.numberImages = 500;
 //        serverConnector.sendStatus(msg);
+
+
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

@@ -9,6 +9,15 @@ public class Despat extends Application {
     private CameraAdapter camera;
     private int imagesTaken = 0;
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        ServerConnector serverConnector = new ServerConnector(this);
+        serverConnector.sendEvent(ServerConnector.EventType.INIT, null);
+
+    }
+
     public void setCamera(CameraAdapter cameraAdapter) {
         this.camera = cameraAdapter;
     }

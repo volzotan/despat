@@ -43,19 +43,24 @@ public class Orchestrator extends BroadcastReceiver {
 
         Log.d(TAG, "Action: " + action + " | Service: " + service + " | operation: " + operation);
 
-        if (action != null && action.length() > 0) switch (action) {
-            case "android.intent.action.BOOT_COMPLETED":
-                // TODO
-                break;
-            case "android.intent.action.SCREEN_OFF":
-                // TODO
-                break;
-            case "android.intent.action.SCREEN_ON":
-                // TODO
-                break;
-            default:
-                Log.e(TAG, "invoked by unknown action");
-                return;
+        if (action != null && action.length() > 0) {
+            switch (action) {
+                case "android.intent.action.BOOT_COMPLETED":
+
+                    ServerConnector serverConnector = new ServerConnector(context);
+                    serverConnector.sendEvent(ServerConnector.EventType.BOOT, null);
+
+                    break;
+                case "android.intent.action.SCREEN_OFF":
+                    // TODO
+                    break;
+                case "android.intent.action.SCREEN_ON":
+                    // TODO
+                    break;
+                default:
+                    Log.e(TAG, "invoked by unknown action");
+                    return;
+            }
         }
 
         switch (service) {

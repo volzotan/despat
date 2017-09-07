@@ -30,8 +30,6 @@
         </activity>
 
         <receiver android:name=".Orchestrator">
-
-            <!-- android:process=":remote"> -->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.SCREEN_OFF"/>
@@ -44,7 +42,8 @@
             android:name=".services.ShutterService"
             android:process="de.volzo.despat.shutter"
             android:enabled="true"
-            android:exported="true"/> -->
+            android:exported="true"/>
+        -->
         <service
             android:name=".services.ShutterService"
             android:enabled="true"
@@ -58,7 +57,6 @@
             android:exported="false"
             android:label="Heartbeat Service"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
-
     </application>
 
 </manifest>

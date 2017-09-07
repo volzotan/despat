@@ -2,11 +2,13 @@ package de.volzo.despat;
 
 import android.content.Context;
 import android.util.Base64;
+import android.util.EventLog;
 import android.util.JsonWriter;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.ExecutorDelivery;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
@@ -25,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -67,7 +70,34 @@ public class ServerConnector {
 
     */
 
-    public void sendStatus(ServerMessage msg) {
+    public void sendEvent(int type, String payload) {
+        try {
+
+            if (payload == null) payload = new String();
+
+            EventMessage msg = new EventMessage();
+
+            Writer writer = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(writer);
+            jsonWriter.beginObject();
+
+            jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
+            jsonWriter.name("deviceName").value(Config.getDeviceName(context));
+            //jsonWriter.name("originalDeviceId").value("");
+            jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
+
+            jsonWriter.name("eventtype").value(msg.eventtype);
+            jsonWriter.name("payload").value(msg.payload);
+            jsonWriter.endObject();
+            jsonWriter.close();
+
+            send("/event", new JSONObject(writer.toString()));
+        } catch (Exception e) {
+            Log.e(TAG, "sending status failed", e);
+        }
+    }
+
+    public void sendStatus(StatusMessage msg) {
         try {
             Writer writer = new StringWriter();
             JsonWriter jsonWriter = new JsonWriter(writer);
@@ -75,6 +105,7 @@ public class ServerConnector {
 
             jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
             jsonWriter.name("deviceName").value(Config.getDeviceName(context));
+            //jsonWriter.name("originalDeviceId").value("");
             jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
 
             jsonWriter.name("numberImages").value(msg.numberImages);
@@ -88,18 +119,18 @@ public class ServerConnector {
 
             // Log.d(TAG, writer.toString());
 
-            send(new JSONObject(writer.toString()));
+            send("/status", new JSONObject(writer.toString()));
         } catch (Exception e) {
             Log.e(TAG, "sending status failed", e);
         }
     }
 
 
-    public void send(JSONObject statusMessage) {
+    public void send(String endpoint, JSONObject statusMessage) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(context);
 
-        String url = this.serverAddress + "/status";
+        String url = this.serverAddress + endpoint;
 
         class CustomRequest extends Request<JSONObject> {
 
@@ -149,6 +180,11 @@ public class ServerConnector {
             }
 
             @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+
+            @Override
             public byte[] getBody() throws AuthFailureError {
                 // usually you'd have a field with some values you'd want to escape, you need to do it yourself if overriding getBody. here's how you do it
 //                try {
@@ -168,11 +204,17 @@ public class ServerConnector {
 
             @Override
             protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+
+                Log.d(TAG, String.format("HTTP response: %d", response.statusCode));
+
                 try {
-                    String jsonString = new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers));
-                    return Response.success(new JSONObject(jsonString),
-                            HttpHeaderParser.parseCacheHeaders(response));
+                    String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+
+                    if (jsonString.length() != 0) {
+                        return Response.success(new JSONObject(jsonString), HttpHeaderParser.parseCacheHeaders(response));
+                    } else {
+                        return Response.success(new JSONObject(), HttpHeaderParser.parseCacheHeaders(response));
+                    }
                 } catch (UnsupportedEncodingException e) {
                     return Response.error(new ParseError(e));
                 } catch (JSONException je) {
@@ -186,7 +228,7 @@ public class ServerConnector {
             @Override
             public void onErrorResponse(VolleyError error) {
 
-                Log.e(TAG, String.format("sending data to server failed. HTTP response: %d", error.networkResponse.statusCode));
+                Log.e(TAG, String.format("sending data to server failed. HTTP response: ")); //%d", error.networkResponse.statusCode));
 
                 NetworkResponse response = error.networkResponse;
                 if (error instanceof ServerError && response != null) {
@@ -212,16 +254,26 @@ public class ServerConnector {
         Response.Listener successListener = new Response.Listener() {
             @Override
             public void onResponse(Object response) {
-                Log.d(TAG, "Success Response: "+ response.toString());
+                Log.d(TAG, String.format("Success Response: %s", response.toString()));
             }
         };
 
         Map<String, String> params = new HashMap<String, String>();
         CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, url, statusMessage, params, successListener, errorListener);
+
+//        try {
+//            Log.wtf(TAG, new String(jsObjRequest.getBody(), "utf-8"));
+//        } catch (Exception e) {}
+
         queue.add(jsObjRequest);
     }
 
-    public static class ServerMessage {
+    public static class StatusMessage {
+
+        public String deviceId;
+        public String deviceName;
+        public String originalDeviceId;
+        public Date timestamp;
 
         public int numberImages;
         public float freeSpaceInternal;
@@ -230,6 +282,25 @@ public class ServerConnector {
         public int batteryInternal;
         public int batteryExternal;
         public boolean stateCharging;
+    }
+
+    public static class EventMessage {
+
+        public String deviceId;
+        public String deviceName;
+        public String originalDeviceId;
+        public Date timestamp;
+
+        public int eventtype;
+        public String payload;
+    }
+
+    public static class EventType {
+
+        public static final int INIT     = 0x0;
+        public static final int BOOT     = 0x1;
+        public static final int SHUTDOWN = 0x2;
+
     }
 
 }

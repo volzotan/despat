@@ -25,17 +25,17 @@ public class HeartbeatService extends JobService {
         Log.d(TAG, "Heartbeat Service running");
 
         SystemController systemController = new SystemController(this);
-        ServerConnector.ServerMessage serverMessage = new ServerConnector.ServerMessage();
+        ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
 
-        serverMessage.numberImages = -1; // TODO
-        serverMessage.freeSpaceInternal = Util.getFreeSpaceOnDevice(Config.IMAGE_FOLDER);
-        serverMessage.freeSpaceExternal = -1; // TODO
-        serverMessage.batteryInternal = systemController.getBatteryLevel();
-        serverMessage.batteryExternal = -1; // TODO
-        serverMessage.stateCharging = systemController.getBatteryChargingState();
+        statusMessage.numberImages = -1; // TODO
+        statusMessage.freeSpaceInternal = Util.getFreeSpaceOnDevice(Config.IMAGE_FOLDER);
+        statusMessage.freeSpaceExternal = -1; // TODO
+        statusMessage.batteryInternal = systemController.getBatteryLevel();
+        statusMessage.batteryExternal = -1; // TODO
+        statusMessage.stateCharging = systemController.getBatteryChargingState();
 
         ServerConnector serverConnector = new ServerConnector(this);
-        serverConnector.sendStatus(serverMessage);
+        serverConnector.sendStatus(statusMessage);
 
         jobFinished(jobParameters, false); // <-- needs to be called from volley callback
         return false;
