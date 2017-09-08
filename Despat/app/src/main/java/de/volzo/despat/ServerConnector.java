@@ -228,7 +228,7 @@ public class ServerConnector {
             @Override
             public void onErrorResponse(VolleyError error) {
 
-                Log.e(TAG, String.format("sending data to server failed. HTTP response: ")); //%d", error.networkResponse.statusCode));
+                Log.e(TAG, String.format("sending data to server failed. %s", error)); //%d", error.networkResponse.statusCode));
 
                 NetworkResponse response = error.networkResponse;
                 if (error instanceof ServerError && response != null) {
