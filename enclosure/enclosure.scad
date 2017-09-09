@@ -10,16 +10,16 @@ lidTol     = 0.4;
 
 crad       = 6;
 w          = 3.2+.1;
-wb         = 1.5;
+wb         = 1.2;
 
 //bottom();
 //translate([70, 4.5, 7+10]) color("green") wedge();
-% translate([0, sizeBot[1]-2.2, 18.5]) rotate([0, 90, 0]) color([1, 1, 1], 1) cylinder($fn=32, d=1.75, h=100);
+% translate([0, sizeBot[1]-2.3, 18.1]) rotate([0, 90, 0]) color([1, 1, 1], 1) cylinder($fn=32, d=1.75, h=100);
 
-difference() {
+//difference(){
     bottom();
-    translate([-1, -1, -1]) cube([15, 100, 50]);
-}
+//    translate([-1, -1, -1]) cube([15, 100, 50]);
+//}
 
 //intersection() {
 //    bottom();
@@ -334,7 +334,7 @@ module bottom() {
         }
         
         // seal
-        translate([0, 0, sizeBot[2]-2.0]) color("red") difference() {
+        translate([0, 0, sizeBot[2]-2.6]) color("red") difference() {
             height = 3;
             hull() {
                 block(sizeBot[0], sizeBot[1], height, crad=crad, red=1.3);
@@ -350,20 +350,16 @@ module bottom() {
         
         // stress relief / anti warping holes
         p_reliefholes = [[0, 0], [3, 3], [12, 3], [15, 5], [15, 0]];
-        translate([23, 15-1, -2.5]) rotate([90, 0, -90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([43, 15-1, -1]) rotate([90, 0, -90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([63, 15-1, -1]) rotate([90, 0, -90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([110, 15-1, -1]) rotate([90, 0, -90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([sizeBot[0]-14, 50, -1]) rotate([90, 0, 0]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([sizeBot[0]-14, 70, -1]) rotate([90, 0, 0]) linear_extrude(height=3) polygon(p_reliefholes);
-        translate([23-3, sizeBot[1]-14, -2.5]) rotate([90, 0, 90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([43-3, sizeBot[1]-14, -1]) rotate([90, 0, 90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([63-3, sizeBot[1]-14, -1]) rotate([90, 0, 90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([110-3, sizeBot[1]-14, -1]) rotate([90, 0, 90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([130-3, sizeBot[1]-14, -1]) rotate([90, 0, 90]) linear_extrude(height=3) polygon(p_reliefholes);
         translate([150-3, sizeBot[1]-14, -1]) rotate([90, 0, 90]) linear_extrude(height=3) polygon(p_reliefholes);
-        translate([14, 30, -2.5]) rotate([90, 0, 180]) linear_extrude(height=3) polygon(p_reliefholes);
-        translate([14, sizeBot[1]-30, -2.5]) rotate([90, 0, 180]) linear_extrude(height=3) polygon(p_reliefholes);
     }
     
     // hinges
