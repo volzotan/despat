@@ -7,3 +7,4 @@
 /enclosure/**/*.lck
 /enclosure/**/*.pro
 /datasets/*
+corodiak.db
