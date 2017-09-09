@@ -5,6 +5,9 @@ import sqlite3
 import sys, os
 import datetime
 
+DATEFORMAT_PARSE = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+DATEFORMAT_PRINT = "yyyy-MM-dd HH:mm:ss"
+
 app = Flask(__name__)
 
 app.config.from_pyfile("default.config")
@@ -17,6 +20,9 @@ app.config.from_pyfile("corodiak.config", silent=True)
 def root():
     return redirect(url_for("overview", option="all"))
 
+@app.route("/overview/")
+def overview_redirect():
+    return redirect(url_for("overview", option="all"))
 
 @app.route("/overview/<option>")
 def overview(option):
@@ -62,7 +68,7 @@ def status():
     # insert into db
     values = [  content["deviceId"], 
                 content["deviceName"],
-                content["timestamp"], 
+                datetime.datetime.strptime(content["timestamp"], DATEFORMAT_PARSE), 
                 content["numberImages"], 
                 content["freeSpaceInternal"], 
                 content["freeSpaceExternal"], 
@@ -83,7 +89,7 @@ def event():
 
     # insert into db
     values = [  content["deviceId"], 
-                content["timestamp"],
+                datetime.datetime.strptime(content["timestamp"], DATEFORMAT_PARSE), 
                 content["eventtype"],
                 content["payload"]]
 
@@ -133,7 +139,7 @@ def sync():
 # --------------------------------------------------------------------------- #
 
 @app.template_filter("eventtype")
-def eventtype(e):
+def eventtype_filter(e):
 
     types = {
         0x0: "APPSTART",
@@ -145,6 +151,12 @@ def eventtype(e):
         return types[e]
     except KeyError as ke:
         return e
+
+
+@app.template_filter("dateformat")
+def dateformat_filter(inp):
+    inp.strftime(DATEFORMAT_PRINT)
+    return inp
 
 
 def get_unique_filename(path, filename):
@@ -202,6 +214,7 @@ def init_db():
 #     """Initializes the database."""
 #     init_db()
 #     print('Initialized the database.')
+
 
 def install_secret_key(app, filename="secret_key"):
     """Configure the SECRET_KEY from a file

@@ -28,15 +28,15 @@
       <td>{{ msg.deviceName }}</td>
       <td>{{ msg.timestamp }}</td>
       <td>{{ msg.numberImages }}</td>
-      <td>{{ msg.freeSpaceInternal }}</td>
-      <td>{{ msg.freeSpaceExternal }}</td>
+      <td>{{ msg.freeSpaceInternal | round }}</td>
+      <td>{{ msg.freeSpaceExternal | round }}</td>
       <td>{{ msg.batteryInternal }}</td>
       <td>{{ msg.batteryExternal }}</td>
       <td>{{ msg.stateCharging }}</td>
     </tr>
     {% else %}
     <tr>
-      <td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td>
+      <td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -57,7 +57,7 @@
     <tr>
       <td>{{ msg.id }}</td>
       <td>{{ msg.deviceId }}</td>
-      <td>{{ msg.timestamp }}</td>
+      <td>{{ msg.timestamp | dateformat }}</td>
       <td>{{ msg.eventtype | eventtype }}</td>
       <td>{{ msg.payload }}</td>
     </tr>

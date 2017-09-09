@@ -6,7 +6,7 @@ create table status (
 
   deviceid text not null,
   deviceName text,
-  timestamp numeric not null,
+  timestamp integer not null,
 
   numberImages integer not null,
   freeSpaceInternal real,
@@ -22,7 +22,7 @@ create table events (
   id integer primary key autoincrement,
 
   deviceid text not null,
-  timestamp numeric not null,
+  timestamp integer not null,
 
   eventtype integer not null,
   payload text
