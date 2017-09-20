@@ -15,9 +15,9 @@ wb         = 1.2;
 difference(){
     union() {
         bottom();
-        translate([0, sizeTop[1], 44+.5]) rotate([180, 0, 0]) top();
+        translate([0, sizeTop[1], 44-.7]) rotate([180, 0, 0]) top();
     }
-    translate([-1, -1, -1]) cube([15, 100, 50]);
+    translate([-1, -1, -1]) cube([7, 100, 50]);
 }
 
 
@@ -37,7 +37,7 @@ difference(){
 
 //translate([0, 0, sizeBot[2]+5]) seal(); //color("green") seal();
 //translate([0, 100-3+10, 0]) top();
-//translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 4]) rotate([90, 0, 180]) socket();
+translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
 //% translate([sizeBot[0]/2-(44/2), -30, 4]) rotate([0, 0, 0]) socket();
 //% translate([63.5, -5-2, 30]) rotate([-90, 0, 0]) DIN912screw(8);
 
@@ -245,21 +245,23 @@ module top() {
 
 module bottom() {   
     
-    a = 1;
+    a = 2;
     c = 2;
     d = 4;
     b = sizeBot[2] - a - c - d - wb + .2;
     
-    x = 1;
+//    z = 
+    x = 2;
     y = 4.8;
     
     difference() {
         union() {
             difference() {
-                hull() {
-                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=x);
-                    translate([0, 0, a]) 
-                        block(sizeBot[0], sizeBot[1], sizeBot[2]-a, crad=crad);
+                
+                hull() { // outer rim reduction
+                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=1);
+                    translate([0, 0, 1]) 
+                        block(sizeBot[0], sizeBot[1], sizeBot[2]-1, crad=crad);
                 }
                 
                 translate([0, 0, wb]) hull() {
@@ -322,7 +324,7 @@ module bottom() {
         }
         
         // socket screw holes
-        translate([sizeBot[0]/2, sizeBot[1]+5, 12]) rotate([90, 0, 0]) {
+        translate([sizeBot[0]/2, sizeBot[1]+5, 11.5]) rotate([90, 0, 0]) {
             translate([-14, 0, 0]) cylinder($fn=32, h=10, d=5.3);
             translate([+14, 0, 0]) cylinder($fn=32, h=10, d=5.3);
         }
@@ -345,7 +347,7 @@ module bottom() {
     
         
         // socket holes
-        translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 12]) rotate([90, 0, 0]) { 
+        translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
             translate([-14, 0, 0]) cylinder($fn=6, h=10, d=9.6);
             translate([+14, 0, 0]) cylinder($fn=6, h=10, d=9.6);
         }

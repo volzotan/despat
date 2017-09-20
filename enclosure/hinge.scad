@@ -1,4 +1,4 @@
-//hinge_bottom();
+//hinge_bottom(screwed=true);
 
 module hinge_bottom(screwed=false) {
     diam        = 10;
@@ -14,14 +14,12 @@ module hinge_bottom(screwed=false) {
             points = [[0, diam/2], [3.54, -3.54], [13.5, 5.5], [0.5, 5.5]];
 
             if (screwed) {
-                intersection() {
-                    hull() {
-                        translate([8.5, 5.5, -5]) rotate([90, 0, 0]) cylinder($fn=32, d=10, h=10);
-                        //translate([3, -4.5, -5.5]) cube([10, 10, 10]);
-                        translate([8.5, 5.5, +21]) rotate([90, 0, 0]) cylinder($fn=32, d=10, h=10);
-                    }
-
-                    color("red") translate([0, 0, -12]) linear_extrude(height=50) polygon(points);
+                hull() {
+                    crad = 3;
+                    translate([8.5+4, 5.5, -5-crad]) rotate([90, 0, 0]) cylinder($fn=32, d=2, h=9);
+                    translate([8.5+4, 5.5, +21+crad]) rotate([90, 0, 0]) cylinder($fn=32, d=2, h=9);
+                    translate([8.5-4, 5.5, -5-crad]) rotate([90, 0, 0]) cylinder($fn=32, d=2, h=9);
+                    translate([8.5-4, 5.5, +21+crad]) rotate([90, 0, 0]) cylinder($fn=32, d=2, h=9);
                 }
             }
         }
@@ -40,10 +38,10 @@ module hinge_bottom(screwed=false) {
             // translate([9, 10, 8.075]) 
             translate([8.5, 10, -5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=20);
             // translate([9, 4.3, 8.075]) 
-            translate([8.5, 3.5, -5]) rotate([90, 0, 0]) cylinder($fn=32, d=6, h=20);
+            translate([8.5, 2, -5]) rotate([90, 0, 0]) cylinder($fn=32, d=6, h=20);
 
             translate([8.5, 10, 21]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=20);
-            translate([8.5, 3.5, 21]) rotate([90, 0, 0]) cylinder($fn=32, d=6, h=20);
+            translate([8.5, 2, 21]) rotate([90, 0, 0]) cylinder($fn=32, d=6, h=20);
         }
     }
     
