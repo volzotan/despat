@@ -3,10 +3,11 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 import sqlite3
 import sys, os
-import datetime
+from datetime import datetime
 
-DATEFORMAT_PARSE = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-DATEFORMAT_PRINT = "yyyy-MM-dd HH:mm:ss"
+DATEFORMAT_INPUT = "%Y-%m-%d %H:%M:%S.%f"
+DATEFORMAT_STORE = "%Y-%m-%d %H:%M:%S.%f"
+DATEFORMAT_OUTPUT = "%Y.%m.%d | %H:%M:%S.%f"
 
 app = Flask(__name__)
 
@@ -32,7 +33,7 @@ def overview(option):
         pass
         # TODO last hour ...
 
-    cur = db.execute("select * from status order by id desc")
+    cur = db.execute("SELECT * FROM status ORDER BY datetime(timestamp) DESC")
     data_status = cur.fetchall()
     cur = db.execute("select * from events order by id desc")
     data_event = cur.fetchall()
@@ -65,10 +66,16 @@ def status():
 
     print(content)
 
+    if content is None:
+        return ("empty request", 400)
+
+    timestamp = datetime.strptime(content["timestamp"], DATEFORMAT_INPUT)
+    timestamp = timestamp.strftime(DATEFORMAT_STORE)
+
     # insert into db
     values = [  content["deviceId"], 
                 content["deviceName"],
-                datetime.datetime.strptime(content["timestamp"], DATEFORMAT_PARSE), 
+                timestamp, 
                 content["numberImages"], 
                 content["freeSpaceInternal"], 
                 content["freeSpaceExternal"], 
@@ -112,7 +119,7 @@ def image():
     # TODO: get device id from session
     device_id = "123"
 
-    if 'file' not in request.files:
+    if "file" not in request.files:
         app.logger.warn("image file missing in request")
         #flash('No file part')
         abort(400, "image file missing in request")
@@ -128,7 +135,7 @@ def image():
         app.logger.error("no new filenames available anymore")
         abort(500, "no filename available")
     imagefile.save(full_filename)
-    app.logger.debug("uploaded: {}".format(unique_filename))
+    app.logger.info("uploaded: {}".format(unique_filename))
     return ("", 204)
 
 
@@ -155,8 +162,7 @@ def eventtype_filter(e):
 
 @app.template_filter("dateformat")
 def dateformat_filter(inp):
-    inp.strftime(DATEFORMAT_PRINT)
-    return inp
+    return datetime.strptime(inp, DATEFORMAT_STORE).strftime(DATEFORMAT_OUTPUT)[:-3]
 
 
 def get_unique_filename(path, filename):

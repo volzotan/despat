@@ -9,15 +9,15 @@
   <thead class="thead-inverse">
     <tr>
       <th>#</th>
-      <th>deviceId</th>
-      <th>deviceName</th>
+      <th>device id</th>
+      <th>device name</th>
       <th>timestamp</th>
-      <th>number images</th>
-      <th>free space int</th>
-      <th>free space ext</th>
-      <th>battery int</th>
-      <th>battery ext</th>
-      <th>stateCharging</th>
+      <th>number</br>images</th>
+      <th>free space</br>int</th>
+      <th>free space</br>ext</th>
+      <th>battery</br>int</th>
+      <th>battery</br>ext</th>
+      <th>state</br>charging</th>
     </tr>
   </thead>
   <tbody>
@@ -26,7 +26,7 @@
       <td>{{ msg.id }}</td>
       <td>{{ msg.deviceId }}</td>
       <td>{{ msg.deviceName }}</td>
-      <td>{{ msg.timestamp }}</td>
+      <td>{{ msg.timestamp | dateformat }}</td>
       <td>{{ msg.numberImages }}</td>
       <td>{{ msg.freeSpaceInternal | round }}</td>
       <td>{{ msg.freeSpaceExternal | round }}</td>
@@ -60,6 +60,33 @@
       <td>{{ msg.timestamp | dateformat }}</td>
       <td>{{ msg.eventtype | eventtype }}</td>
       <td>{{ msg.payload }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td> - </td><td> - </td><td> - </td><td> - </td><td> - </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<table class="table table-sm table-bordered table-striped ">
+  <thead class="thead-inverse">
+    <tr>
+      <th>#</th>
+      <th>deviceId</th>
+      <th>timestamp</th>
+      <th>command</th>
+      <th>status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for msg in data_command %}
+    <tr>
+      <td>{{ msg.id }}</td>
+      <td>{{ msg.deviceId }}</td>
+      <td>{{ msg.timestamp | dateformat }}</td>
+      <td>{{ msg.command }}</td>
+      <td>{{ msg.status }}</td>
     </tr>
     {% else %}
     <tr>
