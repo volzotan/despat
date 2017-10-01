@@ -116,6 +116,11 @@ def event():
     timestamp = datetime.strptime(content["timestamp"], DATEFORMAT_INPUT)
     timestamp = timestamp.strftime(DATEFORMAT_STORE)
 
+    # if content["eventtype"] is not in EVENTTYPESDICTIONARY... # TODO
+
+    if content["payload"] is None:
+        content["payload"] = ""
+
     # insert into db
     values = [  content["deviceId"], 
                 timestamp, 

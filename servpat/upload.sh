@@ -1,1 +1,1 @@
-rsync -a --exclude 'UPLOAD' --exclude '__pycache__' --exclude '.DS_Store' --exclude '*.db' --exclude 'upload.sh' --exclude 'corodiak.config' . grinzold:/var/www/servpat/
+rsync -avz --usermap=volzotan:www-data --exclude 'UPLOAD' --exclude '__pycache__' --exclude '.DS_Store' --exclude '*.db' --exclude 'upload.sh' --exclude 'corodiak.config' . grinzold:/var/www/servpat/

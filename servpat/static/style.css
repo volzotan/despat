@@ -15,3 +15,23 @@ h3 a {
     padding: 1px 3px;
     font-size: 13px;
 }
+
+.col-md-05 {
+    -ms-flex: 0 0 4.166667%;
+    flex: 0 0 4.166667%;
+    max-width: 4.166667%;
+
+    position: relative;
+    width: 100%;
+    min-height: 1px;
+}
+
+.col-md-15 {
+    -ms-flex: 0 0 12.5%;
+    flex: 0 0 12.5%;
+    max-width: 12.5%;
+
+    position: relative;
+    width: 100%;
+    min-height: 1px;
+}
