@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h3><span class="page-title">{{ page_title }}</span></h3>
+
+<a href="{{ url_for('overview', option='last_hour') }}">last hour</a> | 
+<a href="{{ url_for('overview', option='today') }}">today</a>  | 
+<a href="{{ url_for('overview', option='all') }}">all time</a>
+
+<table class="table table-sm table-bordered table-striped ">
+  <thead class="thead-inverse">
+    <tr>
+      <th>#</th>
+      <th>device id</th>
+      <th>device name</th>
+      <th>timestamp</th>
+      <th>number</br>images</th>
+      <th>free space</br>int</th>
+      <th>free space</br>ext</th>
+      <th>battery</br>int</th>
+      <th>battery</br>ext</th>
+      <th>state</br>charging</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for msg in data_status %}
+    <tr>
+      <td>{{ msg.id }}</td>
+      <td><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
+      <td>{{ msg.deviceName }}</td>
+      <td>{{ msg.timestamp | dateformat }}</td>
+      <td>{{ msg.numberImages }}</td>
+      <td>{{ msg.freeSpaceInternal | round }}</td>
+      <td>{{ msg.freeSpaceExternal | round }}</td>
+      <td>{{ msg.batteryInternal }}</td>
+      <td>{{ msg.batteryExternal }}</td>
+      <td>{{ msg.stateCharging }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

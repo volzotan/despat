@@ -5,9 +5,11 @@ import sqlite3
 import sys, os
 from datetime import datetime
 
-DATEFORMAT_INPUT = "%Y-%m-%d %H:%M:%S.%f"
-DATEFORMAT_STORE = "%Y-%m-%d %H:%M:%S.%f"
-DATEFORMAT_OUTPUT = "%Y.%m.%d | %H:%M:%S.%f"
+DATEFORMAT_INPUT    = "%Y-%m-%d %H:%M:%S.%f"
+DATEFORMAT_STORE    = "%Y-%m-%d %H:%M:%S.%f"
+DATEFORMAT_OUTPUT   = "%Y.%m.%d | %H:%M:%S.%f"
+
+DATEFORMAT_IMG      = "%Y-%m-%d--%H-%M-%S-%f"
 
 app = Flask(__name__)
 
@@ -35,10 +37,27 @@ def overview(option):
 
     cur = db.execute("SELECT * FROM status ORDER BY datetime(timestamp) DESC")
     data_status = cur.fetchall()
-    cur = db.execute("select * from events order by id desc")
-    data_event = cur.fetchall()
+    cur = db.execute("SELECT * FROM events ORDER BY datetime(timestamp) DESC")
+    data_events = cur.fetchall()
+    cur = db.execute("SELECT * FROM uploads ORDER BY datetime(timestamp) DESC")
+    data_uploads = cur.fetchall()
 
-    return render_template("overview.html", data_status=data_status, data_event=data_event)
+    return render_template("overview.html", data_status=data_status, data_events=data_events, data_commands=(), data_uploads=data_uploads)
+
+
+@app.route("/device/<device_id>")
+def device(device_id):
+    db = get_db()
+
+    if device_id is None:
+        return render_template("device.html")
+
+    print(type(device_id))
+
+    cur = db.execute("SELECT * FROM status WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC", (device_id,))
+    device_status = cur.fetchall()
+
+    return render_template("device.html", data_status=device_status, page_title=device_id)
 
 
 @app.route("/command")
@@ -94,9 +113,12 @@ def status():
 def event():
     content = request.json
 
+    timestamp = datetime.strptime(content["timestamp"], DATEFORMAT_INPUT)
+    timestamp = timestamp.strftime(DATEFORMAT_STORE)
+
     # insert into db
     values = [  content["deviceId"], 
-                datetime.datetime.strptime(content["timestamp"], DATEFORMAT_PARSE), 
+                timestamp, 
                 content["eventtype"],
                 content["payload"]]
 
@@ -117,7 +139,9 @@ def image():
         abort(500, "no free space left") # 507 Insufficient storage
 
     # TODO: get device id from session
-    device_id = "123"
+    content = {}
+    content["deviceId"] = "123"
+    content["timestamp"] = datetime.now()
 
     if "file" not in request.files:
         app.logger.warn("image file missing in request")
@@ -128,7 +152,8 @@ def image():
         app.logger.warn("empty image filename in request")
         abort(400, "empty image filename in request")
         return redirect(request.url)
-    filename = device_id + "_" + secure_filename(imagefile.filename)
+    filename = "{}_{}.jpg".format(content["deviceId"], content["timestamp"].strftime(DATEFORMAT_IMG)[:-3])
+    # filename = device_id + "_" + timestamp.strftime(DATEFORMAT_IMG) + "_" + secure_filename(imagefile.filename)
     unique_filename = get_unique_filename(app.config["UPLOAD_FOLDER"], filename)
     full_filename = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
     if full_filename is None:
@@ -136,6 +161,16 @@ def image():
         abort(500, "no filename available")
     imagefile.save(full_filename)
     app.logger.info("uploaded: {}".format(unique_filename))
+
+    # insert into db
+    values = [  content["deviceId"], 
+                content["timestamp"].strftime(DATEFORMAT_STORE),
+                full_filename
+            ]
+    db = get_db()
+    db.execute("insert into uploads (deviceId, timestamp, filename) values (?, ?, ?)", values)
+    db.commit()
+
     return ("", 204)
 
 

@@ -24,7 +24,7 @@
     {% for msg in data_status %}
     <tr>
       <td>{{ msg.id }}</td>
-      <td>{{ msg.deviceId }}</td>
+      <td><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td>{{ msg.deviceName }}</td>
       <td>{{ msg.timestamp | dateformat }}</td>
       <td>{{ msg.numberImages }}</td>
@@ -46,17 +46,17 @@
   <thead class="thead-inverse">
     <tr>
       <th>#</th>
-      <th>deviceId</th>
+      <th>device id</th>
       <th>timestamp</th>
       <th>eventtype</th>
       <th>payload</th>
     </tr>
   </thead>
   <tbody>
-    {% for msg in data_event %}
+    {% for msg in data_events %}
     <tr>
       <td>{{ msg.id }}</td>
-      <td>{{ msg.deviceId }}</td>
+      <td><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td>{{ msg.timestamp | dateformat }}</td>
       <td>{{ msg.eventtype | eventtype }}</td>
       <td>{{ msg.payload }}</td>
@@ -73,17 +73,17 @@
   <thead class="thead-inverse">
     <tr>
       <th>#</th>
-      <th>deviceId</th>
+      <th>device id</th>
       <th>timestamp</th>
       <th>command</th>
       <th>status</th>
     </tr>
   </thead>
   <tbody>
-    {% for msg in data_command %}
+    {% for msg in data_commands %}
     <tr>
       <td>{{ msg.id }}</td>
-      <td>{{ msg.deviceId }}</td>
+      <td><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td>{{ msg.timestamp | dateformat }}</td>
       <td>{{ msg.command }}</td>
       <td>{{ msg.status }}</td>
@@ -91,6 +91,31 @@
     {% else %}
     <tr>
       <td> - </td><td> - </td><td> - </td><td> - </td><td> - </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<table class="table table-sm table-bordered table-striped ">
+  <thead class="thead-inverse">
+    <tr>
+      <th>#</th>
+      <th>device id</th>
+      <th>timestamp</th>
+      <th>filename</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for msg in data_uploads %}
+    <tr>
+      <td>{{ msg.id }}</td>
+      <td><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
+      <td>{{ msg.timestamp | dateformat }}</td>
+      <td><a href="/{{ msg.filename }}">{{ msg.filename }}</a></td>
+    </tr>
+    {% else %}
+    <tr>
+      <td> - </td><td> - </td><td> - </td><td> - </td><
     </tr>
     {% endfor %}
   </tbody>

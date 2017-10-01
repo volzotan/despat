@@ -3,6 +3,14 @@
     padding-top: 3px;
 }
 
+.page-title {
+    color: #999;
+}
+
+h3 a {
+    color: #333;
+}
+
 .table-sm td, .table-sm th {
     padding: 1px 3px;
     font-size: 13px;

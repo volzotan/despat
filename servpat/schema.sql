@@ -1,5 +1,6 @@
 drop table if exists status;
 drop table if exists events;
+drop table if exists uploads;
 
 create table status (
   id integer primary key autoincrement,
@@ -26,4 +27,13 @@ create table events (
 
   eventtype integer not null,
   payload text
+);
+
+create table uploads (
+  id integer primary key autoincrement,
+
+  deviceid text not null,
+  timestamp integer not null,
+
+  filename text not null
 );
