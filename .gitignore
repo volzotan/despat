@@ -8,3 +8,7 @@
 /enclosure/**/*.pro
 /datasets/*
 corodiak.db
+result*.jpg
+DespatPlayground/testimages
+servpat/UPLOAD
+secret_key
