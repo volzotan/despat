@@ -272,10 +272,10 @@ public class ServerConnector {
 
     public static class StatusMessage {
 
-        public String deviceId;
-        public String deviceName;
-        public String originalDeviceId;
-        public Date timestamp;
+//        public String deviceId;
+//        public String deviceName;
+//        public String originalDeviceId;
+//        public Date timestamp;
 
         public int numberImages;
         public float freeSpaceInternal;

@@ -122,6 +122,9 @@ public class Orchestrator extends BroadcastReceiver {
         if (!Util.isServiceRunning(context, ShutterService.class)) {
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
             context.startService(shutterServiceIntent);
+
+            ServerConnector serverConnector = new ServerConnector(context);
+            serverConnector.sendEvent(ServerConnector.EventType.START, null);
         }
 
         Intent triggerIntent = new Intent();
@@ -163,6 +166,10 @@ public class Orchestrator extends BroadcastReceiver {
 
         // Notification
         Util.stopNotification(context);
+
+        // send event
+        ServerConnector serverConnector = new ServerConnector(context);
+        serverConnector.sendEvent(ServerConnector.EventType.STOP, null);
     }
 
     private void recognitionServiceStart() {
@@ -195,7 +202,7 @@ public class Orchestrator extends BroadcastReceiver {
         if (!alreadyScheduled) {
             ComponentName serviceComponent = new ComponentName(context, HeartbeatService.class);
             JobInfo.Builder builder = new JobInfo.Builder(HeartbeatService.JOB_ID, serviceComponent);
-            builder.setPeriodic(15 * 60 * 1000L); // Minimum interval is 15m
+            builder.setPeriodic(Config.HEARTBEAT_INTERVAL);
             jobScheduler.schedule(builder.build());
         } else {
             Log.d(TAG, "Heartbeat Service already scheduled");

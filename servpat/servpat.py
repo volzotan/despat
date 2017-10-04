@@ -189,9 +189,15 @@ def sync():
 def eventtype_filter(e):
 
     types = {
-        0x0: "APPSTART",
+        0x0: "INIT",
         0x1: "BOOT",
-        0x2: "SHUTDOWN"
+        0x2: "SHUTDOWN".
+
+
+        0x10: "START",
+        0x11: "STOP",
+
+        0x30: "ERROR"
     }
 
     try:
