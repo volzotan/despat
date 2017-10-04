@@ -9,6 +9,7 @@ public class Broadcast {
     public static final String ALL_SERVICES             = "de.volzo.despat.ALL_SERVICES";
     public static final String SHUTTER_SERVICE          = "de.volzo.despat.SHUTTER_SERVICE";
     public static final String RECOGNITION_SERVICE      = "de.volzo.despat.RECOGNITION_SERVICE";
+    public static final String HEARTBEAT_SERVICE        = "de.volzo.despat.HEARTBEAT_SERVICE";
     public static final String UPLOAD_SERVICE           = "de.volzo.despat.UPLOAD_SERVICE";
 
     public static final String SHUTTER_SERVICE_TRIGGER  = "de.volzo.despat.SHUTTER_SERVICE_TRIGGER";

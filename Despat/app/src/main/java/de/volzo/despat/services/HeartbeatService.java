@@ -4,6 +4,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.util.Log;
 
+import de.volzo.despat.Despat;
 import de.volzo.despat.ServerConnector;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Config;
@@ -27,7 +28,7 @@ public class HeartbeatService extends JobService {
         SystemController systemController = new SystemController(this);
         ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
 
-        statusMessage.numberImages = -1; // TODO
+        statusMessage.numberImages = ((Despat) getApplicationContext()).getImagesTaken();
         statusMessage.freeSpaceInternal = Util.getFreeSpaceOnDevice(Config.IMAGE_FOLDER);
         statusMessage.freeSpaceExternal = -1; // TODO
         statusMessage.batteryInternal = systemController.getBatteryLevel();

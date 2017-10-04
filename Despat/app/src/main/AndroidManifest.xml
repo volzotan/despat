@@ -57,6 +57,16 @@
             android:exported="false"
             android:label="Heartbeat Service"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <service
+            android:name=".services.UploadService"
+            android:exported="false"
+            android:label="Upload Service"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <service
+            android:name=".services.CommandService"
+            android:exported="false"
+            android:label="Command Service"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
     </application>
 
 </manifest>

@@ -22,6 +22,7 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -70,6 +71,34 @@ public class ServerConnector {
 
     */
 
+    public void sendStatus(StatusMessage msg) {
+        try {
+            Writer writer = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(writer);
+            jsonWriter.beginObject();
+
+            jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
+            jsonWriter.name("deviceName").value(Config.getDeviceName(context));
+            //jsonWriter.name("originalDeviceId").value("");
+            jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
+
+            jsonWriter.name("numberImages").value(msg.numberImages);
+            jsonWriter.name("freeSpaceInternal").value(msg.freeSpaceInternal);
+            jsonWriter.name("freeSpaceExternal").value(msg.freeSpaceExternal);
+            jsonWriter.name("batteryInternal").value(msg.batteryInternal);
+            jsonWriter.name("batteryExternal").value(msg.batteryExternal);
+            jsonWriter.name("stateCharging").value(msg.stateCharging);
+            jsonWriter.endObject();
+            jsonWriter.close();
+
+            // Log.d(TAG, writer.toString());
+
+            send("/status", new JSONObject(writer.toString()));
+        } catch (Exception e) {
+            Log.e(TAG, "sending status failed", e);
+        }
+    }
+
     public void sendEvent(int type, String payload) {
         try {
 
@@ -97,29 +126,21 @@ public class ServerConnector {
         }
     }
 
-    public void sendStatus(StatusMessage msg) {
+    public void sendUpload(UploadMessage msg) {
         try {
             Writer writer = new StringWriter();
             JsonWriter jsonWriter = new JsonWriter(writer);
             jsonWriter.beginObject();
 
             jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
-            jsonWriter.name("deviceName").value(Config.getDeviceName(context));
-            //jsonWriter.name("originalDeviceId").value("");
             jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
 
-            jsonWriter.name("numberImages").value(msg.numberImages);
-            jsonWriter.name("freeSpaceInternal").value(msg.freeSpaceInternal);
-            jsonWriter.name("freeSpaceExternal").value(msg.freeSpaceExternal);
-            jsonWriter.name("batteryInternal").value(msg.batteryInternal);
-            jsonWriter.name("batteryExternal").value(msg.batteryExternal);
-            jsonWriter.name("stateCharging").value(msg.stateCharging);
             jsonWriter.endObject();
             jsonWriter.close();
 
             // Log.d(TAG, writer.toString());
 
-            send("/status", new JSONObject(writer.toString()));
+            send("/image", new JSONObject(writer.toString()));
         } catch (Exception e) {
             Log.e(TAG, "sending status failed", e);
         }
@@ -295,6 +316,14 @@ public class ServerConnector {
 
         public int eventtype;
         public String payload;
+    }
+
+    public static class UploadMessage {
+
+        public String deviceId;
+        public Date timestamp;
+
+        public File image;
     }
 
     public static class EventType {

@@ -145,9 +145,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         registerReceiver(broadcastReceiver, filter);
 
         Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
-        heartbeatIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
+        heartbeatIntent.putExtra("service", Broadcast.HEARTBEAT_SERVICE);
         heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
         sendBroadcast(heartbeatIntent);
+
+        Intent uploadIntent = new Intent(activity, Orchestrator.class);
+        uploadIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
+        uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
+        sendBroadcast(uploadIntent);
 
 
 //        startCapturing.callOnClick();

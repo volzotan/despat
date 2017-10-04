@@ -15,6 +15,7 @@ import java.util.List;
 import de.volzo.despat.services.HeartbeatService;
 import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
+import de.volzo.despat.services.UploadService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
@@ -29,6 +30,7 @@ public class Orchestrator extends BroadcastReceiver {
 
     public static final int OPERATION_START     = 1;
     public static final int OPERATION_STOP      = 2;
+    public static final int OPERATION_ONCE      = 3;
 
     private Context context;
 
@@ -68,11 +70,13 @@ public class Orchestrator extends BroadcastReceiver {
                 if (operation == OPERATION_START) {
                     shutterServiceStart();
                     recognitionServiceStart();
+                    heartbeatServiceStart();
                     uploadServiceStart();
                     Log.i(TAG, "all services started");
                 } else if (operation == OPERATION_STOP) {
                     shutterServiceStop();
                     recognitionServiceStop();
+                    heartbeatServiceStop();
                     uploadServiceStop();
                     Log.i(TAG, "all running services stopped");
                 } else {
@@ -100,11 +104,23 @@ public class Orchestrator extends BroadcastReceiver {
                 }
                 break;
 
+            case Broadcast.HEARTBEAT_SERVICE:
+                if (operation == OPERATION_START) {
+                    heartbeatServiceStart();
+                } else if (operation == OPERATION_STOP) {
+                    heartbeatServiceStop();
+                } else {
+                    Log.w(TAG, "no operation command provided");
+                }
+                break;
+
             case Broadcast.UPLOAD_SERVICE:
                 if (operation == OPERATION_START) {
                     uploadServiceStart();
                 } else if (operation == OPERATION_STOP) {
                     uploadServiceStop();
+                } else if (operation == OPERATION_ONCE) {
+                    uploadServiceOnce();
                 } else {
                     Log.w(TAG, "no operation command provided");
                 }
@@ -115,6 +131,8 @@ public class Orchestrator extends BroadcastReceiver {
                 return;
         }
     }
+
+    // ----------------------------------------------------------------------------------------------------
 
     private void shutterServiceStart() {
 
@@ -172,6 +190,8 @@ public class Orchestrator extends BroadcastReceiver {
         serverConnector.sendEvent(ServerConnector.EventType.STOP, null);
     }
 
+    // ----------------------------------------------------------------------------------------------------
+
     private void recognitionServiceStart() {
         ComponentName serviceComponent = new ComponentName(context, RecognitionService.class);
         JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
@@ -186,7 +206,9 @@ public class Orchestrator extends BroadcastReceiver {
         // TODO
     }
 
-    private void uploadServiceStart() {
+    // ----------------------------------------------------------------------------------------------------
+
+    private void heartbeatServiceStart() {
         JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
 
         // already scheduled?
@@ -209,10 +231,52 @@ public class Orchestrator extends BroadcastReceiver {
         }
     }
 
-    private void uploadServiceStop() {
+    private void heartbeatServiceStop() {
         JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
         jobScheduler.cancel(HeartbeatService.JOB_ID);
 
         // jobScheduler.cancelAll();
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+
+    private void uploadServiceStart() {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+
+        // already scheduled?
+        boolean alreadyScheduled = false;
+        List<JobInfo> allJobs = jobScheduler.getAllPendingJobs();
+        for (JobInfo j : allJobs) {
+            if (UploadService.JOB_ID == j.getId()) {
+                alreadyScheduled = true;
+                break;
+            }
+        }
+
+        if (!alreadyScheduled) {
+            ComponentName serviceComponent = new ComponentName(context, UploadService.class);
+            JobInfo.Builder builder = new JobInfo.Builder(UploadService.JOB_ID, serviceComponent);
+            builder.setPeriodic(Config.UPLOAD_INTERVAL);
+            jobScheduler.schedule(builder.build());
+        } else {
+            Log.d(TAG, "Upload Service already scheduled");
+        }
+    }
+
+    private void uploadServiceStop() {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+        jobScheduler.cancel(UploadService.JOB_ID);
+
+        // jobScheduler.cancelAll();
+    }
+
+    private void uploadServiceOnce() {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+
+        ComponentName serviceComponent = new ComponentName(context, UploadService.class);
+        JobInfo.Builder builder = new JobInfo.Builder(UploadService.JOB_ID, serviceComponent);
+        builder.setMinimumLatency(0);
+        builder.setOverrideDeadline(1000);
+        jobScheduler.schedule(builder.build());
     }
 }

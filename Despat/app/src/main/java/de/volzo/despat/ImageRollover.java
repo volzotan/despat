@@ -4,6 +4,7 @@ import android.os.StatFs;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -128,5 +129,26 @@ public class ImageRollover {
         }
 
         Log.i(TAG, "deleted " + deleteCounter + " images");
+    }
+
+    public File getNewestImage() {
+
+        // get last modified file
+        // https://stackoverflow.com/questions/285955/java-get-the-newest-file-in-a-directory
+        File fl = dir;
+        File[] files = fl.listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                return file.isFile() && file.getName().endsWith(fileextension);
+            }
+        });
+        long lastMod = Long.MIN_VALUE;
+        File choice = null;
+        for (File file : files) {
+            if (file.lastModified() > lastMod) {
+                choice = file;
+                lastMod = file.lastModified();
+            }
+        }
+        return choice;
     }
 }
