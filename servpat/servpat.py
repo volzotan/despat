@@ -185,14 +185,33 @@ def sync():
 
 # --------------------------------------------------------------------------- #
 
+@app.template_filter("suppressnegative")
+def suppressnegative_filter(e):
+
+    if e < 0:
+        return ""
+
+    return e
+
+
+@app.template_filter("bool")
+def bool_filter(e):
+
+    if e == 0:
+        return "☐"
+    if e == 1:
+        return "☒"
+
+    return e
+
+
 @app.template_filter("eventtype")
 def eventtype_filter(e):
 
     types = {
         0x0: "INIT",
         0x1: "BOOT",
-        0x2: "SHUTDOWN".
-
+        0x2: "SHUTDOWN",
 
         0x10: "START",
         0x11: "STOP",

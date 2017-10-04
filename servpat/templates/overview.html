@@ -27,12 +27,12 @@
       <td class="col-md-15"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td class="col-md-2">{{ msg.timestamp | dateformat }}</td>
       <td class="col-md-2">{{ msg.deviceName }}</td>
-      <td class="col-md-1">{{ msg.numberImages }}</td>
-      <td class="col-md-1">{{ msg.freeSpaceInternal | round }}</td>
-      <td class="col-md-1">{{ msg.freeSpaceExternal | round }}</td>
-      <td class="col-md-1">{{ msg.batteryInternal }}</td>
-      <td class="col-md-1">{{ msg.batteryExternal }}</td>
-      <td class="col-md-1">{{ msg.stateCharging }}</td>
+      <td class="col-md-1">{{ msg.numberImages | suppressnegative }}</td>
+      <td class="col-md-1">{{ msg.freeSpaceInternal | round | suppressnegative }}</td>
+      <td class="col-md-1">{{ msg.freeSpaceExternal | round | suppressnegative }}</td>
+      <td class="col-md-1">{{ msg.batteryInternal | suppressnegative }}</td>
+      <td class="col-md-1">{{ msg.batteryExternal | suppressnegative }}</td>
+      <td class="col-md-1">{{ msg.stateCharging | bool }}</td>
     </tr>
     {% else %}
     <tr>
