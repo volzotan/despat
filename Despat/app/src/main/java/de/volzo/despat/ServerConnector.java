@@ -305,6 +305,8 @@ public class ServerConnector {
         public int batteryInternal;
         public int batteryExternal;
         public boolean stateCharging;
+
+        public float temperature;
     }
 
     public static class EventMessage {

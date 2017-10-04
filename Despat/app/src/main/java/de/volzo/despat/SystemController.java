@@ -3,6 +3,10 @@ package de.volzo.despat;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -17,6 +21,9 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.util.Calendar;
+import java.util.List;
+
 import static android.content.Context.BATTERY_SERVICE;
 
 /**
@@ -29,7 +36,8 @@ public class SystemController {
 
     Context context;
 
-    Location deviceLocation;
+    private Location deviceLocation;
+    private float deviceTemperature = -1.0f;
 
     public SystemController(Context context) {
         this.context = context;
@@ -40,7 +48,6 @@ public class SystemController {
 
         // is flight mode enabled?
         boolean alreadyEnabled = Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
-
     }
 
     public void wifi(boolean activated) {
@@ -116,5 +123,43 @@ public class SystemController {
     public boolean getBatteryChargingState() {
         BatteryManager batteryManager = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
         return batteryManager.isCharging();
+    }
+
+    // TEMP SENSOR
+
+    public boolean hasTemperatureSensor() {
+        SensorManager sensorManager = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
+        Sensor tempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) != null){
+            return true;
+        }
+
+        return false;
+    }
+
+    public void startTemperatureMeasurement() {
+        final SensorEventListener sensorEventListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                deviceTemperature = event.values[0];
+
+                SensorManager sensorManager = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
+                sensorManager.unregisterListener(this);
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+            }
+        };
+
+        SensorManager sensorManager = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
+        Sensor tempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+        sensorManager.registerListener(sensorEventListener, tempSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    public float getTemperature() {
+        return deviceTemperature;
     }
 }

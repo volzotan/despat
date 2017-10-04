@@ -151,4 +151,13 @@ public class ImageRollover {
         }
         return choice;
     }
+
+    public void deleteAll() {
+        for(File file: dir.listFiles())
+            if (!file.isDirectory())
+                if (file.getName().endsWith(fileextension))
+                    file.delete();
+
+        Log.i(TAG, "Deleted all image files in " + dir.getAbsolutePath());
+    }
 }

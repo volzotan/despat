@@ -60,6 +60,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         checkPermissions();
         Config.init();
 
+        if (despat.getSystemController().hasTemperatureSensor()) {
+            despat.getSystemController().startTemperatureMeasurement();
+        }
+
         // kill all services remaining from prior app starts
 //        Intent killIntent = new Intent(activity, Orchestrator.class);
 //        killIntent.putExtra("service", Broadcast.ALL_SERVICES);

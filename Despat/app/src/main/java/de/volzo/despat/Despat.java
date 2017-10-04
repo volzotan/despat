@@ -1,17 +1,21 @@
 package de.volzo.despat;
 
 import android.app.Application;
+import android.provider.Settings;
 
 import de.volzo.despat.support.CameraAdapter;
 
 public class Despat extends Application {
 
     private CameraAdapter camera;
+    private SystemController systemController;
     private int imagesTaken = 0;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        systemController = new SystemController(this);
 
         // send APPSTART event
         ServerConnector serverConnector = new ServerConnector(this);
@@ -32,6 +36,10 @@ public class Despat extends Application {
             camera.closeCamera();
             camera = null;
         }
+    }
+
+    public SystemController getSystemController() {
+        return systemController;
     }
 
     public void setImagesTaken(int imagesTaken) {

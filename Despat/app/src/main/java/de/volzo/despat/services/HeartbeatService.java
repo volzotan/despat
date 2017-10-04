@@ -25,7 +25,9 @@ public class HeartbeatService extends JobService {
 
         Log.d(TAG, "Heartbeat Service running");
 
-        SystemController systemController = new SystemController(this);
+        Despat despat = ((Despat) getApplicationContext());
+        SystemController systemController = despat.getSystemController();
+
         ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
 
         statusMessage.numberImages = ((Despat) getApplicationContext()).getImagesTaken();
@@ -34,6 +36,7 @@ public class HeartbeatService extends JobService {
         statusMessage.batteryInternal = systemController.getBatteryLevel();
         statusMessage.batteryExternal = -1; // TODO
         statusMessage.stateCharging = systemController.getBatteryChargingState();
+        statusMessage.temperature = systemController.getTemperature();
 
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendStatus(statusMessage);
