@@ -13,6 +13,7 @@ public class Despat extends Application {
     public void onCreate() {
         super.onCreate();
 
+        // send APPSTART event
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendEvent(ServerConnector.EventType.INIT, null);
 

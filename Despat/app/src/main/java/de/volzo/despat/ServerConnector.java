@@ -230,6 +230,8 @@ public class ServerConnector {
 
                 Log.e(TAG, String.format("sending data to server failed. %s", error)); //%d", error.networkResponse.statusCode));
 
+                // TODO: fire toast
+
                 NetworkResponse response = error.networkResponse;
                 if (error instanceof ServerError && response != null) {
                     try {

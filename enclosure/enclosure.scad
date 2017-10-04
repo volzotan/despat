@@ -12,14 +12,15 @@ crad       = 6;
 w          = 3.2+.1;
 wb         = 1.2;
 
-difference(){
-    union() {
-        bottom();
-        translate([0, sizeTop[1], 44-.7]) rotate([180, 0, 0]) top();
-    }
-    translate([-1, -1, -1]) cube([7, 100, 50]);
-}
+//difference(){
+//    union() {
+//        bottom();
+//        translate([0, sizeTop[1], 44-.7]) rotate([180, 0, 0]) top();
+//    }
+//    translate([-1, -1, -1]) cube([7, 100, 50]);
+//}
 
+top();
 
 //bottom();
 //translate([70, 4.5, 7+10]) color("green") wedge();
@@ -37,7 +38,7 @@ difference(){
 
 //translate([0, 0, sizeBot[2]+5]) seal(); //color("green") seal();
 //translate([0, 100-3+10, 0]) top();
-translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
+% translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
 //% translate([sizeBot[0]/2-(44/2), -30, 4]) rotate([0, 0, 0]) socket();
 //% translate([63.5, -5-2, 30]) rotate([-90, 0, 0]) DIN912screw(8);
 
@@ -200,7 +201,7 @@ module top() {
             
             // seal
             translate([0, 0, sizeTop[2]-.1]) color("red") difference() {
-                height = 1.5;
+                height = 2.2;
                 block(sizeTop[0], sizeTop[1], height, crad=crad, red=1.2+0.1+0.2); // = 1.5
                 translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=(1.5)+1.5+0.1);
             }
@@ -353,11 +354,15 @@ module bottom() {
         }
         
         // seal
-        translate([0, 0, sizeBot[2]-2.6]) color("red") difference() {
+        translate([0, 0, sizeBot[2]-2.3]) color("red") difference() {
             height = 3;
-            hull() {
-                block(sizeBot[0], sizeBot[1], height, crad=crad, red=1.3);
-                translate([0, 0, -.5]) block(sizeBot[0], sizeBot[1], height, crad=crad, red=1.3+.5);
+            union() {
+                hull() {
+                    block(sizeBot[0], sizeBot[1], height-.3, crad=crad, red=1.3);
+                    translate([0, 0, -.5]) block(sizeBot[0], sizeBot[1], height, crad=crad, red=1.3+.5);
+                }
+                
+                translate([0, 0, height-0.7-0.3]) block(sizeBot[0], sizeBot[1], 1, crad=crad, red=1.3-.4);
             }
             
             translate([0, 0, -.1]) block(sizeBot[0], sizeBot[1], height+2, crad=crad, red=1.3+2);

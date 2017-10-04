@@ -23,7 +23,7 @@ public class Config {
     public static final boolean PHONE_HOME                  = true;
     public static final String SERVER_ADDRESS               = "http://zoltep.de";
 
-    public static final String dateFormat                   = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+    public static final String dateFormat                   = "yyyy-MM-dd HH:mm:ss.SSS";
 
     private static final String SHAREDPREFNAME              = "de.volzo.despat.DEFAULT_PREFERENCES";
 
@@ -54,7 +54,7 @@ public class Config {
     }
 
     public static String getUniqueDeviceId(Context context) {
-        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID).toUpperCase();
     }
 
     public static void setDeviceName(Context context, String deviceName) {
