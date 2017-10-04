@@ -201,14 +201,14 @@ module top() {
             
             // seal
             translate([0, 0, sizeTop[2]-.1]) color("red") difference() {
-                height = 2.2;
+                height = 1.5;
                 block(sizeTop[0], sizeTop[1], height, crad=crad, red=1.2+0.1+0.2); // = 1.5
                 translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=(1.5)+1.5+0.1);
             }
             
             //inlay
             intersection() {
-                inlay = [154, 72.4, 23];
+                inlay = [154, 71.8, 23];
                 inlayTol = 0.5;
                 
                 difference() {
