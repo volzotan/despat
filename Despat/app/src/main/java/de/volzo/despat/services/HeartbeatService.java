@@ -5,7 +5,7 @@ import android.app.job.JobService;
 import android.util.Log;
 
 import de.volzo.despat.Despat;
-import de.volzo.despat.ServerConnector;
+import de.volzo.despat.web.ServerConnector;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;

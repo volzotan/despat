@@ -4,11 +4,11 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.util.Log;
 
+import java.io.File;
+
 import de.volzo.despat.ImageRollover;
-import de.volzo.despat.ServerConnector;
-import de.volzo.despat.SystemController;
+import de.volzo.despat.web.ServerConnector;
 import de.volzo.despat.support.Config;
-import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 10.08.17.
@@ -27,8 +27,12 @@ public class UploadService extends JobService {
 
         ServerConnector.UploadMessage uploadMessage = new ServerConnector.UploadMessage();
 
-        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, ".jpg");
-        uploadMessage.image = imgroll.getNewestImage();
+        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
+        File newestImage = imgroll.getNewestImage();
+        if (newestImage == null) {
+            // TODO
+        }
+        uploadMessage.image = newestImage;
 
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendUpload(uploadMessage);

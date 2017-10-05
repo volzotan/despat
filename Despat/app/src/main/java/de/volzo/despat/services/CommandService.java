@@ -4,9 +4,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.util.Log;
 
-import de.volzo.despat.ImageRollover;
-import de.volzo.despat.ServerConnector;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.web.ServerConnector;
 
 /**
  * Created by volzotan on 10.08.17.

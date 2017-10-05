@@ -1,16 +1,10 @@
-package de.volzo.despat;
+package de.volzo.despat.web;
 
 import android.content.Context;
-import android.util.Base64;
-import android.util.EventLog;
 import android.util.JsonWriter;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.ExecutorDelivery;
 import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -22,7 +16,11 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -34,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import de.volzo.despat.support.Config;
+import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 10.08.17.
@@ -47,6 +46,10 @@ public class ServerConnector {
     private String serverAddress;
     SimpleDateFormat dateFormat;
 
+    private final String twoHyphens = "--";
+    private final String lineEnd = "\r\n";
+    private final String boundary = "foo-" + System.currentTimeMillis();
+    private final String mimeType = "multipart/form-data;boundary=" + boundary;
 
     public ServerConnector(Context context) {
         this.context = context;
@@ -79,7 +82,6 @@ public class ServerConnector {
 
             jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
             jsonWriter.name("deviceName").value(Config.getDeviceName(context));
-            //jsonWriter.name("originalDeviceId").value("");
             jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
 
             jsonWriter.name("numberImages").value(msg.numberImages);
@@ -88,6 +90,7 @@ public class ServerConnector {
             jsonWriter.name("batteryInternal").value(msg.batteryInternal);
             jsonWriter.name("batteryExternal").value(msg.batteryExternal);
             jsonWriter.name("stateCharging").value(msg.stateCharging);
+
             jsonWriter.endObject();
             jsonWriter.close();
 
@@ -102,7 +105,9 @@ public class ServerConnector {
     public void sendEvent(int type, String payload) {
         try {
 
-            if (payload == null) payload = new String();
+            if (payload == null) {
+                payload = new String();
+            }
 
             EventMessage msg = new EventMessage();
 
@@ -112,11 +117,11 @@ public class ServerConnector {
 
             jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
             jsonWriter.name("deviceName").value(Config.getDeviceName(context));
-            //jsonWriter.name("originalDeviceId").value("");
             jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
 
             jsonWriter.name("eventtype").value(msg.eventtype);
             jsonWriter.name("payload").value(msg.payload);
+
             jsonWriter.endObject();
             jsonWriter.close();
 
@@ -126,130 +131,15 @@ public class ServerConnector {
         }
     }
 
-    public void sendUpload(UploadMessage msg) {
-        try {
-            Writer writer = new StringWriter();
-            JsonWriter jsonWriter = new JsonWriter(writer);
-            jsonWriter.beginObject();
-
-            jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
-            jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
-
-            jsonWriter.endObject();
-            jsonWriter.close();
-
-            // Log.d(TAG, writer.toString());
-
-            send("/image", new JSONObject(writer.toString()));
-        } catch (Exception e) {
-            Log.e(TAG, "sending status failed", e);
-        }
-    }
-
-
     public void send(String endpoint, JSONObject statusMessage) {
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(context);
 
         String url = this.serverAddress + endpoint;
-
-        class CustomRequest extends Request<JSONObject> {
-
-            private Response.Listener<JSONObject> listener;
-            private Map<String, String> params;
-            private JSONObject payload;
-
-            public CustomRequest(String url, Map<String, String> params,
-                                 Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) {
-                super(Method.POST, url, errorListener);
-                this.listener = responseListener;
-                this.params = params;
-            }
-
-            public CustomRequest(int method, String url, Map<String, String> params,
-                                 Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) {
-                super(method, url, errorListener);
-                this.listener = responseListener;
-                this.params = params;
-            }
-
-            public CustomRequest(int method, String url, JSONObject payload, Map<String, String> params,
-                                 Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) {
-                super(method, url, errorListener);
-                this.payload = payload;
-                this.listener = responseListener;
-                this.params = params;
-            }
-
-            @Override
-            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
-                return params;
-            }
-
-            @Override
-            public Map<String, String> getHeaders() {
-
-                String username = context.getResources().getString(R.string.server_username);
-                String password = context.getResources().getString(R.string.server_password);
-                String code = username + ":" + password;
-                code = Base64.encodeToString(code.getBytes(), Base64.DEFAULT);
-
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("Authorization", "Basic " + code);
-
-                return params;
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/json";
-            }
-
-            @Override
-            public byte[] getBody() throws AuthFailureError {
-                // usually you'd have a field with some values you'd want to escape, you need to do it yourself if overriding getBody. here's how you do it
-//                try {
-//                    httpPostBody=httpPostBody+"&randomFieldFilledWithAwkwardCharacters="+URLEncoder.encode("{{%stuffToBe Escaped/","UTF-8");
-//                } catch (UnsupportedEncodingException exception) {
-//                    Log.e("ERROR", "exception", exception);
-//                    // return null and don't pass any POST string if you encounter encoding error
-//                    return null;
-//                }
-                return payload.toString().getBytes();
-            }
-
-            @Override
-            protected void deliverResponse(JSONObject response) {
-                listener.onResponse(response);
-            }
-
-            @Override
-            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-
-                Log.d(TAG, String.format("HTTP response: %d", response.statusCode));
-
-                try {
-                    String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-
-                    if (jsonString.length() != 0) {
-                        return Response.success(new JSONObject(jsonString), HttpHeaderParser.parseCacheHeaders(response));
-                    } else {
-                        return Response.success(new JSONObject(), HttpHeaderParser.parseCacheHeaders(response));
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    return Response.error(new ParseError(e));
-                } catch (JSONException je) {
-                    Log.e(TAG, new String(response.data));
-                    return Response.error(new ParseError(je));
-                }
-            }
-        }
 
         Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
 
-                Log.e(TAG, String.format("sending data to server failed. %s", error)); //%d", error.networkResponse.statusCode));
+                Log.e(TAG, String.format("sending data to server failed: %s", error)); //%d", error.networkResponse.statusCode));
 
                 // TODO: fire toast
 
@@ -282,14 +172,110 @@ public class ServerConnector {
         };
 
         Map<String, String> params = new HashMap<String, String>();
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, url, statusMessage, params, successListener, errorListener);
+        JSONRequest jsObjRequest = new JSONRequest(Request.Method.POST, url, statusMessage, params, successListener, errorListener, context);
 
-//        try {
-//            Log.wtf(TAG, new String(jsObjRequest.getBody(), "utf-8"));
-//        } catch (Exception e) {}
-
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(context);
         queue.add(jsObjRequest);
     }
+
+    public void sendUpload(UploadMessage msg) {
+        try {
+            Writer writer = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(writer);
+            jsonWriter.beginObject();
+
+            jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
+            jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
+
+            jsonWriter.endObject();
+            jsonWriter.close();
+//            send("/image", new JSONObject(writer.toString()));
+
+            sendImage("/image", msg.image);
+
+        } catch (Exception e) {
+            Log.e(TAG, "sending status failed", e);
+        }
+    }
+
+    // taken from: https://stackoverflow.com/questions/32240177/working-post-multipart-request-with-volley-and-without-httpentity
+    private void sendImage(String endpoint, File image) {
+
+        String url = this.serverAddress + endpoint;
+        byte[] multipartBody = {};
+
+        try {
+            byte[] fileData1 = Util.readFileToByteArray(image);
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(bos);
+
+            try {
+                // the first file
+                buildPart(dos, fileData1, "image.jpg");
+                // the second file
+//                buildPart(dos, fileData2, "ic_action_book.png");
+                // send multipart form data necesssary after file data
+                dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+                // pass to multipart body
+                multipartBody = bos.toByteArray();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            MultipartRequest multipartRequest = new MultipartRequest(url, mimeType, multipartBody, new Response.Listener<NetworkResponse>() {
+                @Override
+                public void onResponse(NetworkResponse response) {
+                    Log.d(TAG, "image uploaded");
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    try {
+                        Log.e(TAG, "image upload failed"); // TODO
+                        Log.e(TAG, error.getMessage());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, context);
+
+            // Instantiate the RequestQueue.
+            RequestQueue queue = Volley.newRequestQueue(context);
+            queue.add(multipartRequest);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void buildPart(DataOutputStream dataOutputStream, byte[] fileData, String fileName) throws IOException {
+
+        dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"" + lineEnd);
+        dataOutputStream.writeBytes(lineEnd);
+
+        ByteArrayInputStream fileInputStream = new ByteArrayInputStream(fileData);
+        int bytesAvailable = fileInputStream.available();
+
+        int maxBufferSize = 1024 * 1024;
+        int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+        byte[] buffer = new byte[bufferSize];
+
+        int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+        while (bytesRead > 0) {
+            dataOutputStream.write(buffer, 0, bufferSize);
+            bytesAvailable = fileInputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+        }
+
+        dataOutputStream.writeBytes(lineEnd);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------
 
     public static class StatusMessage {
 

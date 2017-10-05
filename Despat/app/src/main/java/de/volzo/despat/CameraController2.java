@@ -248,7 +248,7 @@ public class CameraController2 implements CameraAdapter {
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90); //ORIENTATIONS.get(rotation));
 
             final File imageFullPath;
-            ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, ".jpg");
+            ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
             imageFullPath = imgroll.getUnusedFullFilename();
 
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {

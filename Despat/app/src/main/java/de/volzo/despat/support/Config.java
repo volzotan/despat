@@ -21,6 +21,7 @@ public class Config {
     public static long UPLOAD_INTERVAL                      = 15 * 60 * 1000L; // Minimum interval is 15m
 
     public static final File IMAGE_FOLDER                   = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final String IMAGE_FILEEXTENSION          = ".jpg";
     public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;
     public static final boolean PHONE_HOME                  = true;
     public static final String SERVER_ADDRESS               = "http://zoltep.de";

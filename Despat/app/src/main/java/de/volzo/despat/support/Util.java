@@ -8,7 +8,12 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.StatFs;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import de.volzo.despat.Orchestrator;
 import de.volzo.despat.R;
@@ -59,6 +64,53 @@ public class Util {
         bytesAvailable = (long) stat.getBlockSizeLong() * (long) stat.getAvailableBlocksLong();
 
         return bytesAvailable / (1024.f * 1024.f);
+    }
+
+    // ---
+
+    // taken from the apache commons io library
+    public static byte[] readFileToByteArray(final File file) throws IOException {
+        InputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            return toByteArray(in); // Do NOT use file.length() - see IO-453
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (final IOException ioe) {
+                // ignore
+            }
+        }
+    }
+
+    private static byte[] toByteArray(final InputStream input) throws IOException {
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        copy(input, output);
+        return output.toByteArray();
+    }
+
+    private static int copy(final InputStream input, final OutputStream output) throws IOException {
+        int DEFAULT_BUFFER_SIZE = 1024 * 4;
+
+        final long count = copyLarge(input, output, new byte[DEFAULT_BUFFER_SIZE]);
+        if (count > Integer.MAX_VALUE) {
+            return -1;
+        }
+        return (int) count;
+    }
+
+    private static long copyLarge(final InputStream input, final OutputStream output, final byte[] buffer) throws IOException {
+        int EOF = -1;
+        long count = 0;
+        int n;
+
+        while (EOF != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            count += n;
+        }
+        return count;
     }
 
 }

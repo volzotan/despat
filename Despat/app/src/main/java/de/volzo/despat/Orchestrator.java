@@ -19,6 +19,7 @@ import de.volzo.despat.services.UploadService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
+import de.volzo.despat.web.ServerConnector;
 
 /**
  * Created by volzotan on 15.08.17.

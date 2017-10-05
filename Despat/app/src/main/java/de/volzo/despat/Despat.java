@@ -1,9 +1,9 @@
 package de.volzo.despat;
 
 import android.app.Application;
-import android.provider.Settings;
 
 import de.volzo.despat.support.CameraAdapter;
+import de.volzo.despat.web.ServerConnector;
 
 public class Despat extends Application {
 
