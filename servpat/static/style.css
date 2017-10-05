@@ -15,7 +15,7 @@ h3 a {
     color: #333;
 }
 
-.table-sm td, .table-sm th {
+.table > tbody > tr > td, .table > thead > tr > th {
     padding: 1px 3px;
     font-size: 13px;
 }
