@@ -131,7 +131,7 @@ public class SystemController {
         SensorManager sensorManager = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
         Sensor tempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
 
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) != null){
+        if (tempSensor != null){
             return true;
         }
 

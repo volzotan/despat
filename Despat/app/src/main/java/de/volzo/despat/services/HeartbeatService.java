@@ -36,7 +36,14 @@ public class HeartbeatService extends JobService {
         statusMessage.batteryInternal = systemController.getBatteryLevel();
         statusMessage.batteryExternal = -1; // TODO
         statusMessage.stateCharging = systemController.getBatteryChargingState();
-        statusMessage.temperature = systemController.getTemperature();
+
+        // Temperature sensors are found in just a small number of devices, namely some Samsung 3 and Moto X
+        // if a sensor is present, use the reading from the last heartbeat and start a new measurement for the next
+        float temp = systemController.getTemperature();
+        statusMessage.temperature = temp;
+        if (temp > 0) {
+            systemController.startTemperatureMeasurement();
+        }
 
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendStatus(statusMessage);
