@@ -1,20 +1,18 @@
 import requests
+from requests.auth import HTTPBasicAuth
 from datetime import datetime
 import json
 
-URL = "http://localhost:5000/" + "status"
+URL = "http://localhost:5000/" + "event"
+URL = "http://zoltep.de/" + "event"
 DATEFORMAT_INPUT = "%Y-%m-%d %H:%M:%S.%f"
 
 payload = {}
 payload["deviceId"] = "123"
-payload["deviceName"] = "pythonTestClient"
+# payload["deviceName"] = "pythonTestClient"
 payload["timestamp"] = datetime.now().strftime(DATEFORMAT_INPUT) #[:-3]
-payload["numberImages"] = 100
-payload["freeSpaceInternal"] = 1000.0
-payload["freeSpaceExternal"] = 1000.0
-payload["batteryInternal"] = 50.0
-payload["batteryExternal"] = -1
-payload["stateCharging"] = 1
+payload["eventtype"] = 0x0
+payload["payload"] = ""
 
 r = requests.post(URL, json=payload)
 print(r)
