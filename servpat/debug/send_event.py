@@ -14,5 +14,5 @@ payload["timestamp"] = datetime.now().strftime(DATEFORMAT_INPUT) #[:-3]
 payload["eventtype"] = 0x0
 payload["payload"] = ""
 
-r = requests.post(URL, json=payload)
+r = requests.post(URL, auth=HTTPBasicAuth('pythonTestClient', 'GRfX58yed'), json=payload)
 print(r)
