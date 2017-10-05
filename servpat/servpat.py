@@ -7,7 +7,7 @@ from datetime import datetime
 
 DATEFORMAT_INPUT    = "%Y-%m-%d %H:%M:%S.%f"
 DATEFORMAT_STORE    = "%Y-%m-%d %H:%M:%S.%f"
-DATEFORMAT_OUTPUT   = "%Y.%m.%d | %H:%M:%S.%f"
+DATEFORMAT_OUTPUT   = "%Y.%m.%d - %H:%M:%S.%f"
 
 DATEFORMAT_IMG      = "%Y-%m-%d--%H-%M-%S-%f"
 
@@ -123,12 +123,13 @@ def event():
 
     # insert into db
     values = [  content["deviceId"], 
+                content["deviceName"],
                 timestamp, 
                 content["eventtype"],
                 content["payload"]]
 
     db = get_db()
-    db.execute("insert into events (deviceId, timestamp, eventtype, payload) values (?, ?, ?, ?)", values)
+    db.execute("insert into events (deviceId, deviceName, timestamp, eventtype, payload) values (?, ?, ?, ?, ?)", values)
     db.commit()
 
     return ("", 204)
@@ -144,9 +145,12 @@ def image():
         abort(500, "no free space left") # 507 Insufficient storage
 
     # TODO: get device id from session
-    content = {}
-    content["deviceId"] = "123"
-    content["timestamp"] = datetime.now()
+    # content = {}
+    # content["deviceId"] = "123"
+    # content["timestamp"] = datetime.now()
+
+    content = request.form
+    timestamp = datetime.strptime(content["timestamp"], DATEFORMAT_INPUT)
 
     if "file" not in request.files:
         app.logger.warn("image file missing in request")
@@ -157,7 +161,7 @@ def image():
         app.logger.warn("empty image filename in request")
         abort(400, "empty image filename in request")
         return redirect(request.url)
-    filename = "{}_{}.jpg".format(content["deviceId"], content["timestamp"].strftime(DATEFORMAT_IMG)[:-3])
+    filename = "{}_{}.jpg".format(content["deviceId"], timestamp.strftime(DATEFORMAT_IMG)[:-3])
     # filename = device_id + "_" + timestamp.strftime(DATEFORMAT_IMG) + "_" + secure_filename(imagefile.filename)
     unique_filename = get_unique_filename(app.config["UPLOAD_FOLDER"], filename)
     full_filename = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
@@ -169,7 +173,7 @@ def image():
 
     # insert into db
     values = [  content["deviceId"], 
-                content["timestamp"].strftime(DATEFORMAT_STORE),
+                timestamp.strftime(DATEFORMAT_STORE),
                 full_filename
             ]
     db = get_db()
@@ -187,27 +191,22 @@ def sync():
 
 @app.template_filter("suppressnegative")
 def suppressnegative_filter(e):
-
     if e < 0:
         return ""
-
     return e
 
 
 @app.template_filter("bool")
 def bool_filter(e):
-
     if e == 0:
         return "☐"
     if e == 1:
         return "☒"
-
     return e
 
 
 @app.template_filter("eventtype")
 def eventtype_filter(e):
-
     types = {
         0x0: "INIT",
         0x1: "BOOT",
@@ -218,7 +217,6 @@ def eventtype_filter(e):
 
         0x30: "ERROR"
     }
-
     try:
         return types[e]
     except KeyError as ke:

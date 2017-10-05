@@ -10,36 +10,36 @@
     <tr>
       <th>#</th>
       <th>device id</th>
-      <th>timestamp</th>
+      <th>time</th>
       <th>device name</th>
-      <th>number</br>images</th>
-      <th>free space</br>int</th>
-      <th>free space</br>ext</th>
-      <th>battery</br>int</th>
-      <th>battery</br>ext</th>
-      <th>state</br>charging</th>
+      <th class="text-right">images</br>taken</th>
+      <th class="text-right">free space</br>internal</th>
+      <th class="text-right">free space</br>SD-card</th>
+      <th class="text-right">battery</br>built-in</th>
+      <th class="text-right">battery</br>external</th>
+      <th class="text-right">charging</th>
     </tr>
   </thead>
   <tbody>
     {% for msg in data_status %}
     <tr>
-      <td class="col-md-05">{{ msg.id }}</td>
-      <td class="col-md-15"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
+      <td class="col-md-1">{{ msg.id }}</td>
+      <td class="col-md-2"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td class="col-md-2">{{ msg.timestamp | dateformat }}</td>
-      <td class="col-md-2">{{ msg.deviceName }}</td>
-      <td class="col-md-1">{{ msg.numberImages | suppressnegative }}</td>
-      <td class="col-md-1">{{ msg.freeSpaceInternal | round | suppressnegative }}</td>
-      <td class="col-md-1">{{ msg.freeSpaceExternal | round | suppressnegative }}</td>
-      <td class="col-md-1">{{ msg.batteryInternal | suppressnegative }}</td>
-      <td class="col-md-1">{{ msg.batteryExternal | suppressnegative }}</td>
-      <td class="col-md-1">{{ msg.stateCharging | bool }}</td>
+      <td class="col-md-1">{{ msg.deviceName }}</td>
+      <td class="col-md-1 text-right">{{ msg.numberImages | suppressnegative }}</td>
+      <td class="col-md-1 text-right">{{ msg.freeSpaceInternal | round | int | suppressnegative }}</td>
+      <td class="col-md-1 text-right">{{ msg.freeSpaceExternal | round | int | suppressnegative }}</td>
+      <td class="col-md-1 text-right">{{ msg.batteryInternal | round | int | suppressnegative }}</td>
+      <td class="col-md-1 text-right">{{ msg.batteryExternal | round | int | suppressnegative }}</td>
+      <td class="col-md-1 text-center">{{ msg.stateCharging | bool }}</td>
     </tr>
     {% else %}
     <tr>
-      <td class="col-md-05"> - </td>
-      <td class="col-md-15"> - </td>
+      <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
       <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
       <td class="col-md-1"> - </td>
       <td class="col-md-1"> - </td>
       <td class="col-md-1"> - </td>
@@ -56,26 +56,29 @@
     <tr>
       <th>#</th>
       <th>device id</th>
-      <th>timestamp</th>
-      <th>eventtype</th>
-      <th>payload</th>
+      <th>time</th>
+      <th>device name</th>
+      <th>event type</th>
+      <th>message</th>
     </tr>
   </thead>
   <tbody>
     {% for msg in data_events %}
     <tr>
-      <td class="col-md-05">{{ msg.id }}</td>
-      <td class="col-md-15"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
+      <td class="col-md-1">{{ msg.id }}</td>
+      <td class="col-md-2"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td class="col-md-2">{{ msg.timestamp | dateformat }}</td>
+      <td class="col-md-1">{{ msg.deviceName }}</td>
       <td class="col-md-2">{{ msg.eventtype | eventtype }}</td>
-      <td class="col-md-6">{{ msg.payload }}</td>
+      <td class="col-md-4">{{ msg.payload }}</td>
     </tr>
     {% else %}
     <tr>
-      <td class="col-md-05"> - </td>
-      <td class="col-md-15"> - </td>
+      <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
-      <td class="col-md-4"> - </td>
+      <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-2"> - </td>
       <td class="col-md-4"> - </td>
     </tr>
     {% endfor %}
@@ -87,7 +90,7 @@
     <tr>
       <th>#</th>
       <th>device id</th>
-      <th>timestamp</th>
+      <th>time</th>
       <th>command</th>
       <th>status</th>
     </tr>
@@ -95,16 +98,16 @@
   <tbody>
     {% for msg in data_commands %}
     <tr>
-      <td class="col-md-05">{{ msg.id }}</td>
-      <td class="col-md-15"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
+      <td class="col-md-1">{{ msg.id }}</td>
+      <td class="col-md-2"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td class="col-md-2">{{ msg.timestamp | dateformat }}</td>
       <td class="col-md-4">{{ msg.command }}</td>
       <td class="col-md-4">{{ msg.status }}</td>
     </tr>
     {% else %}
     <tr>
-      <td class="col-md-05"> - </td>
-      <td class="col-md-15"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-2"> - </td>
       <td class="col-md-2"> - </td>
       <td class="col-md-4"> - </td>
       <td class="col-md-4"> - </td>
@@ -118,22 +121,22 @@
     <tr>
       <th>#</th>
       <th>device id</th>
-      <th>timestamp</th>
+      <th>time</th>
       <th>filename</th>
     </tr>
   </thead>
   <tbody>
     {% for msg in data_uploads %}
     <tr>
-      <td class="col-md-05">{{ msg.id }}</td>
-      <td class="col-md-15"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
+      <td class="col-md-1">{{ msg.id }}</td>
+      <td class="col-md-2"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td class="col-md-2">{{ msg.timestamp | dateformat }}</td>
       <td class="col-md-8"><a href="/{{ msg.filename }}">{{ msg.filename }}</a></td>
     </tr>
     {% else %}
     <tr>
-      <td class="col-md-05"> - </td>
-      <td class="col-md-15"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-2"> - </td>
       <td class="col-md-2"> - </td>
       <td class="col-md-8"> - </td>
     </tr>

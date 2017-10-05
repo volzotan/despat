@@ -23,6 +23,7 @@ create table events (
   id integer primary key autoincrement,
 
   deviceid text not null,
+  deviceName text,
   timestamp integer not null,
 
   eventtype integer not null,
