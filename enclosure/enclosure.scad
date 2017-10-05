@@ -324,7 +324,7 @@ module bottom() {
             down = 39.4+0.7;
             up   = 36.9+0.5;
             cylinder($fn=64, h=1+3.60+0.3, d=down);
-            translate([0, 0, 1+3.60+0.3-0.1]) cylinder($fn=64, h=1, d1=down, d=up);
+            translate([0, 0, 1+3.60+0.3-0.1]) cylinder($fn=64, h=2, d1=down, d=up);
             translate([0, 0, 6-.3]) cylinder($fn=64, h=2, d=up);
             translate([0, 0, 6+2-.3-.1]) cylinder($fn=64, h=3, d1=up, d2=34);
         }
@@ -405,7 +405,7 @@ module bottom() {
 //    translate([sizeBot[0]-17+.2, sizeBot[1], 14+2]) rotate([0, 180, 0]) hinge_support();
     
     // nuts
-    % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 12]) rotate([90, 0, 0]) { 
+    % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
         translate([-14, 0, 0]) M5nut();
         translate([+14, 0, 0]) M5nut();
     }
