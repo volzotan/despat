@@ -1,4 +1,4 @@
-from flask import Flask, json, g, render_template, redirect, url_for, request, Response, flash, abort
+from flask import Flask, json, g, render_template, redirect, url_for, request, Response, flash, abort, send_from_directory
 from werkzeug.utils import secure_filename
 from functools import wraps
 import sqlite3
@@ -135,8 +135,8 @@ def event():
     return ("", 204)
 
 
-@app.route("/image", methods=["POST"])
-def image():
+@app.route("/upload", methods=["POST"])
+def upload():
 
     # check free space on server
     statvfs = os.statvfs(app.config["UPLOAD_FOLDER"])
@@ -174,13 +174,18 @@ def image():
     # insert into db
     values = [  content["deviceId"], 
                 timestamp.strftime(DATEFORMAT_STORE),
-                full_filename
+                unique_filename
             ]
     db = get_db()
     db.execute("insert into uploads (deviceId, timestamp, filename) values (?, ?, ?)", values)
     db.commit()
 
     return ("", 204)
+
+
+@app.route('/image/<path:path>')
+def image(path):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], path)
 
 
 @app.route("/sync")

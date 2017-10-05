@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 import json
 
-URL = "http://localhost:5000/" + "image"
+URL = "http://localhost:5000/" + "upload"
 DATEFORMAT_INPUT = "%Y-%m-%d %H:%M:%S.%f"
 
 files = {"file": open("test.jpg", "rb")}

@@ -131,7 +131,7 @@
       <td class="col-md-1">{{ msg.id }}</td>
       <td class="col-md-2"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td class="col-md-2">{{ msg.timestamp | dateformat }}</td>
-      <td class="col-md-8"><a href="/{{ msg.filename }}">{{ msg.filename }}</a></td>
+      <td class="col-md-8"><a href="{{ url_for("image", path=msg.filename) }}">{{ msg.filename }}</a></td>
     </tr>
     {% else %}
     <tr>
