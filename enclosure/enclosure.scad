@@ -12,29 +12,19 @@ crad       = 6;
 w          = 3.2+.1;
 wb         = 1.2;
 
-//difference(){
-//    union() {
+difference(){
+    union() {
         bottom();
 //        translate([0, sizeTop[1], 44-.7]) rotate([180, 0, 0]) top();
-//    }
-//    translate([-1, -1, -1]) cube([7, 100, 50]);
-//}
+    }
+    translate([-1, -1, -1]) cube([90, 100, 50]);
+}
 
-//top();
+translate([70, 4.7, 7]) color("orange") wedge();
+//translate([70, -20, 12.8]) rotate([180, 0, 0]) color("orange") wedge();
 
-//bottom();
-//translate([70, 4.5, 7+10]) color("green") wedge();
 % translate([0, sizeBot[1]-2.3, 18.1]) rotate([0, 90, 0]) color([1, 1, 1], 1) cylinder($fn=32, d=1.75, h=100);
 
-//difference(){
-//    bottom();
-//    translate([-1, -1, -1]) cube([15, 100, 50]);
-//}
-
-//intersection() {
-//    bottom();
-//    translate([lensHole[0], lensHole[1], -1]) cylinder($fn=32, d=48, h=10);
-//}
 
 //translate([0, 0, sizeBot[2]+5]) seal(); //color("green") seal();
 //translate([0, 100-3+10, 0]) top();
@@ -42,36 +32,27 @@ wb         = 1.2;
 //% translate([sizeBot[0]/2-(44/2), -30, 4]) rotate([0, 0, 0]) socket();
 //% translate([63.5, -5-2, 30]) rotate([-90, 0, 0]) DIN912screw(8);
 
-//% translate([30, 10, 5+0]) nexus5();
+% translate([30, 10, 5+0]) nexus5();
 
 * translate([127, 40, -10]) uvfilter();
 //% translate([5, 36, 4]) usbplug();
-
-//translate([200, 0, 0]) {
-//    bottom();
-//    translate([0, sizeTop[1], 44.1]) rotate([180, 0, 0]) top();
-//    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 4]) rotate([90, 0, 180]) socket();
-//    translate([55, 0, 44]) rotate([0, 180, 0]) color("green") import("hinge.stl");
-//    translate([95+55, 0, 44]) rotate([0, 180, 0]) color("green") import("hinge.stl");
-//}
 
 //translate([30, 105, 4]) cube([126, 69, 14]); // jet
 //translate([30, 105, 4]) cube([92, 59, 22]); // anker 10.000
 //translate([30, 105, 4]) cube([98, 8, 22]); // anker 10.000
 //% translate([25, 104, 4]) color("grey") block(142.3, 72.4, 17.5, crad=3); // anker 10.000
 
-
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 module wedge() {
-    tol = 0.2;
+    tol = 0.3;
     height = 12.5;
     
-    translate([tol, tol, tol]) cube([40-tol*2, 2-tol*2, height]);
-    translate([2+tol, 2-tol, tol]) cube([36-tol*2, 2-tol*2, height]);
+    translate([tol, 0.1+tol, tol]) cube([40-tol*2, 1.7-tol*2, height]);
+    translate([2+tol, 2-tol*2-0.2, tol]) cube([36-tol*2, 2-tol*2+0.1, height]);
     
-    points = [[0, 0], [1, 0], [1, height], [-3, height]];
-    translate([38-tol, 1+4-tol*3, tol]) rotate([90, 0, -90]) linear_extrude(height=36-tol*2) polygon(points); 
+    points = [[0, 0], [1, 0], [1, height], [-1.3, height]];
+    translate([38-tol, 2.9, tol]) rotate([90, 0, -90]) linear_extrude(height=36-tol*2) polygon(points); 
 }
 
 module socket() {
@@ -257,7 +238,6 @@ module bottom() {
     d = 4;
     b = sizeBot[2] - a - c - d - wb + .2;
     
-//    z = 
     x = 2;
     y = 4.8;
     
@@ -471,15 +451,15 @@ module nexus5cavity(height) {
     difference() {
         union() {
             color("red") {
-                translate([124, 61+1, 0]) cylinder($fn=32, h=height, d=14);
-                translate([124, 5,  0]) cylinder($fn=32, h=height, d=14);
+                translate([125, 62+1, 0]) cylinder($fn=32, h=height, d=12);
+                translate([125, 4,  0]) cylinder($fn=32, h=height, d=12);
             }
             color("green") intersection() {
-                translate([120, 5, 0]) cube([20, 56+1, height+2]);
-                translate([124.8, (56+1)/2+5,  0]) scale([0.18, 1]) cylinder($fn=32, h=height, d=90);
+                translate([120, 3, 0]) cube([20, 60+1, height+2]);
+                translate([125.0, (56+1)/2+5,  0]) scale([0.18, 1]) cylinder($fn=32, h=height, d=90);
             }
             
-            translate([-11, -2, 0]) cube([135, (56+1)+14, height]);
+            translate([-11, -2, 0]) cube([136, (56+1)+14, height]);
         }
     
         points_cav = [[0, 0], [-2, height+0.2], [2, height+0.2], [2, 0]];
@@ -490,12 +470,10 @@ module nexus5cavity(height) {
     translate([102, -4.9, 0])cube([16, 5, height]);
     translate([82, 65, 0])cube([26, 5, height]);
     
-    // spring
+    // wedge
     translate([40, -5.5, 0]) cube([40, 2, height]);
     translate([40+2, -5.5, 0]) cube([36, 5, height]);
     
-    
-
 }
 
 module hinge_support() {

@@ -39,13 +39,18 @@ module hinge_bottom(screwed=false) {
         translate([0, 0, 1]) cylinder($fn=32, d=diam+2, h=4+hingeTol*2);
         translate([0, 0, 1+3*3+hingeTol*2]) cylinder($fn=32, d=diam+2, h=4+hingeTol*2);
         
+        translate([0, 0, 1]) cube([3.5, 10, 4+hingeTol*2]);
+        translate([0, 0, 1+3*3+hingeTol*2]) cube([3.5, 10, 4+hingeTol*2]);
+        
         translate([0, 0, -10]) cylinder($fn=32, h=50, d=3.5); // diameter slightly increased
         translate([0, 0, -8]) cylinder($fn=32, h=5, d=6);
-        translate([0, 0, 19]) cylinder($fn=6, h=5, d=6.6+0.1);
+        translate([0, 0, 19]) rotate([0, 0, 30]) cylinder($fn=6, h=5, d=6.6+0.1);
         
-        translate([0, -6, 1]) cube([20, 7.5, 4+hingeTol*2]);
-        translate([0, -6, 1+3*3+hingeTol*2]) cube([20, 7.5, 4+hingeTol*2]);
         
+        points_c = [[0, 0], [14, 0], [13, 1], [10, 7.5], [0, 7.5]];
+        translate([0, -6, 1]) linear_extrude(height=4+hingeTol*2) polygon(points_c);
+        translate([0, -6, 1+3*3+hingeTol*2]) linear_extrude(height=4+hingeTol*2) polygon(points_c);
+
         if (screwed) {
             // translate([9, 10, 8.075]) 
             translate([8.5, 10, -5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=20);
