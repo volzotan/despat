@@ -12,19 +12,21 @@ crad       = 6;
 w          = 3.2+.1;
 wb         = 1.2;
 
-difference(){
-    union() {
-        bottom();
+//difference(){
+//    union() {
+//        bottom();
 //        translate([0, sizeTop[1], 44-.7]) rotate([180, 0, 0]) top();
-    }
-    translate([-1, -1, -1]) cube([90, 100, 50]);
-}
-
-translate([70, 4.7, 7]) color("orange") wedge();
+//    }
+//    translate([-1, -1, -1]) cube([90, 100, 50]);
+//}
+//
+//translate([70, 4.7, 7]) color("orange") wedge();
 //translate([70, -20, 12.8]) rotate([180, 0, 0]) color("orange") wedge();
 
 % translate([0, sizeBot[1]-2.3, 18.1]) rotate([0, 90, 0]) color([1, 1, 1], 1) cylinder($fn=32, d=1.75, h=100);
 
+
+translate([0, 100, 0]) top();
 
 //translate([0, 0, sizeBot[2]+5]) seal(); //color("green") seal();
 //translate([0, 100-3+10, 0]) top();
@@ -195,19 +197,29 @@ module top() {
             
             //inlay
             intersection() {
-                inlay = [154, 71.8, 23];
+                inlay = [154, 60, 23];
                 inlayTol = 0.5;
                 
-                difference() {
-                    translate([sizeTop[0]-150, 0, 0]) {
-                        cube([150, sizeTop[1], 23]);
-                    } 
+                union() {
+                    difference() {
+                        translate([sizeTop[0]-100, 0, 0]) {
+                            cube([100, sizeTop[1], 23]);
+                        } 
+                        
+                        trans = [10, (sizeTop[1]-(inlay[1]+inlayTol*2))/2, 0];
+                        translate(trans) block(inlay[0]+inlayTol*2, inlay[1]+inlayTol*2, inlay[2]+inlayTol*2, crad=1);
                     
-                    trans = [10, (sizeTop[1]-(inlay[1]+inlayTol*2))/2, 0];
-                    translate(trans) block(inlay[0]+inlayTol*2, inlay[1]+inlayTol*2, inlay[2]+inlayTol*2, crad=3);
-                
-                    points = [[0, 0], [sizeTop[1], 0], [sizeTop[1], 20], [sizeTop[1]-20, 30], [20, 30], [0, 20]];
-                    translate([0, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
+                        points = [[0, 0], [sizeTop[1], 0], [sizeTop[1], 20], [sizeTop[1]-20, 30], [20, 30], [0, 20]];
+                        translate([50, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
+                    
+                        // wedge
+                        translate([95, 7, 1]) cube([40, 3, sizeTop[2]]);
+                        translate([95+5, 7+2, 1]) cube([30, 4, sizeTop[2]]);
+                    }
+                    
+                    // hinge screw reinforcement
+                    points_r = [[0, 0], [20, 0], [15, 4.8], [5, 4.8]];
+                    translate([40, sizeTop[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTop[2]) polygon(points_r);
                 }
                 
                 // outer hull
@@ -223,7 +235,7 @@ module top() {
         translate([30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=20, d=3.3);
         translate([sizeBot[0]-30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=20, d=3.3);
         translate([30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
-        translate([sizeBot[0]-30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
+        translate([sizeBot[0]-30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=20, d=6.6);
     }
     
     translate([+20+18.2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
