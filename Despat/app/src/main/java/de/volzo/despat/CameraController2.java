@@ -16,6 +16,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.volzo.despat.support.Broadcast;;
+import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 
@@ -46,19 +47,10 @@ public class CameraController2 implements CameraAdapter {
 
     public static final String TAG = CameraController2.class.getSimpleName();
 
-    private int mode;
-
-    // public static final int OPEN                            = 0x0;
-    public static final int OPEN_PREVIEW                    = 0x1;
-    public static final int OPEN_AND_TAKE_PHOTO             = 0x2;
-    public static final int OPEN_PREVIEW_AND_TAKE_PHOTO     = 0x3;
-
     private Context context;
     private TextureView textureView;
 
     private CameraManager cameraManager;
-    private CameraCharacteristics cameraCharacteristics;
-    private Size imageDimension;
 
     private CameraDevice cameraDevice;
 
@@ -71,29 +63,31 @@ public class CameraController2 implements CameraAdapter {
     private ImageReader imageReader;
 
 
-    public CameraController2(Context context, TextureView textureView, int mode) throws CameraAccessException {
+    public CameraController2(Context context, TextureView textureView) throws Exception {
         this.context = context;
         this.textureView = textureView;
-
-        this.mode = mode;
 
         openCamera();
     }
 
-    public void openCamera() throws CameraAccessException {
+    public void openCamera() throws Exception {
         try {
             cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
 
             String[] cameraIdList = cameraManager.getCameraIdList();
             Log.d(TAG, "found " + cameraIdList.length + " cameras");
             String cameraId = cameraIdList[0];
-            cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
+            CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
 
             StreamConfigurationMap map = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-            assert map != null;
-            imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
+            if (map == null) {
+                throw new Exception("obtaining camera characteristics failed");
+            }
 
-            cameraManager.openCamera(cameraId, cameraStateCallback, null);
+            Size imageDimension = map.getOutputSizes(SurfaceTexture.class)[0]; // TODO: reuse this
+            cameraManager.openCamera(cameraId, cameraStateCallback, null); //mBackgroundHandler);
+
+            cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
 
         } catch (CameraAccessException e) {
             Log.d(TAG, "opening camera failed", e);
@@ -109,23 +103,34 @@ public class CameraController2 implements CameraAdapter {
         public void onOpened(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onOpened");
             cameraDevice = camera;
-            try {
-                createPreview(textureView);
-            } catch (CameraAccessException e) {
-                Log.e(TAG, "creating preview failed");
+
+            if (textureView != null) { // view was supplied, obviously a preview is requested
+                try {
+                    createPreview(textureView);
+                } catch (CameraAccessException e) {
+                    Log.e(TAG, "creating preview failed");
+                }
+            } else {
+                takePhoto();
             }
         }
+
         @Override
         public void onDisconnected(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onDisconnected");
-            cameraDevice.close();
-            //cameraDevice = null; // reuse camera object or not?
+            if (cameraDevice != null) {
+                cameraDevice.close();
+                cameraDevice = null;
+            }
         }
+
         @Override
         public void onError(CameraDevice camera, int error) {
-            Log.d(TAG, "--> Camera: onError");
-            cameraDevice.close();
-            cameraDevice = null;
+            Log.d(TAG, "--> Camera: onError: " + error);
+            if (cameraDevice != null) {
+                cameraDevice.close();
+                cameraDevice = null;
+            }
         }
     };
 
@@ -190,10 +195,6 @@ public class CameraController2 implements CameraAdapter {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
-
-        if (mode == OPEN_AND_TAKE_PHOTO || mode == OPEN_PREVIEW_AND_TAKE_PHOTO) {
-            takePhoto();
-        }
     }
 
     protected void startBackgroundThread() {
@@ -219,7 +220,8 @@ public class CameraController2 implements CameraAdapter {
         }
 
         if (cameraManager == null) { // ?
-            cameraManager =  (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+            cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+            Log.d(TAG, "cameraManager reclaimed");
         }
 
         try {
@@ -228,25 +230,20 @@ public class CameraController2 implements CameraAdapter {
             if (characteristics != null) {
                 jpegSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
             }
-            int width = 640;
-            int height = 480;
-            if (jpegSizes != null && 0 < jpegSizes.length) {
-                width = jpegSizes[0].getWidth();
-                height = jpegSizes[0].getHeight();
-            }
-            imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); // TODO: number of buffers 1 or 2?
-            List<Surface> outputSurfaces = new ArrayList<Surface>(2);
+
+            imageReader = ImageReader.newInstance(jpegSizes[0].getWidth(), jpegSizes[0].getHeight(), ImageFormat.JPEG, 2);
+
+            List<Surface> outputSurfaces = new ArrayList<Surface>(1);
             outputSurfaces.add(imageReader.getSurface());
-            SurfaceTexture surfaceTexture = getSurfaceTexture(this.textureView);
-            outputSurfaces.add(new Surface(surfaceTexture));
+
             final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             captureBuilder.addTarget(imageReader.getSurface());
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
 
-            // Orientation
-            //int rotation = Configuration.ORIENTATION_LANDSCAPE; //getWindowManager().getDefaultDisplay().getRotation();
-            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90); //ORIENTATIONS.get(rotation));
+            // orientation
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90);
 
+            // image path
             final File imageFullPath;
             ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
             imageFullPath = imgroll.getUnusedFullFilename();
@@ -297,23 +294,15 @@ public class CameraController2 implements CameraAdapter {
                     context.sendBroadcast(intent);
 
                     try {
-                        if (mode == OPEN_PREVIEW) {
+                        if (textureView != null) {
                             createPreview(textureView);
-                        } else if (mode == OPEN_PREVIEW_AND_TAKE_PHOTO) {
-                            // to prevent a loop, mode needs to be changed to OPEN_PREVIEW
-                            mode = OPEN_PREVIEW;
-                            createPreview(textureView);
-                        }
-                        else if (mode == OPEN_AND_TAKE_PHOTO) {
-                            closeCamera(); // TODO <--
-                        } else {
-                            Log.w(TAG, "no mode!");
                         }
                     } catch (CameraAccessException cae) {
                         Log.e(TAG, "captureListener failed");
                     }
                 }
             };
+
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
                 @Override
                 public void onConfigured(CameraCaptureSession session) {
@@ -327,13 +316,19 @@ public class CameraController2 implements CameraAdapter {
                 public void onConfigureFailed(CameraCaptureSession session) {
                 }
             }, mBackgroundHandler);
+
             Log.d(TAG, "takePicture complete");
+
         } catch (CameraAccessException cae) {
             Log.e(TAG, "camera access denied", cae);
         }
     }
 
     public void closeCamera() {
+        if (cameraCaptureSession != null) {
+            cameraCaptureSession.close();
+            cameraCaptureSession = null;
+        }
         if (cameraDevice != null) {
             cameraDevice.close();
             cameraDevice = null;

@@ -148,11 +148,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
-        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
-        heartbeatIntent.putExtra("service", Broadcast.HEARTBEAT_SERVICE);
-        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
-        sendBroadcast(heartbeatIntent);
-
+//        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
+//        heartbeatIntent.putExtra("service", Broadcast.HEARTBEAT_SERVICE);
+//        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
+//        sendBroadcast(heartbeatIntent);
+//
         Intent uploadIntent = new Intent(activity, Orchestrator.class);
         uploadIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
         uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
@@ -210,9 +210,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-
         startCamera();
-
     }
 
     @Override
@@ -254,8 +252,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            despat.setCamera(new CameraController2(this, textureView, CameraController2.OPEN_PREVIEW));
-        } catch (CameraAccessException cae) {
+            despat.setCamera(new CameraController2(this, textureView));
+        } catch (Exception cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
         }
@@ -268,9 +266,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         if (camera == null || camera.getState() == CameraAdapter.STATE_DEAD) {
             try {
-                camera = new CameraController2(this, textureView, CameraController2.OPEN_PREVIEW_AND_TAKE_PHOTO);
+                camera = new CameraController2(this, null); //, CameraController2.OPEN_PREVIEW_AND_TAKE_PHOTO);
                 despat.setCamera(camera);
-            } catch (CameraAccessException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "taking photo failed", e);
             }
         } else {

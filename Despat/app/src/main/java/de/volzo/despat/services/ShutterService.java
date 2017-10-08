@@ -11,10 +11,8 @@ import android.util.Log;
 
 import de.volzo.despat.CameraController2;
 import de.volzo.despat.Despat;
-import de.volzo.despat.ImageRollover;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.CameraAdapter;
-import de.volzo.despat.support.Config;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -69,8 +67,7 @@ public class ShutterService extends Service {
 
         try {
             if (camera == null || camera.getState() == CameraAdapter.STATE_DEAD) {
-                camera = new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
-//                new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
+                camera = new CameraController2(this, null);
                 despat.setCamera(camera);
             } else {
                 camera.takePhoto();

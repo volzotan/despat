@@ -66,6 +66,11 @@ public class Orchestrator extends BroadcastReceiver {
             }
         }
 
+        if (service == null) {
+            Log.e(TAG, "invoked for unknown service");
+            return;
+        }
+
         switch (service) {
             case Broadcast.ALL_SERVICES:
                 if (operation == OPERATION_START) {
