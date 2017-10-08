@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.StatFs;
+import android.service.notification.StatusBarNotification;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,7 +41,16 @@ public class Util {
     }
 
     public static void updateNotification(Context context, int numberOfImages) {
-        startNotification(context, numberOfImages);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        StatusBarNotification[] notifications = notificationManager.getActiveNotifications();
+        for (StatusBarNotification not : notifications) {
+            if (not.getId() == NOTIFICATION_IDENTIFIER) {
+                // only update if already existing
+                startNotification(context, numberOfImages);
+                break;
+            }
+        }
     }
 
     public static void stopNotification(Context context) {
