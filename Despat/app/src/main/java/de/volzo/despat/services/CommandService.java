@@ -14,7 +14,7 @@ public class CommandService extends JobService {
 
     private static final String TAG = CommandService.class.getSimpleName();
 
-    public static final int JOB_ID  = 0x1300;
+    public static final int JOB_ID  = 0x1500;
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {

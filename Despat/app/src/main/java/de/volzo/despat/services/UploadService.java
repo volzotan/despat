@@ -18,7 +18,7 @@ public class UploadService extends JobService {
 
     private static final String TAG = UploadService.class.getSimpleName();
 
-    public static final int JOB_ID  = 0x1300;
+    public static final int JOB_ID  = 0x1400;
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
@@ -29,9 +29,14 @@ public class UploadService extends JobService {
 
         ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
         File newestImage = imgroll.getNewestImage();
+
         if (newestImage == null) {
-            // TODO
+            Log.i(TAG, "no image for upload available. abort.");
+
+            jobFinished(jobParameters, false);
+            return false;
         }
+
         uploadMessage.image = newestImage;
 
         ServerConnector serverConnector = new ServerConnector(this);

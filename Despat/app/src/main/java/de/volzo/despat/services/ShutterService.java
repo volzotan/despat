@@ -11,8 +11,10 @@ import android.util.Log;
 
 import de.volzo.despat.CameraController2;
 import de.volzo.despat.Despat;
+import de.volzo.despat.ImageRollover;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.CameraAdapter;
+import de.volzo.despat.support.Config;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -23,9 +25,7 @@ public class ShutterService extends Service {
     public static final String TAG = ShutterService.class.getSimpleName();
     public static final int REQUEST_CODE = 0x1200;
 
-
-    public ShutterService() {
-    }
+    public ShutterService() {}
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -58,6 +58,12 @@ public class ShutterService extends Service {
     };
 
     public void releaseShutter() {
+
+        // check if any images needs to be deleted to have enough free space
+        // may be time-consuming. alternative place to run?
+        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
+        imgroll.run();
+
         Despat despat = ((Despat) getApplicationContext());
         CameraAdapter camera = despat.getCamera();
 
@@ -81,7 +87,6 @@ public class ShutterService extends Service {
     @Override
     public void onDestroy() {
         unregisterReceiver(broadcastReceiver);
-
         Log.d(TAG, "shutterService destroyed");
     }
 

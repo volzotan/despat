@@ -131,7 +131,7 @@ public class ServerConnector {
         }
     }
 
-    public void send(String endpoint, JSONObject statusMessage) {
+    private void send(String endpoint, JSONObject statusMessage) {
 
         String url = this.serverAddress + endpoint;
 
@@ -181,28 +181,18 @@ public class ServerConnector {
 
     public void sendUpload(UploadMessage msg) {
         try {
-            Writer writer = new StringWriter();
-            JsonWriter jsonWriter = new JsonWriter(writer);
-            jsonWriter.beginObject();
-
-            jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
-            jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
-
-            jsonWriter.endObject();
-            jsonWriter.close();
-//            send("/image", new JSONObject(writer.toString()));
-
-            sendImage("/image", msg.image);
-
+            sendImage("/upload", msg);
         } catch (Exception e) {
             Log.e(TAG, "sending status failed", e);
         }
     }
 
-    // taken from: https://stackoverflow.com/questions/32240177/working-post-multipart-request-with-volley-and-without-httpentity
-    private void sendImage(String endpoint, File image) {
+    // partially taken from: https://stackoverflow.com/questions/32240177/working-post-multipart-request-with-volley-and-without-httpentity
+    private void sendImage(String endpoint, UploadMessage msg) {
 
         String url = this.serverAddress + endpoint;
+        File image = msg.image;
+
         byte[] multipartBody = {};
 
         try {
@@ -212,13 +202,11 @@ public class ServerConnector {
             DataOutputStream dos = new DataOutputStream(bos);
 
             try {
-                // the first file
-                buildPart(dos, fileData1, "image.jpg");
-                // the second file
-//                buildPart(dos, fileData2, "ic_action_book.png");
-                // send multipart form data necesssary after file data
+                multipartText(dos, "deviceId", msg.deviceId);
+                multipartText(dos, "timestamp", dateFormat.format(msg.timestamp));
+                multipartFile(dos, fileData1, "image.jpg");
+
                 dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-                // pass to multipart body
                 multipartBody = bos.toByteArray();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -250,7 +238,17 @@ public class ServerConnector {
         }
     }
 
-    private void buildPart(DataOutputStream dataOutputStream, byte[] fileData, String fileName) throws IOException {
+    private void multipartText(DataOutputStream dataOutputStream, String key, String value) throws IOException {
+        dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + key + "\"" + lineEnd);
+        dataOutputStream.writeBytes(lineEnd);
+
+        dataOutputStream.writeBytes(value);
+
+        dataOutputStream.writeBytes(lineEnd);
+    }
+
+    private void multipartFile(DataOutputStream dataOutputStream, byte[] fileData, String fileName) throws IOException {
 
         dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
         dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"" + lineEnd);
