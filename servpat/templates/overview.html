@@ -28,11 +28,11 @@
       <td class="col-md-2">{{ msg.timestamp | dateformat }}</td>
       <td class="col-md-1">{{ msg.deviceName }}</td>
       <td class="col-md-1 text-right">{{ msg.numberImages | suppressnegative }}</td>
-      <td class="col-md-1 text-right">{{ msg.freeSpaceInternal | round | int | suppressnegative }}</td>
+      <td class="col-md-1 text-right {% if msg.freeSpaceInternal < 100 %} bg-danger {% endif %}">{{ msg.freeSpaceInternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right">{{ msg.freeSpaceExternal | round | int | suppressnegative }}</td>
-      <td class="col-md-1 text-right">{{ msg.batteryInternal | round | int | suppressnegative }}</td>
+      <td class="col-md-1 text-right {% if msg.batteryInternal < 20 %} bg-danger {% endif %}">{{ msg.batteryInternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right">{{ msg.batteryExternal | round | int | suppressnegative }}</td>
-      <td class="col-md-1 text-center">{{ msg.stateCharging | bool }}</td>
+      <td class="col-md-1 text-center {% if msg.stateCharging < 1 %} bg-danger {% else %} bg-success {% endif %}">{{ msg.stateCharging | bool }}</td>
     </tr>
     {% else %}
     <tr>

@@ -17,16 +17,10 @@
         android:background="@color/black">
 
         <Button
-            android:text="Start Capturing"
+            android:text="(?) Capturing"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/bt_startCapturing" />
-
-        <Button
-            android:text="Stop Capturing"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_stopCapturing" />
+            android:id="@+id/bt_startStopCapturing" />
 
         <Button
             android:text="Toggle Camera"

@@ -76,29 +76,34 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 
-        Button startCapturing = (Button) findViewById(R.id.bt_startCapturing);
-        startCapturing.setOnClickListener(new View.OnClickListener() {
+        final Button startStopCapturing = (Button) findViewById(R.id.bt_startStopCapturing);
+        startStopCapturing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "startCapturing");
-                Intent shutterIntent = new Intent(activity, Orchestrator.class);
-                shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
-                shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
-                sendBroadcast(shutterIntent);
-            }
-        });
+                if (!Util.isServiceRunning(activity, ShutterService.class)) {
+                    Log.d(TAG, "startCapturing");
+                    Intent shutterIntent = new Intent(activity, Orchestrator.class);
+                    shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
+                    shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
+                    sendBroadcast(shutterIntent);
 
-        Button stopCapturing = (Button) findViewById(R.id.bt_stopCapturing);
-        stopCapturing.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "stopCapturing");
-                Intent shutterIntent = new Intent(activity, Orchestrator.class);
-                shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
-                shutterIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
-                sendBroadcast(shutterIntent);
+                    startStopCapturing.setText("Stop Capturing");
+                } else {
+                    Log.d(TAG, "stopCapturing");
+                    Intent shutterIntent = new Intent(activity, Orchestrator.class);
+                    shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
+                    shutterIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
+                    sendBroadcast(shutterIntent);
+
+                    startStopCapturing.setText("Start Capturing");
+                }
             }
         });
+        if (!Util.isServiceRunning(activity, ShutterService.class)) {
+            startStopCapturing.setText("Start Capturing");
+        } else {
+            startStopCapturing.setText("Stop Capturing");
+        }
 
         Button toggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
         toggleCamera.setOnClickListener(new View.OnClickListener() {
