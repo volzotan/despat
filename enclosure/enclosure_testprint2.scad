@@ -1,7 +1,7 @@
 include <hinge.scad>
 
-sizeBot    = [170, 86, 20];
-sizeTop    = [170, 86, 23];
+sizeBot    = [70, 40, 20]; //[170, 86, 20];
+sizeTop    = [70, 40, 23]; //[170, 86, 23];
 lensHole   = [sizeBot[0]-25, 25];
 
 lidDepth   = 1;
@@ -14,7 +14,7 @@ wb         = 1.2;
 
 //difference(){
 //    union() {
-//        bottom();
+        bottom();
 //        translate([0, sizeTop[1], 44-.7]) rotate([180, 0, 0]) top();
 //    }
 //    translate([-1, -1, -1]) cube([90, 100, 50]);
@@ -23,15 +23,7 @@ wb         = 1.2;
 //translate([70, 4.7, 7]) color("orange") wedge();
 //translate([70, -20, 12.8]) rotate([180, 0, 0]) color("orange") wedge();
 
-% translate([0, sizeBot[1]-2.3, 18.1]) rotate([0, 90, 0]) color([1, 1, 1], 1) cylinder($fn=32, d=1.75, h=100);
-
-
-translate([0, 100, 0]) top();
-
-% translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
-
-
-% translate([30, 10, 5+0]) nexus5();
+translate([70, 82, 0]) rotate([0, 0, 180]) top();
 
 //% translate([127, 40, -10]) uvfilter();
 //% translate([5, 36, 4]) usbplug();
@@ -188,7 +180,7 @@ module top() {
             }
             
             //inlay
-            intersection() {
+            * intersection() {
                 inlay = [154, 60, 23];
                 inlayTol = 0.5;
                 
@@ -224,14 +216,14 @@ module top() {
         }
         
         // hinge holes
-        translate([30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=20, d=3.3);
-        translate([sizeBot[0]-30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=20, d=3.3);
-        translate([30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
-        translate([sizeBot[0]-30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=20, d=6.6);
+        translate([sizeBot[0]/2, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=20, d=3.3);
+//        translate([sizeBot[0]-30, sizeBot[1]+5, 17.6]) rotate([90, 0, 0]) cylinder($fn=32, h=20, d=3.3);
+        translate([sizeBot[0]/2, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
+//        translate([sizeBot[0]-30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=20, d=6.6);
     }
     
-    translate([+20+18.2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
-    translate([-20+sizeTop[0]-2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
+    translate([+25+18.2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
+    * translate([-20+sizeTop[0]-2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
     
 }
 
@@ -279,7 +271,7 @@ module bottom() {
             }
             
             // inlay
-            translate([0, 0, 0]) intersection() {
+            * translate([0, 0, 0]) intersection() {
                 difference() {
                     translate([20, w, 0]) cube([sizeBot[0]-20, sizeBot[1]-2*w, 20]); //20-1]);
                     translate([30, 10, 7]) color("red") nexus5cavity(20);
@@ -300,11 +292,12 @@ module bottom() {
             }
             
             // hinge nut support
-            translate([12, sizeBot[1]-4.8, 1.2]) cube([12, 4.8, 16]);
+            translate([16, sizeBot[1]-4.8, 1.2]) cube([12, 4.8, 16]);
+            translate([42, sizeBot[1]-4.8, 1.2]) cube([12, 4.8, 16]);
         }
         
         // camera lens
-        translate([lensHole[0], lensHole[1], -1]) {
+        * translate([lensHole[0], lensHole[1], -1]) {
             down = 39.4+0.7;
             up   = 36.9+0.5;
             cylinder($fn=64, h=1+3.60+0.3, d=down);
@@ -314,29 +307,29 @@ module bottom() {
         }
         
         // socket screw holes
-        translate([sizeBot[0]/2, sizeBot[1]+5, 11.5]) rotate([90, 0, 0]) {
+        * translate([sizeBot[0]/2, sizeBot[1]+5, 11.5]) rotate([90, 0, 0]) {
             translate([-14, 0, 0]) cylinder($fn=32, h=10, d=5.3);
             translate([+14, 0, 0]) cylinder($fn=32, h=10, d=5.3);
         }
         
         // hinge holes
-        translate([30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
-        translate([sizeBot[0]-30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
-        translate([30, 10+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
-        translate([sizeBot[0]-30, 10+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
+        translate([sizeBot[0]/2, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+//        translate([sizeBot[0]-30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+        translate([sizeBot[0]/2, 10+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
+//        translate([sizeBot[0]-30, 10+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
         
-        translate([17.2, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=10);
-        translate([17.2, sizeBot[1]-3.5, 11.5]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
-        translate([43.2, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=10);
-        translate([43.2, sizeBot[1]-3.5, 11.5]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
+        translate([22.2, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=10);
+        translate([22.2, sizeBot[1]-3.5, 11.5]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
+        translate([48.2, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=10);
+        translate([48.2, sizeBot[1]-3.5, 11.5]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
         
-        translate([sizeBot[0]-43, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=10);
-        translate([sizeBot[0]-43, sizeBot[1]-3.5, 11.5]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
-        translate([sizeBot[0]-17, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=10);
-        translate([sizeBot[0]-17, sizeBot[1]-3.5, 11.5]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
+//        translate([sizeBot[0]-43, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=10);
+//        translate([sizeBot[0]-43, sizeBot[1]-3.5, 11.5]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
+//        translate([sizeBot[0]-17, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=10);
+//        translate([sizeBot[0]-17, sizeBot[1]-3.5, 11.5]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
     
         // socket holes
-        translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
+        * translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
             translate([-14, 0, 0]) cylinder($fn=6, h=10, d=9.6);
             translate([+14, 0, 0]) cylinder($fn=6, h=10, d=9.6);
         }
@@ -379,7 +372,7 @@ module bottom() {
     }
     
     // hinges
-//    translate([20+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
+//    translate([25+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
 //    translate([-20+sizeBot[0]-2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
     
     // hinge support
@@ -388,14 +381,7 @@ module bottom() {
 //    translate([30+13.4, sizeBot[1], 14+2]) rotate([0, 180, 0])          hinge_support();
 //    translate([sizeBot[0]-17+.2, sizeBot[1], 14+2]) rotate([0, 180, 0]) hinge_support();
     
-    // nuts
-    % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
-        translate([-14, 0, 0]) M5nut();
-        translate([+14, 0, 0]) M5nut();
-    }
-    
-    translate([30, 5, 12]) rotate([90, 0, 0]) M3nut();
-    translate([sizeBot[0]-30, 5, 12]) rotate([90, 0, 0]) M3nut();
+
     
 }
 
