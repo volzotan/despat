@@ -34,6 +34,14 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.SCREEN_OFF"/>
                 <action android:name="android.intent.action.SCREEN_ON"/>
+
+                <action android:name="de.volzo.despat.ALL_SERVICES"/>
+                <action android:name="de.volzo.despat.SHUTTER_SERVICE"/>
+                <action android:name="de.volzo.despat.RECOGNITION_SERVICE"/>
+                <action android:name="de.volzo.despat.HEARTBEAT_SERVICE"/>
+                <action android:name="de.volzo.despat.UPLOAD_SERVICE"/>
+                <action android:name="de.volzo.despat.COMMAND_SERVICE"/>
+
             </intent-filter>
         </receiver>
 

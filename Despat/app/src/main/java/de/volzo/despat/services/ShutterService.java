@@ -61,8 +61,8 @@ public class ShutterService extends Service {
 
         // check if any images needs to be deleted to have enough free space
         // may be time-consuming. alternative place to run?
-        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
-        imgroll.run();
+//        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
+//        imgroll.run();
 
         Despat despat = ((Despat) getApplicationContext());
         CameraAdapter camera = despat.getCamera();
@@ -70,6 +70,7 @@ public class ShutterService extends Service {
         try {
             if (camera == null || camera.getState() == CameraAdapter.STATE_DEAD) {
                 camera = new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
+//                new CameraController2(this, null, CameraController2.OPEN_AND_TAKE_PHOTO);
                 despat.setCamera(camera);
             } else {
                 camera.takePhoto();

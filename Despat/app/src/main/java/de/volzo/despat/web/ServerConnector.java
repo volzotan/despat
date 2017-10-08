@@ -109,7 +109,7 @@ public class ServerConnector {
                 payload = new String();
             }
 
-            EventMessage msg = new EventMessage();
+//            EventMessage msg = new EventMessage();
 
             Writer writer = new StringWriter();
             JsonWriter jsonWriter = new JsonWriter(writer);
@@ -119,8 +119,8 @@ public class ServerConnector {
             jsonWriter.name("deviceName").value(Config.getDeviceName(context));
             jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
 
-            jsonWriter.name("eventtype").value(msg.eventtype);
-            jsonWriter.name("payload").value(msg.payload);
+            jsonWriter.name("eventtype").value(type);
+            jsonWriter.name("payload").value(payload);
 
             jsonWriter.endObject();
             jsonWriter.close();
@@ -131,7 +131,7 @@ public class ServerConnector {
         }
     }
 
-    private void send(String endpoint, JSONObject statusMessage) {
+    private void send(String endpoint, JSONObject jsonMessage) {
 
         String url = this.serverAddress + endpoint;
 
@@ -172,7 +172,7 @@ public class ServerConnector {
         };
 
         Map<String, String> params = new HashMap<String, String>();
-        JSONRequest jsObjRequest = new JSONRequest(Request.Method.POST, url, statusMessage, params, successListener, errorListener, context);
+        JSONRequest jsObjRequest = new JSONRequest(Request.Method.POST, url, jsonMessage, params, successListener, errorListener, context);
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -181,6 +181,10 @@ public class ServerConnector {
 
     public void sendUpload(UploadMessage msg) {
         try {
+
+            msg.deviceId = Config.getUniqueDeviceId(context);
+            msg.timestamp = Calendar.getInstance().getTime();
+
             sendImage("/upload", msg);
         } catch (Exception e) {
             Log.e(TAG, "sending status failed", e);
@@ -293,16 +297,16 @@ public class ServerConnector {
         public float temperature;
     }
 
-    public static class EventMessage {
-
-        public String deviceId;
-        public String deviceName;
-        public String originalDeviceId;
-        public Date timestamp;
-
-        public int eventtype;
-        public String payload;
-    }
+//    public static class EventMessage {
+//
+//        public String deviceId;
+//        public String deviceName;
+//        public String originalDeviceId;
+//        public Date timestamp;
+//
+//        public int eventtype;
+//        public String payload;
+//    }
 
     public static class UploadMessage {
 
@@ -314,12 +318,12 @@ public class ServerConnector {
 
     public static class EventType {
 
-        public static final int INIT        = 0x0;
-        public static final int BOOT        = 0x1;
-        public static final int SHUTDOWN    = 0x2;
+        public static final int INIT        = 0x10;
+        public static final int BOOT        = 0x11;
+        public static final int SHUTDOWN    = 0x12;
 
-        public static final int START       = 0x10;
-        public static final int STOP        = 0x11;
+        public static final int START       = 0x20;
+        public static final int STOP        = 0x21;
 
         public static final int ERROR       = 0x30;
     }

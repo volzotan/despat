@@ -16,7 +16,7 @@ public class Config {
 
     public static final String TAG = Config.class.getSimpleName();
 
-    public static long SHUTTER_INTERVAL                     = 60 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
+    public static long SHUTTER_INTERVAL                     = 6 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
     public static long HEARTBEAT_INTERVAL                   = 15 * 60 * 1000L; // Minimum interval is 15m
     public static long UPLOAD_INTERVAL                      = 15 * 60 * 1000L; // Minimum interval is 15m
 
