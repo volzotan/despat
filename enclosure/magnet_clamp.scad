@@ -1,7 +1,7 @@
 % translate([0, 0, -7]) color("grey") {
-    rotate([0, 0, 90+120]) translate([25, 0, 0]) magnet(); 
-    rotate([0, 0, 90+240]) translate([25, 0, 0]) magnet(); 
-    rotate([0, 0, 90+000]) translate([25, 0, 0]) magnet(); 
+    rotate([0, 0, 90+120]) translate([32, 0, 0]) magnet(); 
+    rotate([0, 0, 90+240]) translate([32, 0, 0]) magnet(); 
+    rotate([0, 0, 90+000]) translate([32, 0, 0]) magnet(); 
 }
 
 baseplate();
@@ -9,9 +9,9 @@ baseplate();
 module baseplate() {
     height = 6;
 
-    x = 21.7;
-    y = 12.5;
-    y2 = 25;
+    x = 27.8;
+    y = 16;
+    y2 = 32;
         
     y_head = 0;
 
@@ -26,28 +26,28 @@ module baseplate() {
             translate([0, y2, height]) cylinder($fn=64, d1=20, d2=20-2, h=2);
             
             hull() {
-                translate([x, -y, 0]) cylinder($fn=32, d=20-7, h=height-1);
-                translate([-x, -y, 0]) cylinder($fn=32, d=20-7, h=height-1);
-                translate([0, y2, 0]) cylinder($fn=32, d=20-7, h=height-1);
+                translate([x, -y, 0]) cylinder($fn=32, d=20-8, h=height-1);
+                translate([-x, -y, 0]) cylinder($fn=32, d=20-8, h=height-1);
+                translate([0, y2, 0]) cylinder($fn=32, d=20-8, h=height-1);
             }
             hull() {
-                translate([x, -y, height-1]) cylinder($fn=32, d1=20-7, d2=20-8, h=1);
-                translate([-x, -y, height-1]) cylinder($fn=32, d1=20-7, d2=20-8, h=1);
-                translate([0, y2, height-1]) cylinder($fn=32, d1=20-7, d2=20-8, h=1);
+                translate([x, -y, height-1]) cylinder($fn=32, d1=20-8, d2=20-9, h=1);
+                translate([-x, -y, height-1]) cylinder($fn=32, d1=20-8, d2=20-9, h=1);
+                translate([0, y2, height-1]) cylinder($fn=32, d1=20-8, d2=20-9, h=1);
             }
             
-//            hull() {
-//                translate([x, -y, height]) cylinder($fn=32, d1=6, d2=2, h=2);
-//                translate([0, 0, height]) cylinder($fn=32, d1=6, d2=2, h=2);
-//            }
-//            hull() {   
-//                translate([-x, -y, height]) cylinder($fn=32, d1=6, d2=2, h=2);
-//                translate([0, 0, height]) cylinder($fn=32, d1=6, d2=2, h=2);
-//            }
-//            hull() {  
-//                translate([0, y2, height]) cylinder($fn=32, d1=6, d2=2, h=2);
-//                translate([0, 0, height]) cylinder($fn=32, d1=6, d2=2, h=2);
-//            }
+            hull() {
+                translate([x, -y, height]) cylinder($fn=32, d1=6, d2=3, h=2);
+                translate([0, 0, height]) cylinder($fn=32, d1=6, d2=3, h=2);
+            }
+            hull() {   
+                translate([-x, -y, height]) cylinder($fn=32, d1=6, d2=3, h=2);
+                translate([0, 0, height]) cylinder($fn=32, d1=6, d2=3, h=2);
+            }
+            hull() {  
+                translate([0, y2, height]) cylinder($fn=32, d1=6, d2=3, h=2);
+                translate([0, 0, height]) cylinder($fn=32, d1=6, d2=3, h=2);
+            }
             
             // ballhead
             translate([0, y_head, 0]) cylinder($fn=64, d=29+6, h=height+3);
@@ -55,16 +55,16 @@ module baseplate() {
             
             // grappling hook
             translate([0, -20, 1]) hull() {
-                translate([-12, 0, 0]) cylinder($fn=32, d=10, h=height-2);
-                translate([+12, 0, 0]) cylinder($fn=32, d=10, h=height-2);
+                translate([-11, 0, 0]) cylinder($fn=32, d=10, h=height-2);
+                translate([+11, 0, 0]) cylinder($fn=32, d=10, h=height-2);
             }
             translate([0, -20, height-1]) hull() {
-                translate([-12, 0, 0]) cylinder($fn=32, d1=10, d2=8, h=1);
-                translate([+12, 0, 0]) cylinder($fn=32, d1=10, d2=8, h=1);
+                translate([-11, 0, 0]) cylinder($fn=32, d1=10, d2=8, h=1);
+                translate([+11, 0, 0]) cylinder($fn=32, d1=10, d2=8, h=1);
             }
             translate([0, -20, 0]) hull() {
-                translate([-12, 0, 0]) cylinder($fn=32, d1=8, d2=10, h=1);
-                translate([+12, 0, 0]) cylinder($fn=32, d1=8, d2=10, h=1);
+                translate([-11, 0, 0]) cylinder($fn=32, d1=8, d2=10, h=1);
+                translate([+11, 0, 0]) cylinder($fn=32, d1=8, d2=10, h=1);
             }
         }
         
@@ -77,16 +77,16 @@ module baseplate() {
         
         // grappling hook
         translate([0, -20, -1]) hull() {
-            translate([-10, 0, 0]) cylinder($fn=32, d=3, h=height+2);
-            translate([+10, 0, 0]) cylinder($fn=32, d=3, h=height+2);
+            translate([-9, 0, 0]) cylinder($fn=32, d=3, h=height+2);
+            translate([+9, 0, 0]) cylinder($fn=32, d=3, h=height+2);
         }
         translate([0, -20, -1]) hull() {
-            translate([-10, 0, height]) cylinder($fn=32, d1=3, d2=5, h=1.1);
-            translate([+10, 0, height]) cylinder($fn=32, d1=3, d2=5, h=1.1);
+            translate([-9, 0, height]) cylinder($fn=32, d1=3, d2=5, h=1.1);
+            translate([+9, 0, height]) cylinder($fn=32, d1=3, d2=5, h=1.1);
         }
         translate([0, -20, -.1]) hull() {
-            translate([-10, 0, 0]) cylinder($fn=32, d1=5, d2=3, h=1.1);
-            translate([+10, 0, 0]) cylinder($fn=32, d1=5, d2=3, h=1.1);
+            translate([-9, 0, 0]) cylinder($fn=32, d1=5, d2=3, h=1.1);
+            translate([+9, 0, 0]) cylinder($fn=32, d1=5, d2=3, h=1.1);
         }
         
         // magnet screws
