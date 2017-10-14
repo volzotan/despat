@@ -178,6 +178,22 @@ module top() {
                 block(sizeTop[0], sizeTop[1], height, crad=crad, red=1.6+0.2);
                 translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=1.6+1.4-0.2);
             }
+            // seal3
+            translate([0, 0, sizeTop[2]-.1]) {
+                color("purple") intersection() {
+                    difference() {
+                        height = 1.5+0.3;
+                        block(sizeTop[0], sizeTop[1], height, crad=crad, red=1.6+0.2);
+                        translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=1.6+1.4-0.2);
+                    }
+                    union() {
+                        translate([0, 0, 0]) cube([8, 8, 10]);
+                        translate([sizeTop[0]-8, 0, 0]) cube([8, 8, 10]);
+                        translate([0, sizeTop[1]-8, 0]) cube([8, 8, 10]);
+                        translate([sizeTop[0]-8, sizeTop[1]-8, 0]) cube([8, 8, 10]);
+                    }
+                }
+            }
             
             //inlay
             * intersection() {
@@ -339,21 +355,21 @@ module bottom() {
             height = 3;
             union() {
                 hull() {
-                    block(sizeBot[0], sizeBot[1], height-.3, crad=crad, red=1.4);
-                    translate([0, 0, -.5]) block(sizeBot[0], sizeBot[1], height, crad=crad, red=1.4+.5);
+                    block(sizeBot[0], sizeBot[1], height-.3, crad=crad, red=1.45);
+                    translate([0, 0, -.5]) block(sizeBot[0], sizeBot[1], height, crad=crad, red=1.45+0.5); // lower triange #1
                 }
             }
             
-            translate([0, 0, -.1]) block(sizeBot[0], sizeBot[1], height+2, crad=crad, red=1.4+1.8);
+            translate([0, 0, -.1]) block(sizeBot[0], sizeBot[1], height+2, crad=crad, red=1.45+1.75);
             translate([0, 0, -.6]) color("orange") hull() {
-                block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=1.4+1.8-0.5);
-                translate([0, 0, 0.5])block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=1.4+1.8);
+                block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=1.45+1.75-0.5);                          // lower triange #1
+                translate([0, 0, 0.5])block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=1.45+1.75);
             }
         }
         // seal 2
         translate([0, 0, sizeBot[2]-2.3]) translate([0, 0, 3-0.7-0.3]) color("orange") difference() {
-            block(sizeBot[0], sizeBot[1], 1, crad=crad, red=1.4-0.3);
-            block(sizeBot[0], sizeBot[1], 1, crad=crad, red=1.4+1.8+0.3);
+            block(sizeBot[0], sizeBot[1], 1, crad=crad, red=1.45-0.3);
+            block(sizeBot[0], sizeBot[1], 1, crad=crad, red=1.45+1.75+0.3);
         }
         
         
