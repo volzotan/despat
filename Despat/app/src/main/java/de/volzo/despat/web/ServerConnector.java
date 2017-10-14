@@ -226,7 +226,7 @@ public class ServerConnector {
                 public void onErrorResponse(VolleyError error) {
                     try {
                         Log.e(TAG, "image upload failed"); // TODO
-                        Log.e(TAG, error.getMessage());
+                        Log.e(TAG, error.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

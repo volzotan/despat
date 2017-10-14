@@ -163,14 +163,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
         sendBroadcast(uploadIntent);
 
-
 //        startCapturing.callOnClick();
-
-//        ServerConnector serverConnector = new ServerConnector(this);
-//        ServerConnector.ServerMessage msg = new ServerConnector.ServerMessage();
-//        msg.numberImages = 500;
-//        serverConnector.sendStatus(msg);
-
 
     }
 

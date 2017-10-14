@@ -59,6 +59,7 @@
         <service
             android:name=".services.RecognitionService"
             android:exported="false"
+            android:label="Recognition Service"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
         <service
             android:name=".services.HeartbeatService"
