@@ -30,7 +30,7 @@ public class HeartbeatService extends JobService {
 
         ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
 
-        statusMessage.numberImages = ((Despat) getApplicationContext()).getImagesTaken();
+        statusMessage.numberImages = Config.getImagesTaken(this);
         statusMessage.freeSpaceInternal = Util.getFreeSpaceOnDevice(Config.IMAGE_FOLDER);
         statusMessage.freeSpaceExternal = -1; // TODO
         statusMessage.batteryInternal = systemController.getBatteryLevel();

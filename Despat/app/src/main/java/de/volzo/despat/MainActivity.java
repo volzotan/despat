@@ -174,8 +174,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
             Log.d("image taken", "path: " + path);
 
-            despat.setImagesTaken(despat.getImagesTaken() + 1);
-            Util.updateNotification(activity, despat.getImagesTaken());
+            Toast.makeText(activity, "image taken", Toast.LENGTH_SHORT).show();
+
         }
     };
 

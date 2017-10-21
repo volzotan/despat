@@ -42,6 +42,7 @@
                 <action android:name="de.volzo.despat.UPLOAD_SERVICE"/>
                 <action android:name="de.volzo.despat.COMMAND_SERVICE"/>
 
+                <action android:name="de.volzo.despat.PICTURE_TAKEN"/>
             </intent-filter>
         </receiver>
 

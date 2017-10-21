@@ -16,9 +16,9 @@ public class Config {
 
     public static final String TAG = Config.class.getSimpleName();
 
-    public static long SHUTTER_INTERVAL                     = 6 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
+    public static long SHUTTER_INTERVAL                     = 10 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
     public static long HEARTBEAT_INTERVAL                   = 15 * 60 * 1000L; // Minimum interval is 15m
-    public static long UPLOAD_INTERVAL                      = 15 * 60 * 1000L; // Minimum interval is 15m
+    public static long UPLOAD_INTERVAL                      = 15 * 60 * 1000L;
 
     public static final File IMAGE_FOLDER                   = new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final String IMAGE_FILEEXTENSION          = ".jpg";
@@ -70,6 +70,22 @@ public class Config {
     public static String getDeviceName(Context context) {
         SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
         return settings.getString("deviceName", android.os.Build.MODEL);
+    }
+
+    public static void resetImagesTaken(Context context) {
+        setImagesTaken(context, 0);
+    }
+
+    public static void setImagesTaken(Context context, int count) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt("imagesTaken", count);
+        editor.apply();
+    }
+
+    public static int getImagesTaken(Context context) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        return settings.getInt("imagesTaken", 0);
     }
 
 }

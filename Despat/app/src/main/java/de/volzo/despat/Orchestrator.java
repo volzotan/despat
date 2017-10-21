@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public class Orchestrator extends BroadcastReceiver {
         String service      = intent.getStringExtra("service");
         int operation       = intent.getIntExtra("operation", -1);
 
-        Log.d(TAG, "Action: " + action + " | Service: " + service + " | operation: " + operation);
+        log(action, service, operation);
 
         if (action != null && action.length() > 0) {
             switch (action) {
@@ -60,10 +61,18 @@ public class Orchestrator extends BroadcastReceiver {
                 case "android.intent.action.SCREEN_ON":
                     // TODO
                     break;
+
+                case Broadcast.PICTURE_TAKEN:
+                    Config.setImagesTaken(context, Config.getImagesTaken(context) + 1);
+                    Util.updateNotification(context, Config.getImagesTaken(context));
+                    break;
+
                 default:
                     Log.e(TAG, "invoked by unknown action");
-                    return;
             }
+
+            // processing of action finished, no service extra will be present
+            return;
         }
 
         if (service == null) {
@@ -134,7 +143,6 @@ public class Orchestrator extends BroadcastReceiver {
 
             default:
                 Log.d(TAG, "unknown service to start: " + service);
-                return;
         }
     }
 
@@ -144,9 +152,14 @@ public class Orchestrator extends BroadcastReceiver {
 
         // start the Shutter Service
         if (!Util.isServiceRunning(context, ShutterService.class)) {
+
+            // reset the counter
+            Config.resetImagesTaken(context);
+
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
             context.startService(shutterServiceIntent);
 
+            // server event
             ServerConnector serverConnector = new ServerConnector(context);
             serverConnector.sendEvent(ServerConnector.EventType.START, null);
         }
@@ -172,8 +185,8 @@ public class Orchestrator extends BroadcastReceiver {
         // so a single alarm needs to schedule the next one
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
 
-        Despat despat = ((Despat) context.getApplicationContext());
-        Util.startNotification(context, despat.getImagesTaken());
+        // update the notification
+        Util.startNotification(context, Config.getImagesTaken(context));
     }
 
     private void shutterServiceStop() {
@@ -262,7 +275,13 @@ public class Orchestrator extends BroadcastReceiver {
         if (!alreadyScheduled) {
             ComponentName serviceComponent = new ComponentName(context, UploadService.class);
             JobInfo.Builder builder = new JobInfo.Builder(UploadService.JOB_ID, serviceComponent);
-            builder.setPeriodic(Config.UPLOAD_INTERVAL);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                builder.setPeriodic(Config.UPLOAD_INTERVAL, 30000);
+            } else{
+                builder.setPeriodic(Config.UPLOAD_INTERVAL);
+            }
+
             jobScheduler.schedule(builder.build());
         } else {
             Log.d(TAG, "Upload Service already scheduled");
@@ -284,5 +303,31 @@ public class Orchestrator extends BroadcastReceiver {
         builder.setMinimumLatency(0);
         builder.setOverrideDeadline(1000);
         jobScheduler.schedule(builder.build());
+    }
+
+
+    private void log(String action, String service, int operation) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(">> ");
+
+        if (action != null) {
+            sb.append("Action: ");
+            sb.append(action.substring(action.lastIndexOf(".")));
+        }
+
+        if (service != null) {
+            if (action != null) sb.append(" | ");
+            sb.append("Service: ");
+            sb.append(service.substring(service.lastIndexOf(".")));
+        }
+
+        if (operation >= 0) {
+            if (service != null) sb.append(" | ");
+            sb.append("operation: ");
+            sb.append(operation);
+        }
+
+        Log.d(TAG, sb.toString());
     }
 }

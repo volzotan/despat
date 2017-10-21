@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import de.volzo.despat.support.CameraAdapter;
+import de.volzo.despat.support.Config;
 import de.volzo.despat.web.ServerConnector;
 
 public class Despat extends Application {
@@ -12,7 +13,7 @@ public class Despat extends Application {
 
     private CameraAdapter camera;
     private SystemController systemController;
-    private int imagesTaken = 0;
+//    private int imagesTaken = 0;
 
     @Override
     public void onCreate() {
@@ -55,11 +56,4 @@ public class Despat extends Application {
         return systemController;
     }
 
-    public void setImagesTaken(int imagesTaken) {
-        this.imagesTaken = imagesTaken;
-    }
-
-    public int getImagesTaken() {
-        return this.imagesTaken;
-    }
 }
