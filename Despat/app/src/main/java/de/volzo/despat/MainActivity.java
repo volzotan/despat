@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.io.File;
 
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 
-        final Button startStopCapturing = (Button) findViewById(R.id.bt_startStopCapturing);
+        final ToggleButton startStopCapturing = (ToggleButton) findViewById(R.id.bt_startStopCapturing);
         startStopCapturing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
                     sendBroadcast(shutterIntent);
 
-                    startStopCapturing.setText("Stop Capturing");
+                    startStopCapturing.setChecked(true);
                 } else {
                     Log.d(TAG, "stopCapturing");
                     Intent shutterIntent = new Intent(activity, Orchestrator.class);
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     shutterIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
                     sendBroadcast(shutterIntent);
 
-                    startStopCapturing.setText("Start Capturing");
+                    startStopCapturing.setChecked(false);
                 }
             }
         });
@@ -149,22 +150,30 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
+        Button btConfig = (Button) findViewById(R.id.bt_config);
+        btConfig.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(activity, ConfigActivity.class);
+                startActivity(intent);
+            }
+        });
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.PICTURE_TAKEN);
         registerReceiver(broadcastReceiver, filter);
 
-//        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
-//        heartbeatIntent.putExtra("service", Broadcast.HEARTBEAT_SERVICE);
-//        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
-//        sendBroadcast(heartbeatIntent);
-//
+        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
+        heartbeatIntent.putExtra("service", Broadcast.HEARTBEAT_SERVICE);
+        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
+        sendBroadcast(heartbeatIntent);
+
         Intent uploadIntent = new Intent(activity, Orchestrator.class);
         uploadIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
         uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
         sendBroadcast(uploadIntent);
 
 //        startCapturing.callOnClick();
-
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

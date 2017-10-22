@@ -10,44 +10,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="de.volzo.despat.MainActivity">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:orientation="vertical"
-        android:background="@color/black">
-
-        <Button
-            android:text="(?) Capturing"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_startStopCapturing" />
-
-        <Button
-            android:text="Toggle Camera"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_toggleCamera" />
-
-        <Button
-            android:text="Take Photo"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_takePhoto" />
-
-        <Button
-            android:text="Start Recognizer"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_startRecognizer" />
-
-        <Button
-            android:text="Kill Services"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_kill" />
-
-    </LinearLayout>
-
     <de.volzo.despat.support.FixedAspectRatioFrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -77,5 +39,50 @@
             android:text="uninitialized"/>
 
     </de.volzo.despat.support.FixedAspectRatioFrameLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:background="@color/colorPrimary">
+
+        <ToggleButton
+            android:textOn="Stop Capturing"
+            android:textOff="Start Capturing"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_startStopCapturing" />
+
+        <Button
+            android:text="Toggle Camera"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_toggleCamera" />
+
+        <Button
+            android:text="Take Photo"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_takePhoto" />
+
+        <Button
+            android:text="Start Recognizer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_startRecognizer" />
+
+        <Button
+            android:text="Kill Services"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_kill" />
+
+        <Button
+            android:text="Config"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_config" />
+
+    </LinearLayout>
 
 </FrameLayout>
