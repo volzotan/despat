@@ -220,9 +220,13 @@ module top() {
                     
                         translate([54, 1, wb]) anker_cutout();
                         
+                        // button
+                        translate([73+06, 6, 5]) block(14, 20, 50);
+//                        translate([73+08, 0]) cube([10, 10, 50]);
+                        
                         // wedge
-                        translate([95, 7, 1]) cube([40, 3, sizeTop[2]]);
-                        translate([95+5, 7+2, 1]) cube([30, 20, sizeTop[2]]);
+                        translate([100, 7, 1]) cube([40, 3, sizeTop[2]]);
+                        translate([100+5, 7+2, 1]) cube([30, 20, sizeTop[2]]);
                     }
                     
                     // hinge screw reinforcement
