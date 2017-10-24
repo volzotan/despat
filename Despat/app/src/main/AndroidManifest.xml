@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="de.volzo.despat">
+    package="de.volzo.despat">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:name=".Despat"
@@ -21,28 +21,25 @@
             android:name=".MainActivity"
             android:screenOrientation="landscape">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PreviewActivity">
-        </activity>
+        <activity android:name=".PreviewActivity"></activity>
 
         <receiver android:name=".Orchestrator">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.SCREEN_OFF"/>
-                <action android:name="android.intent.action.SCREEN_ON"/>
-
-                <action android:name="de.volzo.despat.ALL_SERVICES"/>
-                <action android:name="de.volzo.despat.SHUTTER_SERVICE"/>
-                <action android:name="de.volzo.despat.RECOGNITION_SERVICE"/>
-                <action android:name="de.volzo.despat.HEARTBEAT_SERVICE"/>
-                <action android:name="de.volzo.despat.UPLOAD_SERVICE"/>
-                <action android:name="de.volzo.despat.COMMAND_SERVICE"/>
-
-                <action android:name="de.volzo.despat.PICTURE_TAKEN"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="de.volzo.despat.ALL_SERVICES" />
+                <action android:name="de.volzo.despat.SHUTTER_SERVICE" />
+                <action android:name="de.volzo.despat.RECOGNITION_SERVICE" />
+                <action android:name="de.volzo.despat.HEARTBEAT_SERVICE" />
+                <action android:name="de.volzo.despat.UPLOAD_SERVICE" />
+                <action android:name="de.volzo.despat.COMMAND_SERVICE" />
+                <action android:name="de.volzo.despat.PICTURE_TAKEN" />
             </intent-filter>
         </receiver>
 
@@ -56,27 +53,29 @@
         <service
             android:name=".services.ShutterService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
         <service
             android:name=".services.RecognitionService"
             android:exported="false"
             android:label="Recognition Service"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".services.HeartbeatService"
             android:exported="false"
             android:label="Heartbeat Service"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".services.UploadService"
             android:exported="false"
             android:label="Upload Service"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".services.CommandService"
             android:exported="false"
             android:label="Command Service"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <activity android:name=".ConfigActivity"></activity>
     </application>
 
 </manifest>
