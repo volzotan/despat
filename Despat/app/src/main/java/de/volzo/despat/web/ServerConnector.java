@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import de.volzo.despat.SystemController;
+import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
 
@@ -83,6 +85,17 @@ public class ServerConnector {
             jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
             jsonWriter.name("deviceName").value(Config.getDeviceName(context));
             jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
+
+            if (Util.isServiceRunning(context, ShutterService.class)) {
+                jsonWriter.name("status").value(StatusType.CAPTURING);
+            } else {
+                SystemController systemController = new SystemController(context);
+                if (systemController.isDisplayOn()) {
+                    jsonWriter.name("status").value(StatusType.DISPLAY_ON);
+                } else {
+                    jsonWriter.name("status").value(StatusType.IDLE);
+                }
+            }
 
             jsonWriter.name("numberImages").value(msg.numberImages);
             jsonWriter.name("freeSpaceInternal").value(msg.freeSpaceInternal);
@@ -324,6 +337,15 @@ public class ServerConnector {
 
         public static final int START       = 0x20;
         public static final int STOP        = 0x21;
+
+        public static final int ERROR       = 0x30;
+    }
+
+    public static class StatusType {
+
+        public static final int IDLE        = 0x10;
+        public static final int DISPLAY_ON  = 0x11;
+        public static final int CAPTURING   = 0x12;
 
         public static final int ERROR       = 0x30;
     }

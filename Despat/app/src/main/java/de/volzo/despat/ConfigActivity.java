@@ -16,6 +16,16 @@ public class ConfigActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
 
+        // MAC address
+        // device name
+        // free space internal
+        // free space SD-card
+        // battery internal
+        // battery external
+        //
+
+
+
         final ListView lv = (ListView) findViewById(R.id.listView);
 
         // Initializing a new String Array
