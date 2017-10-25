@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         sendBroadcast(uploadIntent);
 
 //        startCapturing.callOnClick();
+        btConfig.callOnClick();
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

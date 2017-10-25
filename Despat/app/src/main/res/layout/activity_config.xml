@@ -7,9 +7,8 @@
     tools:context="de.volzo.despat.ConfigActivity">
 
     <ListView
-        android:layout_width="576dp"
-        android:layout_height="343dp"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:id="@+id/listView" />
+
 </android.support.constraint.ConstraintLayout>
