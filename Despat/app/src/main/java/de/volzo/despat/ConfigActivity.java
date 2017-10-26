@@ -1,6 +1,7 @@
 package de.volzo.despat;
 
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -17,12 +19,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.ServerConnector;
 
-public class ConfigActivity extends AppCompatActivity {
+public class ConfigActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     public static final String TAG = ConfigActivity.class.getSimpleName();
 
@@ -46,6 +49,7 @@ public class ConfigActivity extends AppCompatActivity {
 
 
         final ListView lv = (ListView) findViewById(R.id.listView);
+        lv.setOnItemClickListener(this);
 
         List<ConfigItem> configItems = new ArrayList<ConfigItem>();
 
@@ -55,15 +59,40 @@ public class ConfigActivity extends AppCompatActivity {
         Despat despat = ((Despat) getApplicationContext());
         SystemController systemController = despat.getSystemController();
 
+        ConfigItem ci;
+
         configItems.add(new ConfigItem("unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
-        configItems.add(new ConfigItem("device name", "e.g. \"Red House\"", Config.getDeviceName(this), false));
-        configItems.add(new ConfigItem("free space", "free space available on the internal memory", Float.toString(Util.getFreeSpaceOnDevice(Config.IMAGE_FOLDER)), false));
+
+        ci = new ConfigItem("device name", "e.g. \"Red House\"", Config.getDeviceName(this), false);
+        ci.setAction(new Callable<Void>() {
+            public Void call() {
+                System.out.println("FOO");
+                return null;
+            }
+        });
+        configItems.add(ci);
+
+        configItems.add(new ConfigItem("free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDevice(Config.IMAGE_FOLDER))) + " MB", false));
         configItems.add(new ConfigItem("free space SD-card", "free space available on the SD-card", "unavailable", false));
-        configItems.add(new ConfigItem("battery internal", "", Float.toString(systemController.getBatteryLevel()), false));
+        configItems.add(new ConfigItem("battery internal", "", Integer.toString(Math.round(systemController.getBatteryLevel())) + "%", false));
         configItems.add(new ConfigItem("battery external", "", "unavailable", false));
 
         configItems.add(new ConfigItem("upload data", "send gathered data directly to the server", "1", true));
+    }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Log.d(TAG, ((ConfigItem) configListAdapter.getItem(position)).getTitle());
+
+        ConfigItem ci = (ConfigItem) configListAdapter.getItem(position);
+        if (ci.getAction() != null) {
+            try {
+                ci.getAction().call();
+            } catch (Exception e) {
+                Log.e(TAG, "calling listview item action failed", e);
+                // TODO: Toast
+            }
+        }
     }
 }
 
@@ -148,7 +177,11 @@ class ConfigItem {
     private String value;
     private boolean valueIsBool;
 
-    private boolean setBackgroundRed;
+    private Callable<Void> action;
+
+    private String validationText;
+
+    public ConfigItem() {}
 
     public ConfigItem(String title, String description, String value, boolean valueIsBoolean) {
         this.title = title;
@@ -187,5 +220,21 @@ class ConfigItem {
 
     public void setValueIsBool(boolean valueIsBool) {
         this.valueIsBool = valueIsBool;
+    }
+
+    public Callable<Void> getAction() {
+        return action;
+    }
+
+    public void setAction(Callable<Void> action) {
+        this.action = action;
+    }
+
+    public String getValidationText() {
+        return validationText;
+    }
+
+    public void setValidationText(String validationText) {
+        this.validationText = validationText;
     }
 }
