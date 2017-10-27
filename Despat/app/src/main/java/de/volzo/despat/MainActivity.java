@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         despat = ((Despat) getApplicationContext());
 
         checkPermissions();
-        Config.init();
+        Config.init(activity);
 
         if (despat.getSystemController().hasTemperatureSensor()) {
             despat.getSystemController().startTemperatureMeasurement();
@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         recognizer = new Recognizer();
 
-        File dir = Config.IMAGE_FOLDER;
+        File dir = Config.getImageFolder(activity);
         File imageFullPath = new File(dir, "foobar" + ".jpg");
 
         Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);

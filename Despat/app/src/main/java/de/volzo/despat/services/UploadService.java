@@ -27,7 +27,7 @@ public class UploadService extends JobService {
 
         ServerConnector.UploadMessage uploadMessage = new ServerConnector.UploadMessage();
 
-        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
+        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(this), Config.IMAGE_FILEEXTENSION);
         File newestImage = imgroll.getNewestImage();
 
         if (newestImage == null) {

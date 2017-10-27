@@ -5,6 +5,7 @@ import android.app.job.JobService;
 import android.util.Log;
 
 import de.volzo.despat.Despat;
+import de.volzo.despat.ImageRollover;
 import de.volzo.despat.web.ServerConnector;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Config;
@@ -28,10 +29,13 @@ public class HeartbeatService extends JobService {
         Despat despat = ((Despat) getApplicationContext());
         SystemController systemController = despat.getSystemController();
 
+        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(this), Config.IMAGE_FILEEXTENSION);
+
         ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
 
-        statusMessage.numberImages = Config.getImagesTaken(this);
-        statusMessage.freeSpaceInternal = Util.getFreeSpaceOnDevice(Config.IMAGE_FOLDER);
+        statusMessage.numberImagesTaken = Config.getImagesTaken(this);
+        statusMessage.numberImagesSaved = imgroll.getNumberOfSavedImages();
+        statusMessage.freeSpaceInternal = Util.getFreeSpaceOnDevice(Config.getImageFolder(this));
         statusMessage.freeSpaceExternal = -1; // TODO
         statusMessage.batteryInternal = systemController.getBatteryLevel();
         statusMessage.batteryExternal = -1; // TODO

@@ -16,19 +16,28 @@ public class Config {
 
     public static final String TAG = Config.class.getSimpleName();
 
-    public static long SHUTTER_INTERVAL                     = 10 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
-    public static long HEARTBEAT_INTERVAL                   = 15 * 60 * 1000L; // Minimum interval is 15m
-    public static long UPLOAD_INTERVAL                      = 15 * 60 * 1000L;
+    private static long DEFAULT_SHUTTER_INTERVAL                     = 10 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
+    private static long DEFAULT_HEARTBEAT_INTERVAL                   = 15 * 60 * 1000L; // Minimum interval is 15m
+    private static long DEFAULT_UPLOAD_INTERVAL                      = 15 * 60 * 1000L;
 
-    public static final File IMAGE_FOLDER                   = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final File DEFAULT_IMAGE_FOLDER                    = new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final String IMAGE_FILEEXTENSION          = ".jpg";
     public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;
     public static final boolean PHONE_HOME                  = true;
-    public static final String SERVER_ADDRESS               = "http://zoltep.de";
+    public static final String DEFAULT_SERVER_ADDRESS       = "http://zoltep.de";
 
     public static final String dateFormat                   = "yyyy-MM-dd HH:mm:ss.SSS";
 
     private static final String SHAREDPREFNAME              = "de.volzo.despat.DEFAULT_PREFERENCES";
+
+
+    private static final String KEY_DEVICENAME              = "de.volzo.despat.deviceName";
+    private static final String KEY_SHUTTER_INTERVAL        = "de.volzo.despat.shutterInterval";
+    private static final String KEY_IMAGE_FOLDER            = "de.volzo.despat.imageFolder";
+    private static final String KEY_PHONE_HOME              = "de.volzo.despat.phoneHome";
+    private static final String KEY_SERVER_ADDRESS          = "de.volzo.despat.serverAddress";
+    private static final String KEY_HEARTBEAT_INTERVAL      = "de.volzo.despat.heartbeatInterval";
+    private static final String KEY_UPLOAD_INTERVAL         = "de.volzo.despat.uploadInterval";
 
     /*
     image folder
@@ -45,12 +54,15 @@ public class Config {
 
     */
 
-    public static void init() {
+    public static void init(Context context) {
+
+        File imageFolder = getImageFolder(context);
+
         // check if all folders are existing
-        if (!IMAGE_FOLDER.isDirectory()) {
+        if (!imageFolder.isDirectory()) {
             // not existing. create
-            Log.i(TAG, "Directory IMAGE_FOLDER ( " + IMAGE_FOLDER.getAbsolutePath() + " ) missing. creating...");
-            IMAGE_FOLDER.mkdirs();
+            Log.i(TAG, "Directory IMAGE_FOLDER ( " + imageFolder.getAbsolutePath() + " ) missing. creating...");
+            imageFolder.mkdirs();
         }
 
         // ...
@@ -58,18 +70,6 @@ public class Config {
 
     public static String getUniqueDeviceId(Context context) {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID).toUpperCase();
-    }
-
-    public static void setDeviceName(Context context, String deviceName) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("deviceName", deviceName);
-        editor.apply();
-    }
-
-    public static String getDeviceName(Context context) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
-        return settings.getString("deviceName", android.os.Build.MODEL);
     }
 
     public static void resetImagesTaken(Context context) {
@@ -88,4 +88,75 @@ public class Config {
         return settings.getInt("imagesTaken", 0);
     }
 
+    // ----
+
+    private static void setProperty(Context context, String key, String value) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(key, value);
+        editor.apply();
+    }
+
+    private static String getProperty(Context context, String key, String defaultValue) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        return settings.getString(key, defaultValue);
+    }
+
+    private static int getPropertyInt(Context context, String key, int defaultValue) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        return settings.getInt(key, defaultValue);
+    }
+
+    private static long getPropertyLong(Context context, String key, long defaultValue) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        return settings.getLong(key, defaultValue);
+    }
+
+    public static String getDeviceName(Context context) {
+        return getProperty(context, KEY_DEVICENAME, android.os.Build.MODEL);
+    }
+
+    public static void setDeviceName(Context context, String deviceName) {
+        setProperty(context, KEY_DEVICENAME, deviceName);
+    }
+
+    public static long getShutterInterval(Context context) {
+        return getPropertyLong(context, KEY_SHUTTER_INTERVAL, DEFAULT_SHUTTER_INTERVAL);
+    }
+
+    public static void setShutterInterval(Context context, String shutterInterval) {
+        setProperty(context, KEY_SHUTTER_INTERVAL, shutterInterval);
+    }
+
+    public static File getImageFolder(Context context) {
+        return new File(getProperty(context, KEY_IMAGE_FOLDER, DEFAULT_IMAGE_FOLDER.getAbsolutePath()));
+    }
+
+    public static void setImageFolder(Context context, String imageFolder) {
+        setProperty(context, KEY_IMAGE_FOLDER, imageFolder);
+    }
+
+    public static String getServerAddress(Context context) {
+        return getProperty(context, KEY_SERVER_ADDRESS, DEFAULT_SERVER_ADDRESS);
+    }
+
+    public static void setServerAddress(Context context, String serverAddress) {
+        setProperty(context, KEY_SERVER_ADDRESS, serverAddress);
+    }
+
+    public static long getHeartbeatInterval(Context context) {
+        return getPropertyLong(context, KEY_HEARTBEAT_INTERVAL, DEFAULT_HEARTBEAT_INTERVAL);
+    }
+
+    public static void setHeartbeatInterval(Context context, String heartbeatInterval) {
+        setProperty(context, KEY_HEARTBEAT_INTERVAL, heartbeatInterval);
+    }
+
+    public static long getUploadInterval(Context context) {
+        return getPropertyLong(context, KEY_UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL);
+    }
+
+    public static void setUploadInterval(Context context, String uploadInterval) {
+        setProperty(context, KEY_UPLOAD_INTERVAL, uploadInterval);
+    }
 }

@@ -26,7 +26,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".PreviewActivity"></activity>
+
+        <activity android:name=".ConfigActivity"
+            android:screenOrientation="landscape">
+        </activity>
 
         <receiver android:name=".Orchestrator">
             <intent-filter>
@@ -75,7 +80,6 @@
             android:label="Command Service"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <activity android:name=".ConfigActivity"></activity>
     </application>
 
 </manifest>

@@ -55,7 +55,7 @@ public class ServerConnector {
 
     public ServerConnector(Context context) {
         this.context = context;
-        this.serverAddress = Config.SERVER_ADDRESS;
+        this.serverAddress = Config.getServerAddress(context);
 
         this.dateFormat =  new SimpleDateFormat(Config.dateFormat, new Locale("de", "DE"));
     }
@@ -97,7 +97,8 @@ public class ServerConnector {
                 }
             }
 
-            jsonWriter.name("numberImages").value(msg.numberImages);
+            jsonWriter.name("numberImagesTaken").value(msg.numberImagesTaken);
+            jsonWriter.name("numberImagesSaved").value(msg.numberImagesSaved);
             jsonWriter.name("freeSpaceInternal").value(msg.freeSpaceInternal);
             jsonWriter.name("freeSpaceExternal").value(msg.freeSpaceExternal);
             jsonWriter.name("batteryInternal").value(msg.batteryInternal);
@@ -299,7 +300,8 @@ public class ServerConnector {
 //        public String originalDeviceId;
 //        public Date timestamp;
 
-        public int numberImages;
+        public int numberImagesTaken;
+        public int numberImagesSaved;
         public float freeSpaceInternal;
         public float freeSpaceExternal;
 

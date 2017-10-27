@@ -1,10 +1,13 @@
 package de.volzo.despat;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -29,6 +33,8 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
 
     public static final String TAG = ConfigActivity.class.getSimpleName();
 
+    Activity activity;
+
     ConfigListAdapter configListAdapter;
 
     @Override
@@ -36,16 +42,23 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
 
-        // MAC address
+        this.activity = this;
+
         // device name
+
+        // shutter interval
+        // folder
+
+        // upload telemetry data
+        // server address
+        // heartbeat interval
+        // upload interval
+
+        // MAC address
         // free space internal
         // free space SD-card
         // battery internal
         // battery external
-
-        // upload telemetry data
-        // folder
-        // server address
 
 
         final ListView lv = (ListView) findViewById(R.id.listView);
@@ -59,20 +72,74 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
         Despat despat = ((Despat) getApplicationContext());
         SystemController systemController = despat.getSystemController();
 
-        ConfigItem ci;
-
-        configItems.add(new ConfigItem("unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
-
-        ci = new ConfigItem("device name", "e.g. \"Red House\"", Config.getDeviceName(this), false);
-        ci.setAction(new Callable<Void>() {
+        final ConfigItem ci1 = new ConfigItem("device name", "human readable name, e.g. \"Red House\"", Config.getDeviceName(this), false);
+        ci1.setAction(new Callable<Void>() {
             public Void call() {
-                System.out.println("FOO");
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                builder.setMessage("message");
+                builder.setTitle("title");
+
+                // Set up the input
+                final EditText input = new EditText(activity);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                input.setText(ci1.getValue());
+                builder.setView(input);
+
+                builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Config.setDeviceName(activity, input.getText().toString());
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
                 return null;
             }
         });
-        configItems.add(ci);
+        configItems.add(ci1);
 
-        configItems.add(new ConfigItem("free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDevice(Config.IMAGE_FOLDER))) + " MB", false));
+        final ConfigItem ci2 = new ConfigItem("server address", "servpat URL", Config.getServerAddress(activity), false);
+        ci2.setAction(new Callable<Void>() {
+            public Void call() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                builder.setMessage("message");
+                builder.setTitle("title");
+
+                // Set up the input
+                final EditText input = new EditText(activity);
+                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+                input.setText(ci2.getValue());
+                builder.setView(input);
+
+                builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked OK button
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                return null;
+            }
+        });
+        configItems.add(ci2);
+
+        configItems.add(new ConfigItem("unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
+        configItems.add(new ConfigItem("free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDevice(Config.getImageFolder(activity)))) + " MB", false));
         configItems.add(new ConfigItem("free space SD-card", "free space available on the SD-card", "unavailable", false));
         configItems.add(new ConfigItem("battery internal", "", Integer.toString(Math.round(systemController.getBatteryLevel())) + "%", false));
         configItems.add(new ConfigItem("battery external", "", "unavailable", false));

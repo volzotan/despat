@@ -179,7 +179,7 @@ public class Orchestrator extends BroadcastReceiver {
                 ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        long nextExecution = ((now + Config.SHUTTER_INTERVAL) / 1000) * 1000;
+        long nextExecution = ((now + Config.getShutterInterval(context)) / 1000) * 1000;
 
         // as of API lvl 19, all repeating alarms are inexact,
         // so a single alarm needs to schedule the next one
@@ -243,7 +243,7 @@ public class Orchestrator extends BroadcastReceiver {
         if (!alreadyScheduled) {
             ComponentName serviceComponent = new ComponentName(context, HeartbeatService.class);
             JobInfo.Builder builder = new JobInfo.Builder(HeartbeatService.JOB_ID, serviceComponent);
-            builder.setPeriodic(Config.HEARTBEAT_INTERVAL);
+            builder.setPeriodic(Config.getHeartbeatInterval(context));
             jobScheduler.schedule(builder.build());
         } else {
             Log.d(TAG, "Heartbeat Service already scheduled");
@@ -277,9 +277,9 @@ public class Orchestrator extends BroadcastReceiver {
             JobInfo.Builder builder = new JobInfo.Builder(UploadService.JOB_ID, serviceComponent);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                builder.setPeriodic(Config.UPLOAD_INTERVAL, 30000);
+                builder.setPeriodic(Config.getUploadInterval(context), 30000);
             } else{
-                builder.setPeriodic(Config.UPLOAD_INTERVAL);
+                builder.setPeriodic(Config.getUploadInterval(context));
             }
 
             jobScheduler.schedule(builder.build());

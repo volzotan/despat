@@ -131,6 +131,17 @@ public class ImageRollover {
         Log.i(TAG, "deleted " + deleteCounter + " images");
     }
 
+    public int getNumberOfSavedImages() {
+        File fl = dir;
+        File[] files = fl.listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                return file.isFile() && file.getName().endsWith(fileextension);
+            }
+        });
+
+        return files.length;
+    }
+
     public File getNewestImage() {
 
         // get last modified file

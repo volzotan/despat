@@ -120,7 +120,7 @@ public class CameraController implements CameraAdapter, Camera.PreviewCallback, 
 
         Log.d( TAG, "imageCallback: picture retrieved ("+bytes.length+" bytes)" );
 
-        File dir = Config.IMAGE_FOLDER;
+        File dir = Config.getImageFolder(context);
         File imageFullPath;
         ImageRollover imgroll = new ImageRollover(dir, ".jpg");
         imageFullPath = new File(dir, imgroll.getUnusedFilename());

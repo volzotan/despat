@@ -245,7 +245,7 @@ public class CameraController2 implements CameraAdapter {
 
             // image path
             final File imageFullPath;
-            ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
+            ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
             imageFullPath = imgroll.getUnusedFullFilename();
 
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
