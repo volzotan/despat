@@ -56,15 +56,6 @@ public class Config {
 
     public static void init(Context context) {
 
-        File imageFolder = getImageFolder(context);
-
-        // check if all folders are existing
-        if (!imageFolder.isDirectory()) {
-            // not existing. create
-            Log.i(TAG, "Directory IMAGE_FOLDER ( " + imageFolder.getAbsolutePath() + " ) missing. creating...");
-            imageFolder.mkdirs();
-        }
-
         // ...
     }
 
@@ -86,6 +77,67 @@ public class Config {
     public static int getImagesTaken(Context context) {
         SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
         return settings.getInt("imagesTaken", 0);
+    }
+
+    public static String sanityCheckDeviceName(Context context) {
+        return null;
+    }
+
+    public static String sanityCheckShutterInterval(Context context) {
+        long value = getShutterInterval(context);
+
+        if (value < 6000) {
+            return "Shutter interval is shorter than 6000ms";
+        }
+
+        if (value > 6 * 60 * 1000) {
+            return "Shutter interval is longer than 6 minutes";
+        }
+
+        return null;
+    }
+
+    public static String sanityCheckImageFolder(Context context) {
+        File imageFolder = getImageFolder(context);
+
+        // check if all folders are existing
+        if (!imageFolder.isDirectory()) {
+            // not existing. create
+            Log.i(TAG, "Directory IMAGE_FOLDER ( " + imageFolder.getAbsolutePath() + " ) missing. creating...");
+            imageFolder.mkdirs();
+        }
+
+        return null; // TODO: add checks for writability, etc...
+    }
+
+    public static String sanityCheckServerAddress(Context context) {
+        String value = getServerAddress(context);
+
+        if (value.startsWith("http://") || value.startsWith("https://")) {
+            return null;
+        }
+
+        return "not a valid URL. Should start with \"http://\" or \"https://\"";
+    }
+
+    public static String sanityCheckHeartbeatInterval(Context context) {
+        long value = getHeartbeatInterval(context);
+
+        if (value < 15 * 60 * 1000) {
+            return "Heartbeat interval is shorter than 15 minutes";
+        }
+
+        return null;
+    }
+
+    public static String sanityCheckUploadInterval(Context context) {
+        long value = getUploadInterval(context);
+
+        if (value < 15 * 60 * 1000) {
+            return "Image upload interval is shorter than 15 minutes";
+        }
+
+        return null;
     }
 
     // ----

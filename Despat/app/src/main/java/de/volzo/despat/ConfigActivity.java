@@ -60,6 +60,7 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
         // battery internal
         // battery external
 
+        // TODO: do sanity checks on Config variables
 
         final ListView lv = (ListView) findViewById(R.id.listView);
         lv.setOnItemClickListener(this);
@@ -77,23 +78,27 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
             public Void call() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-                builder.setMessage("message");
-                builder.setTitle("title");
+                builder.setTitle(ci1.getTitle());
+                builder.setMessage(ci1.getDescription());
 
-                // Set up the input
-                final EditText input = new EditText(activity);
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                input.setText(ci1.getValue());
-                builder.setView(input);
+                LayoutInflater inflater = activity.getLayoutInflater();
+                View view = inflater.inflate(R.layout.dialog_textinput, null);
+                final TextView tv = ((TextView) view.findViewById(R.id.edittext));
+
+                builder.setView(view);
+                tv.setText(ci1.getValue());
 
                 builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Config.setDeviceName(activity, input.getText().toString());
+                        Config.setDeviceName(activity, tv.getText().toString());
+
+                        // restart activity
+                        activity.recreate();
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
+                        // User cancelled the dialog, do nothing
                     }
                 });
 
@@ -110,18 +115,22 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
             public Void call() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-                builder.setMessage("message");
-                builder.setTitle("title");
+                builder.setTitle(ci2.getTitle());
+                builder.setMessage(ci2.getDescription());
 
-                // Set up the input
-                final EditText input = new EditText(activity);
-                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-                input.setText(ci2.getValue());
-                builder.setView(input);
+                LayoutInflater inflater = activity.getLayoutInflater();
+                View view = inflater.inflate(R.layout.dialog_textinput, null);
+                final TextView tv = ((TextView) view.findViewById(R.id.edittext));
+
+                builder.setView(view);
+                tv.setText(ci2.getValue());
 
                 builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // User clicked OK button
+                        Config.setServerAddress(activity, tv.getText().toString());
+
+                        // restart activity
+                        activity.recreate();
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -136,6 +145,7 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
                 return null;
             }
         });
+        ci2.setValidationText(Config.sanityCheckServerAddress(activity));
         configItems.add(ci2);
 
         configItems.add(new ConfigItem("unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
@@ -205,6 +215,7 @@ class ConfigListAdapter extends BaseAdapter {
         TextView description = (TextView) convertView.findViewById(R.id.description);
         TextView value = (TextView) convertView.findViewById(R.id.value);
         CheckBox checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+        TextView validation = (TextView) convertView.findViewById(R.id.validation);
 
         title.setText(c.getTitle());
         description.setText(c.getDescription());
@@ -231,6 +242,13 @@ class ConfigListAdapter extends BaseAdapter {
                 Log.w("ConfigListAdapter", "parsing bool value failed", e);
                 checkbox.setVisibility(View.INVISIBLE);
             }
+        }
+
+        if (c.getValidationText() == null || c.getValidationText().length() <= 0) {
+            validation.setVisibility(View.GONE);
+        } else {
+            validation.setText(c.getValidationText());
+            validation.setVisibility(View.VISIBLE);
         }
 
         return convertView;

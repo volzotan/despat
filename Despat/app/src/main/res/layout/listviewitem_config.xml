@@ -28,4 +28,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true" />
 
+    <TextView
+        android:id="@+id/validation"
+        android:textColor="@color/error"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 </RelativeLayout>

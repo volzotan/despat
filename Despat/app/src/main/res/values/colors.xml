@@ -7,4 +7,6 @@
     <color name="navigationBarColor">#666</color>
 
     <color name="black">#000000</color>
+
+    <color name="error">#FF0000</color>
 </resources>
