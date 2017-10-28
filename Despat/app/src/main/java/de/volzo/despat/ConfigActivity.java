@@ -73,126 +73,23 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
         Despat despat = ((Despat) getApplicationContext());
         SystemController systemController = despat.getSystemController();
 
-        final ConfigItem ci1 = new ConfigItem("device name", "human readable name, e.g. \"Red House\"", Config.getDeviceName(this), false);
-        ci1.setAction(new Callable<Void>() {
-            public Void call() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        configItems.add(new ConfigItem(Config.KEY_DEVICENAME, "device name", "human readable name, e.g. \"Red House\"", Config.getDeviceName(this), false));
 
-                builder.setTitle(ci1.getTitle());
-                builder.setMessage(ci1.getDescription());
-
-                LayoutInflater inflater = activity.getLayoutInflater();
-                View view = inflater.inflate(R.layout.dialog_textinput, null);
-                final TextView tv = ((TextView) view.findViewById(R.id.edittext));
-
-                builder.setView(view);
-                tv.setText(ci1.getValue());
-
-                builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Config.setDeviceName(activity, tv.getText().toString());
-
-                        // restart activity
-                        activity.recreate();
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog, do nothing
-                    }
-                });
-
-                AlertDialog dialog = builder.create();
-                dialog.show();
-
-                return null;
-            }
-        });
-        configItems.add(ci1);
-
-        final ConfigItem ci2 = new ConfigItem("shutter interval", "take image every X milliseconds", Config.getShutterInterval(activity), false);
-        ci2.setAction(new Callable<Void>() {
-            public Void call() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-
-                builder.setTitle(ci2.getTitle());
-                builder.setMessage(ci2.getDescription());
-
-                LayoutInflater inflater = activity.getLayoutInflater();
-                View view = inflater.inflate(R.layout.dialog_textinput, null);
-                final TextView tv = ((TextView) view.findViewById(R.id.edittext));
-
-                builder.setView(view);
-                tv.setText(ci2.getValue());
-
-                builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Config.setShutterInterval(activity, tv.getText().toString());
-
-                        // restart activity
-                        activity.recreate();
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
-                });
-
-                AlertDialog dialog = builder.create();
-                dialog.show();
-
-                return null;
-            }
-        });
+        ConfigItem ci2 = new ConfigItem(Config.KEY_SHUTTER_INTERVAL, "shutter interval", "take image every X milliseconds", Config.getShutterInterval(activity), false);
         ci2.setValidationText(Config.sanityCheckShutterInterval(activity));
         configItems.add(ci2);
 
-        final ConfigItem ci3 = new ConfigItem("server address", "servpat URL", Config.getServerAddress(activity), false);
-        ci3.setAction(new Callable<Void>() {
-            public Void call() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-
-                builder.setTitle(ci3.getTitle());
-                builder.setMessage(ci3.getDescription());
-
-                LayoutInflater inflater = activity.getLayoutInflater();
-                View view = inflater.inflate(R.layout.dialog_textinput, null);
-                final TextView tv = ((TextView) view.findViewById(R.id.edittext));
-
-                builder.setView(view);
-                tv.setText(ci3.getValue());
-
-                builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Config.setServerAddress(activity, tv.getText().toString());
-
-                        // restart activity
-                        activity.recreate();
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
-                });
-
-                AlertDialog dialog = builder.create();
-                dialog.show();
-
-                return null;
-            }
-        });
+        ConfigItem ci3 = new ConfigItem(Config.KEY_SERVER_ADDRESS, "server address", "servpat URL", Config.getServerAddress(activity), false);
         ci3.setValidationText(Config.sanityCheckServerAddress(activity));
         configItems.add(ci3);
 
-        configItems.add(new ConfigItem("unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
-        configItems.add(new ConfigItem("free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDevice(Config.getImageFolder(activity)))) + " MB", false));
-        configItems.add(new ConfigItem("free space SD-card", "free space available on the SD-card", "unavailable", false));
-        configItems.add(new ConfigItem("battery internal", "", Integer.toString(Math.round(systemController.getBatteryLevel())) + "%", false));
-        configItems.add(new ConfigItem("battery external", "", "unavailable", false));
+        configItems.add(new ConfigItem(null, "unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
+        configItems.add(new ConfigItem(null, "free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDevice(Config.getImageFolder(activity)))) + " MB", false));
+        configItems.add(new ConfigItem(null, "free space SD-card", "free space available on the SD-card", "unavailable", false));
+        configItems.add(new ConfigItem(null, "battery internal", "", Integer.toString(Math.round(systemController.getBatteryLevel())) + "%", false));
+        configItems.add(new ConfigItem(null, "battery external", "", "unavailable", false));
 
-        configItems.add(new ConfigItem("upload data", "send gathered data directly to the server", "1", true));
+        configItems.add(new ConfigItem(null, "upload data", "send gathered data directly to the server", "1", true));
     }
 
     @Override
@@ -200,14 +97,65 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
         Log.d(TAG, ((ConfigItem) configListAdapter.getItem(position)).getTitle());
 
         ConfigItem ci = (ConfigItem) configListAdapter.getItem(position);
-        if (ci.getAction() != null) {
-            try {
-                ci.getAction().call();
-            } catch (Exception e) {
-                Log.e(TAG, "calling listview item action failed", e);
-                // TODO: Toast
-            }
+        if (ci.getKey() != null) {
+            createDialog(ci);
         }
+    }
+
+    private void createDialog(ConfigItem ci) {
+        final String key = ci.getKey();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+        builder.setTitle(ci.getTitle());
+        builder.setMessage(ci.getDescription());
+
+        LayoutInflater inflater = activity.getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_textinput, null);
+
+        builder.setView(view);
+
+        final TextView tv = ((TextView) view.findViewById(R.id.edittext));
+        tv.setText(ci.getValue());
+
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                String value = tv.getText().toString();
+
+                switch(key) {
+                    case Config.KEY_DEVICENAME:
+                        Config.setDeviceName(activity, value);
+                        break;
+                    case Config.KEY_SHUTTER_INTERVAL:
+                        Config.setShutterInterval(activity, value);
+                        break;
+                    case Config.KEY_IMAGE_FOLDER:
+                        Config.setImageFolder(activity, value);
+                        break;
+                    case Config.KEY_HEARTBEAT_INTERVAL:
+                        Config.setHeartbeatInterval(activity, value);
+                        break;
+                    case Config.KEY_PHONE_HOME:
+                        // TODO
+                        break;
+                    case Config.KEY_SERVER_ADDRESS:
+                        Config.setServerAddress(activity, value);
+                        break;
+                    default:
+                        Log.e(TAG, "unknown Config key");
+                }
+                // restart activity
+                activity.recreate();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
 
@@ -295,36 +243,46 @@ class ConfigListAdapter extends BaseAdapter {
 }
 
 class ConfigItem {
+    private String key;
     private String title;
     private String description;
     private String value;
     private boolean valueIsBool;
 
-    private Callable<Void> action;
-
     private String validationText;
 
     public ConfigItem() {}
 
-    public ConfigItem(String title, String description, String value, boolean valueIsBoolean) {
+    public ConfigItem(String key, String title, String description, String value, boolean valueIsBoolean) {
+        this.key = key;
         this.title = title;
         this.description = description;
         this.value = value;
         this.valueIsBool = valueIsBoolean;
     }
 
-    public ConfigItem(String title, String description, int value, boolean valueIsBoolean) {
+    public ConfigItem(String key, String title, String description, int value, boolean valueIsBoolean) {
+        this.key = key;
         this.title = title;
         this.description = description;
         this.value = Integer.toString(value);
         this.valueIsBool = valueIsBoolean;
     }
 
-    public ConfigItem(String title, String description, long value, boolean valueIsBoolean) {
+    public ConfigItem(String key, String title, String description, long value, boolean valueIsBoolean) {
+        this.key = key;
         this.title = title;
         this.description = description;
         this.value = Long.toString(value);
         this.valueIsBool = valueIsBoolean;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getTitle() {
@@ -357,14 +315,6 @@ class ConfigItem {
 
     public void setValueIsBool(boolean valueIsBool) {
         this.valueIsBool = valueIsBool;
-    }
-
-    public Callable<Void> getAction() {
-        return action;
-    }
-
-    public void setAction(Callable<Void> action) {
-        this.action = action;
     }
 
     public String getValidationText() {

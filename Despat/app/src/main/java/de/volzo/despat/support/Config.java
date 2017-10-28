@@ -30,14 +30,13 @@ public class Config {
 
     private static final String SHAREDPREFNAME              = "de.volzo.despat.DEFAULT_PREFERENCES";
 
-
-    private static final String KEY_DEVICENAME              = "de.volzo.despat.deviceName";
-    private static final String KEY_SHUTTER_INTERVAL        = "de.volzo.despat.shutterInterval";
-    private static final String KEY_IMAGE_FOLDER            = "de.volzo.despat.imageFolder";
-    private static final String KEY_PHONE_HOME              = "de.volzo.despat.phoneHome";
-    private static final String KEY_SERVER_ADDRESS          = "de.volzo.despat.serverAddress";
-    private static final String KEY_HEARTBEAT_INTERVAL      = "de.volzo.despat.heartbeatInterval";
-    private static final String KEY_UPLOAD_INTERVAL         = "de.volzo.despat.uploadInterval";
+    public static final String KEY_DEVICENAME              = "de.volzo.despat.deviceName";
+    public static final String KEY_SHUTTER_INTERVAL        = "de.volzo.despat.shutterInterval";
+    public static final String KEY_IMAGE_FOLDER            = "de.volzo.despat.imageFolder";
+    public static final String KEY_PHONE_HOME              = "de.volzo.despat.phoneHome";
+    public static final String KEY_SERVER_ADDRESS          = "de.volzo.despat.serverAddress";
+    public static final String KEY_HEARTBEAT_INTERVAL      = "de.volzo.despat.heartbeatInterval";
+    public static final String KEY_UPLOAD_INTERVAL         = "de.volzo.despat.uploadInterval";
 
     /*
     image folder
