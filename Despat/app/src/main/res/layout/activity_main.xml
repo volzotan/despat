@@ -66,10 +66,10 @@
             android:id="@+id/bt_takePhoto" />
 
         <Button
-            android:text="Start Recognizer"
+            android:text="Run Recognizer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/bt_startRecognizer" />
+            android:id="@+id/bt_runRecognizer" />
 
         <Button
             android:text="Kill Services"

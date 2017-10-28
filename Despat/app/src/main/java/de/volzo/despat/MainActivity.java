@@ -129,11 +129,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        Button btStartRec = (Button) findViewById(R.id.bt_startRecognizer);
-        btStartRec.setOnClickListener(new View.OnClickListener() {
+        Button btRunRec = (Button) findViewById(R.id.bt_runRecognizer);
+        btRunRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activity.startRecognizer();
+                activity.runRecognizer();
             }
         });
 
@@ -284,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
     }
 
-    public void startRecognizer() {
+    public void runRecognizer() {
         // remove the textureView from the preview
         FixedAspectRatioFrameLayout aspectRatioLayout = (FixedAspectRatioFrameLayout) findViewById(R.id.aspectratio_layout);
         aspectRatioLayout.removeView(findViewById(R.id.textureView));
@@ -292,16 +292,20 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         textureView.setId(R.id.textureView);
         aspectRatioLayout.addView(textureView);
 
-        Intent mServiceIntent = new Intent(this, RecognitionService.class);
-        mServiceIntent.setData(Uri.parse("foobar.jpg"));
-        this.startService(mServiceIntent);
+//        Intent mServiceIntent = new Intent(this, RecognitionService.class);
+//
+//        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(this), Config.IMAGE_FILEEXTENSION);
+//        File newestImage = imgroll.getNewestImage();
+//
+//        mServiceIntent.setData(Uri.parse(newestImage.getAbsolutePath()));
+//        this.startService(mServiceIntent);
 
         recognizer = new Recognizer();
 
-        File dir = Config.getImageFolder(activity);
-        File imageFullPath = new File(dir, "foobar" + ".jpg");
+        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(this), Config.IMAGE_FILEEXTENSION);
+        File newestImage = imgroll.getNewestImage();
 
-        Recognizer.RecognizerResultset res = recognizer.run(imageFullPath);
+        Recognizer.RecognizerResultset res = recognizer.run(newestImage.getAbsoluteFile());
 
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
         imageView.setImageBitmap(res.bitmap);

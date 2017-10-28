@@ -22,7 +22,7 @@ import java.io.File;
 
 public class Recognizer {
 
-    private long[] computationTime = new long[3];
+    private long[] computationTime = new long[4];
 
     public Recognizer() {
         System.loadLibrary("opencv_java3");

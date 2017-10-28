@@ -110,7 +110,7 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
         });
         configItems.add(ci1);
 
-        final ConfigItem ci2 = new ConfigItem("server address", "servpat URL", Config.getServerAddress(activity), false);
+        final ConfigItem ci2 = new ConfigItem("shutter interval", "take image every X milliseconds", Config.getShutterInterval(activity), false);
         ci2.setAction(new Callable<Void>() {
             public Void call() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -124,6 +124,44 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
 
                 builder.setView(view);
                 tv.setText(ci2.getValue());
+
+                builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Config.setShutterInterval(activity, tv.getText().toString());
+
+                        // restart activity
+                        activity.recreate();
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                return null;
+            }
+        });
+        ci2.setValidationText(Config.sanityCheckShutterInterval(activity));
+        configItems.add(ci2);
+
+        final ConfigItem ci3 = new ConfigItem("server address", "servpat URL", Config.getServerAddress(activity), false);
+        ci3.setAction(new Callable<Void>() {
+            public Void call() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                builder.setTitle(ci3.getTitle());
+                builder.setMessage(ci3.getDescription());
+
+                LayoutInflater inflater = activity.getLayoutInflater();
+                View view = inflater.inflate(R.layout.dialog_textinput, null);
+                final TextView tv = ((TextView) view.findViewById(R.id.edittext));
+
+                builder.setView(view);
+                tv.setText(ci3.getValue());
 
                 builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -145,8 +183,8 @@ public class ConfigActivity extends AppCompatActivity implements AdapterView.OnI
                 return null;
             }
         });
-        ci2.setValidationText(Config.sanityCheckServerAddress(activity));
-        configItems.add(ci2);
+        ci3.setValidationText(Config.sanityCheckServerAddress(activity));
+        configItems.add(ci3);
 
         configItems.add(new ConfigItem("unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
         configItems.add(new ConfigItem("free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDevice(Config.getImageFolder(activity)))) + " MB", false));
@@ -272,6 +310,20 @@ class ConfigItem {
         this.title = title;
         this.description = description;
         this.value = value;
+        this.valueIsBool = valueIsBoolean;
+    }
+
+    public ConfigItem(String title, String description, int value, boolean valueIsBoolean) {
+        this.title = title;
+        this.description = description;
+        this.value = Integer.toString(value);
+        this.valueIsBool = valueIsBoolean;
+    }
+
+    public ConfigItem(String title, String description, long value, boolean valueIsBoolean) {
+        this.title = title;
+        this.description = description;
+        this.value = Long.toString(value);
         this.valueIsBool = valueIsBoolean;
     }
 
