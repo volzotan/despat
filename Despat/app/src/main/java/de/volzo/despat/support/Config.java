@@ -16,27 +16,26 @@ public class Config {
 
     public static final String TAG = Config.class.getSimpleName();
 
-    private static long DEFAULT_SHUTTER_INTERVAL                     = 10 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
-    private static long DEFAULT_HEARTBEAT_INTERVAL                   = 15 * 60 * 1000L; // Minimum interval is 15m
-    private static long DEFAULT_UPLOAD_INTERVAL                      = 15 * 60 * 1000L;
-
-    public static final File DEFAULT_IMAGE_FOLDER                    = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final String DATEFORMAT                   = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String IMAGE_FILEEXTENSION          = ".jpg";
     public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;
     public static final boolean PHONE_HOME                  = true;
-    public static final String DEFAULT_SERVER_ADDRESS       = "http://zoltep.de";
 
-    public static final String dateFormat                   = "yyyy-MM-dd HH:mm:ss.SSS";
+    private static final long DEFAULT_SHUTTER_INTERVAL      = 10 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
+    private static final long DEFAULT_HEARTBEAT_INTERVAL    = 15 * 60 * 1000L; // Minimum interval is 15m
+    private static final long DEFAULT_UPLOAD_INTERVAL       = 15 * 60 * 1000L;
+    private static final File DEFAULT_IMAGE_FOLDER          = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    private static final String DEFAULT_SERVER_ADDRESS      = "http://zoltep.de";
 
     private static final String SHAREDPREFNAME              = "de.volzo.despat.DEFAULT_PREFERENCES";
 
-    public static final String KEY_DEVICENAME              = "de.volzo.despat.deviceName";
-    public static final String KEY_SHUTTER_INTERVAL        = "de.volzo.despat.shutterInterval";
-    public static final String KEY_IMAGE_FOLDER            = "de.volzo.despat.imageFolder";
-    public static final String KEY_PHONE_HOME              = "de.volzo.despat.phoneHome";
-    public static final String KEY_SERVER_ADDRESS          = "de.volzo.despat.serverAddress";
-    public static final String KEY_HEARTBEAT_INTERVAL      = "de.volzo.despat.heartbeatInterval";
-    public static final String KEY_UPLOAD_INTERVAL         = "de.volzo.despat.uploadInterval";
+    public static final String KEY_DEVICENAME               = "de.volzo.despat.deviceName";
+    public static final String KEY_SHUTTER_INTERVAL         = "de.volzo.despat.shutterInterval";
+    public static final String KEY_IMAGE_FOLDER             = "de.volzo.despat.imageFolder";
+    public static final String KEY_PHONE_HOME               = "de.volzo.despat.phoneHome";
+    public static final String KEY_SERVER_ADDRESS           = "de.volzo.despat.serverAddress";
+    public static final String KEY_HEARTBEAT_INTERVAL       = "de.volzo.despat.heartbeatInterval";
+    public static final String KEY_UPLOAD_INTERVAL          = "de.volzo.despat.uploadInterval";
 
     /*
     image folder
@@ -77,6 +76,8 @@ public class Config {
         SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
         return settings.getInt("imagesTaken", 0);
     }
+
+    // ----
 
     public static String sanityCheckDeviceName(Context context) {
         return null;
