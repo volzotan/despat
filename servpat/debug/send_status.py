@@ -9,10 +9,11 @@ payload = {}
 payload["deviceId"] = "123"
 payload["deviceName"] = "pythonTestClient"
 payload["timestamp"] = datetime.now().strftime(DATEFORMAT_INPUT) #[:-3]
-payload["numberImages"] = 100
-payload["freeSpaceInternal"] = 1000.0
+payload["numberImagesTaken"] = 100
+payload["numberImagesSaved"] = 50
+payload["freeSpaceInternal"] = 990.0
 payload["freeSpaceExternal"] = 1000.0
-payload["batteryInternal"] = 50.0
+payload["batteryInternal"] = 99.0
 payload["batteryExternal"] = -1
 payload["stateCharging"] = 1
 

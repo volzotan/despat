@@ -52,12 +52,14 @@ def device(device_id):
     if device_id is None:
         return render_template("device.html")
 
-    print(type(device_id))
+    device_status = query_db("SELECT * FROM status WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC", (device_id,))
 
-    cur = db.execute("SELECT * FROM status WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC", (device_id,))
-    device_status = cur.fetchall()
+    cur = db.execute("SELECT * FROM uploads WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC LIMIT 4", (device_id,))
+    device_uploads = cur.fetchall()
 
-    return render_template("device.html", data_status=device_status, page_title=device_id)
+    graph_status = rows_to_list(device_status)
+
+    return render_template("device.html", graph_status=graph_status, data_status=device_status, data_uploads=device_uploads, page_title=device_id)
 
 
 @app.route("/command")
@@ -95,7 +97,8 @@ def status():
     values = [  content["deviceId"], 
                 content["deviceName"],
                 timestamp, 
-                content["numberImages"], 
+                content["numberImagesTaken"],
+                content["numberImagesSaved"], 
                 content["freeSpaceInternal"], 
                 content["freeSpaceExternal"], 
                 content["batteryInternal"],
@@ -103,7 +106,7 @@ def status():
                 content["stateCharging"]]
 
     db = get_db()
-    db.execute("insert into status (deviceId, deviceName, timestamp, numberImages, freeSpaceInternal, freeSpaceExternal, batteryInternal, batteryExternal, stateCharging) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", values)
+    db.execute("insert into status (deviceId, deviceName, timestamp, numberImagesTaken, numberImagesSaved, freeSpaceInternal, freeSpaceExternal, batteryInternal, batteryExternal, stateCharging) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", values)
     db.commit()
 
     return ("", 204)
@@ -201,6 +204,13 @@ def suppressnegative_filter(e):
     return e
 
 
+@app.template_filter("suppresszero")
+def suppressnegative_filter(e):
+    if e < 1:
+        return ""
+    return e
+
+
 @app.template_filter("bool")
 def bool_filter(e):
     if e == 0:
@@ -268,6 +278,17 @@ def query_db(query, args=(), one=False):
     rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
+
+
+def rows_to_list(cursor):
+    obj = []
+    for item in cursor:
+        d = []
+        for key in item.keys():
+            d.append(item[key])
+        obj.append(d)
+
+    return obj #json.dumps(obj)
 
 
 @app.teardown_appcontext

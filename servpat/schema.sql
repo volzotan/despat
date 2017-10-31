@@ -9,7 +9,8 @@ create table status (
   deviceName text,
   timestamp integer not null,
 
-  numberImages integer not null,
+  numberImagesTaken integer not null,
+  numberImagesSaved integer not null,
   freeSpaceInternal real,
   freeSpaceExternal real,
 
