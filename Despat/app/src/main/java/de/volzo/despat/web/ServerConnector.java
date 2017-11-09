@@ -57,7 +57,7 @@ public class ServerConnector {
         this.context = context;
         this.serverAddress = Config.getServerAddress(context);
 
-        this.dateFormat =  new SimpleDateFormat(Config.dateFormat, new Locale("de", "DE"));
+        this.dateFormat =  new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
     }
 
     /*
@@ -181,7 +181,13 @@ public class ServerConnector {
         Response.Listener successListener = new Response.Listener() {
             @Override
             public void onResponse(Object response) {
-                Log.d(TAG, String.format("Success Response: %s", response.toString()));
+                if (response == null) {
+                    Log.d(TAG, String.format("Success. Response null"));
+                } else if (response.toString().equals("{}")) {
+                    Log.d(TAG, String.format("Success Response empty"));
+                } else {
+                    Log.d(TAG, String.format("Success Response: %s", response.toString()));
+                }
             }
         };
 

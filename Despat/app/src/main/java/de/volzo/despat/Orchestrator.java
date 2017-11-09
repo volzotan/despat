@@ -275,6 +275,7 @@ public class Orchestrator extends BroadcastReceiver {
         if (!alreadyScheduled) {
             ComponentName serviceComponent = new ComponentName(context, UploadService.class);
             JobInfo.Builder builder = new JobInfo.Builder(UploadService.JOB_ID, serviceComponent);
+            builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 builder.setPeriodic(Config.getUploadInterval(context), 30000);
@@ -300,6 +301,7 @@ public class Orchestrator extends BroadcastReceiver {
 
         ComponentName serviceComponent = new ComponentName(context, UploadService.class);
         JobInfo.Builder builder = new JobInfo.Builder(UploadService.JOB_ID, serviceComponent);
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         builder.setMinimumLatency(0);
         builder.setOverrideDeadline(1000);
         jobScheduler.schedule(builder.build());

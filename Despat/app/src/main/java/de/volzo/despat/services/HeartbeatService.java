@@ -49,6 +49,11 @@ public class HeartbeatService extends JobService {
             systemController.startTemperatureMeasurement();
         }
 
+        if (!systemController.isNetworkConnectionAvailable()) {
+            Log.w(TAG, "no network connection available. abort.");
+            return true;
+        }
+
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendStatus(statusMessage);
 

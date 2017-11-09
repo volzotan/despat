@@ -11,6 +11,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -119,6 +121,12 @@ public class SystemController {
     public boolean isDisplayOn() {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         return pm.isInteractive();
+    }
+
+    public boolean isNetworkConnectionAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
     public int getBatteryLevel() {

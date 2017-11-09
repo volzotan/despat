@@ -6,7 +6,9 @@ import android.util.Log;
 
 import java.io.File;
 
+import de.volzo.despat.Despat;
 import de.volzo.despat.ImageRollover;
+import de.volzo.despat.SystemController;
 import de.volzo.despat.web.ServerConnector;
 import de.volzo.despat.support.Config;
 
@@ -39,10 +41,17 @@ public class UploadService extends JobService {
 
         uploadMessage.image = newestImage;
 
+        Despat despat = ((Despat) getApplicationContext());
+        SystemController systemController = despat.getSystemController();
+        if (!systemController.isNetworkConnectionAvailable()) {
+            Log.w(TAG, "no network connection available. abort.");
+            return true;
+        }
+
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendUpload(uploadMessage);
 
-        jobFinished(jobParameters, false); // <-- needs to be called from volley callback
+        jobFinished(jobParameters, false); // <-- TODO: needs to be called from volley callback
         return false;
     }
 
