@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 Log.e(TAG, "taking photo failed", e);
             }
         } else {
-            camera.takePhoto();
+            camera.captureImages(3);
         }
     }
 

@@ -12,7 +12,7 @@ public interface CameraAdapter {
 
     // public void openCamera() throws Exception;
 
-    public void takePhoto();
+    public void captureImages(final int number);
 
     public void closeCamera();
 

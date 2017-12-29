@@ -60,9 +60,6 @@ public class CameraController2 implements CameraAdapter {
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
 
-    private ImageReader imageReader;
-
-
     public CameraController2(Context context, TextureView textureView) throws Exception {
         this.context = context;
         this.textureView = textureView;
@@ -111,7 +108,7 @@ public class CameraController2 implements CameraAdapter {
                     Log.e(TAG, "creating preview failed");
                 }
             } else {
-                takePhoto();
+                captureImages(Config.NUMBER_OF_BURST_IMAGES);
             }
         }
 
@@ -213,7 +210,7 @@ public class CameraController2 implements CameraAdapter {
         }
     }
 
-    public void takePhoto() {
+    public void captureImages(final int number) {
         if (cameraDevice == null) {
             Log.e(TAG, "cameraDevice is null");
             throw new IllegalStateException();
@@ -231,7 +228,8 @@ public class CameraController2 implements CameraAdapter {
                 jpegSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
             }
 
-            imageReader = ImageReader.newInstance(jpegSizes[0].getWidth(), jpegSizes[0].getHeight(), ImageFormat.JPEG, 2);
+            ImageReader imageReader;
+            imageReader = ImageReader.newInstance(jpegSizes[0].getWidth(), jpegSizes[0].getHeight(), ImageFormat.JPEG, 10);
 
             List<Surface> outputSurfaces = new ArrayList<Surface>(1);
             outputSurfaces.add(imageReader.getSurface());
@@ -244,20 +242,32 @@ public class CameraController2 implements CameraAdapter {
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90);
 
             // image path
-            final File imageFullPath;
-            ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
-            imageFullPath = imgroll.getUnusedFullFilename();
+            final ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
 
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
                     Image image = null;
                     try {
-                        image = reader.acquireLatestImage();
+                        image = reader.acquireNextImage();
+                        if (image == null) {
+                            Log.e(TAG, "image empty");
+                            return;
+                        }
                         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                         byte[] bytes = new byte[buffer.capacity()];
                         buffer.get(bytes);
-                        save(bytes);
+
+                        File imageFullPath = imgroll.getTimestampAsFullFilename();
+                        FileOutputStream fos = new FileOutputStream(imageFullPath);
+                        try {
+                            fos.write(bytes);
+                            fos.close();
+                        } finally {
+                            if (fos != null) {
+                                fos.close();
+                            }
+                        }
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
@@ -265,17 +275,6 @@ public class CameraController2 implements CameraAdapter {
                     } finally {
                         if (image != null) {
                             image.close();
-                        }
-                    }
-                }
-                private void save(byte[] bytes) throws IOException {
-                    FileOutputStream fos = new FileOutputStream(imageFullPath);
-                    try {
-                        fos.write(bytes);
-                        fos.close();
-                    } finally {
-                        if (fos != null) {
-                            fos.close();
                         }
                     }
                 }
@@ -287,10 +286,10 @@ public class CameraController2 implements CameraAdapter {
                 @Override
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Log.i(TAG, "Saved:" + imageFullPath);
+                    Log.i(TAG, "Saved image");
 
                     Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
-                    intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath());
+                    // intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath()); // TODO
                     context.sendBroadcast(intent);
 
                     try {
@@ -307,7 +306,17 @@ public class CameraController2 implements CameraAdapter {
                 @Override
                 public void onConfigured(CameraCaptureSession session) {
                     try {
-                        session.capture(captureBuilder.build(), captureListener, mBackgroundHandler);
+                        if (number == 1) {
+                            session.capture(captureBuilder.build(), captureListener, mBackgroundHandler);
+                        } else {
+
+                            List<CaptureRequest> captureList = new ArrayList<CaptureRequest>();
+                            for (int i=0; i<number; i++) {
+                                captureList.add(captureBuilder.build());
+                            }
+
+                            session.captureBurst(captureList, captureListener, mBackgroundHandler);
+                        }
                     } catch (CameraAccessException e) {
                         e.printStackTrace();
                     }
@@ -333,10 +342,10 @@ public class CameraController2 implements CameraAdapter {
             cameraDevice.close();
             cameraDevice = null;
         }
-        if (imageReader != null) {
-            imageReader.close();
-            imageReader = null;
-        }
+//        if (imageReader != null) {
+//            imageReader.close();
+//            imageReader = null;
+//        }
     }
 
     public int getState() {

@@ -75,6 +75,11 @@ public class ImageRollover {
         return new File(this.dir, getUnusedFilename());
     }
 
+    public File getTimestampAsFullFilename() {
+        String str = Long.toString(System.currentTimeMillis()) + fileextension;
+        return new File(this.dir, str);
+    }
+
     public void run() {
         Log.d(TAG, "imageRollover running");
 
@@ -152,6 +157,9 @@ public class ImageRollover {
                 return file.isFile() && file.getName().endsWith(fileextension);
             }
         });
+
+        if (files == null) return null;
+
         long lastMod = Long.MIN_VALUE;
         File choice = null;
         for (File file : files) {

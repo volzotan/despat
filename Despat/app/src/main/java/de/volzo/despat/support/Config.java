@@ -20,6 +20,7 @@ public class Config {
     public static final String IMAGE_FILEEXTENSION          = ".jpg";
     public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;
     public static final boolean PHONE_HOME                  = true;
+    public static final int NUMBER_OF_BURST_IMAGES          = 2;
 
     private static final long DEFAULT_SHUTTER_INTERVAL      = 10 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
     private static final long DEFAULT_HEARTBEAT_INTERVAL    = 15 * 60 * 1000L; // Minimum interval is 15m
