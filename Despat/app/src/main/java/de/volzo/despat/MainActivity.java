@@ -31,7 +31,6 @@ import java.io.File;
 import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
 import de.volzo.despat.support.Util;
@@ -111,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onClick(View view) {
 
-                CameraAdapter camera = despat.getCamera();
+                CameraController2 camera = despat.getCamera();
 
                 if (camera == null){
                     activity.startCamera();
@@ -270,9 +269,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void takePhoto() {
 
-        CameraAdapter camera = despat.getCamera();
+        CameraController2 camera = despat.getCamera();
 
-        if (camera == null || camera.getState() == CameraAdapter.STATE_DEAD) {
+        if (camera == null || camera.getState() == CameraController2.STATE_DEAD) {
             try {
                 camera = new CameraController2(this, null); //, CameraController2.OPEN_PREVIEW_AND_TAKE_PHOTO);
                 despat.setCamera(camera);
@@ -280,7 +279,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 Log.e(TAG, "taking photo failed", e);
             }
         } else {
-            camera.captureImages(3);
+            //camera.isAutoFocusSupported();
+            camera.captureImages(2);
         }
     }
 

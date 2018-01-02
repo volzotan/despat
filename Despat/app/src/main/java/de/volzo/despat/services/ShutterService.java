@@ -12,7 +12,6 @@ import android.util.Log;
 import de.volzo.despat.CameraController2;
 import de.volzo.despat.Despat;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 
 /**
@@ -64,10 +63,10 @@ public class ShutterService extends Service {
 //        imgroll.run();
 
         Despat despat = ((Despat) getApplicationContext());
-        CameraAdapter camera = despat.getCamera();
+        CameraController2 camera = despat.getCamera();
 
         try {
-            if (camera == null || camera.getState() == CameraAdapter.STATE_DEAD) {
+            if (camera == null || camera.getState() == CameraController2.STATE_DEAD) {
                 camera = new CameraController2(this, null);
                 despat.setCamera(camera);
             } else {

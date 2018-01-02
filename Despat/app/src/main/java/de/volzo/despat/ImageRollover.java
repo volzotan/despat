@@ -71,6 +71,38 @@ public class ImageRollover {
         return sb.toString();
     }
 
+    public boolean fileAlreadyExisting(File f2) {
+
+        File[] listOfFiles = dir.listFiles();
+
+        for (File file : listOfFiles) {
+            if (file.isFile()) {
+                if (file.getAbsolutePath().equals(f2.getAbsolutePath())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public File filenamify(String name) {
+        File f = new File(this.dir, name + fileextension);
+
+        if (fileAlreadyExisting(f)) {
+            for (int i=2; i<9999; i++) {
+                f = new File(this.dir,name + "_" + i + fileextension);
+                if (!fileAlreadyExisting(f)) {
+                    return f;
+                }
+            }
+
+            return null;
+        }
+
+        return f;
+    }
+
     public File getUnusedFullFilename() {
         return new File(this.dir, getUnusedFilename());
     }

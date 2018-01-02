@@ -3,15 +3,13 @@ package de.volzo.despat;
 import android.app.Application;
 import android.util.Log;
 
-import de.volzo.despat.support.CameraAdapter;
-import de.volzo.despat.support.Config;
 import de.volzo.despat.web.ServerConnector;
 
 public class Despat extends Application {
 
     public static String TAG = Despat.class.getSimpleName();
 
-    private CameraAdapter camera;
+    private CameraController2 camera;
     private SystemController systemController;
 //    private int imagesTaken = 0;
 
@@ -37,11 +35,11 @@ public class Despat extends Application {
         serverConnector.sendEvent(ServerConnector.EventType.SHUTDOWN, null);
     }
 
-    public void setCamera(CameraAdapter cameraAdapter) {
-        this.camera = cameraAdapter;
+    public void setCamera(CameraController2 cameraController) {
+        this.camera = cameraController;
     }
 
-    public CameraAdapter getCamera() {
+    public CameraController2 getCamera() {
         return this.camera;
     }
 

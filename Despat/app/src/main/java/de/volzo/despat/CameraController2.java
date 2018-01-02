@@ -1,5 +1,6 @@
 package de.volzo.despat;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.ImageFormat;
@@ -35,7 +36,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.CameraAdapter;
 import de.volzo.despat.support.Config;
 
 
@@ -43,7 +43,7 @@ import de.volzo.despat.support.Config;
  * Created by volzotan on 19.12.16.
  */
 
-public class CameraController2 implements CameraAdapter {
+public class CameraController2 {
 
     public static final String TAG = CameraController2.class.getSimpleName();
 
@@ -59,6 +59,10 @@ public class CameraController2 implements CameraAdapter {
 
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
+
+    public static int STATE_DEAD          = 0x11;
+    public static int STATE_EMPTY_PREVIEW = 0x12;
+    public static int STATE_PREVIEW       = 0x13;
 
     public CameraController2(Context context, TextureView textureView) throws Exception {
         this.context = context;
@@ -222,6 +226,9 @@ public class CameraController2 implements CameraAdapter {
         }
 
         try {
+            final CaptureRequest.Builder requestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+
+            // output
             CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
             Size[] jpegSizes = null;
             if (characteristics != null) {
@@ -229,17 +236,22 @@ public class CameraController2 implements CameraAdapter {
             }
 
             ImageReader imageReader;
-            imageReader = ImageReader.newInstance(jpegSizes[0].getWidth(), jpegSizes[0].getHeight(), ImageFormat.JPEG, 10);
+            imageReader = ImageReader.newInstance(jpegSizes[0].getWidth(), jpegSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES+2);
 
             List<Surface> outputSurfaces = new ArrayList<Surface>(1);
             outputSurfaces.add(imageReader.getSurface());
+            requestBuilder.addTarget(imageReader.getSurface());
 
-            final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-            captureBuilder.addTarget(imageReader.getSurface());
-            captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+            // exposure
+            requestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+
+            // autofocus
+            requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
+            float focusdistance = 0f; //characteristics.get(characteristics.LENS_INFO_HYPERFOCAL_DISTANCE);
+            requestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focusdistance);
 
             // orientation
-            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90);
+            requestBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90);
 
             // image path
             final ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
@@ -259,6 +271,10 @@ public class CameraController2 implements CameraAdapter {
                         buffer.get(bytes);
 
                         File imageFullPath = imgroll.getTimestampAsFullFilename();
+                        //File imageFullPath = imgroll.filenamify(Long.toString(image.getTimestamp())); // timestamp date is no unix epoch
+                        if (imageFullPath == null) { // only duplicates
+                            Log.e(TAG, "saving image failed. no new filename could be acquired");
+                        }
                         FileOutputStream fos = new FileOutputStream(imageFullPath);
                         try {
                             fos.write(bytes);
@@ -289,15 +305,26 @@ public class CameraController2 implements CameraAdapter {
                     Log.i(TAG, "Saved image");
 
                     Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
-                    // intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath()); // TODO
+                    // TODO: figure out the path of the saved picture
+                    // intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath());
                     context.sendBroadcast(intent);
 
-                    try {
-                        if (textureView != null) {
+                    if (textureView != null) {
+                        try {
+
+                            // retrieve tag (number of image in burst sequence)
+                            Object tag = request.getTag();
+                            if (tag != null) {
+                                int n = (int) request.getTag();
+                                if (n + 1 != Config.NUMBER_OF_BURST_IMAGES) {
+                                    return;
+                                }
+                            }
+
                             createPreview(textureView);
+                        } catch (CameraAccessException cae) {
+                            Log.e(TAG, "captureListener failed");
                         }
-                    } catch (CameraAccessException cae) {
-                        Log.e(TAG, "captureListener failed");
                     }
                 }
             };
@@ -307,12 +334,16 @@ public class CameraController2 implements CameraAdapter {
                 public void onConfigured(CameraCaptureSession session) {
                     try {
                         if (number == 1) {
-                            session.capture(captureBuilder.build(), captureListener, mBackgroundHandler);
+                            session.capture(requestBuilder.build(), captureListener, mBackgroundHandler);
                         } else {
 
                             List<CaptureRequest> captureList = new ArrayList<CaptureRequest>();
                             for (int i=0; i<number; i++) {
-                                captureList.add(captureBuilder.build());
+                                // attach the number of the picture in the burst sequence to the request
+                                requestBuilder.setTag(i);
+                                CaptureRequest req = requestBuilder.build();
+
+                                captureList.add(req);
                             }
 
                             session.captureBurst(captureList, captureListener, mBackgroundHandler);
