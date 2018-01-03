@@ -31,6 +31,7 @@ public class Despat extends Application {
 
         Log.i(TAG, "despat terminate.");
 
+        closeCamera();
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendEvent(ServerConnector.EventType.SHUTDOWN, null);
     }
