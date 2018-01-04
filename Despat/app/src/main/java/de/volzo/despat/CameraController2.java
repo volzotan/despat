@@ -1,6 +1,5 @@
 package de.volzo.despat;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
@@ -16,7 +15,6 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -31,7 +29,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import de.volzo.despat.support.Config;
@@ -78,6 +75,7 @@ public class CameraController2 {
         this.context = context;
         this.textureView = textureView;
 
+        startBackgroundThread();
         openCamera();
     }
 
@@ -136,7 +134,7 @@ public class CameraController2 {
 
     private void createCaptureSession() throws CameraAccessException {
         try {
-            
+
             // output
             CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
             Size[] jpegSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
@@ -169,18 +167,25 @@ public class CameraController2 {
             List<Surface> outputSurfaces = new ArrayList<Surface>(2);
             outputSurfaces.add(imageReader.getSurface());
 
+            // get empty dummy surface or surface with texture view
             SurfaceTexture surfaceTexture = getSurfaceTexture(textureView);
             int width = 640; //imageDimension.getWidth();   // TODO: drop hardcoded resolution
             int height = 480; //imageDimension.getHeight();
             surfaceTexture.setDefaultBufferSize(width, height);
             Surface surface = new Surface(surfaceTexture);
+            outputSurfaces.add(surface);
 
             if (textureView != null) {
-                outputSurfaces.add(surface);
-
-                previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-                previewRequestBuilder.addTarget(surface);
+                // Lowly camera API developers haven't deemed it necessary to integrate automatic screen rotation and aspect ratio
+                Matrix mat = new Matrix();
+                mat.postScale(height / (float) width, width / (float) height);
+                mat.postRotate(-90);
+                mat.postTranslate(0, textureView.getHeight());
+                textureView.setTransform(mat);
             }
+
+            previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            previewRequestBuilder.addTarget(surface);
 
             stillRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             stillRequestBuilder.addTarget(imageReader.getSurface());
@@ -196,16 +201,23 @@ public class CameraController2 {
 
                     captureSession = cameraCaptureSession;
 
+                    // if a view was supplied, we want a preview
+
+                    // if no view was supplied, no preview is needed and
+                    // we just take a picture after the camera started
+
                     if (textureView != null) {
                         try {
                             // Auto focus should be continuous for camera preview.
                             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-
                             previewRequest = previewRequestBuilder.build();
                             captureSession.setRepeatingRequest(previewRequest, captureCallback, backgroundHandler);
                         } catch (CameraAccessException e) {
                             e.printStackTrace();
                         }
+                    } else {
+                        takePicture(); // TODO
+                        //captureImages(Config.NUMBER_OF_BURST_IMAGES);
                     }
                 }
 
@@ -214,24 +226,6 @@ public class CameraController2 {
                     Log.e(TAG, "creating capture session failed");
                 }
             }, null);
-
-            // if no view was supplied, no preview is needed and we just take a picture after the camera started
-            if (textureView != null) { // PREVIEW
-
-                // Lowly camera API developers haven't deemed it necessary to integrate automatic screen rotation and aspect ratio
-                Matrix mat = new Matrix();
-                mat.postScale(height / (float) width, width / (float) height);
-                mat.postRotate(-90);
-                mat.postTranslate(0, textureView.getHeight());
-                textureView.setTransform(mat);
-
-                previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-                previewRequestBuilder.addTarget(surface);
-
-            } else { // STILL
-                //captureImages(Config.NUMBER_OF_BURST_IMAGES);
-            }
-
         } catch (CameraAccessException e) {
             Log.d(TAG, "creating capture session failed", e);
             throw e;
@@ -458,43 +452,39 @@ public class CameraController2 {
                     // We have nothing to do when the camera preview is working normally.
                     break;
                 }
-//                case STATE_WAITING_LOCK: {
-//                    Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-//                    if (afState == null) {
-//                        captureStillPicture();
-//                    } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
-//                            CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
-//                        // CONTROL_AE_STATE can be null on some devices
-//                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-//                        if (aeState == null ||
-//                                aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-//                            mState = STATE_PICTURE_TAKEN;
-//                            captureStillPicture();
-//                        } else {
-//                            runPrecaptureSequence();
-//                        }
-//                    }
-//                    break;
-//                }
-//                case STATE_WAITING_PRECAPTURE: {
-//                    // CONTROL_AE_STATE can be null on some devices
-//                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-//                    if (aeState == null ||
-//                            aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
-//                            aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
-//                        mState = STATE_WAITING_NON_PRECAPTURE;
-//                    }
-//                    break;
-//                }
-//                case STATE_WAITING_NON_PRECAPTURE: {
-//                    // CONTROL_AE_STATE can be null on some devices
-//                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-//                    if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
-//                        mState = STATE_PICTURE_TAKEN;
-//                        captureStillPicture();
-//                    }
-//                    break;
-//                }
+                case STATE_WAITING_LOCK: {
+                    Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                    if (afState == null) {
+                        captureStillPicture();
+                    } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
+                            CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
+                        // CONTROL_AE_STATE can be null on some devices
+                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                        if (aeState == null ||
+                                aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
+                            state = STATE_PICTURE_TAKEN;
+                            captureStillPicture();
+                        } else {
+                            runPrecaptureSequence();
+                        }
+                    }
+                    break;
+                }
+                case STATE_WAITING_PRECAPTURE: {
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE || aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
+                        state = STATE_WAITING_NON_PRECAPTURE;
+                    }
+                    break;
+                }
+                case STATE_WAITING_NON_PRECAPTURE: {
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    //if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
+                        state = STATE_PICTURE_TAKEN;
+                        captureStillPicture();
+                    //}
+                    break;
+                }
             }
         }
 
@@ -514,6 +504,88 @@ public class CameraController2 {
 
     };
 
+    public void takePicture() {
+        lockFocus();
+    }
+
+    private void lockFocus() {
+        try {
+            // This is how to tell the camera to lock focus.
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+            // Tell #mCaptureCallback to wait for the lock.
+            state = STATE_WAITING_LOCK;
+            captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void runPrecaptureSequence() {
+        try {
+            // This is how to tell the camera to trigger.
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            // Tell #mCaptureCallback to wait for the precapture sequence to be set.
+            state = STATE_WAITING_PRECAPTURE;
+            captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void captureStillPicture() {
+        try {
+            if (null == cameraDevice) {
+                Log.e(TAG, "cameraDevice missing");
+                return;
+            }
+            // This is the CaptureRequest.Builder that we use to take a picture.
+            final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            captureBuilder.addTarget(imageReader.getSurface());
+
+            // Use the same AE and AF modes as the preview.
+            captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+
+            CameraCaptureSession.CaptureCallback CaptureCallback = new CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+                    Log.wtf(TAG, "saved");
+                    unlockFocus();
+                }
+            };
+
+            captureSession.stopRepeating();
+            captureSession.abortCaptures();
+            captureSession.capture(captureBuilder.build(), CaptureCallback, null);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void unlockFocus() {
+        try {
+            // Reset the auto-focus trigger
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+            captureSession.capture(previewRequestBuilder.build(), new CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+                    if (textureView == null) {
+                        // no preview is needed and camera can be killed
+                        // (must be happen after the cancel AF request has been processed and the image saver did its job)
+                        // closeCamera();
+                    }
+                }
+            }, backgroundHandler);
+
+            // resume preview
+            if (textureView != null) {
+                state = STATE_PREVIEW;
+                captureSession.setRepeatingRequest(previewRequest, captureCallback, backgroundHandler);
+            }
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void closeCamera() {
         if (captureSession != null) {
             captureSession.close();
@@ -527,6 +599,7 @@ public class CameraController2 {
             imageReader.close();
             imageReader = null;
         }
+        stopBackgroundThread();
     }
 
     public int getState() {
@@ -555,28 +628,7 @@ public class CameraController2 {
 
     // additional functionality
 
-    private float getMinimumFocusDistance() {
-        Float minimumLens = null;
-        try {
-            CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-            String cameraId = cameraManager.getCameraIdList()[0];
-            CameraCharacteristics c = manager.getCameraCharacteristics(cameraId);
-            minimumLens = c.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
-        } catch (Exception e) {
-            Log.e(TAG, "isHardwareLevelSupported Error", e);
-        }
-        if (minimumLens != null)
-            return minimumLens;
-        return 0;
-    }
-
-    public boolean isAutoFocusSupported() {
-        return  isHardwareLevelSupported(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) || getMinimumFocusDistance() > 0;
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private boolean isHardwareLevelSupported(int requiredLevel) {
-        boolean res = false;
+    private void printHardwareLevel() {
 
         try {
             CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
@@ -601,45 +653,34 @@ public class CameraController2 {
                     Log.d(TAG, "Unknown INFO_SUPPORTED_HARDWARE_LEVEL: " + deviceLevel);
                     break;
             }
-
-
-            if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
-                res = requiredLevel == deviceLevel;
-            } else {
-                // deviceLevel is not LEGACY, can use numerical sort
-                res = requiredLevel <= deviceLevel;
-            }
-
         } catch (Exception e) {
-            Log.e(TAG, "isHardwareLevelSupported Error", e);
+            Log.e(TAG, "HardwareLevel Error", e);
         }
-        return res;
     }
-
 
     private static class ImageSaver implements Runnable {
 
-        private final Image mImage;
-        private final File mFile;
+        private final Image image;
+        private final File file;
 
         ImageSaver(Image image, File file) {
-            mImage = image;
-            mFile = file;
+            this.image = image;
+            this.file = file;
         }
 
         @Override
         public void run() {
-            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
+            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
             FileOutputStream output = null;
             try {
-                output = new FileOutputStream(mFile);
+                output = new FileOutputStream(file);
                 output.write(bytes);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                mImage.close();
+                image.close();
                 if (null != output) {
                     try {
                         output.close();
@@ -649,7 +690,6 @@ public class CameraController2 {
                 }
             }
         }
-
     }
 }
 
