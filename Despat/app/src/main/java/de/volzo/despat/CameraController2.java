@@ -1,6 +1,7 @@
 package de.volzo.despat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
@@ -31,6 +32,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 
 
@@ -64,6 +66,7 @@ public class CameraController2 {
 
     public static final int STATE_DEAD                      = 0;
     public static final int STATE_IDLE                      = 1;
+    public static final int STATE_READY_TO_DIE              = 9;
 
     public static final int STATE_PREVIEW                   = 2;
     public static final int STATE_WAITING_LOCK              = 3;
@@ -149,6 +152,8 @@ public class CameraController2 {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
 
+                    if (true) return; // FIXME
+
                     // image path
                     final ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
                     File imageFullPath = imgroll.getTimestampAsFullFilename();
@@ -159,6 +164,11 @@ public class CameraController2 {
                     }
 
                     backgroundHandler.post(new ImageSaver(reader.acquireNextImage(), imageFullPath));
+
+                    if (state == STATE_READY_TO_DIE) { // TODO
+                        Log.wtf(TAG, "killing camera");
+                        closeCamera();
+                    }
                 }
             };
             imageReader.setOnImageAvailableListener(readerListener, backgroundHandler);
@@ -216,8 +226,7 @@ public class CameraController2 {
                             e.printStackTrace();
                         }
                     } else {
-                        takePicture(); // TODO
-                        //captureImages(Config.NUMBER_OF_BURST_IMAGES);
+                        captureImages();
                     }
                 }
 
@@ -231,20 +240,6 @@ public class CameraController2 {
             throw e;
         }
     }
-
-//    private void updatePreview() {
-//        if (cameraDevice == null) {
-//            Log.e(TAG, "updatePreview error, return");
-//        }
-//
-//        previewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-//
-//        try {
-//            cameraCaptureSession.setRepeatingRequest(previewRequestBuilder.build(), null, backgroundHandler);
-//        } catch (CameraAccessException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     protected void startBackgroundThread() {
         backgroundThread = new HandlerThread("Camera Background");
@@ -262,191 +257,28 @@ public class CameraController2 {
         }
     }
 
-    public void captureImages(final int number) {
-    }
 /*
-    private void startCaptureProcess() {
-        try {
-            // requestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-            // session.capture(requestBuilder.build(), captureListener, mBackgroundHandler);
-
-            stillRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void endCaptureProcess() {
-        // Reset the auto-focus trigger
-        previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-        captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
-
-        createPreview(textureView);
-    }
-
-    private void captureStillImages(final int number) {
-        if (cameraDevice == null) {
-            Log.e(TAG, "cameraDevice is null");
-            throw new IllegalStateException();
-        }
-
-        if (cameraManager == null) { // ?
-            cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-            Log.d(TAG, "cameraManager reclaimed");
-        }
-
-        try {
-            final CaptureRequest.Builder requestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-
-            // output surfaces
-            List<Surface> outputSurfaces = new ArrayList<Surface>(1);
-            outputSurfaces.add(imageReader.getSurface());
-            requestBuilder.addTarget(imageReader.getSurface());
-
-            // exposure
-            requestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-
             // AF
-//            requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
-//            float focusdistance = 0f; //characteristics.get(characteristics.LENS_INFO_HYPERFOCAL_DISTANCE);
-//            requestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focusdistance);
+            requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
+            float focusdistance = 0f; //characteristics.get(characteristics.LENS_INFO_HYPERFOCAL_DISTANCE);
+            requestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focusdistance);
             requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-
-            // AE
-            requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 
             // orientation
             requestBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90);
-
-//            final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
-//
-//                public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
-//
-//                    int aeState = partialResult.get(CaptureResult.CONTROL_AE_STATE);
-//                    switch(aeState) {
-//                        case CaptureResult.CONTROL_AE_STATE_CONVERGED:
-//                            Log.d(TAG, "AE: " + "converged");
-//                            break;
-//                        case CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED:
-//                            Log.d(TAG, "AE: " + "flash required");
-//                            break;
-//                        case CaptureResult.CONTROL_AE_STATE_INACTIVE:
-//                            Log.d(TAG, "AE: " + "inactive");
-//                            break;
-//                        case CaptureResult.CONTROL_AE_STATE_LOCKED:
-//                            Log.d(TAG, "AE: " + "locked");
-//                            break;
-//                        case CaptureResult.CONTROL_AE_STATE_PRECAPTURE:
-//                            Log.d(TAG, "AE: " + "precapture");
-//                            break;
-//                        case CaptureResult.CONTROL_AE_STATE_SEARCHING:
-//                            Log.d(TAG, "AE: " + "searching");
-//                            break;
-//                    }
-//
-//                    int afState = partialResult.get(CaptureResult.CONTROL_AF_STATE);
-//                    switch(afState) {
-//                        case CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN:
-//                            Log.d(TAG, "AF: " + "active scan");
-//                            break;
-//                        case CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED:
-//                            Log.d(TAG, "AF: " + "focus locked");
-//                            break;
-//                        case CaptureResult.CONTROL_AF_STATE_INACTIVE:
-//                            Log.d(TAG, "AF: " + "inactive");
-//                            break;
-//                        case CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED:
-//                            Log.d(TAG, "AF: " + "not focus locked");
-//                            break;
-//                        case CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED:
-//                            Log.d(TAG, "AF: " + "passive focused");
-//                            break;
-//                        case CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN:
-//                            Log.d(TAG, "AF: " + "passive scan");
-//                            break;
-//                        case CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED:
-//                            Log.d(TAG, "AF: " + "passive unfocused");
-//                            break;
-//                        default:
-//                            Log.d(TAG, "AF: " + "undefined");
-//                            break;
-//                    }
-//                }
-//
-//                @Override
-//                public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-//                    super.onCaptureCompleted(session, request, result);
-//                    Log.i(TAG, "Saved image");
-//
-//                    Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
-//                    // TODO: figure out the path of the saved picture
-//                    // intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath());
-//                    context.sendBroadcast(intent);
-//
-//
-//
-//
-//                            // retrieve tag (number of image in burst sequence)
-//                            Object tag = request.getTag();
-//                            if (tag != null) {
-//                                int n = (int) request.getTag();
-//                                if (n + 1 != Config.NUMBER_OF_BURST_IMAGES) {
-//                                    return;
-//                                }
-//                            }
-//
-//                            endCaptureProcess();
-//
-//                }
-//            };
-
-//            cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
-//                @Override
-//                public void onConfigured(CameraCaptureSession session) {
-//
-//                    // camera needs to be active to do AF an AE
-//                    // if the preview is running this is already done
-//                    // if no preview is active, the camera needs to take and
-//                    // discard several images before focus and metering is fine
-//
-//                    try {
-//                        if (number == 1) {
-//                            session.capture(requestBuilder.build(), captureCallback, backgroundHandler);
-//                        } else {
-//
-//                            List<CaptureRequest> captureList = new ArrayList<CaptureRequest>();
-//                            for (int i=0; i<number; i++) {
-//                                // attach the number of the picture in the burst sequence to the request
-//                                requestBuilder.setTag(i);
-//                                CaptureRequest req = requestBuilder.build();
-//
-//                                captureList.add(req);
-//                            }
-//
-//                            session.captureBurst(captureList, captureCallback, backgroundHandler);
-//                        }
-//                    } catch (CameraAccessException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                @Override
-//                public void onConfigureFailed(CameraCaptureSession session) {
-//                    Log.e(TAG, "configuring capture session failed");
-//                }
-//            }, backgroundHandler);
-
-            Log.d(TAG, "takePicture complete");
-
-        } catch (CameraAccessException cae) {
-            Log.e(TAG, "camera access denied", cae);
-        }
-    }
 */
 
     private CameraCaptureSession.CaptureCallback captureCallback
             = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
+
+//            if (state != STATE_PREVIEW){
+//                logCameraAutomaticModeState(
+//                        result.get(CaptureResult.CONTROL_AE_STATE),
+//                        result.get(CaptureResult.CONTROL_AF_STATE));
+//            }
+
             switch (state) {
                 case STATE_PREVIEW: {
                     // We have nothing to do when the camera preview is working normally.
@@ -456,12 +288,9 @@ public class CameraController2 {
                     Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
                     if (afState == null) {
                         captureStillPicture();
-                    } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
-                            CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
-                        // CONTROL_AE_STATE can be null on some devices
+                    } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState || CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
                         Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                        if (aeState == null ||
-                                aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
+                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
                             state = STATE_PICTURE_TAKEN;
                             captureStillPicture();
                         } else {
@@ -504,7 +333,7 @@ public class CameraController2 {
 
     };
 
-    public void takePicture() {
+    public void captureImages() {
         lockFocus();
     }
 
@@ -538,24 +367,59 @@ public class CameraController2 {
                 Log.e(TAG, "cameraDevice missing");
                 return;
             }
-            // This is the CaptureRequest.Builder that we use to take a picture.
-            final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-            captureBuilder.addTarget(imageReader.getSurface());
 
             // Use the same AE and AF modes as the preview.
-            captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            stillRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
-            CameraCaptureSession.CaptureCallback CaptureCallback = new CameraCaptureSession.CaptureCallback() {
+            // stop AF/AE measurements
+            captureSession.stopRepeating();
+            captureSession.abortCaptures();
+
+            final int burstLength = Config.NUMBER_OF_BURST_IMAGES; // TODO: make burstLength a function parameter
+
+            CameraCaptureSession.CaptureCallback localCaptureCallback = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-                    Log.wtf(TAG, "saved");
+
+                    super.onCaptureCompleted(session, request, result);
+                    Log.i(TAG, "Saved image");
+
+                    Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
+                    // TODO: figure out the path of the saved picture
+                    // intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath());
+                    context.sendBroadcast(intent);
+
+                    // retrieve tag (number of image in burst sequence)
+                    Object tag = request.getTag();
+                    if (tag != null) {
+                        int n = (int) request.getTag();
+                        Log.wtf(TAG, Integer.toString(n));
+                        if (n < burstLength - 1) {
+                            // there are still remaining requests in the pipeline
+                            // no shutdown yet
+                            return;
+                        }
+                    }
+
                     unlockFocus();
                 }
             };
 
-            captureSession.stopRepeating();
-            captureSession.abortCaptures();
-            captureSession.capture(captureBuilder.build(), CaptureCallback, null);
+            if (burstLength == 1) {
+                stillRequestBuilder.setTag(null);
+                captureSession.capture(stillRequestBuilder.build(), localCaptureCallback, backgroundHandler);
+            } else {
+
+                List<CaptureRequest> captureList = new ArrayList<CaptureRequest>();
+                for (int i=0; i<burstLength; i++) {
+                    // attach the number of the picture in the burst sequence to the request
+                    stillRequestBuilder.setTag(i);
+                    CaptureRequest req = stillRequestBuilder.build();
+                    captureList.add(req);
+                }
+
+                captureSession.captureBurst(captureList, localCaptureCallback, backgroundHandler);
+            }
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -572,6 +436,9 @@ public class CameraController2 {
                         // no preview is needed and camera can be killed
                         // (must be happen after the cancel AF request has been processed and the image saver did its job)
                         // closeCamera();
+
+                        //state = STATE_READY_TO_DIE;
+                        closeCamera();
                     }
                 }
             }, backgroundHandler);
@@ -587,6 +454,8 @@ public class CameraController2 {
     }
 
     public void closeCamera() {
+        Log.d(TAG, "--> closeCamera");
+
         if (captureSession != null) {
             captureSession.close();
             captureSession = null;
@@ -603,18 +472,16 @@ public class CameraController2 {
     }
 
     public int getState() {
+        
+        if (cameraDevice == null) {
+            return this.STATE_DEAD;
+        }
 
-        return state;
-
-//        if (cameraDevice == null) {
-//            return this.STATE_DEAD;
-//        }
-//
-//        if (textureView == null) {
-//            return this.STATE_IDLE;
-//        } else {
-//            return this.STATE_PREVIEW;
-//        }
+        if (textureView == null) {
+            return this.STATE_IDLE;
+        } else {
+            return this.STATE_PREVIEW;
+        }
     }
 
     private SurfaceTexture getSurfaceTexture(TextureView tv) {
@@ -628,7 +495,61 @@ public class CameraController2 {
 
     // additional functionality
 
-    private void printHardwareLevel() {
+    private void logCameraAutomaticModeState(int aeState, int afState) {
+        //int aeState = partialResult.get(CaptureResult.CONTROL_AE_STATE);
+
+        switch (aeState) {
+            case CaptureResult.CONTROL_AE_STATE_CONVERGED:
+                Log.d(TAG, "AE: " + "converged");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED:
+                Log.d(TAG, "AE: " + "flash required");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_INACTIVE:
+                Log.d(TAG, "AE: " + "inactive");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_LOCKED:
+                Log.d(TAG, "AE: " + "locked");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_PRECAPTURE:
+                Log.d(TAG, "AE: " + "precapture");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_SEARCHING:
+                Log.d(TAG, "AE: " + "searching");
+                break;
+        }
+
+        //int afState = partialResult.get(CaptureResult.CONTROL_AF_STATE);
+
+        switch (afState) {
+            case CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN:
+                Log.d(TAG, "AF: " + "active scan");
+                break;
+            case CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED:
+                Log.d(TAG, "AF: " + "focus locked");
+                break;
+            case CaptureResult.CONTROL_AF_STATE_INACTIVE:
+                Log.d(TAG, "AF: " + "inactive");
+                break;
+            case CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED:
+                Log.d(TAG, "AF: " + "not focus locked");
+                break;
+            case CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED:
+                Log.d(TAG, "AF: " + "passive focused");
+                break;
+            case CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN:
+                Log.d(TAG, "AF: " + "passive scan");
+                break;
+            case CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED:
+                Log.d(TAG, "AF: " + "passive unfocused");
+                break;
+            default:
+                Log.d(TAG, "AF: " + "undefined");
+                break;
+        }
+    }
+
+    private void logHardwareLevel() {
 
         try {
             CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);

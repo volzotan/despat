@@ -7,16 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
-import android.hardware.camera2.CameraAccessException;
-import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -112,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
                 CameraController2 camera = despat.getCamera();
 
-                if (camera == null){
+                if (camera == null || camera.getState() == CameraController2.STATE_DEAD){
                     activity.startCamera();
                 } else {
                     despat.closeCamera();
@@ -173,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         sendBroadcast(uploadIntent);
 
 //        startCapturing.callOnClick();
-        btConfig.callOnClick();
+//        btConfig.callOnClick();
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -217,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        startCamera();
+        //startCamera();
     }
 
     @Override
@@ -227,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+        despat.closeCamera();
         return false;
     }
 
@@ -276,12 +275,40 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 camera = new CameraController2(this, null); //, CameraController2.OPEN_PREVIEW_AND_TAKE_PHOTO);
                 despat.setCamera(camera);
             } catch (Exception e) {
-                Log.e(TAG, "taking photo failed", e);
+                Log.e(TAG, "starting camera failed", e);
             }
-        } else {
-            //camera.isAutoFocusSupported();
-            camera.captureImages(2);
         }
+
+//        //camera.takePicture();
+//        if (true) return;
+//
+//        // TODO: wait till camera has started
+//        if (camera != null && camera.getState() != CameraController2.STATE_DEAD) {
+//            camera.captureImages(2);
+//        }
+
+//        final Context ctx = this;
+//        Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                ImageRollover imgroll = new ImageRollover(Config.getImageFolder(ctx), Config.IMAGE_FILEEXTENSION);
+//                File newestImage = imgroll.getNewestImage();
+//
+//                if (newestImage == null) return;
+//
+//                Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
+//
+//                ImageView imageView = (ImageView) findViewById(R.id.imageView);
+//
+//                imageView.setImageBitmap(imgBitmap);
+//
+//                PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+//                photoViewAttacher.update();
+//            }
+//        }, 1500); // TODO: buffer queue gets abandoned if this is not long enough. Something is wrong...
+
     }
 
     public void runRecognizer() {
