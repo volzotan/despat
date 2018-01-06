@@ -40,9 +40,9 @@ import de.volzo.despat.support.Config;
  * Created by volzotan on 19.12.16.
  */
 
-public class CameraController2 {
+public class CameraController {
 
-    public static final String TAG = CameraController2.class.getSimpleName();
+    public static final String TAG = CameraController.class.getSimpleName();
 
     private Context context;
     private TextureView textureView;
@@ -73,7 +73,7 @@ public class CameraController2 {
     public static final int STATE_WAITING_NON_PRECAPTURE    = 5;
     public static final int STATE_PICTURE_TAKEN             = 6;
 
-    public CameraController2(Context context, TextureView textureView) throws Exception {
+    public CameraController(Context context, TextureView textureView) throws Exception {
         this.context = context;
         this.textureView = textureView;
 

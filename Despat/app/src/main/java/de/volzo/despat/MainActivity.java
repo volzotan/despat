@@ -7,10 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,7 +23,6 @@ import android.widget.ToggleButton;
 
 import java.io.File;
 
-import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
@@ -108,9 +104,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onClick(View view) {
 
-                CameraController2 camera = despat.getCamera();
+                CameraController camera = despat.getCamera();
 
-                if (camera == null || camera.getState() == CameraController2.STATE_DEAD){
+                if (camera == null || camera.getState() == CameraController.STATE_DEAD){
                     activity.startCamera();
                 } else {
                     despat.closeCamera();
@@ -258,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            despat.setCamera(new CameraController2(this, textureView));
+            despat.setCamera(new CameraController(this, textureView));
         } catch (Exception cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -268,11 +264,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void takePhoto() {
 
-        CameraController2 camera = despat.getCamera();
+        CameraController camera = despat.getCamera();
 
-        if (camera == null || camera.getState() == CameraController2.STATE_DEAD) {
+        if (camera == null || camera.getState() == CameraController.STATE_DEAD) {
             try {
-                camera = new CameraController2(this, null); //, CameraController2.OPEN_PREVIEW_AND_TAKE_PHOTO);
+                camera = new CameraController(this, null); //, CameraController.OPEN_PREVIEW_AND_TAKE_PHOTO);
                 despat.setCamera(camera);
             } catch (Exception e) {
                 Log.e(TAG, "starting camera failed", e);
@@ -283,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        if (true) return;
 //
 //        // TODO: wait till camera has started
-//        if (camera != null && camera.getState() != CameraController2.STATE_DEAD) {
+//        if (camera != null && camera.getState() != CameraController.STATE_DEAD) {
 //            camera.captureImages(2);
 //        }
 

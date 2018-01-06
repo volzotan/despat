@@ -9,10 +9,9 @@ import android.hardware.camera2.CameraAccessException;
 import android.os.IBinder;
 import android.util.Log;
 
-import de.volzo.despat.CameraController2;
+import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.Config;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -63,11 +62,11 @@ public class ShutterService extends Service {
 //        imgroll.run();
 
         Despat despat = ((Despat) getApplicationContext());
-        CameraController2 camera = despat.getCamera();
+        CameraController camera = despat.getCamera();
 
         try {
-            if (camera == null || camera.getState() == CameraController2.STATE_DEAD) {
-                camera = new CameraController2(this, null);
+            if (camera == null || camera.getState() == CameraController.STATE_DEAD) {
+                camera = new CameraController(this, null);
                 despat.setCamera(camera);
             } else {
                 camera.captureImages();

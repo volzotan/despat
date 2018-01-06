@@ -9,7 +9,7 @@ public class Despat extends Application {
 
     public static String TAG = Despat.class.getSimpleName();
 
-    private CameraController2 camera;
+    private CameraController camera;
     private SystemController systemController;
 //    private int imagesTaken = 0;
 
@@ -36,11 +36,11 @@ public class Despat extends Application {
         serverConnector.sendEvent(ServerConnector.EventType.SHUTDOWN, null);
     }
 
-    public void setCamera(CameraController2 cameraController) {
+    public void setCamera(CameraController cameraController) {
         this.camera = cameraController;
     }
 
-    public CameraController2 getCamera() {
+    public CameraController getCamera() {
         return this.camera;
     }
 
