@@ -66,7 +66,6 @@ public class CameraController2 {
 
     public static final int STATE_DEAD                      = 0;
     public static final int STATE_IDLE                      = 1;
-    public static final int STATE_READY_TO_DIE              = 9;
 
     public static final int STATE_PREVIEW                   = 2;
     public static final int STATE_WAITING_LOCK              = 3;
@@ -78,7 +77,10 @@ public class CameraController2 {
         this.context = context;
         this.textureView = textureView;
 
-        startBackgroundThread();
+        //startBackgroundThread();
+        // stopping the background thread kills the whole application when its
+        // done by the ShutterService
+        
         openCamera();
     }
 
@@ -152,9 +154,8 @@ public class CameraController2 {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
 
-                    if (true) return; // FIXME
+                    Log.d(TAG, "# onImageAvailable");
 
-                    // image path
                     final ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
                     File imageFullPath = imgroll.getTimestampAsFullFilename();
                     //File imageFullPath = imgroll.filenamify(Long.toString(image.getTimestamp())); // timestamp date is no unix epoch
@@ -163,11 +164,31 @@ public class CameraController2 {
                         return;
                     }
 
-                    backgroundHandler.post(new ImageSaver(reader.acquireNextImage(), imageFullPath));
+                    //backgroundHandler.post(new ImageSaver(reader.acquireNextImage(), imageFullPath));
+                    // image saving in a background thread seems not be a good idea if
+                    // it's done by a service
 
-                    if (state == STATE_READY_TO_DIE) { // TODO
-                        Log.wtf(TAG, "killing camera");
-                        closeCamera();
+                    Image image = reader.acquireNextImage();
+                    File file = imageFullPath;
+
+                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                    byte[] bytes = new byte[buffer.remaining()];
+                    buffer.get(bytes);
+                    FileOutputStream output = null;
+                    try {
+                        output = new FileOutputStream(file);
+                        output.write(bytes);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        image.close();
+                        if (null != output) {
+                            try {
+                                output.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
             };
@@ -242,11 +263,17 @@ public class CameraController2 {
     }
 
     protected void startBackgroundThread() {
+        Log.d(TAG, "# startBackgroundThread");
         backgroundThread = new HandlerThread("Camera Background");
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
     }
+
     protected void stopBackgroundThread() {
+        Log.d(TAG, "# stopBackgroundThread");
+
+        if (backgroundThread == null) return;
+
         backgroundThread.quitSafely();
         try {
             backgroundThread.join();
@@ -279,6 +306,8 @@ public class CameraController2 {
 //                        result.get(CaptureResult.CONTROL_AF_STATE));
 //            }
 
+            Log.d(TAG, "# CaptureCallback");
+
             switch (state) {
                 case STATE_PREVIEW: {
                     // We have nothing to do when the camera preview is working normally.
@@ -308,7 +337,7 @@ public class CameraController2 {
                 }
                 case STATE_WAITING_NON_PRECAPTURE: {
                     Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                    //if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
+                    //if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) { // TODO
                         state = STATE_PICTURE_TAKEN;
                         captureStillPicture();
                     //}
@@ -339,8 +368,8 @@ public class CameraController2 {
 
     private void lockFocus() {
         try {
-            // This is how to tell the camera to lock focus.
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+
             // Tell #mCaptureCallback to wait for the lock.
             state = STATE_WAITING_LOCK;
             captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
@@ -351,9 +380,9 @@ public class CameraController2 {
 
     private void runPrecaptureSequence() {
         try {
-            // This is how to tell the camera to trigger.
             previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-            // Tell #mCaptureCallback to wait for the precapture sequence to be set.
+
+            // Tell captureCallback to wait for the precapture sequence to be set.
             state = STATE_WAITING_PRECAPTURE;
             captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
         } catch (CameraAccessException e) {
@@ -380,9 +409,10 @@ public class CameraController2 {
             CameraCaptureSession.CaptureCallback localCaptureCallback = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-
                     super.onCaptureCompleted(session, request, result);
-                    Log.i(TAG, "Saved image");
+
+                    Log.d(TAG, "# captureComplete");
+                    Log.i(TAG, "captured image");
 
                     Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
                     // TODO: figure out the path of the saved picture
@@ -393,7 +423,7 @@ public class CameraController2 {
                     Object tag = request.getTag();
                     if (tag != null) {
                         int n = (int) request.getTag();
-                        Log.wtf(TAG, Integer.toString(n));
+                        Log.wtf(TAG, "Image: " + Integer.toString(n));
                         if (n < burstLength - 1) {
                             // there are still remaining requests in the pipeline
                             // no shutdown yet
@@ -426,6 +456,7 @@ public class CameraController2 {
     }
 
     private void unlockFocus() {
+        Log.d(TAG, "# unlockFocus");
         try {
             // Reset the auto-focus trigger
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
@@ -434,10 +465,10 @@ public class CameraController2 {
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
                     if (textureView == null) {
                         // no preview is needed and camera can be killed
-                        // (must be happen after the cancel AF request has been processed and the image saver did its job)
+                        // (must be happen after the cancel AF request has been processed and the image was written to disk)
                         // closeCamera();
 
-                        //state = STATE_READY_TO_DIE;
+                        Log.d(TAG, "# unlockedFocus CaptureCompleted");
                         closeCamera();
                     }
                 }
@@ -472,7 +503,7 @@ public class CameraController2 {
     }
 
     public int getState() {
-        
+
         if (cameraDevice == null) {
             return this.STATE_DEAD;
         }
@@ -496,8 +527,6 @@ public class CameraController2 {
     // additional functionality
 
     private void logCameraAutomaticModeState(int aeState, int afState) {
-        //int aeState = partialResult.get(CaptureResult.CONTROL_AE_STATE);
-
         switch (aeState) {
             case CaptureResult.CONTROL_AE_STATE_CONVERGED:
                 Log.d(TAG, "AE: " + "converged");
@@ -518,8 +547,6 @@ public class CameraController2 {
                 Log.d(TAG, "AE: " + "searching");
                 break;
         }
-
-        //int afState = partialResult.get(CaptureResult.CONTROL_AF_STATE);
 
         switch (afState) {
             case CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN:

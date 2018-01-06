@@ -70,7 +70,7 @@ public class ShutterService extends Service {
                 camera = new CameraController2(this, null);
                 despat.setCamera(camera);
             } else {
-                camera.captureImages(Config.NUMBER_OF_BURST_IMAGES);
+                camera.captureImages();
             }
 
         } catch (CameraAccessException cae) {
