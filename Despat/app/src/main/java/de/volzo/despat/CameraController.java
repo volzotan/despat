@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
@@ -61,6 +62,7 @@ public class CameraController {
     private HandlerThread backgroundThread;
 
     private ImageReader imageReader;
+    private SurfaceTexture surfaceTexture; // no GC
 
     private int state = STATE_IDLE;
 
@@ -80,7 +82,7 @@ public class CameraController {
         //startBackgroundThread();
         // stopping the background thread kills the whole application when its
         // done by the ShutterService
-        
+
         openCamera();
     }
 
@@ -118,8 +120,9 @@ public class CameraController {
         @Override
         public void onDisconnected(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onDisconnected");
-            if (cameraDevice != null) {
-                cameraDevice.close();
+
+            if (camera != null) {
+                camera.close();
                 cameraDevice = null;
             }
         }
@@ -130,8 +133,8 @@ public class CameraController {
 
             Toast.makeText(context, "Opening Camera failed", Toast.LENGTH_LONG).show();
 
-            if (cameraDevice != null) {
-                cameraDevice.close();
+            if (camera != null) {
+                camera.close();
                 cameraDevice = null;
             }
         }
@@ -199,7 +202,7 @@ public class CameraController {
             outputSurfaces.add(imageReader.getSurface());
 
             // get empty dummy surface or surface with texture view
-            SurfaceTexture surfaceTexture = getSurfaceTexture(textureView);
+             surfaceTexture = getSurfaceTexture(textureView);
             int width = 640; //imageDimension.getWidth();   // TODO: drop hardcoded resolution
             int height = 480; //imageDimension.getHeight();
             surfaceTexture.setDefaultBufferSize(width, height);
@@ -305,8 +308,6 @@ public class CameraController {
 //                        result.get(CaptureResult.CONTROL_AE_STATE),
 //                        result.get(CaptureResult.CONTROL_AF_STATE));
 //            }
-
-            Log.d(TAG, "# CaptureCallback");
 
             switch (state) {
                 case STATE_PREVIEW: {
@@ -469,6 +470,10 @@ public class CameraController {
                         // closeCamera();
 
                         Log.d(TAG, "# unlockedFocus CaptureCompleted");
+
+                        Despat despat = ((Despat) context.getApplicationContext());
+                        despat.releaseWakeLock(); // TODO: needs to be run in a callback
+
                         closeCamera();
                     }
                 }
@@ -519,7 +524,7 @@ public class CameraController {
         if (tv != null) {
             return tv.getSurfaceTexture();
         } else {
-            return new SurfaceTexture(0);
+            return new SurfaceTexture(ThreadLocalRandom.current().nextInt(1, 1000 + 1)); //0);
         }
     }
 

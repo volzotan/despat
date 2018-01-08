@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
         despat.closeCamera();
-        return false;
+        return true;
     }
 
     @Override
@@ -273,6 +273,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             } catch (Exception e) {
                 Log.e(TAG, "starting camera failed", e);
             }
+        } else {
+            camera.captureImages();
         }
 
 //        //camera.takePicture();

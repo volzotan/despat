@@ -1,6 +1,7 @@
 package de.volzo.despat;
 
 import android.app.Application;
+import android.os.PowerManager;
 import android.util.Log;
 
 import de.volzo.despat.web.ServerConnector;
@@ -12,6 +13,8 @@ public class Despat extends Application {
     private CameraController camera;
     private SystemController systemController;
 //    private int imagesTaken = 0;
+
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
@@ -34,6 +37,28 @@ public class Despat extends Application {
         closeCamera();
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendEvent(ServerConnector.EventType.SHUTDOWN, null);
+    }
+
+    public void acquireWakeLock() {
+        Log.d(TAG, "acquiring wake lock");
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DespatWakeLockTag");
+        wakeLock.acquire();
+    }
+
+    public void releaseWakeLock() {
+        Log.d(TAG, "releasing wake lock");
+
+        if (wakeLock == null) {
+            Log.w(TAG, "wake lock missing");
+        } else {
+            if (wakeLock.isHeld()){
+                wakeLock.release();
+            } else{
+                // do nothing
+            }
+        }
     }
 
     public void setCamera(CameraController cameraController) {
