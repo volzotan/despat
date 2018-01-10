@@ -178,7 +178,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             Log.d("image taken", "path: " + path);
 
             Toast.makeText(activity, "image taken", Toast.LENGTH_SHORT).show();
-
         }
     };
 

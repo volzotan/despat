@@ -13,6 +13,7 @@ public class Broadcast {
     public static final String UPLOAD_SERVICE           = "de.volzo.despat.UPLOAD_SERVICE";
     public static final String COMMAND_SERVICE          = "de.volzo.despat.COMMAND_SERVICE";
 
+    public static final String CAMERA_CONTROLLER_STOP   = "de.volzo.despat.CAMERA_CONTROLLER_STOP";
     public static final String SHUTTER_SERVICE_TRIGGER  = "de.volzo.despat.SHUTTER_SERVICE_TRIGGER";
 
     public static final String PICTURE_TAKEN            = "de.volzo.despat.PICTURE_TAKEN";

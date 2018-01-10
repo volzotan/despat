@@ -487,6 +487,12 @@ public class CameraController {
                         despat.releaseWakeLock(); // TODO: should be run from ShutterService in a callback
 
                         // closeCamera(); // FIXME
+
+                        // notify Orchestrator to close the Camera
+                        // TODO: find a more clean way to do this (its not cool to reuse the Orchestrator for that)
+                        Intent stopIntent = new Intent(context, Orchestrator.class);
+                        stopIntent.putExtra("service", Broadcast.CAMERA_CONTROLLER_STOP);
+                        context.sendBroadcast(stopIntent);
                     }
                 }
             }, backgroundHandler);

@@ -141,6 +141,23 @@ public class Orchestrator extends BroadcastReceiver {
                 }
                 break;
 
+            case Broadcast.CAMERA_CONTROLLER_STOP:
+
+                // If the camera is closed right after taking a picture the HAL locks up and
+                // the camera returns on every camera.open thereafter only disconnect-errors till
+                // the device is rebooted.
+
+                try {
+                    Thread.sleep(1000);
+                } catch(InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+
+                Despat despat = (Despat) context.getApplicationContext();
+                despat.closeCamera();
+
+                break;
+
             default:
                 Log.d(TAG, "unknown service to start: " + service);
         }
