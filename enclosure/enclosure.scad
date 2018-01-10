@@ -1,7 +1,7 @@
 include <hinge.scad>
 
 sizeBot    = [170, 86, 20];
-sizeTop    = [170, 86, 23];
+sizeTop    = [170, 86, 24];
 lensHole   = [sizeBot[0]-25, 25];
 
 lidDepth   = 1;
@@ -12,30 +12,44 @@ crad       = 6;
 w          = 3.2+.1;
 wb         = 1.2;
 
-difference(){
-    union() {
-        bottom();
-        translate([0, sizeTop[1], 44-.7]) rotate([180, 0, 0]) top();
-    }
-    translate([-1, -1, -1]) cube([90, 100, 50]);
-}
 
-translate([70, 4.7, 7]) color("orange") wedge();
-translate([70, -20, 12.8]) rotate([180, 0, 0]) color("orange") wedge();
+//difference(){
+//    union() {
+//        bottom();
+//        translate([0, sizeTop[1], 45-.7]) rotate([180, 0, 0]) top();
+//    }
+//    translate([-1, -1, -1]) cube([90, 100, 50]);
+//}
 
-% translate([0, sizeBot[1]-2.3-0.025, 18.-0.2]) rotate([0, 90, 0]) color([1, 1, 1], 1) cylinder($fn=32, d=1.75, h=100);
+//translate([50, 220+80, 0]) rotate([0, -90, 180]) scale([0.5, 0.5, 0.5]) {
+//    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
+//    bottom();
+//    translate([0, sizeTop[1], 45-.7]) rotate([180, 0, 0]) top();
+//}
 
+//translate([70, 4.7, 10+7]) color("orange") wedge();
+////translate([70, -20, 12.8]) rotate([180, 0, 0]) color("orange") wedge();
+//
+//% translate([0, sizeBot[1]-2.3-0.025, 18.-0.2]) rotate([0, 90, 0]) color([1, 1, 1], 1) cylinder($fn=32, d=1.75, h=100);
+//
+//
+//translate([0, 100, 0]) top();
 
-translate([0, 100, 0]) top();
+//translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_flat();
 
-translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
-
-% translate([30, 10, 5+0]) nexus5();
+//% translate([30, 10, 5+0]) nexus5();
 
 //% translate([127, 40, -10]) uvfilter();
 //% translate([5, 36, 4]) usbplug();
 
-% translate([62, 101, 2]) anker();
+
+// print top
+top();
+
+// print bottom
+//bottom();
+
+
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -50,11 +64,17 @@ module wedge() {
     translate([38-tol, 2.9, tol]) rotate([90, 0, -90]) linear_extrude(height=36-tol*2) polygon(points); 
 }
 
-module socket() {
+module socket_normal() {
+    
+    // socket_normal works either with DIN 7984 M5 or standard DIN 912 M5 screws
+    // DIN 934 1/4 inch or the slightly higher different imperial nut types are okay
+    
     width = 44;
     depth = 16;
+    height = 7.5;
+    
     difference() {
-        block(width, depth, 7.5, crad=2);
+        block(width, depth, height, crad=2);
         
         translate([(width)/2-14, depth/2, -1]) cylinder($fn=32, h=20, d=5.3);
         translate([(width)/2+14, depth/2, -1]) cylinder($fn=32, h=20, d=5.3);
@@ -64,9 +84,27 @@ module socket() {
         translate([(width)/2, depth/2, -10]) cylinder($fn=32, h=20, d=7);
         translate([(width)/2, depth/2, -1]) cylinder($fn=6, h=1+6, d=13.15);  // +1 safety margin for long fastening screws
     }
+}
+
+module socket_flat() {
     
-//    translate([(width)/2+14-5, depth/2-5, 1.8-.3]) cube([10, 10, .3]);
-//    translate([(width)/2-14-5, depth/2-5, 1.8-.3]) cube([10, 10, .3]);
+    // socket_flat requires DIN 7984 M5 screws and DIN 934 1/4 inch nuts
+    
+    width = 44;
+    depth = 16;
+    height = 6;
+    
+    difference() {
+        block(width, depth, height, crad=2);
+        
+        translate([(width)/2-14, depth/2, -1]) cylinder($fn=32, h=20, d=5.3);
+        translate([(width)/2+14, depth/2, -1]) cylinder($fn=32, h=20, d=5.3);
+        translate([(width)/2-14, depth/2, height-3.5-0.3]) cylinder($fn=32, h=20, d=9);
+        translate([(width)/2+14, depth/2, height-3.5-0.3]) cylinder($fn=32, h=20, d=9);
+        
+        translate([(width)/2, depth/2, -10]) cylinder($fn=32, h=20, d=7);
+        translate([(width)/2, depth/2, -1]) cylinder($fn=6, h=1+5, d=13.15);  // +1 safety margin for long fastening screws
+    }
 }
 
 module seal() {
@@ -212,13 +250,13 @@ module top() {
                 union() {
                     difference() {
                         translate([sizeTop[0]-120, 0, 0]) {
-                            cube([120, sizeTop[1], 23]);
+                            cube([120, sizeTop[1], sizeTop[2]]);
                         } 
                
                         points = [[0, 0], [sizeTop[1], 0], [sizeTop[1], 20], [sizeTop[1]-10, 30], [10, 30], [0, 20]];
                         translate([40, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
                     
-                        translate([54, 1, wb]) anker_cutout();
+                        translate([54, 1, wb]) color("purple") anker_cutout();
                         
                         // button
                         translate([73+06, 6, 5]) block(14, 20, 50);
@@ -255,6 +293,7 @@ module top() {
     translate([+20+18.2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
     translate([-20+sizeTop[0]-2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
     
+    % translate([62, 1, wb+0.3]) anker();
 }
                     
 
@@ -365,7 +404,7 @@ module bottom() {
         }
         
         // seal
-        translate([0, 0, sizeBot[2]-2.6]) color("red") difference() {
+        translate([0, 0, sizeBot[2]-2.1]) color("red") difference() {
             height = 3;
             union() {
                 hull() {
@@ -381,7 +420,7 @@ module bottom() {
             }
         }
         // seal 2
-        translate([0, 0, sizeBot[2]-2.3]) translate([0, 0, 3-0.7-0.3]) color("orange") difference() {
+        translate([0, 0, sizeBot[2]-0.3]) color("orange") difference() {
             block(sizeBot[0], sizeBot[1], 1, crad=crad, red=1.45-0.3);
             block(sizeBot[0], sizeBot[1], 1, crad=crad, red=1.45+1.75+0.3);
         }
@@ -402,8 +441,8 @@ module bottom() {
     }
     
     // hinges
-//    translate([20+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
-//    translate([-20+sizeBot[0]-2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
+    % translate([20+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
+    % translate([-20+sizeBot[0]-2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
     
     // hinge support
 //    translate([17-.2, sizeBot[1], 2])                                   hinge_support();
@@ -474,7 +513,6 @@ module nexus5() {
 }
 
 module nexus5cavity(height) {
-
     difference() {
         union() {
             color("red") {
@@ -500,7 +538,6 @@ module nexus5cavity(height) {
     // wedge
     translate([40, -5.5, 0]) cube([40, 2, height]);
     translate([40+2, -5.5, 0]) cube([36, 5, height]);
-    
 }
 
 module anker() {
@@ -512,7 +549,6 @@ module anker() {
 
 module anker_cutout() {
     tol = 0.3;
-    
     dist = 9;
     
     translate([0, 11, 11]) rotate([0, 90, 0]) hull() {
@@ -535,13 +571,6 @@ module hinge_support() {
 }
 
 module block(width, depth, height, crad=3, red=0) {
-//    hull() {    
-//        translate([crad+red, crad+red]) cylinder($fn=32, h=height, r=crad);
-//        translate([width-crad-red, crad+red]) cylinder($fn=32, h=height, r=crad);
-//        translate([crad+red, depth-crad-red]) cylinder($fn=32, h=height, r=crad);
-//        translate([width-crad-red, depth-crad-red]) cylinder($fn=32, h=height, r=crad);
-//    }
-    
     hull() {    
         translate([crad, crad]) cylinder($fn=32, h=height, r=crad-red);
         translate([width-crad, crad]) cylinder($fn=32, h=height, r=crad-red);
