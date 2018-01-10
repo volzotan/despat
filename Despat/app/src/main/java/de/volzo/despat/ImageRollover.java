@@ -176,7 +176,11 @@ public class ImageRollover {
             }
         });
 
-        return files.length;
+        if (files == null) {
+            return 0;
+        } else {
+            return files.length;
+        }
     }
 
     public File getNewestImage() {

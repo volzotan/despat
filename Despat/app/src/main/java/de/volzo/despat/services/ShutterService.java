@@ -35,8 +35,6 @@ public class ShutterService extends Service {
 
         Log.d(TAG, "SHUTTER SERVICE invoked");
 
-        // TODO: acquire Wake Lock?
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
         registerReceiver(broadcastReceiver, filter);
@@ -62,6 +60,8 @@ public class ShutterService extends Service {
 //        imgroll.run();
 
         Despat despat = ((Despat) getApplicationContext());
+
+        despat.acquireWakeLock();
         CameraController camera = despat.getCamera();
 
         try {
@@ -74,9 +74,11 @@ public class ShutterService extends Service {
 
         } catch (CameraAccessException cae) {
             Log.e(TAG, "taking photo failed", cae);
+            despat.releaseWakeLock();
             // throw cae;
         } catch (Exception e) {
             Log.e(TAG, "taking photo failed", e);
+            despat.releaseWakeLock();
             // throw e;
         }
     }
@@ -84,6 +86,12 @@ public class ShutterService extends Service {
     @Override
     public void onDestroy() {
         unregisterReceiver(broadcastReceiver);
+
+        Despat despat = ((Despat) getApplicationContext());
+        despat.releaseWakeLock();
+
+        // TODO: close camera?
+
         Log.d(TAG, "shutterService destroyed");
     }
 

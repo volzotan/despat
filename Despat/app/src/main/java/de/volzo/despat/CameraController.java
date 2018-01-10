@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
@@ -64,6 +66,8 @@ public class CameraController {
     private ImageReader imageReader;
     private SurfaceTexture surfaceTexture; // no GC
 
+    private Semaphore cameraOpenCloseLock = new Semaphore(1);
+
     private int state = STATE_IDLE;
 
     public static final int STATE_DEAD                      = 0;
@@ -94,12 +98,16 @@ public class CameraController {
             Log.d(TAG, "found " + cameraIdList.length + " cameras");
             String cameraId = cameraIdList[0];
 
+            if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
+                throw new RuntimeException("Time out waiting to lock camera opening.");
+            }
+
             cameraManager.openCamera(cameraId, cameraStateCallback, null); //backgroundHandler);
         } catch (CameraAccessException e) {
-            Log.d(TAG, "opening camera failed", e);
+            Log.e(TAG, "opening camera failed", e);
             throw e;
         } catch (SecurityException e) {
-            Log.d(TAG, "opening camera failed [missing permissions]", e);
+            Log.w(TAG, "opening camera failed [missing permissions]", e);
             throw e;
         }
     }
@@ -108,6 +116,8 @@ public class CameraController {
         @Override
         public void onOpened(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onOpened");
+            cameraOpenCloseLock.release();
+
             cameraDevice = camera;
 
             try {
@@ -120,6 +130,7 @@ public class CameraController {
         @Override
         public void onDisconnected(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onDisconnected");
+            cameraOpenCloseLock.release();
 
             if (camera != null) {
                 camera.close();
@@ -130,8 +141,9 @@ public class CameraController {
         @Override
         public void onError(CameraDevice camera, int error) {
             Log.e(TAG, "--> Camera: onError: " + error);
+            cameraOpenCloseLock.release();
 
-            Toast.makeText(context, "Opening Camera failed", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Opening Camera failed", Toast.LENGTH_SHORT).show();
 
             if (camera != null) {
                 camera.close();
@@ -202,7 +214,7 @@ public class CameraController {
             outputSurfaces.add(imageReader.getSurface());
 
             // get empty dummy surface or surface with texture view
-             surfaceTexture = getSurfaceTexture(textureView);
+            surfaceTexture = getSurfaceTexture(textureView);
             int width = 640; //imageDimension.getWidth();   // TODO: drop hardcoded resolution
             int height = 480; //imageDimension.getHeight();
             surfaceTexture.setDefaultBufferSize(width, height);
@@ -472,9 +484,9 @@ public class CameraController {
                         Log.d(TAG, "# unlockedFocus CaptureCompleted");
 
                         Despat despat = ((Despat) context.getApplicationContext());
-                        despat.releaseWakeLock(); // TODO: needs to be run in a callback
+                        despat.releaseWakeLock(); // TODO: should be run from ShutterService in a callback
 
-                        closeCamera();
+                        // closeCamera(); // FIXME
                     }
                 }
             }, backgroundHandler);
@@ -492,19 +504,28 @@ public class CameraController {
     public void closeCamera() {
         Log.d(TAG, "--> closeCamera");
 
-        if (captureSession != null) {
-            captureSession.close();
-            captureSession = null;
+        try {
+            cameraOpenCloseLock.acquire();
+
+            if (captureSession != null) {
+                captureSession.close();
+                captureSession = null;
+            }
+            if (cameraDevice != null) {
+                cameraDevice.close();
+                cameraDevice = null;
+            }
+            if (imageReader != null) {
+                imageReader.close();
+                imageReader = null;
+            }
+
+            stopBackgroundThread();
+        } catch (InterruptedException ie) {
+            Log.e(TAG, "lock could not be acquired", ie);
+        } finally {
+            cameraOpenCloseLock.release();
         }
-        if (cameraDevice != null) {
-            cameraDevice.close();
-            cameraDevice = null;
-        }
-        if (imageReader != null) {
-            imageReader.close();
-            imageReader = null;
-        }
-        stopBackgroundThread();
     }
 
     public int getState() {
