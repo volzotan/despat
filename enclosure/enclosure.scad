@@ -254,13 +254,12 @@ module top() {
                         } 
                
                         points = [[0, 0], [sizeTop[1], 0], [sizeTop[1], 20], [sizeTop[1]-10, 30], [10, 30], [0, 20]];
-                        translate([40, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
+                        translate([41, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
                     
                         translate([54, 1, wb]) color("purple") anker_cutout();
                         
                         // button
-                        translate([73+06, 6, 5]) block(14, 20, 50);
-//                        translate([73+08, 0]) cube([10, 10, 50]);
+                        translate([74+06, 6, 5]) block(14, 20, 50);
                         
                         // wedge
                         translate([100, 7, 1]) cube([40, 3, sizeTop[2]]);
@@ -271,7 +270,7 @@ module top() {
                     points_r = [[0, 0], [20, 0], [15, 4.8], [5, 4.8]];
                     translate([40, sizeTop[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTop[2]) polygon(points_r);
              
-                    translate([70, 0]) cube([2, sizeBot[1], 3]);
+                    translate([71, 0]) cube([2, sizeTop[1], 5]);
                 }
                 
                 // outer hull
