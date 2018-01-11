@@ -83,7 +83,7 @@ public class CameraController {
         this.context = context;
         this.textureView = textureView;
 
-        //startBackgroundThread();
+        startBackgroundThread();
         // stopping the background thread kills the whole application when its
         // done by the ShutterService
 
@@ -104,10 +104,10 @@ public class CameraController {
 
             cameraManager.openCamera(cameraId, cameraStateCallback, null); //backgroundHandler);
         } catch (CameraAccessException e) {
-            Log.e(TAG, "opening camera failed", e);
+            Log.e(TAG, "opening camera failed");
             throw e;
         } catch (SecurityException e) {
-            Log.w(TAG, "opening camera failed [missing permissions]", e);
+            Log.w(TAG, "opening camera failed [missing permissions]");
             throw e;
         }
     }
@@ -119,6 +119,12 @@ public class CameraController {
             cameraOpenCloseLock.release();
 
             cameraDevice = camera;
+
+            try { // FIXME
+                Thread.sleep(500);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
 
             try {
                 createCaptureSession();
@@ -179,7 +185,7 @@ public class CameraController {
                         return;
                     }
 
-                    //backgroundHandler.post(new ImageSaver(reader.acquireNextImage(), imageFullPath));
+                    // backgroundHandler.post(new ImageSaver(reader.acquireNextImage(), imageFullPath));
                     // image saving in a background thread seems not be a good idea if
                     // it's done by a service
 
@@ -315,11 +321,16 @@ public class CameraController {
 
         private void process(CaptureResult result) {
 
-//            if (state != STATE_PREVIEW){
-//                logCameraAutomaticModeState(
-//                        result.get(CaptureResult.CONTROL_AE_STATE),
-//                        result.get(CaptureResult.CONTROL_AF_STATE));
-//            }
+            if (state != STATE_PREVIEW){
+                Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+
+                if (afState == null || aeState == null) {
+                    Log.e(TAG, "control state null");
+                } else {
+                    logCameraAutomaticModeState(afState, aeState);
+                }
+            }
 
             switch (state) {
                 case STATE_PREVIEW: {
@@ -350,10 +361,10 @@ public class CameraController {
                 }
                 case STATE_WAITING_NON_PRECAPTURE: {
                     Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                    //if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) { // TODO
+                    if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) { // TODO
                         state = STATE_PICTURE_TAKEN;
                         captureStillPicture();
-                    //}
+                    }
                     break;
                 }
             }
@@ -376,6 +387,12 @@ public class CameraController {
     };
 
     public void captureImages() {
+        try { // FIXME
+            Thread.sleep(500);
+        } catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+
         lockFocus();
     }
 
@@ -383,7 +400,6 @@ public class CameraController {
         try {
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
 
-            // Tell #mCaptureCallback to wait for the lock.
             state = STATE_WAITING_LOCK;
             captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
         } catch (CameraAccessException e) {
@@ -393,6 +409,12 @@ public class CameraController {
 
     private void runPrecaptureSequence() {
         try {
+            try { // FIXME
+                Thread.sleep(500);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+
             previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
 
             // Tell captureCallback to wait for the precapture sequence to be set.
@@ -483,9 +505,6 @@ public class CameraController {
 
                         Log.d(TAG, "# unlockedFocus CaptureCompleted");
 
-                        Despat despat = ((Despat) context.getApplicationContext());
-                        despat.releaseWakeLock(); // TODO: should be run from ShutterService in a callback
-
                         // closeCamera(); // FIXME
 
                         // notify Orchestrator to close the Camera
@@ -514,6 +533,13 @@ public class CameraController {
             cameraOpenCloseLock.acquire();
 
             if (captureSession != null) {
+
+                try {
+                    captureSession.abortCaptures();
+                } catch (CameraAccessException cae) {
+                    Log.w(TAG, "aborting captures while closing camera failed");
+                }
+
                 captureSession.close();
                 captureSession = null;
             }
@@ -558,28 +584,7 @@ public class CameraController {
 
     // additional functionality
 
-    private void logCameraAutomaticModeState(int aeState, int afState) {
-        switch (aeState) {
-            case CaptureResult.CONTROL_AE_STATE_CONVERGED:
-                Log.d(TAG, "AE: " + "converged");
-                break;
-            case CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED:
-                Log.d(TAG, "AE: " + "flash required");
-                break;
-            case CaptureResult.CONTROL_AE_STATE_INACTIVE:
-                Log.d(TAG, "AE: " + "inactive");
-                break;
-            case CaptureResult.CONTROL_AE_STATE_LOCKED:
-                Log.d(TAG, "AE: " + "locked");
-                break;
-            case CaptureResult.CONTROL_AE_STATE_PRECAPTURE:
-                Log.d(TAG, "AE: " + "precapture");
-                break;
-            case CaptureResult.CONTROL_AE_STATE_SEARCHING:
-                Log.d(TAG, "AE: " + "searching");
-                break;
-        }
-
+    private void logCameraAutomaticModeState(int afState, int aeState) {
         switch (afState) {
             case CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN:
                 Log.d(TAG, "AF: " + "active scan");
@@ -604,6 +609,27 @@ public class CameraController {
                 break;
             default:
                 Log.d(TAG, "AF: " + "undefined");
+                break;
+        }
+
+        switch (aeState) {
+            case CaptureResult.CONTROL_AE_STATE_CONVERGED:
+                Log.d(TAG, "AE: " + "converged");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED:
+                Log.d(TAG, "AE: " + "flash required");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_INACTIVE:
+                Log.d(TAG, "AE: " + "inactive");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_LOCKED:
+                Log.d(TAG, "AE: " + "locked");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_PRECAPTURE:
+                Log.d(TAG, "AE: " + "precapture");
+                break;
+            case CaptureResult.CONTROL_AE_STATE_SEARCHING:
+                Log.d(TAG, "AE: " + "searching");
                 break;
         }
     }

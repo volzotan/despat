@@ -155,6 +155,7 @@ public class Orchestrator extends BroadcastReceiver {
 
                 Despat despat = (Despat) context.getApplicationContext();
                 despat.closeCamera();
+                despat.releaseWakeLock(); // TODO: should be run from ShutterService in a callback
 
                 break;
 

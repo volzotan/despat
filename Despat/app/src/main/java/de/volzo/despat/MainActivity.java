@@ -7,7 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -284,27 +287,27 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            camera.captureImages(2);
 //        }
 
-//        final Context ctx = this;
-//        Handler handler = new Handler();
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                ImageRollover imgroll = new ImageRollover(Config.getImageFolder(ctx), Config.IMAGE_FILEEXTENSION);
-//                File newestImage = imgroll.getNewestImage();
-//
-//                if (newestImage == null) return;
-//
-//                Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
-//
-//                ImageView imageView = (ImageView) findViewById(R.id.imageView);
-//
-//                imageView.setImageBitmap(imgBitmap);
-//
-//                PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
-//                photoViewAttacher.update();
-//            }
-//        }, 1500); // TODO: buffer queue gets abandoned if this is not long enough. Something is wrong...
+        final Context ctx = this;
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                ImageRollover imgroll = new ImageRollover(Config.getImageFolder(ctx), Config.IMAGE_FILEEXTENSION);
+                File newestImage = imgroll.getNewestImage();
+
+                if (newestImage == null) return;
+
+                Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
+
+                ImageView imageView = (ImageView) findViewById(R.id.imageView);
+
+                imageView.setImageBitmap(imgBitmap);
+
+                PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+                photoViewAttacher.update();
+            }
+        }, 1500); // TODO: buffer queue gets abandoned if this is not long enough. Something is wrong...
 
     }
 

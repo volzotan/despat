@@ -56,7 +56,7 @@ public class Despat extends Application {
             if (wakeLock.isHeld()){
                 wakeLock.release();
             } else{
-                // do nothing
+                Log.d(TAG, "wake lock requested while still held");
             }
         }
     }
