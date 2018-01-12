@@ -49,6 +49,7 @@ public class CameraController {
 
     private Context context;
     private TextureView textureView;
+    private ControllerCallback controllerCallback;
 
     private CameraManager cameraManager;
 
@@ -65,6 +66,7 @@ public class CameraController {
 
     private ImageReader imageReader;
     private SurfaceTexture surfaceTexture; // no GC
+    private Surface surface;
 
     private Semaphore cameraOpenCloseLock = new Semaphore(1);
 
@@ -79,8 +81,9 @@ public class CameraController {
     public static final int STATE_WAITING_NON_PRECAPTURE    = 5;
     public static final int STATE_PICTURE_TAKEN             = 6;
 
-    public CameraController(Context context, TextureView textureView) throws Exception {
+    public CameraController(Context context, ControllerCallback controllerCallback, TextureView textureView) throws Exception {
         this.context = context;
+        this.controllerCallback = controllerCallback;
         this.textureView = textureView;
 
         startBackgroundThread();
@@ -131,6 +134,10 @@ public class CameraController {
             } catch (CameraAccessException e) {
                 Log.e(TAG, e.getMessage());
             }
+
+            if (controllerCallback != null) {
+                controllerCallback.cameraOpened();
+            }
         }
 
         @Override
@@ -145,6 +152,31 @@ public class CameraController {
         }
 
         @Override
+        public void onClosed(CameraDevice camera) {
+            Log.d(TAG, "--> Camera: onClosed");
+            cameraOpenCloseLock.release();
+
+            stopBackgroundThread();
+
+            if (imageReader != null) {
+                imageReader.close();
+                imageReader = null;
+            }
+
+            if(surface != null) {
+                surface.release();
+            }
+
+            if (surfaceTexture != null) {
+                surfaceTexture.release();
+            }
+
+            if (controllerCallback != null) {
+                controllerCallback.cameraClosed();
+            }
+        }
+
+        @Override
         public void onError(CameraDevice camera, int error) {
             Log.e(TAG, "--> Camera: onError: " + error);
             cameraOpenCloseLock.release();
@@ -154,6 +186,10 @@ public class CameraController {
             if (camera != null) {
                 camera.close();
                 cameraDevice = null;
+            }
+
+            if (controllerCallback != null) {
+                controllerCallback.cameraFailed();
             }
         }
     };
@@ -224,7 +260,7 @@ public class CameraController {
             int width = 640; //imageDimension.getWidth();   // TODO: drop hardcoded resolution
             int height = 480; //imageDimension.getHeight();
             surfaceTexture.setDefaultBufferSize(width, height);
-            Surface surface = new Surface(surfaceTexture);
+            surface = new Surface(surfaceTexture);
             outputSurfaces.add(surface);
 
             if (textureView != null) {
@@ -462,8 +498,17 @@ public class CameraController {
                         if (n < burstLength - 1) {
                             // there are still remaining requests in the pipeline
                             // no shutdown yet
+
+                            if (controllerCallback != null) {
+                                controllerCallback.intermediateImageTaken();
+                            }
+
                             return;
                         }
+                    }
+
+                    if (controllerCallback != null) {
+                        controllerCallback.finalImageTaken();
                     }
 
                     unlockFocus();
@@ -532,27 +577,22 @@ public class CameraController {
         try {
             cameraOpenCloseLock.acquire();
 
-            if (captureSession != null) {
-
-                try {
-                    captureSession.abortCaptures();
-                } catch (CameraAccessException cae) {
-                    Log.w(TAG, "aborting captures while closing camera failed");
-                }
-
-                captureSession.close();
-                captureSession = null;
-            }
+//            if (captureSession != null) {
+//
+//                try {
+//                    captureSession.abortCaptures();
+//                } catch (CameraAccessException cae) {
+//                    Log.w(TAG, "aborting captures while closing camera failed");
+//                }
+//
+//                captureSession.close();
+//                captureSession = null;
+//            }
             if (cameraDevice != null) {
                 cameraDevice.close();
                 cameraDevice = null;
             }
-            if (imageReader != null) {
-                imageReader.close();
-                imageReader = null;
-            }
 
-            stopBackgroundThread();
         } catch (InterruptedException ie) {
             Log.e(TAG, "lock could not be acquired", ie);
         } finally {
@@ -696,6 +736,17 @@ public class CameraController {
                 }
             }
         }
+    }
+
+    public interface ControllerCallback {
+
+        void cameraOpened();
+        void cameraClosed();
+        void cameraFailed();
+
+        void intermediateImageTaken();
+        void finalImageTaken();
+
     }
 }
 

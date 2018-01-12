@@ -66,7 +66,7 @@ public class ShutterService extends Service {
 
         try {
             if (camera == null || camera.getState() == CameraController.STATE_DEAD) {
-                camera = new CameraController(this, null);
+                camera = new CameraController(this, null, null);
                 despat.setCamera(camera);
             } else {
                 camera.captureImages();

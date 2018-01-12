@@ -54,7 +54,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat = ((Despat) getApplicationContext());
 
-        checkPermissions();
+        if (!checkPermissionsAreGiven()) {
+            // TODO: find better way to resume as soon as permissions are given
+            return;
+        }
+
         Config.init(activity);
 
         if (despat.getSystemController().hasTemperatureSensor()) {
@@ -98,8 +102,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         });
         if (!Util.isServiceRunning(activity, ShutterService.class)) {
             startStopCapturing.setText("Start Capturing");
+            startStopCapturing.setChecked(false);
         } else {
             startStopCapturing.setText("Stop Capturing");
+            startStopCapturing.setChecked(true);
         }
 
         Button toggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
@@ -204,9 +210,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         cleanup();
 
-//        if (!ShutterService.isRunning(this)) {
-//            // TODO
-//        }
+
+        if (Util.isServiceRunning(activity, ShutterService.class)) {
+            Toast.makeText(activity, "running in background", Toast.LENGTH_SHORT).show();
+        }
 
         Log.i(TAG, "application exit");
     }
@@ -256,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            despat.setCamera(new CameraController(this, textureView));
+            despat.setCamera(new CameraController(this, null, textureView));
         } catch (Exception cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -270,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         if (camera == null || camera.getState() == CameraController.STATE_DEAD) {
             try {
-                camera = new CameraController(this, null); //, CameraController.OPEN_PREVIEW_AND_TAKE_PHOTO);
+                camera = new CameraController(this, null, null);
                 despat.setCamera(camera);
             } catch (Exception e) {
                 Log.e(TAG, "starting camera failed", e);
@@ -279,14 +286,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             camera.captureImages();
         }
 
-//        //camera.takePicture();
-//        if (true) return;
-//
-//        // TODO: wait till camera has started
-//        if (camera != null && camera.getState() != CameraController.STATE_DEAD) {
-//            camera.captureImages(2);
-//        }
-
+        // TODO: move that to the controller callback
         final Context ctx = this;
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
                 photoViewAttacher.update();
             }
-        }, 1500); // TODO: buffer queue gets abandoned if this is not long enough. Something is wrong...
+        }, 1500);
 
     }
 
@@ -343,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         tvStatus.setText("n: " + res.coordinates.length);
     }
 
-    public void checkPermissions() {
+    public boolean checkPermissionsAreGiven() {
 
         Activity activity = this;
 
@@ -357,6 +357,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.ACCESS_FINE_LOCATION},
                         1337);
+
+                return false;
+
+        } else {
+            return true;
         }
     }
 

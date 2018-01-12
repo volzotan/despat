@@ -148,7 +148,7 @@ public class Orchestrator extends BroadcastReceiver {
                 // the device is rebooted.
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(1500);
                 } catch(InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
