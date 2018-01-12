@@ -12,21 +12,20 @@ crad       = 6;
 w          = 3.2+.1;
 wb         = 1.2;
 
-
-//difference(){
-//    union() {
-//        bottom();
-//        translate([0, sizeTop[1], 45-.7]) rotate([180, 0, 0]) top();
-//    }
-//    translate([-1, -1, -1]) cube([90, 100, 50]);
-//}
+difference(){
+    union() {
+        bottom();
+        translate([0, sizeTop[1], 44+0.25]) rotate([180, 0, 0]) top();
+    }
+    translate([-1, -1, -1]) cube([90, 100, 50]);
+}
 
 //translate([50, 220+80, 0]) rotate([0, -90, 180]) scale([0.5, 0.5, 0.5]) {
 //    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
 //    bottom();
 //    translate([0, sizeTop[1], 45-.7]) rotate([180, 0, 0]) top();
 //}
-
+//
 //translate([70, 4.7, 10+7]) color("orange") wedge();
 ////translate([70, -20, 12.8]) rotate([180, 0, 0]) color("orange") wedge();
 //
@@ -42,9 +41,11 @@ wb         = 1.2;
 //% translate([127, 40, -10]) uvfilter();
 //% translate([5, 36, 4]) usbplug();
 
+//socket_normal();
+//translate([0, 0, 10]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
 
 // print top
-top();
+//top();
 
 // print bottom
 //bottom();
@@ -178,6 +179,7 @@ module seal() {
     }
 }
 
+
 module top() {
     a = 1;
     c = 2;
@@ -289,8 +291,8 @@ module top() {
         translate([sizeBot[0]-30, sizeBot[1]-2, 17.6]) rotate([90, 0, 0]) cylinder($fn=6, h=20, d=6.6);
     }
     
-    translate([+20+18.2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
-    translate([-20+sizeTop[0]-2, -5.5, 23]) rotate([0, -90, 0]) hinge_top();
+    translate([+20+18.2, -5.5, 24+0.25]) rotate([0, -90, 0]) hinge_top();
+    translate([-20+sizeTop[0]-2, -5.5, 24+0.25]) rotate([0, -90, 0]) hinge_top();
     
     % translate([62, 1, wb+0.3]) anker();
 }
@@ -440,8 +442,8 @@ module bottom() {
     }
     
     // hinges
-    % translate([20+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
-    % translate([-20+sizeBot[0]-2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) hinge_bottom(screwed=true);
+    % translate([20+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) color("purple") hinge_bottom(screwed=true);
+    % translate([-20+sizeBot[0]-2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) color("purple") hinge_bottom(screwed=true);
     
     // hinge support
 //    translate([17-.2, sizeBot[1], 2])                                   hinge_support();
