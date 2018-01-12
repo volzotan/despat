@@ -59,10 +59,45 @@ public class ShutterService extends Service {
 //        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
 //        imgroll.run();
 
-        Despat despat = ((Despat) getApplicationContext());
+        final Despat despat = ((Despat) getApplicationContext());
 
         despat.acquireWakeLock();
         CameraController camera = despat.getCamera();
+
+        CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
+            @Override
+            public void cameraOpened() {
+
+            }
+
+            @Override
+            public void cameraClosed() {
+
+            }
+
+            @Override
+            public void cameraFailed() {
+
+            }
+
+            @Override
+            public void intermediateImageTaken() {
+
+            }
+
+            @Override
+            public void finalImageTaken() {
+
+            }
+
+            @Override
+            public void captureComplete() {
+
+                despat.closeCamera();
+                despat.releaseWakeLock();
+
+            }
+        };
 
         try {
             if (camera == null || camera.getState() == CameraController.STATE_DEAD) {

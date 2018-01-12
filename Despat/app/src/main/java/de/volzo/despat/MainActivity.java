@@ -274,10 +274,56 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void takePhoto() {
 
         CameraController camera = despat.getCamera();
+        final Context context = this;
+
+        CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
+            @Override
+            public void cameraOpened() {
+
+            }
+
+            @Override
+            public void cameraClosed() {
+
+            }
+
+            @Override
+            public void cameraFailed() {
+
+            }
+
+            @Override
+            public void intermediateImageTaken() {
+
+            }
+
+            @Override
+            public void finalImageTaken() {
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
+                        File newestImage = imgroll.getNewestImage();
+
+                        if (newestImage == null) return;
+
+                        Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
+                        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                        imageView.setImageBitmap(imgBitmap);
+
+                        PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+                        photoViewAttacher.update();}
+                });
+            }
+
+            @Override
+            public void captureComplete() {
+
+            }
+        };
 
         if (camera == null || camera.getState() == CameraController.STATE_DEAD) {
             try {
-                camera = new CameraController(this, null, null);
+                camera = new CameraController(this, callback, null);
                 despat.setCamera(camera);
             } catch (Exception e) {
                 Log.e(TAG, "starting camera failed", e);
@@ -285,29 +331,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         } else {
             camera.captureImages();
         }
-
-        // TODO: move that to the controller callback
-        final Context ctx = this;
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                ImageRollover imgroll = new ImageRollover(Config.getImageFolder(ctx), Config.IMAGE_FILEEXTENSION);
-                File newestImage = imgroll.getNewestImage();
-
-                if (newestImage == null) return;
-
-                Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
-
-                ImageView imageView = (ImageView) findViewById(R.id.imageView);
-
-                imageView.setImageBitmap(imgBitmap);
-
-                PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
-                photoViewAttacher.update();
-            }
-        }, 1500);
 
     }
 

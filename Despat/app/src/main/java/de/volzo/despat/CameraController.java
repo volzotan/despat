@@ -123,12 +123,6 @@ public class CameraController {
 
             cameraDevice = camera;
 
-            try { // FIXME
-                Thread.sleep(500);
-            } catch(InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
-
             try {
                 createCaptureSession();
             } catch (CameraAccessException e) {
@@ -148,6 +142,10 @@ public class CameraController {
             if (camera != null) {
                 camera.close();
                 cameraDevice = null;
+            }
+
+            if (controllerCallback != null) {
+                controllerCallback.cameraFailed();
             }
         }
 
@@ -423,12 +421,6 @@ public class CameraController {
     };
 
     public void captureImages() {
-        try { // FIXME
-            Thread.sleep(500);
-        } catch(InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-
         lockFocus();
     }
 
@@ -445,11 +437,6 @@ public class CameraController {
 
     private void runPrecaptureSequence() {
         try {
-            try { // FIXME
-                Thread.sleep(500);
-            } catch(InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
 
             previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
 
@@ -546,17 +533,12 @@ public class CameraController {
                     if (textureView == null) {
                         // no preview is needed and camera can be killed
                         // (must be happen after the cancel AF request has been processed and the image was written to disk)
-                        // closeCamera();
 
                         Log.d(TAG, "# unlockedFocus CaptureCompleted");
 
-                        // closeCamera(); // FIXME
-
-                        // notify Orchestrator to close the Camera
-                        // TODO: find a more clean way to do this (its not cool to reuse the Orchestrator for that)
-                        Intent stopIntent = new Intent(context, Orchestrator.class);
-                        stopIntent.putExtra("service", Broadcast.CAMERA_CONTROLLER_STOP);
-                        context.sendBroadcast(stopIntent);
+                        if (controllerCallback != null) {
+                            controllerCallback.captureComplete();
+                        }
                     }
                 }
             }, backgroundHandler);
@@ -577,17 +559,6 @@ public class CameraController {
         try {
             cameraOpenCloseLock.acquire();
 
-//            if (captureSession != null) {
-//
-//                try {
-//                    captureSession.abortCaptures();
-//                } catch (CameraAccessException cae) {
-//                    Log.w(TAG, "aborting captures while closing camera failed");
-//                }
-//
-//                captureSession.close();
-//                captureSession = null;
-//            }
             if (cameraDevice != null) {
                 cameraDevice.close();
                 cameraDevice = null;
@@ -746,6 +717,7 @@ public class CameraController {
 
         void intermediateImageTaken();
         void finalImageTaken();
+        void captureComplete();
 
     }
 }
