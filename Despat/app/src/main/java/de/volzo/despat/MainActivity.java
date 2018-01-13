@@ -83,10 +83,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             public void onClick(View view) {
                 if (!Util.isServiceRunning(activity, ShutterService.class)) {
                     Log.d(TAG, "startCapturing");
-                    Intent shutterIntent = new Intent(activity, Orchestrator.class);
-                    shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
-                    shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
-                    sendBroadcast(shutterIntent);
+
+                    RecordingSession.startRecordingSession(activity);
 
                     startStopCapturing.setChecked(true);
                 } else {
@@ -115,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
                 CameraController camera = despat.getCamera();
 
-                if (camera == null || camera.getState() == CameraController.STATE_DEAD){
+                if (camera == null || camera.isDead()){
                     activity.startCamera();
                 } else {
                     despat.closeCamera();
@@ -277,25 +275,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         final Context context = this;
 
         CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
-            @Override
-            public void cameraOpened() {
-
-            }
-
-            @Override
-            public void cameraClosed() {
-
-            }
-
-            @Override
-            public void cameraFailed() {
-
-            }
-
-            @Override
-            public void intermediateImageTaken() {
-
-            }
 
             @Override
             public void finalImageTaken() {
@@ -315,13 +294,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 });
             }
 
-            @Override
-            public void captureComplete() {
-
-            }
         };
 
-        if (camera == null || camera.getState() == CameraController.STATE_DEAD) {
+        if (camera == null || camera.isDead()) {
             try {
                 camera = new CameraController(this, callback, null);
                 despat.setCamera(camera);

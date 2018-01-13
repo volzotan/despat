@@ -11,7 +11,9 @@ import android.util.Log;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
+import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.Config;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -54,54 +56,35 @@ public class ShutterService extends Service {
 
     public void releaseShutter() {
 
+        final Despat despat = ((Despat) getApplicationContext());
+        SystemController systemController = despat.getSystemController();
+
+        Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + Config.getImagesTaken(this));
+
         // check if any images needs to be deleted to have enough free space
         // may be time-consuming. alternative place to run?
 //        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
 //        imgroll.run();
-
-        final Despat despat = ((Despat) getApplicationContext());
 
         despat.acquireWakeLock();
         CameraController camera = despat.getCamera();
 
         CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
             @Override
-            public void cameraOpened() {
-
+            public void captureComplete() {
+                despat.closeCamera();
             }
 
             @Override
             public void cameraClosed() {
-
-            }
-
-            @Override
-            public void cameraFailed() {
-
-            }
-
-            @Override
-            public void intermediateImageTaken() {
-
-            }
-
-            @Override
-            public void finalImageTaken() {
-
-            }
-
-            @Override
-            public void captureComplete() {
-
-                despat.closeCamera();
                 despat.releaseWakeLock();
-
             }
+
         };
 
         try {
-            if (camera == null || camera.getState() == CameraController.STATE_DEAD) {
-                camera = new CameraController(this, null, null);
+            if (camera == null || camera.isDead()) {
+                camera = new CameraController(this, callback, null);
                 despat.setCamera(camera);
             } else {
                 camera.captureImages();

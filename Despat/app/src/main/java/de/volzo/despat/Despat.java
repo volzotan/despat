@@ -42,8 +42,16 @@ public class Despat extends Application {
     public void acquireWakeLock() {
         Log.d(TAG, "acquiring wake lock");
 
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DespatWakeLockTag");
+        if (wakeLock != null) {
+            if (wakeLock.isHeld()) {
+                Log.d(TAG, "wake lock is already held");
+                return;
+            }
+        } else {
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DespatWakeLockTag");
+        }
+
         wakeLock.acquire();
     }
 

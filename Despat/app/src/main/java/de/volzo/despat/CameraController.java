@@ -72,9 +72,7 @@ public class CameraController {
 
     private int state = STATE_IDLE;
 
-    public static final int STATE_DEAD                      = 0;
     public static final int STATE_IDLE                      = 1;
-
     public static final int STATE_PREVIEW                   = 2;
     public static final int STATE_WAITING_LOCK              = 3;
     public static final int STATE_WAITING_PRECAPTURE        = 4;
@@ -355,16 +353,16 @@ public class CameraController {
 
         private void process(CaptureResult result) {
 
-            if (state != STATE_PREVIEW){
-                Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-
-                if (afState == null || aeState == null) {
-                    Log.e(TAG, "control state null");
-                } else {
-                    logCameraAutomaticModeState(afState, aeState);
-                }
-            }
+//            if (state != STATE_PREVIEW){
+//                Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+//                Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+//
+//                if (afState == null || aeState == null) {
+//                    Log.e(TAG, "control state null");
+//                } else {
+//                    logCameraAutomaticModeState(afState, aeState);
+//                }
+//            }
 
             switch (state) {
                 case STATE_PREVIEW: {
@@ -571,17 +569,14 @@ public class CameraController {
         }
     }
 
-    public int getState() {
+    public boolean isDead() {
 
         if (cameraDevice == null) {
-            return this.STATE_DEAD;
+            return true;
+        } else {
+            return false;
         }
 
-        if (textureView == null) {
-            return this.STATE_IDLE;
-        } else {
-            return this.STATE_PREVIEW;
-        }
     }
 
     private SurfaceTexture getSurfaceTexture(TextureView tv) {
@@ -709,16 +704,15 @@ public class CameraController {
         }
     }
 
-    public interface ControllerCallback {
+    public static abstract class ControllerCallback {
 
-        void cameraOpened();
-        void cameraClosed();
-        void cameraFailed();
+        public void cameraOpened() {}
+        public void cameraClosed() {}
+        public void cameraFailed() {}
 
-        void intermediateImageTaken();
-        void finalImageTaken();
-        void captureComplete();
-
+        public void intermediateImageTaken() {}
+        public void finalImageTaken() {}
+        public void captureComplete() {}
     }
 }
 
