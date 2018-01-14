@@ -2,7 +2,8 @@ include <hinge.scad>
 
 sizeBot    = [170, 86, 20];
 sizeTop    = [170, 86, 24];
-lensHole   = [sizeBot[0]-25, 25];
+lensHole   = [sizeBot[0]-25, 25]; // Nexus 5
+//lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
 
 lidDepth   = 1;
 lidWall    = 0.8;
@@ -12,13 +13,13 @@ crad       = 6;
 w          = 3.2+.1;
 wb         = 1.2;
 
-difference(){
-    union() {
-        bottom();
-        translate([0, sizeTop[1], 44+0.25]) rotate([180, 0, 0]) top();
-    }
-    translate([-1, -1, -1]) cube([90, 100, 50]);
-}
+//difference(){
+//    union() {
+//        bottom();
+//        translate([0, sizeTop[1], 44+0.25]) rotate([180, 0, 0]) top();
+//    }
+//    translate([-1, -1, -1]) cube([90, 100, 50]);
+//}
 
 //translate([50, 220+80, 0]) rotate([0, -90, 180]) scale([0.5, 0.5, 0.5]) {
 //    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
@@ -48,9 +49,12 @@ difference(){
 //top();
 
 // print bottom
-//bottom();
+bottom();
 
-
+//translate([sizeBot[0]/2-(44/2), 0, 3.5]) rotate([90, 0, 0]) socket_normal();
+//
+//translate([32, 09, 10]) color("green") motoE();
+//translate([32, 09, 40]) motoEcavity(20);
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -345,7 +349,7 @@ module bottom() {
             translate([0, 0, 0]) intersection() {
                 difference() {
                     translate([20, w, 0]) cube([sizeBot[0]-20, sizeBot[1]-2*w, 20]); //20-1]);
-                    translate([30, 10, 7]) color("red") nexus5cavity(20);
+                    translate([30, 10, 7]) color("red") nexus5cavity(20); //motoEcavity(20);
                     
                     points = [[0, 0], [sizeTop[1], 0], [sizeTop[1], 20], [sizeTop[1]-20, 30], [20, 30], [0, 20]];
                     translate([0, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
@@ -405,7 +409,7 @@ module bottom() {
         }
         
         // seal
-        translate([0, 0, sizeBot[2]-2.1]) color("red") difference() {
+        translate([0, 0, sizeBot[2]-2.3]) color("red") difference() {
             height = 3;
             union() {
                 hull() {
@@ -504,13 +508,31 @@ module DIN912screw(length) {
 module motoE() {
     //cube([154, 75, 10]); // Moto Z
     block(130, 67, 12.3, crad=10);
-    translate([65, -0.5, 7]) cube([17, 2, 1.5]);
-    translate([65+17+10, -1, 7]) cube([9, 2, 1.5]);
-    translate([130-23, 67/2, -1]) cylinder($fn=32, h=3, d=13);
+    color("grey") {
+        translate([65, -0.5, 7]) cube([17, 2, 1.5]);
+        translate([65+17+10, -1, 7]) cube([9, 2, 1.5]);
+        translate([130-22, 67/2, -1]) cylinder($fn=32, h=3, d=13);
+    }
 }
 
 module nexus5() {
     translate([-5, 68, -26]) rotate([0, 0, -90]) import("nexus5.stl");
+}
+
+module motoEcavity(height) {
+    difference() {
+        translate([-10, 0]) block(143, 67, height, crad=5);
+//        points_cav = [[0, 0], [-2, height+0.2], [2, height+0.2], [2, 0]];
+//        translate([-12, 68-.1, -.1]) rotate([90, 0, 90]) linear_extrude(height=200) polygon(points_cav);
+    }
+    
+    
+    translate([64, -4.9, 0])cube([42, 5, height]);
+//    translate([82, 65, 0])cube([26, 5, height]);
+    
+    // wedge
+    translate([40, 61+5.5+3, 0]) cube([40, 2, height]);
+    translate([40+2, 61+5.5, 0]) cube([36, 5, height]);
 }
 
 module nexus5cavity(height) {
