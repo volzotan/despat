@@ -25,13 +25,32 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+    compile 'com.android.support:appcompat-v7:26.1.0'
+    compile 'com.android.support.constraint:constraint-layout:+'
+
+    // openCV for HOG
     compile project(':openCVLibrary310')
 
-    compile 'com.android.support:appcompat-v7:26.1.0'
+    // Photoview to preview images
     compile 'com.github.chrisbanes:PhotoView:1.3.1'
+
+    // UsbSerial for Powerbrain
     compile 'com.github.felHR85:UsbSerial:4.5'
+
+    // Volley for the Web-Interface
     compile 'com.android.volley:volley:1.0.0'
-    compile 'android.arch.persistence.room:runtime:1.0.0'
-    compile 'com.android.support.constraint:constraint-layout:+'
+
+    // ACRA for bug reporting
+    def acraVersion = '5.0.0'
+    implementation "ch.acra:acra-http:$acraVersion"
+    implementation "ch.acra:acra-notification:$acraVersion"
+    implementation "ch.acra:acra-limiter:$acraVersion"
+
+    // Room
+    implementation "android.arch.persistence.room:runtime:1.0.0"
+    annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
+    // Test helpers for Room (optional)
+    testImplementation "android.arch.persistence.room:testing:1.0.0"
+
     testCompile 'junit:junit:4.12'
 }

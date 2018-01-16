@@ -1,11 +1,17 @@
 package de.volzo.despat;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
 
+import org.acra.ACRA;
+import org.acra.annotation.AcraCore;
+
+import de.volzo.despat.support.Config;
 import de.volzo.despat.web.ServerConnector;
 
+@AcraCore(buildConfigClass = BuildConfig.class)
 public class Despat extends Application {
 
     public static String TAG = Despat.class.getSimpleName();
@@ -17,6 +23,12 @@ public class Despat extends Application {
     private PowerManager.WakeLock wakeLock;
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        ACRA.init(this);
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 
@@ -25,7 +37,6 @@ public class Despat extends Application {
         // send APPSTART event
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendEvent(ServerConnector.EventType.INIT, null);
-
     }
 
     @Override
@@ -52,7 +63,7 @@ public class Despat extends Application {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DespatWakeLockTag");
         }
 
-        wakeLock.acquire();
+        wakeLock.acquire(Config.WAKELOCK_MAX_LIFETIME);
     }
 
     public void releaseWakeLock() {

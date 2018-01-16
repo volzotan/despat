@@ -30,4 +30,13 @@ public class RecordingSession {
     public static String getRecordingSessionId() {
         return null; // TODO
     }
+
+    public static void checkForIntegrity() {
+
+        // TODO:
+
+        // check the DB if shutter events have occurred at the timed interval
+        // or if android suppressed the alarm manager
+
+    }
 }

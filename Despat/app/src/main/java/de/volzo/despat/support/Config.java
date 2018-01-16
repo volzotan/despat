@@ -21,6 +21,8 @@ public class Config {
     public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;
     public static final boolean PHONE_HOME                  = true;
     public static final int NUMBER_OF_BURST_IMAGES          = 2;
+    public static final long WAKELOCK_MAX_LIFETIME          = 3000;
+    public static final String ACRA_REPORT_URL              = "http://zoltep.de/report";
 
     private static final long DEFAULT_SHUTTER_INTERVAL      = 10 * 1000; // in ms. should not be shorter than 6s (5s is android minimum and a few extra ms are needed for compensation of scheduling irregularities
     private static final long DEFAULT_HEARTBEAT_INTERVAL    = 15 * 60 * 1000L; // Minimum interval is 15m
