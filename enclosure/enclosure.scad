@@ -60,7 +60,54 @@ difference(){
 //translate([32, 09, 10]) color("green") motoE();
 //translate([32, 09, 40]) motoEcavity(20);
 
+translate([30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+latch();
+translate([0, 16, 0]) latch_knob();
+}
+
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+module latch_knob() {
+    height = 5;
+    
+    difference() {
+        union() {
+            translate([]) cylinder($fn=32, d=8, h=height);
+        }
+        
+        translate([0, 0, -1]) cylinder($fn=32, d=3.3, h=height+2);
+        translate([0, 0, height-3.3]) cylinder($fn=32, d=6, h=height+2);
+    }
+}
+
+module latch() {
+    height = 5+1;
+    
+    depth = 22;
+    depth_knob = 16;
+    
+    difference() {
+        union() {
+//            points = [[-3, 0], [3, 0], [10, 30], [-10, 30], [-10, 25], [5, 25]];
+//            translate([]) linear_extrude(height=height) polygon(points);
+            
+            hull() {
+                translate([]) cylinder($fn=32, d=10, h=height);
+                translate([4, depth, 0]) cylinder($fn=32, d=8, h=height);
+                translate([-4, depth, 0]) cylinder($fn=32, d=8, h=height);
+            }
+        }
+        
+        translate([0, 0, -1]) hull() {
+            translate([-20, depth_knob-2]) cylinder($fn=32, d=9, h=height+2);
+            translate([-20, depth_knob-5]) cylinder($fn=32, d=9, h=height+2);
+            translate([0, depth_knob]) cylinder($fn=32, d=9, h=height+2);
+        }
+        
+        translate([0, 0, -1]) cylinder($fn=32, d=3.3, h=height+2);
+        translate([0, 0, height-3.3]) cylinder($fn=32, d=8, h=height+2);
+    }
+}
 
 module wedge() {
     tol = 0.3;
@@ -159,7 +206,7 @@ module seal() {
     width_top = 1.2;
     width_cut = 1.6+0.2;
    
-    difference() {
+    color("grey") difference() {
         union() {
             difference() {
                 block(sizeBot[0], sizeBot[1], height, crad=crad);
@@ -318,9 +365,10 @@ module bottom() {
             difference() {
                 
                 hull() { // outer rim reduction
-                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=1);
-                    translate([0, 0, 1]) 
-                        block(sizeBot[0], sizeBot[1], sizeBot[2]-1, crad=crad);
+                    red = 1;
+                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=red);
+                    translate([0, 0, red]) 
+                        block(sizeBot[0], sizeBot[1], sizeBot[2]-red, crad=crad);
                 }
                 
                 translate([0, 0, wb]) hull() {
