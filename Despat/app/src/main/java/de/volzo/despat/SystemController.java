@@ -2,6 +2,8 @@ package de.volzo.despat;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -15,6 +17,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -129,9 +132,28 @@ public class SystemController {
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
+    // needs API level >= 21
     public int getBatteryLevel() {
+        int batt = -1;
+
         BatteryManager batteryManager = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
-        return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+        batt = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+
+        if (batt > 0) {
+            return batt;
+        }
+
+        // alternative for devices with API level < 21 or devices with vendor modifications (e.g. Moto E)
+
+        Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        if(level == -1 || scale == -1) {
+            return 50;
+        }
+
+        return (int) (((float)level / (float)scale) * 100.0f);
     }
 
     public boolean getBatteryChargingState() {
