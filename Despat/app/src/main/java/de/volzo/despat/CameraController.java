@@ -213,7 +213,7 @@ public class CameraController {
 
                     Log.d(TAG, "# onImageAvailable");
 
-                    final ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
+                    final ImageRollover imgroll = new ImageRollover(context);
                     File imageFullPath = imgroll.getTimestampAsFullFilename();
                     //File imageFullPath = imgroll.filenamify(Long.toString(image.getTimestamp())); // timestamp date is no unix epoch
                     if (imageFullPath == null) { // only duplicates

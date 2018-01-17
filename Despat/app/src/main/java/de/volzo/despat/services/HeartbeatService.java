@@ -4,8 +4,13 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.util.Log;
 
+import java.util.Calendar;
+
 import de.volzo.despat.Despat;
 import de.volzo.despat.ImageRollover;
+import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Status;
+import de.volzo.despat.persistence.StatusDao;
 import de.volzo.despat.web.ServerConnector;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Config;
@@ -29,33 +34,40 @@ public class HeartbeatService extends JobService {
         Despat despat = ((Despat) getApplicationContext());
         SystemController systemController = despat.getSystemController();
 
-        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(this), Config.IMAGE_FILEEXTENSION);
+        ImageRollover imgroll = new ImageRollover(this);
 
-        ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
+        Status status = new Status();
 
-        statusMessage.numberImagesTaken = Config.getImagesTaken(this);
-        statusMessage.numberImagesSaved = imgroll.getNumberOfSavedImages();
-        statusMessage.freeSpaceInternal = Util.getFreeSpaceOnDevice(Config.getImageFolder(this));
-        statusMessage.freeSpaceExternal = -1; // TODO
-        statusMessage.batteryInternal = systemController.getBatteryLevel();
-        statusMessage.batteryExternal = -1; // TODO
-        statusMessage.stateCharging = systemController.getBatteryChargingState();
+        status.setTimestamp(Calendar.getInstance().getTime());
+        status.setNumberImagesTaken(Config.getImagesTaken(this));
+        status.setNumberImagesInMemory(imgroll.getNumberOfSavedImages());
+        status.setFreeSpaceInternal(Util.getFreeSpaceOnDevice(Config.getImageFolder(this)));
+        status.setFreeSpaceExternal(-1); // TODO
+        status.setBatteryInternal(systemController.getBatteryLevel());
+        status.setBatteryExternal(-1); // TODO
+        status.setStateCharging(systemController.getBatteryChargingState());
 
         // Temperature sensors are found in just a small number of devices, namely some Samsung 3 and Moto X
         // if a sensor is present, use the reading from the last heartbeat and start a new measurement for the next
         float temp = systemController.getTemperature();
-        statusMessage.temperature = temp;
+        status.setTemperature(temp);
         if (temp > 0) {
             systemController.startTemperatureMeasurement();
         }
 
-        if (!systemController.isNetworkConnectionAvailable()) {
-            Log.w(TAG, "no network connection available. abort.");
-            return true;
-        }
+        AppDatabase db = AppDatabase.getAppDatabase(despat);
+        StatusDao statusDao = db.statusDao();
+        statusDao.insertAll(status);
 
-        ServerConnector serverConnector = new ServerConnector(this);
-        serverConnector.sendStatus(statusMessage);
+//        ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
+
+//        if (!systemController.isNetworkConnectionAvailable()) {
+//            Log.w(TAG, "no network connection available. abort.");
+//            return true;
+//        }
+//
+//        ServerConnector serverConnector = new ServerConnector(this);
+//        serverConnector.sendStatus(statusMessage);
 
         jobFinished(jobParameters, false); // <-- needs to be called from volley callback
         return false;

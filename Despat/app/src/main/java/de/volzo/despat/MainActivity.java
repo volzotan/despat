@@ -276,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             public void finalImageTaken() {
                 MainActivity.this.runOnUiThread(new Runnable() {
                     public void run() {
-                        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(context), Config.IMAGE_FILEEXTENSION);
+                        ImageRollover imgroll = new ImageRollover(context);
                         File newestImage = imgroll.getNewestImage();
 
                         if (newestImage == null) return;
@@ -322,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         recognizer = new Recognizer();
 
-        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(this), Config.IMAGE_FILEEXTENSION);
+        ImageRollover imgroll = new ImageRollover(this);
         File newestImage = imgroll.getNewestImage();
 
         Recognizer.RecognizerResultset res = recognizer.run(newestImage.getAbsoluteFile());

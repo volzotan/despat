@@ -28,10 +28,10 @@ public class ImageRollover {
         this.dir = Config.getImageFolder(context);
         String suffix = Config.IMAGE_FILEEXTENSION;
 
-        if (fileextension.charAt(0) != '.') {
-            this.fileextension = "." + fileextension;
+        if (suffix.charAt(0) != '.') {
+            this.fileextension = "." + suffix;
         } else {
-            this.fileextension = fileextension;
+            this.fileextension = suffix;
         }
 
         float freeSpace = Util.getFreeSpaceOnDevice(dir);

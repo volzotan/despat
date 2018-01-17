@@ -17,9 +17,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
 import de.volzo.despat.Orchestrator;
 import de.volzo.despat.R;
+import de.volzo.despat.SystemController;
 
 /**
  * Created by volzotan on 16.08.17.
@@ -80,6 +82,10 @@ public class Util {
         bytesAvailable = (long) stat.getBlockSizeLong() * (long) stat.getAvailableBlocksLong();
 
         return bytesAvailable / (1024.f * 1024.f);
+    }
+
+    public static Despat getDespat(Context context) {
+        return ((Despat) context.getApplicationContext());
     }
 
     // ---

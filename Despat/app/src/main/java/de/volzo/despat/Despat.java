@@ -1,6 +1,7 @@
 package de.volzo.despat;
 
 import android.app.Application;
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.util.Log;
 import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
 
+import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.web.ServerConnector;
 
@@ -25,7 +27,7 @@ public class Despat extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        ACRA.init(this);
+//        ACRA.init(this);
     }
 
     @Override
@@ -49,6 +51,11 @@ public class Despat extends Application {
         ServerConnector serverConnector = new ServerConnector(this);
         serverConnector.sendEvent(ServerConnector.EventType.SHUTDOWN, null);
     }
+
+//    public AppDatabase getDb() {
+//        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-name").build();
+//        return db;
+//    }
 
     public void acquireWakeLock() {
         Log.d(TAG, "acquiring wake lock");

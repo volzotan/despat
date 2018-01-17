@@ -1,0 +1,81 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "2d9aa89554b0c5db4785bf8354a66247",
+    "entities": [
+      {
+        "tableName": "Status",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature` REAL NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "mid",
+            "columnName": "mid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numberImagesTaken",
+            "columnName": "images_taken",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numberImagesInMemory",
+            "columnName": "images_in_memory",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "freeSpaceInternal",
+            "columnName": "free_space_internal",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "freeSpaceExternal",
+            "columnName": "free_space_external",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batteryInternal",
+            "columnName": "battery_internal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batteryExternal",
+            "columnName": "battery_external",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stateCharging",
+            "columnName": "state_charging",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temperature",
+            "columnName": "temperature",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "mid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"2d9aa89554b0c5db4785bf8354a66247\")"
+    ]
+  }
+}

@@ -42,7 +42,6 @@ public class SystemController {
 
     Context context;
 
-    private Location deviceLocation;
     private float deviceTemperature = -1.0f;
 
     public SystemController(Context context) {
@@ -64,12 +63,18 @@ public class SystemController {
     }
 
     // Location will be available in class variable a few seconds after calling the getLocation method
-    public void getLocation() {
+    public void getLocation(LocationCallback locationCallback) {
+
+        final LocationCallback locCallback = locationCallback;
+
         final LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 Log.d(TAG, "location update");
-                deviceLocation = location;
+
+                if (locCallback != null) {
+                    locCallback.locationAcquired(location);
+                }
             }
 
             @Override
@@ -197,5 +202,9 @@ public class SystemController {
 
     public float getTemperature() {
         return deviceTemperature;
+    }
+
+    public static abstract class LocationCallback {
+        public void locationAcquired(Location location) {}
     }
 }

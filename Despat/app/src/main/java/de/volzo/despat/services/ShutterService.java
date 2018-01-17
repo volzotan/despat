@@ -15,6 +15,7 @@ import de.volzo.despat.ImageRollover;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
+import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -57,7 +58,7 @@ public class ShutterService extends Service {
 
     public void releaseShutter() {
 
-        final Despat despat = ((Despat) getApplicationContext());
+        final Despat despat = Util.getDespat(this);
         SystemController systemController = despat.getSystemController();
 
         Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + Config.getImagesTaken(this));
@@ -66,7 +67,7 @@ public class ShutterService extends Service {
 
         // check if any images needs to be deleted to have enough free space
         // may be time-consuming. alternative place to run?
-        ImageRollover imgroll = new ImageRollover();
+        ImageRollover imgroll = new ImageRollover(despat);
         imgroll.run();
 
         CameraController camera = despat.getCamera();

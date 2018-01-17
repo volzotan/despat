@@ -28,8 +28,8 @@ public interface StatusDao {
 //    Status findByName(String first, String last);
 
     @Insert
-    void insertAll(Status... users);
+    void insertAll(Status... statuses);
 
     @Delete
-    void delete(Status user);
+    void delete(Status status);
 }

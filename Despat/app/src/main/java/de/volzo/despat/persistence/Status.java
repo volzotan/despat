@@ -4,6 +4,8 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import java.util.Date;
+
 /**
  * Created by christophergetschmann on 24.11.17.
  */
@@ -13,6 +15,9 @@ public class Status {
 
     @PrimaryKey(autoGenerate = true)
     private int mid;
+
+    @ColumnInfo(name = "timestamp")
+    private Date timestamp;
 
     @ColumnInfo(name = "images_taken")
     private int numberImagesTaken;
@@ -44,6 +49,14 @@ public class Status {
 
     public void setMid(int mid) {
         this.mid = mid;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public int getNumberImagesTaken() {
