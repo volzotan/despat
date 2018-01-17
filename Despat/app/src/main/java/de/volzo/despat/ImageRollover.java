@@ -1,5 +1,6 @@
 package de.volzo.despat;
 
+import android.content.Context;
 import android.os.StatFs;
 import android.util.Log;
 
@@ -23,8 +24,9 @@ public class ImageRollover {
     private File dir;
     private String fileextension;
 
-    public ImageRollover(File dir, String fileextension) {
-        this.dir = dir;
+    public ImageRollover(Context context) {
+        this.dir = Config.getImageFolder(context);
+        String suffix = Config.IMAGE_FILEEXTENSION;
 
         if (fileextension.charAt(0) != '.') {
             this.fileextension = "." + fileextension;
@@ -113,10 +115,15 @@ public class ImageRollover {
     }
 
     public void run() {
+        if (!Config.IMGROLL_DELETE_IF_FULL) {
+            Log.d(TAG, "imageRollover is disabled.");
+        }
+
         Log.d(TAG, "imageRollover running");
 
-        if (Util.getFreeSpaceOnDevice(dir) > Config.IMGROLL_FREE_SPACE_THRESHOLD) {
-            Log.d(TAG, "rollover: no deletions necessary");
+        float freeSpace = Util.getFreeSpaceOnDevice(dir);
+        if (freeSpace > Config.IMGROLL_FREE_SPACE_THRESHOLD) {
+            Log.d(TAG, "rollover: no deletions necessary. free space: "+ freeSpace);
             return;
         }
 

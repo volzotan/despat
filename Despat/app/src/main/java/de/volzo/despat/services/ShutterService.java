@@ -11,6 +11,7 @@ import android.util.Log;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
+import de.volzo.despat.ImageRollover;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
@@ -61,12 +62,13 @@ public class ShutterService extends Service {
 
         Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + Config.getImagesTaken(this));
 
+        despat.acquireWakeLock();
+
         // check if any images needs to be deleted to have enough free space
         // may be time-consuming. alternative place to run?
-//        ImageRollover imgroll = new ImageRollover(Config.IMAGE_FOLDER, Config.IMAGE_FILEEXTENSION);
-//        imgroll.run();
+        ImageRollover imgroll = new ImageRollover();
+        imgroll.run();
 
-        despat.acquireWakeLock();
         CameraController camera = despat.getCamera();
 
         CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {

@@ -18,7 +18,8 @@ public class Config {
 
     public static final String DATEFORMAT                   = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String IMAGE_FILEEXTENSION          = ".jpg";
-    public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 100;
+    public static final float IMGROLL_FREE_SPACE_THRESHOLD  = 300; // in MB
+    public static final boolean IMGROLL_DELETE_IF_FULL      = false;
     public static final boolean PHONE_HOME                  = true;
     public static final int NUMBER_OF_BURST_IMAGES          = 2;
     public static final long WAKELOCK_MAX_LIFETIME          = 3000;
