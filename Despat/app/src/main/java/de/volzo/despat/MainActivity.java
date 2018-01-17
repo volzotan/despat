@@ -83,17 +83,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             public void onClick(View view) {
                 if (!Util.isServiceRunning(activity, ShutterService.class)) {
                     Log.d(TAG, "startCapturing");
-
                     RecordingSession.startRecordingSession(activity);
-
                     startStopCapturing.setChecked(true);
                 } else {
                     Log.d(TAG, "stopCapturing");
-                    Intent shutterIntent = new Intent(activity, Orchestrator.class);
-                    shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
-                    shutterIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
-                    sendBroadcast(shutterIntent);
-
+                    RecordingSession.stopRecordingSession(activity);
                     startStopCapturing.setChecked(false);
                 }
             }
@@ -218,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        //startCamera();
+        startCamera();
     }
 
     @Override
@@ -271,6 +265,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void takePhoto() {
 
+        // Caveat: Camera keeps running after taking a photo this way
+
         CameraController camera = despat.getCamera();
         final Context context = this;
 
@@ -298,8 +294,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         if (camera == null || camera.isDead()) {
             try {
-                camera = new CameraController(this, callback, null);
-                despat.setCamera(camera);
+                despat.setCamera(new CameraController(this, callback, null));
             } catch (Exception e) {
                 Log.e(TAG, "starting camera failed", e);
             }

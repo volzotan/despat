@@ -27,6 +27,17 @@ public class RecordingSession {
         context.sendBroadcast(shutterIntent);
     }
 
+    public static void stopRecordingSession(Context context) {
+        String sessionName = "TODO"; // TODO
+
+        Log.d(TAG, "stop RecordingSession [" + sessionName + "]");
+
+        Intent shutterIntent = new Intent(context, Orchestrator.class);
+        shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
+        shutterIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
+        context.sendBroadcast(shutterIntent);
+    }
+
     public static String getRecordingSessionId() {
         return null; // TODO
     }

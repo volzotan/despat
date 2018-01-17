@@ -159,12 +159,16 @@ public class CameraController {
                 imageReader = null;
             }
 
-            if(surface != null) {
-                surface.release();
-            }
+            // if a textureView exists outside of the CameraController
+            // closing the surfaces would cause problems
+            if (textureView == null) {
+                if(surface != null) {
+                    surface.release();
+                }
 
-            if (surfaceTexture != null) {
-                surfaceTexture.release();
+                if (surfaceTexture != null) {
+                    surfaceTexture.release();
+                }
             }
 
             if (controllerCallback != null) {
