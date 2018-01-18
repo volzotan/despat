@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import de.volzo.despat.SystemController;
+import de.volzo.despat.persistence.Status;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
@@ -76,8 +77,11 @@ public class ServerConnector {
 
     */
 
-    public void sendStatus(StatusMessage msg) {
+    public void sendStatus(Status status) {
         try {
+
+            // TODO: json list of status, not single status
+
             Writer writer = new StringWriter();
             JsonWriter jsonWriter = new JsonWriter(writer);
             jsonWriter.beginObject();
@@ -97,13 +101,13 @@ public class ServerConnector {
                 }
             }
 
-            jsonWriter.name("numberImagesTaken").value(msg.numberImagesTaken);
-            jsonWriter.name("numberImagesSaved").value(msg.numberImagesSaved);
-            jsonWriter.name("freeSpaceInternal").value(msg.freeSpaceInternal);
-            jsonWriter.name("freeSpaceExternal").value(msg.freeSpaceExternal);
-            jsonWriter.name("batteryInternal").value(msg.batteryInternal);
-            jsonWriter.name("batteryExternal").value(msg.batteryExternal);
-            jsonWriter.name("stateCharging").value(msg.stateCharging);
+            jsonWriter.name("numberImagesTaken").value(status.getNumberImagesTaken());
+            jsonWriter.name("numberImagesSaved").value(status.getNumberImagesInMemory());
+            jsonWriter.name("freeSpaceInternal").value(status.getFreeSpaceInternal());
+            jsonWriter.name("freeSpaceExternal").value(status.getFreeSpaceExternal());
+            jsonWriter.name("batteryInternal").value(status.getBatteryInternal());
+            jsonWriter.name("batteryExternal").value(status.getBatteryExternal());
+            jsonWriter.name("stateCharging").value(status.isStateCharging());
 
             jsonWriter.endObject();
             jsonWriter.close();
@@ -298,25 +302,6 @@ public class ServerConnector {
     }
 
     // --------------------------------------------------------------------------------------------------------------
-
-    public static class StatusMessage {
-
-//        public String deviceId;
-//        public String deviceName;
-//        public String originalDeviceId;
-//        public Date timestamp;
-
-        public int numberImagesTaken;
-        public int numberImagesSaved;
-        public float freeSpaceInternal;
-        public float freeSpaceExternal;
-
-        public int batteryInternal;
-        public int batteryExternal;
-        public boolean stateCharging;
-
-        public float temperature;
-    }
 
 //    public static class EventMessage {
 //

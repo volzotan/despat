@@ -6,6 +6,8 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.facebook.stetho.Stetho;
+
 import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
 
@@ -33,6 +35,9 @@ public class Despat extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Stetho Debug Library
+        Stetho.initializeWithDefaults(this);
 
         systemController = new SystemController(this);
 

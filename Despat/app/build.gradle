@@ -59,4 +59,7 @@ dependencies {
     testImplementation "android.arch.persistence.room:testing:1.0.0"
 
     testCompile 'junit:junit:4.12'
+
+    // debug: access sqlite DB
+    compile 'com.facebook.stetho:stetho:1.5.0'
 }
