@@ -8,6 +8,7 @@ import java.util.Calendar;
 
 import de.volzo.despat.Despat;
 import de.volzo.despat.ImageRollover;
+import de.volzo.despat.RecordingSession;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
@@ -39,13 +40,17 @@ public class HeartbeatService extends JobService {
         Status status = new Status();
 
         status.setTimestamp(Calendar.getInstance().getTime());
-        status.setNumberImagesTaken(Config.getImagesTaken(this));
         status.setNumberImagesInMemory(imgroll.getNumberOfSavedImages());
         status.setFreeSpaceInternal(Util.getFreeSpaceOnDevice(Config.getImageFolder(this)));
         status.setFreeSpaceExternal(-1); // TODO
         status.setBatteryInternal(systemController.getBatteryLevel());
         status.setBatteryExternal(-1); // TODO
         status.setStateCharging(systemController.getBatteryChargingState());
+
+        RecordingSession session = RecordingSession.getInstance(this);
+        if (session.isActive()) {
+            status.setNumberImagesTaken(session.getImagesTaken());
+        }
 
         // Temperature sensors are found in just a small number of devices, namely some Samsung 3 and Moto X
         // if a sensor is present, use the reading from the last heartbeat and start a new measurement for the next

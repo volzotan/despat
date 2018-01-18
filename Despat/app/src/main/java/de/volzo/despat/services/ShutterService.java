@@ -12,6 +12,7 @@ import android.util.Log;
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
 import de.volzo.despat.ImageRollover;
+import de.volzo.despat.RecordingSession;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
@@ -61,7 +62,9 @@ public class ShutterService extends Service {
         final Despat despat = Util.getDespat(this);
         SystemController systemController = despat.getSystemController();
 
-        Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + Config.getImagesTaken(this));
+        RecordingSession session = RecordingSession.getInstance(this);
+
+        Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + session.getImagesTaken());
 
         despat.acquireWakeLock();
 

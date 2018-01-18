@@ -4,6 +4,7 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
 import android.graphics.Bitmap;
 import android.location.Location;
 
@@ -26,7 +27,7 @@ public class Session {
     start
     end
 
-    position
+    location
 
     exclusion_image
     compressed_image
@@ -47,14 +48,27 @@ public class Session {
     @ColumnInfo(name = "end")
     private Date end;
 
-    @ColumnInfo(name = "position")
-    private Location position;
+    @ColumnInfo(name = "latitude")
+    private String latitude;
 
-    @ColumnInfo(name = "exclusion_image")
-    private Bitmap exclusionImage;
+    @ColumnInfo(name = "longitude")
+    private String longitude;
+
+    @ColumnInfo(name = "exclusion_image", typeAffinity = ColumnInfo.BLOB)
+    private byte[] exclusionImage;
 
     @ColumnInfo(name = "compressed_image")
     private File compressedImage;
+
+
+
+    public Location getLocation() {
+        return null; // TODO
+    }
+
+    public void setLocation(Location location) {
+        // TODO
+    }
 
 
     public int getSid() {
@@ -89,19 +103,27 @@ public class Session {
         this.end = end;
     }
 
-    public Location getPosition() {
-        return position;
+    public String getLatitude() {
+        return latitude;
     }
 
-    public void setPosition(Location position) {
-        this.position = position;
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 
-    public Bitmap getExclusionImage() {
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public byte[] getExclusionImage() {
         return exclusionImage;
     }
 
-    public void setExclusionImage(Bitmap exclusionImage) {
+    public void setExclusionImage(byte[] exclusionImage) {
         this.exclusionImage = exclusionImage;
     }
 

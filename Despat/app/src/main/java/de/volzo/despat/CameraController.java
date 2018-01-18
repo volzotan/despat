@@ -474,11 +474,6 @@ public class CameraController {
                     Log.d(TAG, "# captureComplete");
                     Log.i(TAG, "captured image");
 
-                    Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
-                    // TODO: figure out the path of the saved picture
-                    // intent.putExtra(Broadcast.DATA_PICTURE_PATH, imageFullPath.getAbsolutePath());
-                    context.sendBroadcast(intent);
-
                     // retrieve tag (number of image in burst sequence)
                     Object tag = request.getTag();
                     if (tag != null) {
@@ -495,6 +490,14 @@ public class CameraController {
                             return;
                         }
                     }
+
+                    // final image of burstSequence
+
+                    Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
+                    ImageRollover imgroll = new ImageRollover(context);
+                    File image = imgroll.getNewestImage();
+                    intent.putExtra(Broadcast.DATA_PICTURE_PATH, image.getAbsolutePath());
+                    context.sendBroadcast(intent);
 
                     if (controllerCallback != null) {
                         controllerCallback.finalImageTaken();

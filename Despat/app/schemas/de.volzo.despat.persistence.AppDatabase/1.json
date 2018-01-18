@@ -2,17 +2,23 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2d9aa89554b0c5db4785bf8354a66247",
+    "identityHash": "b4b16834ffed5a6125ef6a29d953177a",
     "entities": [
       {
         "tableName": "Status",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature` REAL NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature` REAL NOT NULL)",
         "fields": [
           {
             "fieldPath": "mid",
             "columnName": "mid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": false
           },
           {
             "fieldPath": "numberImagesTaken",
@@ -71,11 +77,123 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "Session",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` INTEGER, `end` INTEGER, `latitude` TEXT, `longitude` TEXT, `exclusion_image` BLOB, `compressed_image` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "sid",
+            "columnName": "sid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionName",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "start",
+            "columnName": "start",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "end",
+            "columnName": "end",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "exclusionImage",
+            "columnName": "exclusion_image",
+            "affinity": "BLOB",
+            "notNull": false
+          },
+          {
+            "fieldPath": "compressedImage",
+            "columnName": "compressed_image",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "sid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Capture",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `time` INTEGER, `image_path` TEXT, FOREIGN KEY(`session_id`) REFERENCES `Session`(`sid`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "cid",
+            "columnName": "cid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recordingTime",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "image",
+            "columnName": "image_path",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "Session",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "sid"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"2d9aa89554b0c5db4785bf8354a66247\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"b4b16834ffed5a6125ef6a29d953177a\")"
     ]
   }
 }

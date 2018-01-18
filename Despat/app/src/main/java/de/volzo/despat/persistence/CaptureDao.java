@@ -8,14 +8,14 @@ import android.arch.persistence.room.Query;
 import java.util.List;
 
 @Dao
-public interface SessionDao {
+public interface CaptureDao {
 
-    @Query("SELECT * FROM session")
-    List<Session> getAll();
+    @Query("SELECT * FROM capture")
+    List<Capture> getAll();
 
     @Insert
-    void insertAll(Session... sessions);
+    void insertAll(Capture... captures);
 
     @Delete
-    void delete(Session session);
+    void delete(Capture capture);
 }

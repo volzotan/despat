@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
+import java.io.File;
 import java.util.List;
 
 import de.volzo.despat.services.HeartbeatService;
@@ -63,8 +64,15 @@ public class Orchestrator extends BroadcastReceiver {
                     break;
 
                 case Broadcast.PICTURE_TAKEN:
-                    Config.setImagesTaken(context, Config.getImagesTaken(context) + 1);
-                    Util.updateNotification(context, Config.getImagesTaken(context));
+                    try {
+                    RecordingSession session = RecordingSession.getInstance(context);
+                    String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
+                    session.addCapture(new File(path));
+                    Util.updateNotification(context, session.getImagesTaken());
+                    } catch (RecordingSession.NotRecordingException nre) {
+                        Log.w(TAG, "image taken after recordingSession stopped");
+                    }
+
                     break;
 
                 default:
@@ -154,7 +162,7 @@ public class Orchestrator extends BroadcastReceiver {
         if (!Util.isServiceRunning(context, ShutterService.class)) {
 
             // reset the counter
-            Config.resetImagesTaken(context);
+//            Config.resetImagesTaken(context);
 
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
             context.startService(shutterServiceIntent);
@@ -186,7 +194,8 @@ public class Orchestrator extends BroadcastReceiver {
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
 
         // update the notification
-        Util.startNotification(context, Config.getImagesTaken(context));
+        RecordingSession session = RecordingSession.getInstance(context);
+        Util.startNotification(context, session.getImagesTaken());
     }
 
     private void shutterServiceStop() {
@@ -327,7 +336,21 @@ public class Orchestrator extends BroadcastReceiver {
         if (operation >= 0) {
             if (service != null) sb.append(" | ");
             sb.append("operation: ");
-            sb.append(operation);
+
+            switch(operation) {
+                case OPERATION_START:
+                    sb.append("START");
+                    break;
+                case OPERATION_STOP:
+                    sb.append("STOP");
+                    break;
+                case OPERATION_ONCE:
+                    sb.append("ONCE");
+                    break;
+                default:
+                    sb.append("UNKNOWN");
+                    break;
+            }
         }
 
         Log.d(TAG, sb.toString());

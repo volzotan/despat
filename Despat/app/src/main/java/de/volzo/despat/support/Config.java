@@ -65,21 +65,21 @@ public class Config {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID).toUpperCase();
     }
 
-    public static void resetImagesTaken(Context context) {
-        setImagesTaken(context, 0);
-    }
-
-    public static void setImagesTaken(Context context, int count) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putInt("imagesTaken", count);
-        editor.apply();
-    }
-
-    public static int getImagesTaken(Context context) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
-        return settings.getInt("imagesTaken", 0);
-    }
+//    public static void resetImagesTaken(Context context) {
+//        setImagesTaken(context, 0);
+//    }
+//
+//    public static void setImagesTaken(Context context, int count) {
+//        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = settings.edit();
+//        editor.putInt("imagesTaken", count);
+//        editor.apply();
+//    }
+//
+//    public static int getImagesTaken(Context context) {
+//        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+//        return settings.getInt("imagesTaken", 0);
+//    }
 
     // ----
 

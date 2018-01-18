@@ -83,11 +83,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             public void onClick(View view) {
                 if (!Util.isServiceRunning(activity, ShutterService.class)) {
                     Log.d(TAG, "startCapturing");
-                    RecordingSession.startRecordingSession(activity);
+                    RecordingSession session = RecordingSession.getInstance(activity);
+                    session.startRecordingSession(null);
                     startStopCapturing.setChecked(true);
                 } else {
                     Log.d(TAG, "stopCapturing");
-                    RecordingSession.stopRecordingSession(activity);
+                    RecordingSession session = RecordingSession.getInstance(activity);
+                    session.stopRecordingSession();
                     startStopCapturing.setChecked(false);
                 }
             }
