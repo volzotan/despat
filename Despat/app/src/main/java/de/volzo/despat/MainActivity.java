@@ -19,13 +19,16 @@ import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.File;
+import java.util.Calendar;
 
+import de.volzo.despat.persistence.Session;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
@@ -89,7 +92,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 } else {
                     Log.d(TAG, "stopCapturing");
                     RecordingSession session = RecordingSession.getInstance(activity);
-                    session.stopRecordingSession();
+                    try {
+                        session.stopRecordingSession();
+                    } catch (RecordingSession.NotRecordingException e) {
+                        Log.e(TAG, "stopping Recording Session failed", e);
+                    }
                     startStopCapturing.setChecked(false);
                 }
             }
@@ -181,6 +188,25 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             Log.d("image taken", "path: " + path);
 
             Toast.makeText(activity, "image taken", Toast.LENGTH_SHORT).show();
+
+            StringBuilder sb = new StringBuilder();
+            RecordingSession session = RecordingSession.getInstance(context);
+
+            try {
+                if (session.isActive()) {
+                    sb.append("Session: ");
+                    sb.append(session.getSessionName());
+                    sb.append("\n"); //sb.append(" | ");
+                    sb.append("running for: ");
+                    sb.append(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime()));
+                    sb.append(" | ");
+                    sb.append("images: ");
+                    sb.append(session.getImagesTaken());
+                }
+            } catch (RecordingSession.NotRecordingException e) {}
+
+            TextView tvStatus = (TextView) findViewById(R.id.tv_status);
+            tvStatus.setText(sb.toString());
         }
     };
 

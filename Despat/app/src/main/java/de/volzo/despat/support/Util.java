@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 
 import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
@@ -88,6 +89,56 @@ public class Util {
         return ((Despat) context.getApplicationContext());
     }
 
+    public static String getHumanReadableTimediff(Date d1, Date d2) {
+        long diff = d2.getTime() - d1.getTime();
+
+        long diffSeconds = diff / 1000 % 60;
+        long diffMinutes = diff / (60 * 1000) % 60;
+        long diffHours = diff / (60 * 60 * 1000) % 24;
+        long diffDays = diff / (24 * 60 * 60 * 1000);
+
+        StringBuilder sb = new StringBuilder();
+
+        if (diffDays > 0) {
+            sb.append((int) diffDays);
+            if (diffDays >= 2) {
+                sb.append(" days ");
+            } else {
+                sb.append(" day ");
+            }
+        }
+
+        if (diffHours > 0) {
+            sb.append((int) diffHours);
+            if (diffHours >= 2) {
+                sb.append(" hours ");
+            } else {
+                sb.append(" hour ");
+            }
+        }
+
+        if (diffMinutes > 0) {
+            sb.append((int) diffMinutes);
+            sb.append("min ");
+//            if (diffMinutes >= 2) {
+//                sb.append(" minutes ");
+//            } else {
+//                sb.append(" minute ");
+//            }
+        }
+
+        if (diffSeconds > 0) {
+            sb.append((int) diffSeconds);
+            sb.append("s");
+//            if (diffSeconds >= 2) {
+//                sb.append(" seconds");
+//            } else {
+//                sb.append(" second");
+//            }
+        }
+
+        return sb.toString();
+    }
     // ---
 
     // taken from the apache commons io library

@@ -10,11 +10,17 @@ import java.util.List;
 @Dao
 public interface SessionDao {
 
+    @Query("SELECT * FROM session WHERE sid = :sessionId")
+    Session getById(long sessionId);
+
     @Query("SELECT * FROM session")
     List<Session> getAll();
 
+    @Query("SELECT COUNT(*) FROM capture WHERE session_id = :sessionId")
+    int getNumberOfCaptures(int sessionId);
+
     @Insert
-    void insertAll(Session... sessions);
+    long[] insertAll(Session... sessions);
 
     @Delete
     void delete(Session session);

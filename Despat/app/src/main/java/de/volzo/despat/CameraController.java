@@ -472,25 +472,19 @@ public class CameraController {
                     super.onCaptureCompleted(session, request, result);
 
                     Log.d(TAG, "# captureComplete");
-                    Log.i(TAG, "captured image");
 
                     // retrieve tag (number of image in burst sequence)
                     Object tag = request.getTag();
                     if (tag != null) {
                         int n = (int) request.getTag();
-                        Log.wtf(TAG, "Image: " + Integer.toString(n));
+                        Log.i(TAG, "captured image [" + Integer.toString(n+1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
                         if (n < burstLength - 1) {
-                            // there are still remaining requests in the pipeline
-                            // no shutdown yet
+                            if (controllerCallback != null) controllerCallback.intermediateImageTaken();
 
-                            if (controllerCallback != null) {
-                                controllerCallback.intermediateImageTaken();
-                            }
-
+                            // there are still remaining requests in the pipeline: no shutdown yet
                             return;
                         }
                     }
-
                     // final image of burstSequence
 
                     Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
@@ -499,9 +493,7 @@ public class CameraController {
                     intent.putExtra(Broadcast.DATA_PICTURE_PATH, image.getAbsolutePath());
                     context.sendBroadcast(intent);
 
-                    if (controllerCallback != null) {
-                        controllerCallback.finalImageTaken();
-                    }
+                    if (controllerCallback != null) controllerCallback.finalImageTaken();
 
                     unlockFocus();
                 }

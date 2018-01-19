@@ -65,10 +65,10 @@ public class Orchestrator extends BroadcastReceiver {
 
                 case Broadcast.PICTURE_TAKEN:
                     try {
-                    RecordingSession session = RecordingSession.getInstance(context);
-                    String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
-                    session.addCapture(new File(path));
-                    Util.updateNotification(context, session.getImagesTaken());
+                        RecordingSession session = RecordingSession.getInstance(context);
+                        String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
+                        session.addCapture(new File(path));
+                        Util.updateNotification(context, session.getImagesTaken());
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "image taken after recordingSession stopped");
                     }
