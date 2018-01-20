@@ -37,7 +37,7 @@ public class Session {
      */
 
     @PrimaryKey(autoGenerate = true)
-    private int sid;
+    private long sid;
 
     @ColumnInfo(name = "name")
     private String sessionName;
@@ -71,11 +71,11 @@ public class Session {
     }
 
 
-    public int getSid() {
+    public long getSid() {
         return sid;
     }
 
-    public void setSid(int sid) {
+    public void setSid(long sid) {
         this.sid = sid;
     }
 

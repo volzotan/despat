@@ -34,8 +34,8 @@ public class ImageRollover {
             this.fileextension = suffix;
         }
 
-        float freeSpace = Util.getFreeSpaceOnDevice(dir);
-        Log.d(TAG, "free space in " + dir.getAbsolutePath() + " : " + freeSpace + " MB");
+//        float freeSpace = Util.getFreeSpaceOnDevice(dir);
+//        Log.d(TAG, "free space in " + dir.getAbsolutePath() + " : " + freeSpace + " MB");
     }
 
     /*

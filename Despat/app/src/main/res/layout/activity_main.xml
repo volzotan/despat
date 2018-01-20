@@ -46,6 +46,12 @@
         android:orientation="vertical"
         android:background="@color/colorPrimary">
 
+        <Button
+            android:text="Configure"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_configure" />
+
         <ToggleButton
             android:textOn="Stop Capturing"
             android:textOff="Start Capturing"
@@ -78,10 +84,10 @@
             android:id="@+id/bt_kill" />
 
         <Button
-            android:text="Config"
+            android:text="Settings"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/bt_config" />
+            android:id="@+id/bt_settings" />
 
     </LinearLayout>
 

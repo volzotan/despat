@@ -153,11 +153,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        Button btConfig = (Button) findViewById(R.id.bt_config);
-        btConfig.setOnClickListener(new View.OnClickListener() {
+        Button btSettings = (Button) findViewById(R.id.bt_settings);
+        btSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(activity, ConfigActivity.class);
+                Intent intent = new Intent(activity, SettingsActivity.class);
                 startActivity(intent);
             }
         });

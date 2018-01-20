@@ -15,7 +15,7 @@ import java.util.Date;
 public class Status {
 
     @PrimaryKey(autoGenerate = true)
-    private int mid;
+    private long mid;
 
     @ColumnInfo(name = "timestamp")
     private Date timestamp;
@@ -44,11 +44,11 @@ public class Status {
     @ColumnInfo(name = "temperature")
     private float temperature;
 
-    public int getMid() {
+    public long getMid() {
         return mid;
     }
 
-    public void setMid(int mid) {
+    public void setMid(long mid) {
         this.mid = mid;
     }
 

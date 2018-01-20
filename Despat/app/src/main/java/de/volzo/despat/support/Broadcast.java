@@ -15,6 +15,8 @@ public class Broadcast {
 
     public static final String SHUTTER_SERVICE_TRIGGER  = "de.volzo.despat.SHUTTER_SERVICE_TRIGGER";
 
+    public static final String CAMERA_STATE_CHANGED     = "de.volzo.despat.CAMERA_STATE_CHANGED";
+
     public static final String PICTURE_TAKEN            = "de.volzo.despat.PICTURE_TAKEN";
     public static final String DATA_PICTURE_PATH        = "de.volzo.despat.DATA_PICTURE_PATH";
 

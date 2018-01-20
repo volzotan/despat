@@ -32,7 +32,13 @@
 
         <activity android:name=".PreviewActivity"></activity>
 
-        <activity android:name=".ConfigActivity"
+        <!--
+        <activity android:name=".ConfigureActivity"
+            android:screenOrientation="landscape">
+        </activity>
+        -->
+
+        <activity android:name=".SettingsActivity"
             android:screenOrientation="landscape">
         </activity>
 

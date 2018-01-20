@@ -8,6 +8,7 @@ import android.util.Log;
 import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import de.volzo.despat.persistence.AppDatabase;
@@ -17,6 +18,7 @@ import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.StatusDao;
 import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
 
 /**
@@ -84,7 +86,7 @@ public class RecordingSession {
         session.setStart(Calendar.getInstance().getTime());
         session.setLocation(null);
 
-        AppDatabase db = AppDatabase.getAppDatabase(despat);
+        AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
         long[] ids = sessionDao.insertAll(session);
 
@@ -134,8 +136,7 @@ public class RecordingSession {
         capture.setRecordingTime(Calendar.getInstance().getTime());
         capture.setImage(image);
 
-        Despat despat = Util.getDespat(context);
-        AppDatabase db = AppDatabase.getAppDatabase(despat);
+        AppDatabase db = AppDatabase.getAppDatabase(context);
         CaptureDao captureDao = db.captureDao();
         captureDao.insertAll(capture);
     }
@@ -143,21 +144,36 @@ public class RecordingSession {
     public int getImagesTaken() {
         if (!isActive()) return -1;
 
-        Despat despat = Util.getDespat(context);
-        AppDatabase db = AppDatabase.getAppDatabase(despat);
+        AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
         int numberImagesTaken = sessionDao.getNumberOfCaptures(session.getSid());
 
         return numberImagesTaken;
     }
 
-    public void checkForIntegrity() {
-
-        // TODO:
+    public boolean checkForIntegrity() {
 
         // check the DB if shutter events have occurred at the timed interval
         // or if android suppressed the alarm manager
 
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        CaptureDao captureDao = db.captureDao();
+
+        List<Capture> captures = captureDao.getAllBySession(session.getSid());
+
+        long maxTimeDiff = Config.getShutterInterval(context) * 1000 + 3 * 1000;
+        Date comp = session.getStart();
+        for (Capture cap : captures) {
+            long diff = cap.getRecordingTime().getTime() - comp.getTime();
+
+            if (diff > maxTimeDiff) {
+                return false;
+            }
+
+            comp = cap.getRecordingTime();
+        }
+
+        return true;
     }
 
     public String getSessionName() throws NotRecordingException {

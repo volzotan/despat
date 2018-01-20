@@ -11,17 +11,17 @@ import java.io.File;
  * Created by christophergetschmann on 24.11.17.
  */
 
-@Entity(foreignKeys = @ForeignKey(  entity = Session.class,
+@Entity(foreignKeys = @ForeignKey(  entity = Capture.class,
                                     parentColumns = "cid",
-                                    childColumns = "capture"))
+                                    childColumns = "capture_id"))
 
 public class Position {
 
     @PrimaryKey(autoGenerate = true)
-    private int pid;
+    private long pid;
 
-    @ColumnInfo(name = "capture")
-    private int capture;
+    @ColumnInfo(name = "capture_id")
+    private long captureId;
 
     @ColumnInfo(name = "x")
     private int x;
@@ -35,20 +35,20 @@ public class Position {
     @ColumnInfo(name = "longitude")
     private String longitude;
 
-    public int getPid() {
+    public long getPid() {
         return pid;
     }
 
-    public void setPid(int pid) {
+    public void setPid(long pid) {
         this.pid = pid;
     }
 
-    public int getCapture() {
-        return capture;
+    public long getCaptureId() {
+        return captureId;
     }
 
-    public void setCapture(int capture) {
-        this.capture = capture;
+    public void setCaptureId(long captureId) {
+        this.captureId = captureId;
     }
 
     public int getX() {

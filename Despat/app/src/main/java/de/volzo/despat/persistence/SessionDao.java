@@ -17,7 +17,7 @@ public interface SessionDao {
     List<Session> getAll();
 
     @Query("SELECT COUNT(*) FROM capture WHERE session_id = :sessionId")
-    int getNumberOfCaptures(int sessionId);
+    int getNumberOfCaptures(long sessionId);
 
     @Insert
     long[] insertAll(Session... sessions);

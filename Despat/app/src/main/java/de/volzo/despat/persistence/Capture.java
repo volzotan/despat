@@ -19,10 +19,10 @@ import java.util.Date;
 public class Capture {
 
     @PrimaryKey(autoGenerate = true)
-    private int cid;
+    private long cid;
 
     @ColumnInfo(name = "session_id")
-    private int sessionId;
+    private long sessionId;
 
     @ColumnInfo(name = "time")
     private Date recordingTime;
@@ -30,19 +30,19 @@ public class Capture {
     @ColumnInfo(name = "image_path")
     private File image;
 
-    public int getCid() {
+    public long getCid() {
         return cid;
     }
 
-    public void setCid(int cid) {
+    public void setCid(long cid) {
         this.cid = cid;
     }
 
-    public int getSessionId() {
+    public long getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(int sessionId) {
+    public void setSessionId(long sessionId) {
         this.sessionId = sessionId;
     }
 

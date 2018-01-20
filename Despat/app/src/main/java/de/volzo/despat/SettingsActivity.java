@@ -29,9 +29,9 @@ import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.ServerConnector;
 
-public class ConfigActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class SettingsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
-    public static final String TAG = ConfigActivity.class.getSimpleName();
+    public static final String TAG = SettingsActivity.class.getSimpleName();
 
     Activity activity;
 

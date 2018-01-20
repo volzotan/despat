@@ -12,7 +12,9 @@ import android.content.Context;
 
 @Database(entities = {  Status.class,
                         Session.class,
-                        Capture.class},
+                        Capture.class,
+                        Position.class,
+                        Event.class},
                         version = 1)
 
 @TypeConverters(RoomConverter.class)
