@@ -16,8 +16,11 @@ public interface CaptureDao {
     @Query("SELECT * FROM capture WHERE session_id = :sessionId")
     List<Capture> getAllBySession(long sessionId);
 
+    @Query("SELECT * FROM capture WHERE session_id = :sessionId ORDER BY recording_time DESC LIMIT 1")
+    Capture getLastFromSession(long sessionId);
+
     @Insert
-    void insertAll(Capture... captures);
+    void insert(Capture... captures);
 
     @Delete
     void delete(Capture capture);

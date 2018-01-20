@@ -18,7 +18,7 @@ public interface EventDao {
     List<Event> getAll();
 
     @Insert
-    void insertAll(Event... events);
+    void insert(Event... events);
 
     @Delete
     void delete(Event event);

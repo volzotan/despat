@@ -26,6 +26,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract StatusDao statusDao();
     public abstract SessionDao sessionDao();
     public abstract CaptureDao captureDao();
+    //public abstract PositionDao positionDao();
+    public abstract EventDao eventDao();
 
     public static AppDatabase getAppDatabase(Context context) {
         if (INSTANCE == null) {

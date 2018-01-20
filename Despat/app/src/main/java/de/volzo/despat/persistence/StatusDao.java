@@ -28,7 +28,7 @@ public interface StatusDao {
 //    Status findByName(String first, String last);
 
     @Insert
-    void insertAll(Status... statuses);
+    void insert(Status... statuses);
 
     @Delete
     void delete(Status status);

@@ -20,7 +20,7 @@ public interface SessionDao {
     int getNumberOfCaptures(long sessionId);
 
     @Insert
-    long[] insertAll(Session... sessions);
+    long[] insert(Session... sessions);
 
     @Delete
     void delete(Session session);

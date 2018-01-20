@@ -34,8 +34,10 @@ public class HeartbeatService extends JobService {
 
         Despat despat = ((Despat) getApplicationContext());
         SystemController systemController = despat.getSystemController();
-
         ImageRollover imgroll = new ImageRollover(this);
+
+        // TODO: check if the RecordingSession is valid
+        // (i.e. if the alarmManager was triggered always correctly)
 
         Status status = new Status();
 
