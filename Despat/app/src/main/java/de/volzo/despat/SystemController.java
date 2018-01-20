@@ -1,6 +1,8 @@
 package de.volzo.despat;
 
 import android.Manifest;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,6 +29,7 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
@@ -118,11 +121,11 @@ public class SystemController {
         // http://stackoverflow.com/questions/30090589
 
         final Window win = ((MainActivity) context).getWindow();
-        win.addFlags( WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+        win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON );
+                WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
     }
 
@@ -154,16 +157,32 @@ public class SystemController {
         int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        if(level == -1 || scale == -1) {
+        if (level == -1 || scale == -1) {
             return 50;
         }
 
-        return (int) (((float)level / (float)scale) * 100.0f);
+        return (int) (((float) level / (float) scale) * 100.0f);
     }
 
     public boolean getBatteryChargingState() {
         BatteryManager batteryManager = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
         return batteryManager.isCharging();
+    }
+
+    public void reboot() {
+//        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+//        devicePolicyManager.reboot(new ComponentName("de.volzo.despat", "despat")); // TODO
+
+        // TODO
+
+        try {
+            Runtime.getRuntime().exec(new String[]{"/system/bin/su","-c","reboot now"});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        PowerManager powerManger = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        powerManger.reboot(null);
     }
 
     // TEMP SENSOR

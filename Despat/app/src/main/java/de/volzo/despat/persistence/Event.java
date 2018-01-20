@@ -20,7 +20,7 @@ public class Event {
     private Date timestamp;
 
     @ColumnInfo(name = "type")
-    private int eventType;
+    private int type;
 
     @ColumnInfo(name = "payload")
     private String payload;
@@ -50,12 +50,12 @@ public class Event {
         this.timestamp = timestamp;
     }
 
-    public int getEventType() {
-        return eventType;
+    public int getType() {
+        return type;
     }
 
-    public void setEventType(int eventType) {
-        this.eventType = eventType;
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getPayload() {

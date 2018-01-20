@@ -147,7 +147,7 @@ public class RecordingSession {
             long maxDiff = Config.getShutterInterval(context) * 1000 + 3 * 1000;
             if (diff > maxDiff) {
                 Event event = new Event();
-                event.setEventType(Event.ERROR);
+                event.setType(Event.ERROR);
                 event.setPayload("irregular capture pattern");
                 EventDao eventDao = db.eventDao();
                 eventDao.insert(event);

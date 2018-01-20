@@ -24,7 +24,7 @@ public class Capture {
     @ColumnInfo(name = "session_id")
     private long sessionId;
 
-    @ColumnInfo(name = "time")
+    @ColumnInfo(name = "recording_time")
     private Date recordingTime;
 
     @ColumnInfo(name = "image_path")

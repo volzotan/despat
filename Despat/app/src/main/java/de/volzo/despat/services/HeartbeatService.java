@@ -64,7 +64,7 @@ public class HeartbeatService extends JobService {
 
         AppDatabase db = AppDatabase.getAppDatabase(despat);
         StatusDao statusDao = db.statusDao();
-        statusDao.insertAll(status);
+        statusDao.insert(status);
 
 //        ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
 

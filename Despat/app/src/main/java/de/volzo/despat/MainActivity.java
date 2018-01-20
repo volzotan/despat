@@ -145,6 +145,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onClick(View view) {
 
+//                Despat despat = Util.getDespat(act/*ivity);
+//                SystemController systemController = despat.getSystemController();
+//                systemController.reboot();*/
+
                 Intent killIntent = new Intent(activity, Orchestrator.class);
                 killIntent.putExtra("service", Broadcast.ALL_SERVICES);
                 killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
