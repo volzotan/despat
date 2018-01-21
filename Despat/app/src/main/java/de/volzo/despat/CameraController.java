@@ -396,6 +396,12 @@ public class CameraController {
                     break;
                 }
                 case STATE_WAITING_NON_PRECAPTURE: {
+                    if (Config.CAMERA_CONTROLLER_RELEASE_EARLY) {
+                        state = STATE_PICTURE_TAKEN;
+                        captureStillPicture();
+                        break;
+                    }
+
                     Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                     if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) { // TODO
                         state = STATE_PICTURE_TAKEN;

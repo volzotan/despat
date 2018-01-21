@@ -43,7 +43,7 @@
             android:screenOrientation="landscape">
         </activity>
 
-        <receiver android:name=".Orchestrator">
+        <receiver android:name=".services.Orchestrator">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.SCREEN_OFF" />

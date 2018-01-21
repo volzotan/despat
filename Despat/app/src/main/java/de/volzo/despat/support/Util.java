@@ -16,13 +16,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Date;
 
 import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
-import de.volzo.despat.Orchestrator;
 import de.volzo.despat.R;
-import de.volzo.despat.SystemController;
+import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Event;
+import de.volzo.despat.persistence.EventDao;
 
 /**
  * Created by volzotan on 16.08.17.
@@ -83,6 +85,19 @@ public class Util {
         bytesAvailable = (long) stat.getBlockSizeLong() * (long) stat.getAvailableBlocksLong();
 
         return bytesAvailable / (1024.f * 1024.f);
+    }
+
+    public static void saveEvent(Context context, int type, String payload) {
+
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        EventDao eventDao = db.eventDao();
+
+        Event event = new Event();
+        event.setTimestamp(Calendar.getInstance().getTime());
+        event.setType(type);
+        event.setPayload(payload);
+
+        eventDao.insert(event);
     }
 
     public static Despat getDespat(Context context) {

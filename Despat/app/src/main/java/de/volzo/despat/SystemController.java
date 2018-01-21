@@ -176,9 +176,10 @@ public class SystemController {
         // TODO
 
         try {
-            Runtime.getRuntime().exec(new String[]{"/system/bin/su","-c","reboot now"});
-        } catch (IOException e) {
-            e.printStackTrace();
+            Process proc = Runtime.getRuntime().exec(new String[]{"/system/bin/su", "-c", "reboot"});
+            proc.waitFor();
+        } catch (Exception ex) {
+            Log.e(TAG, "Error ", ex);
         }
 
         PowerManager powerManger = (PowerManager) context.getSystemService(Context.POWER_SERVICE);

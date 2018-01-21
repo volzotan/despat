@@ -34,6 +34,9 @@ public class ImageRollover {
             this.fileextension = suffix;
         }
 
+        // create directory
+        this.dir.mkdirs();
+
 //        float freeSpace = Util.getFreeSpaceOnDevice(dir);
 //        Log.d(TAG, "free space in " + dir.getAbsolutePath() + " : " + freeSpace + " MB");
     }
@@ -117,6 +120,7 @@ public class ImageRollover {
     public void run() {
         if (!Config.IMGROLL_DELETE_IF_FULL) {
             Log.d(TAG, "imageRollover is disabled.");
+            return;
         }
 
         Log.d(TAG, "imageRollover running");

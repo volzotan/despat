@@ -322,17 +322,17 @@ public class ServerConnector {
         public File image;
     }
 
-    public static class EventType {
-
-        public static final int INIT        = 0x10;
-        public static final int BOOT        = 0x11;
-        public static final int SHUTDOWN    = 0x12;
-
-        public static final int START       = 0x20;
-        public static final int STOP        = 0x21;
-
-        public static final int ERROR       = 0x30;
-    }
+//    public static class EventType {
+//
+//        public static final int INIT        = 0x10;
+//        public static final int BOOT        = 0x11;
+//        public static final int SHUTDOWN    = 0x12;
+//
+//        public static final int START       = 0x20;
+//        public static final int STOP        = 0x21;
+//
+//        public static final int ERROR       = 0x30;
+//    }
 
     public static class StatusType {
 

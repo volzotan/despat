@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +18,6 @@ import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +26,7 @@ import android.widget.ToggleButton;
 import java.io.File;
 import java.util.Calendar;
 
-import de.volzo.despat.persistence.Session;
+import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
@@ -39,6 +37,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
+    private static final int PERMISSION_REQUEST_CODE = 0x123;
 
     Despat despat;
     MainActivity activity = this;
@@ -58,9 +57,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         despat = ((Despat) getApplicationContext());
 
         if (!checkPermissionsAreGiven()) {
-            // TODO: find better way to resume as soon as permissions are given
-            return;
+            requestPermissions();
+        } else {
+            init();
         }
+    }
+
+    public void init() {
 
         Config.init(activity);
 
@@ -84,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         startStopCapturing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!Util.isServiceRunning(activity, ShutterService.class)) {
+                if (!RecordingSession.getInstance(activity).isActive()) { // if (!Util.isServiceRunning(activity, ShutterService.class)) {
                     Log.d(TAG, "startCapturing");
                     RecordingSession session = RecordingSession.getInstance(activity);
                     session.startRecordingSession(null);
@@ -101,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 }
             }
         });
-        if (!Util.isServiceRunning(activity, ShutterService.class)) {
+        if (!RecordingSession.getInstance(activity).isActive()) {
             startStopCapturing.setText("Start Capturing");
             startStopCapturing.setChecked(false);
         } else {
@@ -145,9 +148,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onClick(View view) {
 
-//                Despat despat = Util.getDespat(act/*ivity);
-//                SystemController systemController = despat.getSystemController();
-//                systemController.reboot();*/
+                // FIXME
+                Despat despat = Util.getDespat(activity);
+                SystemController systemController = despat.getSystemController();
+                systemController.reboot();
 
                 Intent killIntent = new Intent(activity, Orchestrator.class);
                 killIntent.putExtra("service", Broadcast.ALL_SERVICES);
@@ -244,7 +248,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        startCamera();
+        if (Config.START_CAMERA_ON_ACTIVITY_START) {
+            if (checkPermissionsAreGiven()) {
+                startCamera();
+            }
+        }
     }
 
     @Override
@@ -376,18 +384,34 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 ) {
-
-                ActivityCompat.requestPermissions(activity,
-                                new String[]{Manifest.permission.CAMERA,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                Manifest.permission.ACCESS_FINE_LOCATION},
-                        1337);
-
                 return false;
-
         } else {
             return true;
         }
     }
 
+    public void requestPermissions() {
+        ActivityCompat.requestPermissions(activity,
+                new String[]{Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    init();
+                } else {
+
+                    Log.w(TAG, "permissions denied by user");
+                }
+            }
+        }
+    }
 }

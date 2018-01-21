@@ -14,6 +14,7 @@ import de.volzo.despat.Despat;
 import de.volzo.despat.ImageRollover;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.SystemController;
+import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
@@ -62,11 +63,10 @@ public class ShutterService extends Service {
         final Despat despat = Util.getDespat(this);
         SystemController systemController = despat.getSystemController();
 
-        RecordingSession session = RecordingSession.getInstance(this);
-
-        Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + session.getImagesTaken());
-
         despat.acquireWakeLock();
+
+        RecordingSession session = RecordingSession.getInstance(this);
+        Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + session.getImagesTaken());
 
         // check if any images needs to be deleted to have enough free space
         // may be time-consuming. alternative place to run?
@@ -83,25 +83,27 @@ public class ShutterService extends Service {
 
             @Override
             public void cameraClosed() {
-                despat.releaseWakeLock();
-            }
+                // despat.releaseWakeLock();
 
+                Intent shutterServiceIntent = new Intent(despat, ShutterService.class);
+                stopService(shutterServiceIntent);
+            }
         };
 
         try {
             if (camera == null || camera.isDead()) {
+                Log.d(TAG, "CamController created");
                 camera = new CameraController(this, callback, null);
                 despat.setCamera(camera);
             } else {
+                Log.d(TAG, "CamController already up and running");
                 camera.captureImages();
             }
 
-        } catch (CameraAccessException cae) {
-            Log.e(TAG, "taking photo failed", cae);
-            despat.releaseWakeLock();
-            // throw cae;
         } catch (Exception e) {
             Log.e(TAG, "taking photo failed", e);
+
+            Util.saveEvent(this, Event.EventType.ERROR, "shutter failed: " + e.getMessage());
             despat.releaseWakeLock();
             // throw e;
         }

@@ -1,4 +1,4 @@
-package de.volzo.despat;
+package de.volzo.despat.services;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -14,10 +14,8 @@ import android.util.Log;
 import java.io.File;
 import java.util.List;
 
-import de.volzo.despat.services.HeartbeatService;
-import de.volzo.despat.services.RecognitionService;
-import de.volzo.despat.services.ShutterService;
-import de.volzo.despat.services.UploadService;
+import de.volzo.despat.RecordingSession;
+import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
@@ -51,10 +49,7 @@ public class Orchestrator extends BroadcastReceiver {
         if (action != null && action.length() > 0) {
             switch (action) {
                 case "android.intent.action.BOOT_COMPLETED":
-
-                    ServerConnector serverConnector = new ServerConnector(context);
-                    serverConnector.sendEvent(ServerConnector.EventType.BOOT, null);
-
+                    Util.saveEvent(context, Event.EventType.BOOT, null);
                     break;
                 case "android.intent.action.SCREEN_OFF":
                     // TODO
@@ -166,15 +161,13 @@ public class Orchestrator extends BroadcastReceiver {
 
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
             context.startService(shutterServiceIntent);
+        } else {
+//            Intent triggerIntent = new Intent();
+//            triggerIntent.setAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
+//            context.sendBroadcast(triggerIntent);
 
-            // server event
-            ServerConnector serverConnector = new ServerConnector(context);
-            serverConnector.sendEvent(ServerConnector.EventType.START, null);
+            Log.wtf(TAG, "SHUTTER RUNNING OVERTIME");
         }
-
-        Intent triggerIntent = new Intent();
-        triggerIntent.setAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
-        context.sendBroadcast(triggerIntent);
 
         // trigger the next invocation
         long now = System.currentTimeMillis(); // alarm is set right away
@@ -212,10 +205,6 @@ public class Orchestrator extends BroadcastReceiver {
 
         // Notification
         Util.stopNotification(context);
-
-        // send event
-        ServerConnector serverConnector = new ServerConnector(context);
-        serverConnector.sendEvent(ServerConnector.EventType.STOP, null);
     }
 
     // ----------------------------------------------------------------------------------------------------

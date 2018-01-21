@@ -12,7 +12,9 @@ import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
 
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Config;
+import de.volzo.despat.support.Util;
 import de.volzo.despat.web.ServerConnector;
 
 @AcraCore(buildConfigClass = BuildConfig.class)
@@ -42,8 +44,10 @@ public class Despat extends Application {
         systemController = new SystemController(this);
 
         // send APPSTART event
-        ServerConnector serverConnector = new ServerConnector(this);
-        serverConnector.sendEvent(ServerConnector.EventType.INIT, null);
+//        ServerConnector serverConnector = new ServerConnector(this);
+//        serverConnector.sendEvent(ServerConnector.EventType.INIT, null);
+
+        Util.saveEvent(this, Event.EventType.BOOT, null);
     }
 
     @Override
@@ -53,14 +57,12 @@ public class Despat extends Application {
         Log.i(TAG, "despat terminate.");
 
         closeCamera();
-        ServerConnector serverConnector = new ServerConnector(this);
-        serverConnector.sendEvent(ServerConnector.EventType.SHUTDOWN, null);
-    }
 
-//    public AppDatabase getDb() {
-//        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-name").build();
-//        return db;
-//    }
+//        ServerConnector serverConnector = new ServerConnector(this);
+//        serverConnector.sendEvent(ServerConnector.EventType.SHUTDOWN, null);
+
+        Util.saveEvent(this, Event.EventType.SHUTDOWN, null);
+    }
 
     public void acquireWakeLock() {
         Log.d(TAG, "acquiring wake lock");
@@ -87,7 +89,7 @@ public class Despat extends Application {
             if (wakeLock.isHeld()){
                 wakeLock.release();
             } else{
-                Log.d(TAG, "wake lock requested while still held");
+                Log.d(TAG, "wake lock already released");
             }
         }
     }
