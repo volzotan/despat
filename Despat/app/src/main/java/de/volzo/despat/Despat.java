@@ -47,7 +47,7 @@ public class Despat extends Application {
 //        ServerConnector serverConnector = new ServerConnector(this);
 //        serverConnector.sendEvent(ServerConnector.EventType.INIT, null);
 
-        Util.saveEvent(this, Event.EventType.BOOT, null);
+        Util.saveEvent(this, Event.EventType.INIT, null);
     }
 
     @Override
@@ -92,6 +92,21 @@ public class Despat extends Application {
                 Log.d(TAG, "wake lock already released");
             }
         }
+    }
+
+    public void criticalErrorReboot() {
+        Log.i(TAG, "CRITICAL ERROR REBOOT");
+
+        if (!Config.REBOOT_ON_CRITICAL_ERROR) {
+            Log.i(TAG, "reboot aborted");
+            return;
+        }
+
+        Util.backupLogcat(null);
+
+        SystemController systemController = getSystemController();
+        Config.setResumeAfterReboot(this, true);
+        systemController.reboot();
     }
 
     public void setCamera(CameraController cameraController) {

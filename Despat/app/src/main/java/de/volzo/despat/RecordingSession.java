@@ -116,6 +116,40 @@ public class RecordingSession {
         Util.saveEvent(context, Event.EventType.START, null);
     }
 
+    public void resumeRecordingSession() throws Exception {
+        if (session != null) {
+            throw new Exception("Session still recording");
+        }
+
+        Despat despat = Util.getDespat(context);
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+
+        session = sessionDao.getLast();
+
+        if (session == null) {
+            Log.w(TAG, "no session to resume");
+            return;
+        }
+
+        if (session.getEnd() != null) {
+            Log.d(TAG, "session resume, end date reset");
+            session.setEnd(null);
+        }
+        session.setResumed(true);
+
+        sessionDao.insert(session);
+
+        Log.d(TAG, "resume RecordingSession [" + session.getSessionName() + "]");
+
+        Intent shutterIntent = new Intent(context, Orchestrator.class);
+        shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
+        shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
+        context.sendBroadcast(shutterIntent);
+
+        Util.saveEvent(context, Event.EventType.RESTART, null);
+    }
+
     public void stopRecordingSession() throws NotRecordingException {
         if (!isActive()) throw new NotRecordingException();
 

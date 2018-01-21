@@ -64,8 +64,12 @@ public class Event {
 
         public static final int START           = 40;
         public static final int STOP            = 41;
+        public static final int RESTART         = 42;
 
         public static final int ERROR           = 50;
         public static final int SCHEDULE_GLITCH = 51;
+
+        public static final int DISPLAY_ON      = 60;
+        public static final int DISPLAY_OFF     = 61;
     }
 }

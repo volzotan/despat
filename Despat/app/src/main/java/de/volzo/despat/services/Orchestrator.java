@@ -40,6 +40,14 @@ public class Orchestrator extends BroadcastReceiver {
 
         this.context = context;
 
+//        try { // backup logcat entries
+//            Util.backupLogcat(RecordingSession.getInstance(context).getSessionName());
+//        } catch (RecordingSession.NotRecordingException e) {
+//            Util.backupLogcat(null);
+//        }
+
+        Util.backupLogcat(null);
+
         String action       = intent.getAction();
         String service      = intent.getStringExtra("service");
         int operation       = intent.getIntExtra("operation", -1);
@@ -50,12 +58,28 @@ public class Orchestrator extends BroadcastReceiver {
             switch (action) {
                 case "android.intent.action.BOOT_COMPLETED":
                     Util.saveEvent(context, Event.EventType.BOOT, null);
+
+                    boolean resume = Config.getResumeAfterReboot(context);
+
+                    if (resume) {
+                        RecordingSession session = RecordingSession.getInstance(context);
+
+                        try {
+                            session.resumeRecordingSession();
+                        } catch (Exception e) {
+                            Log.e(TAG, "resuming failed", e);
+                            // TODO: simply start a new one? in which cases could resuming fail? (empty db)
+                        }
+
+                        Config.setResumeAfterReboot(context, false);
+                    }
+
                     break;
                 case "android.intent.action.SCREEN_OFF":
-                    // TODO
+                    Util.saveEvent(context, Event.EventType.DISPLAY_OFF, null);
                     break;
                 case "android.intent.action.SCREEN_ON":
-                    // TODO
+                    Util.saveEvent(context, Event.EventType.DISPLAY_ON, null);
                     break;
 
                 case Broadcast.PICTURE_TAKEN:
@@ -155,10 +179,6 @@ public class Orchestrator extends BroadcastReceiver {
 
         // start the Shutter Service
         if (!Util.isServiceRunning(context, ShutterService.class)) {
-
-            // reset the counter
-//            Config.resetImagesTaken(context);
-
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
             context.startService(shutterServiceIntent);
         } else {
@@ -166,6 +186,7 @@ public class Orchestrator extends BroadcastReceiver {
 //            triggerIntent.setAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
 //            context.sendBroadcast(triggerIntent);
 
+            Util.saveEvent(context, Event.EventType.ERROR, "shutter running overtime");
             Log.wtf(TAG, "SHUTTER RUNNING OVERTIME");
         }
 

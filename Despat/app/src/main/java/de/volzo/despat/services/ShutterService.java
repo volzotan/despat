@@ -104,6 +104,10 @@ public class ShutterService extends Service {
             Log.e(TAG, "taking photo failed", e);
 
             Util.saveEvent(this, Event.EventType.ERROR, "shutter failed: " + e.getMessage());
+
+            // critical error
+            despat.criticalErrorReboot();
+
             despat.releaseWakeLock();
             // throw e;
         }

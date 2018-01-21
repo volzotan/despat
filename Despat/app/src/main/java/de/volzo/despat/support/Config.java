@@ -17,15 +17,18 @@ public class Config {
     public static final String TAG = Config.class.getSimpleName();
 
     public static final String DATEFORMAT                       = "yyyy-MM-dd HH:mm:ss.SSS";
+    public static final String DATEFORMAT_LOGFILE               = "yyyy-MM-dd"; // only used for file name
     public static final String IMAGE_FILEEXTENSION              = ".jpg";
     public static final float IMGROLL_FREE_SPACE_THRESHOLD      = 300; // in MB
     public static final boolean IMGROLL_DELETE_IF_FULL          = false;
     public static final boolean PHONE_HOME                      = true;
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
     public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
+    public static final boolean REBOOT_ON_CRITICAL_ERROR        = true;
     public static final int NUMBER_OF_BURST_IMAGES              = 2;
     public static final long WAKELOCK_MAX_LIFETIME              = 3000;
     public static final String ACRA_REPORT_URL                  = "http://zoltep.de/report";
+    public static final File LOGCAT_DIR                         = new File(Environment.getExternalStorageDirectory(), ("despat"));
 
     // DEFAULT_SHUTTER_INTERVAL should not be shorter than 6s (5s is android minimum
     // and a few extra ms are needed for compensation of scheduling irregularities)
@@ -34,6 +37,7 @@ public class Config {
     private static final long DEFAULT_UPLOAD_INTERVAL           = 15 * 60 * 1000L;
     private static final File DEFAULT_IMAGE_FOLDER              = new File(Environment.getExternalStorageDirectory(), ("despat"));
     private static final String DEFAULT_SERVER_ADDRESS          = "http://zoltep.de";
+    private static final boolean DEFAULT_RESUME_AFTER_REBOOT    = false;
 
     private static final String SHAREDPREFNAME                  = "de.volzo.despat.DEFAULT_PREFERENCES";
 
@@ -44,6 +48,7 @@ public class Config {
     public static final String KEY_SERVER_ADDRESS               = "de.volzo.despat.serverAddress";
     public static final String KEY_HEARTBEAT_INTERVAL           = "de.volzo.despat.heartbeatInterval";
     public static final String KEY_UPLOAD_INTERVAL              = "de.volzo.despat.uploadInterval";
+    public static final String KEY_RESUME_AFTER_REBOOT          = "de.volzo.despat.resumeAfterReboot";
 
     /*
     image folder
@@ -157,6 +162,13 @@ public class Config {
         editor.apply();
     }
 
+    private static void setProperty(Context context, String key, boolean value) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
     private static String getProperty(Context context, String key, String defaultValue) {
         SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
         return settings.getString(key, defaultValue);
@@ -170,6 +182,11 @@ public class Config {
     private static long getPropertyLong(Context context, String key, long defaultValue) {
         SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
         return settings.getLong(key, defaultValue);
+    }
+
+    private static boolean getPropertyBoolean(Context context, String key, boolean defaultValue) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        return settings.getBoolean(key, defaultValue);
     }
 
     public static String getDeviceName(Context context) {
@@ -218,5 +235,13 @@ public class Config {
 
     public static void setUploadInterval(Context context, String uploadInterval) {
         setProperty(context, KEY_UPLOAD_INTERVAL, uploadInterval);
+    }
+
+    public static boolean getResumeAfterReboot(Context context) {
+        return getPropertyBoolean(context, KEY_RESUME_AFTER_REBOOT, DEFAULT_RESUME_AFTER_REBOOT);
+    }
+
+    public static void setResumeAfterReboot(Context context, boolean resumeAfterReboot) {
+        setProperty(context, KEY_UPLOAD_INTERVAL, resumeAfterReboot);
     }
 }

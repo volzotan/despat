@@ -7,21 +7,32 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.os.StatFs;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
 import de.volzo.despat.R;
+import de.volzo.despat.SystemController;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
@@ -102,6 +113,74 @@ public class Util {
 
     public static Despat getDespat(Context context) {
         return ((Despat) context.getApplicationContext());
+    }
+
+
+    public static void clearLogcat() {
+        try {
+            Process process = Runtime.getRuntime().exec("logcat -c");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void backupLogcat(String sessionName) {
+
+        File appDirectory = Config.LOGCAT_DIR;
+        File logDirectory = new File(appDirectory + "/log");
+        File logFile = null;
+
+        if (sessionName != null) {
+            logFile = new File(logDirectory, "logcat_" + sessionName + ".txt");
+        } else {
+            DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT_LOGFILE, new Locale("de", "DE"));
+            logFile = new File(logDirectory, "logcat_" + dateFormat.format(Calendar.getInstance().getTime()) + ".txt");
+        }
+
+        // create app folder
+        if (!appDirectory.exists()) {
+            appDirectory.mkdir();
+        }
+
+        // create log folder
+        if (!logDirectory.exists()) {
+            logDirectory.mkdir();
+        }
+
+        // clear the previous logcat and then write the new one to the file
+//        try {
+//            Process process = Runtime.getRuntime().exec("logcat -c");
+//            process = Runtime.getRuntime().exec("logcat -f " + logFile); // + " *:S MyActivity:D MyActivity2:D");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        BufferedReader bufferedReader = null;
+        BufferedWriter bufferedWriter = null;
+        try {
+            Process process = Runtime.getRuntime().exec("logcat -d");
+
+            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            bufferedWriter = new BufferedWriter(new FileWriter(logFile, true));
+
+            String line = "";
+            while ((line = bufferedReader.readLine()) != null) {
+                bufferedWriter.write(line);
+                bufferedWriter.write("\n");
+            }
+
+        } catch (IOException e) {
+            Log.w("logcatBackup", "IOException", e);
+        } finally {
+            try {
+                if (bufferedReader != null) bufferedReader.close();
+                if (bufferedWriter != null) bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        clearLogcat();
     }
 
     public static String getHumanReadableTimediff(Date d1, Date d2) {

@@ -19,6 +19,9 @@ public interface SessionDao {
     @Query("SELECT * FROM session")
     List<Session> getAll();
 
+    @Query("SELECT * FROM session ORDER BY start DESC LIMIT 1")
+    Session getLast();
+
     @Query("SELECT COUNT(*) FROM capture WHERE session_id = :sessionId")
     int getNumberOfCaptures(long sessionId);
 

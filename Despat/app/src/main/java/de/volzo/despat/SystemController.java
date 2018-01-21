@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
+import eu.chainfire.libsuperuser.Shell;
+
 import static android.content.Context.BATTERY_SERVICE;
 
 /**
@@ -173,17 +175,23 @@ public class SystemController {
 //        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
 //        devicePolicyManager.reboot(new ComponentName("de.volzo.despat", "despat")); // TODO
 
-        // TODO
+        Shell.SU.run("reboot");
 
-        try {
-            Process proc = Runtime.getRuntime().exec(new String[]{"/system/bin/su", "-c", "reboot"});
-            proc.waitFor();
-        } catch (Exception ex) {
-            Log.e(TAG, "Error ", ex);
-        }
-
-        PowerManager powerManger = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        powerManger.reboot(null);
+//        try {
+//            Runtime.getRuntime().exec(new String[]{"/system/xbin/su","-c","reboot now"});
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        try {
+//            Process proc = Runtime.getRuntime().exec(new String[]{"/system/bin/su", "-c", "reboot"});
+//            proc.waitFor();
+//        } catch (Exception ex) {
+//            Log.e(TAG, "Error ", ex);
+//        }
+//
+//        PowerManager powerManger = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+//        powerManger.reboot(null);
     }
 
     // TEMP SENSOR

@@ -49,10 +49,10 @@ public class Session {
     private Date end;
 
     @ColumnInfo(name = "latitude")
-    private String latitude;
+    private double latitude;
 
     @ColumnInfo(name = "longitude")
-    private String longitude;
+    private double longitude;
 
     @ColumnInfo(name = "exclusion_image", typeAffinity = ColumnInfo.BLOB)
     private byte[] exclusionImage;
@@ -60,16 +60,24 @@ public class Session {
     @ColumnInfo(name = "compressed_image")
     private File compressedImage;
 
+    @ColumnInfo(name = "resumed")
+    private boolean resumed = false;
+
 
 
     public Location getLocation() {
-        return null; // TODO
+        Location loc = new Location("despatProvider");
+        loc.setLatitude(getLatitude());
+        loc.setLongitude(getLongitude());
+        return loc;
     }
 
     public void setLocation(Location location) {
-        // TODO
-    }
+        if (location == null) return;
 
+        setLatitude(location.getLatitude());
+        setLongitude(location.getLongitude());
+    }
 
     public long getSid() {
         return sid;
@@ -103,19 +111,19 @@ public class Session {
         this.end = end;
     }
 
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
@@ -133,5 +141,13 @@ public class Session {
 
     public void setCompressedImage(File compressedImage) {
         this.compressedImage = compressedImage;
+    }
+
+    public boolean isResumed() {
+        return resumed;
+    }
+
+    public void setResumed(boolean resumed) {
+        this.resumed = resumed;
     }
 }
