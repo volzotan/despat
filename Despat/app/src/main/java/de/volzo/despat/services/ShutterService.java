@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.hardware.camera2.CameraAccessException;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -126,10 +127,16 @@ public class ShutterService extends Service {
 
             @Override
             public void cameraClosed() {
-                // despat.releaseWakeLock();
 
-                Intent shutterServiceIntent = new Intent(despat, ShutterService.class);
-                stopService(shutterServiceIntent);
+                // Nexus 5: nasty camera-close-bug workaround
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent shutterServiceIntent = new Intent(despat, ShutterService.class);
+                        stopService(shutterServiceIntent);
+                    }
+                }, 500);
             }
         };
 
@@ -142,7 +149,6 @@ public class ShutterService extends Service {
                 Log.d(TAG, "CamController already up and running");
                 camera.captureImages();
             }
-
         } catch (Exception e) {
             Log.e(TAG, "taking photo failed", e);
 
@@ -152,7 +158,6 @@ public class ShutterService extends Service {
             despat.criticalErrorReboot();
 
             despat.releaseWakeLock();
-            // throw e;
         }
     }
 
@@ -171,15 +176,4 @@ public class ShutterService extends Service {
         Log.d(TAG, "shutterService destroyed");
     }
 
-//    public static boolean isRunning(Context context) {
-//
-//        Intent shutterIntent = new Intent(context, Orchestrator.class);
-//        // TODO: not sure if really needed:
-//        shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
-//        shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
-//
-//        boolean alarmUp = (PendingIntent.getBroadcast(context, REQUEST_CODE, shutterIntent, PendingIntent.FLAG_NO_CREATE) != null);
-//
-//        return alarmUp;
-//    }
 }
