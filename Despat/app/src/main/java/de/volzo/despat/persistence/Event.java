@@ -58,13 +58,14 @@ public class Event {
     }
 
     public class EventType {
-        public static final int INIT        = 10;
-        public static final int BOOT        = 20;
-        public static final int SHUTDOWN    = 30;
+        public static final int INIT            = 10;
+        public static final int BOOT            = 20;
+        public static final int SHUTDOWN        = 30;
 
-        public static final int START       = 40;
-        public static final int STOP        = 41;
+        public static final int START           = 40;
+        public static final int STOP            = 41;
 
-        public static final int ERROR       = 50;
+        public static final int ERROR           = 50;
+        public static final int SCHEDULE_GLITCH = 51;
     }
 }

@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
+import android.media.Image;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -116,6 +117,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         toggleCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                ImageView iv = (ImageView) findViewById(R.id.imageView);
+                iv.setImageDrawable(null);
 
                 CameraController camera = despat.getCamera();
 
