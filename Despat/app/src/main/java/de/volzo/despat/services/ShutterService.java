@@ -1,17 +1,26 @@
 package de.volzo.despat.services;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.hardware.camera2.CameraAccessException;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
 import de.volzo.despat.ImageRollover;
+import de.volzo.despat.MainActivity;
+import de.volzo.despat.R;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.persistence.Event;
@@ -26,7 +35,10 @@ import de.volzo.despat.support.Util;
 public class ShutterService extends Service {
 
     public static final String TAG = ShutterService.class.getSimpleName();
-    public static final int REQUEST_CODE = 0x1200;
+    public static final int REQUEST_CODE                = 0x1200;
+    public static final int FOREGROUND_NOTIFICATION_ID  = 0x0500;
+
+    Timer timer;
 
     public ShutterService() {}
 
@@ -41,12 +53,43 @@ public class ShutterService extends Service {
 
         Log.d(TAG, "SHUTTER SERVICE invoked");
 
+        final Context context = this;
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification notification = new Notification.Builder(context.getApplicationContext())
+                .setContentTitle("despat Shutter Service")
+                .setContentText("active")
+                .setSmallIcon(R.drawable.ic_notification)
+                //.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setContentIntent(pendingIntent)
+                .setTicker("ticker text")
+                .setPriority(Notification.PRIORITY_HIGH)
+                .build();
+
+        startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
         registerReceiver(broadcastReceiver, filter);
 
         // start and release shutter
         releaseShutter();
+
+        // watchdog: Service must be dead 5 seconds after start
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.wtf(TAG, "SHUTTER SERVICE WATCHDOG KILL");
+                Util.saveEvent(context, Event.EventType.ERROR, "ShutterService: watchdog kill");
+
+                Intent shutterServiceIntent = new Intent(context, ShutterService.class);
+                context.stopService(shutterServiceIntent);
+            }
+        }, 5000);
 
         return START_NOT_STICKY;
     }
@@ -117,10 +160,13 @@ public class ShutterService extends Service {
     public void onDestroy() {
         unregisterReceiver(broadcastReceiver);
 
+        timer.cancel();
+
         Despat despat = ((Despat) getApplicationContext());
+        despat.closeCamera();// TODO: close camera?
         despat.releaseWakeLock();
 
-        // TODO: close camera?
+        stopForeground(true);
 
         Log.d(TAG, "shutterService destroyed");
     }

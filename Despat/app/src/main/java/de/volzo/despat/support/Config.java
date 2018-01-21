@@ -24,7 +24,7 @@ public class Config {
     public static final boolean PHONE_HOME                      = true;
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
     public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
-    public static final boolean REBOOT_ON_CRITICAL_ERROR        = true;
+    public static final boolean REBOOT_ON_CRITICAL_ERROR        = false;
     public static final int NUMBER_OF_BURST_IMAGES              = 2;
     public static final long WAKELOCK_MAX_LIFETIME              = 3000;
     public static final String ACRA_REPORT_URL                  = "http://zoltep.de/report";

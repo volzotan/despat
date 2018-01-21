@@ -165,6 +165,8 @@ public class Util {
 
             String line = "";
             while ((line = bufferedReader.readLine()) != null) {
+                if (line.contains("beginning of main")) continue;
+
                 bufferedWriter.write(line);
                 bufferedWriter.write("\n");
             }
