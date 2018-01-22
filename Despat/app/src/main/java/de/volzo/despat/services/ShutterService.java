@@ -90,7 +90,7 @@ public class ShutterService extends Service {
                 Intent shutterServiceIntent = new Intent(context, ShutterService.class);
                 context.stopService(shutterServiceIntent);
             }
-        }, 5000);
+        }, Config.SHUTTER_SERVICE_MAX_LIFETIME);
 
         return START_NOT_STICKY;
     }
@@ -155,7 +155,7 @@ public class ShutterService extends Service {
             Util.saveEvent(this, Event.EventType.ERROR, "shutter failed: " + e.getMessage());
 
             // critical error
-            despat.criticalErrorReboot();
+            if (Config.REBOOT_ON_CRITICAL_ERROR) despat.criticalErrorReboot();
 
             despat.releaseWakeLock();
         }

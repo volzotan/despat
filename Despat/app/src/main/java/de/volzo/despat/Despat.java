@@ -97,12 +97,7 @@ public class Despat extends Application {
     public void criticalErrorReboot() {
         Log.i(TAG, "CRITICAL ERROR REBOOT");
 
-        if (!Config.REBOOT_ON_CRITICAL_ERROR) {
-            Log.i(TAG, "reboot aborted");
-            return;
-        }
-
-        Util.backupLogcat(null);
+        if (Config.BACKUP_LOGCAT) Util.backupLogcat(null);
 
         SystemController systemController = getSystemController();
         Config.setResumeAfterReboot(this, true);

@@ -25,9 +25,13 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
@@ -235,6 +239,61 @@ public class Util {
 
         return sb.toString();
     }
+
+    public static String getMostlyUniqueRandomString(Context context) {
+        List<String> colors = new ArrayList<String>();
+        List<String> animals = new ArrayList<String>();
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(context.getAssets().open("colors.txt"), "UTF-8"));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                //process line
+                animals.add(line);
+            }
+        } catch (IOException e) {
+
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        try {
+            reader = new BufferedReader(new InputStreamReader(context.getAssets().open("animals.txt"), "UTF-8"));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                //process line
+                animals.add(line);
+            }
+        } catch (IOException e) {
+
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        if (colors == null || animals == null || colors.size() < 10 || animals.size() < 10) {
+            return UUID.randomUUID().toString();
+        }
+
+        int r1 = ThreadLocalRandom.current().nextInt(0, colors.size());
+        int r2 = ThreadLocalRandom.current().nextInt(0, animals.size());
+
+        return new String(colors.get(r1) + " " + animals.get(r2));
+    }
+
+
     // ---
 
     // taken from the apache commons io library

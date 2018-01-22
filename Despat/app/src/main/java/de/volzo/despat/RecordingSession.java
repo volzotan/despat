@@ -75,7 +75,7 @@ public class RecordingSession {
 
         if (sessionName == null || sessionName.isEmpty()) {
             // TODO: Do the animal name thingy here
-            sessionName = UUID.randomUUID().toString();
+            sessionName = Util.getMostlyUniqueRandomString(context);
         }
 
         Log.d(TAG, "init new RecordingSession [" + sessionName + "]");

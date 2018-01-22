@@ -46,7 +46,7 @@ public class Orchestrator extends BroadcastReceiver {
 //            Util.backupLogcat(null);
 //        }
 
-        Util.backupLogcat(null);
+        if (Config.BACKUP_LOGCAT) Util.backupLogcat(null);
 
         String action       = intent.getAction();
         String service      = intent.getStringExtra("service");

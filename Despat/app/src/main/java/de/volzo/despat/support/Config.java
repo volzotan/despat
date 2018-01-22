@@ -17,18 +17,26 @@ public class Config {
     public static final String TAG = Config.class.getSimpleName();
 
     public static final String DATEFORMAT                       = "yyyy-MM-dd HH:mm:ss.SSS";
-    public static final String DATEFORMAT_LOGFILE               = "yyyy-MM-dd"; // only used for file name
     public static final String IMAGE_FILEEXTENSION              = ".jpg";
+
     public static final float IMGROLL_FREE_SPACE_THRESHOLD      = 300; // in MB
     public static final boolean IMGROLL_DELETE_IF_FULL          = false;
+
     public static final boolean PHONE_HOME                      = true;
-    public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
+
+    public static final boolean START_CAMERA_ON_ACTIVITY_START  = true;
     public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
-    public static final boolean REBOOT_ON_CRITICAL_ERROR        = false;
     public static final int NUMBER_OF_BURST_IMAGES              = 2;
-    public static final long WAKELOCK_MAX_LIFETIME              = 3000;
+    public static final long WAKELOCK_MAX_LIFETIME              = 5000;
+    public static final long SHUTTER_SERVICE_MAX_LIFETIME       = 4000;
+
     public static final String ACRA_REPORT_URL                  = "http://zoltep.de/report";
+
+    public static final boolean BACKUP_LOGCAT                   = false;
     public static final File LOGCAT_DIR                         = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final String DATEFORMAT_LOGFILE               = "yyyy-MM-dd"; // only used for file name
+
+    public static final boolean REBOOT_ON_CRITICAL_ERROR        = false;
 
     // DEFAULT_SHUTTER_INTERVAL should not be shorter than 6s (5s is android minimum
     // and a few extra ms are needed for compensation of scheduling irregularities)
