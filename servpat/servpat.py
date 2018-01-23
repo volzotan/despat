@@ -3,7 +3,7 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 import sqlite3
 import sys, os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DATEFORMAT_INPUT    = "%Y-%m-%d %H:%M:%S.%f"
 DATEFORMAT_STORE    = "%Y-%m-%d %H:%M:%S.%f"
@@ -54,10 +54,14 @@ def device(device_id):
 
     device_status = query_db("SELECT * FROM status WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC", (device_id,))
 
+    # TODO: add some serious filtering
+    now = datetime.now()
+    comp = now - timedelta(days=3)
+    graph_status = query_db("SELECT * FROM status WHERE deviceid LIKE (?) AND timestamp > (?) ORDER BY datetime(timestamp) DESC", (device_id, comp))
+    graph_status = rows_to_list(graph_status)
+
     cur = db.execute("SELECT * FROM uploads WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC LIMIT 4", (device_id,))
     device_uploads = cur.fetchall()
-
-    graph_status = rows_to_list(device_status)
 
     return render_template("device.html", graph_status=graph_status, data_status=device_status, data_uploads=device_uploads, page_title=device_id)
 

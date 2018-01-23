@@ -3,8 +3,9 @@
 
 <h3><span class="page-title">{{ page_title }}</span></h3>
 
-<svg class="graph-battery" width="400" height="250"></svg>
-<svg class="graph-memory" width="400" height="250"></svg>
+<svg class="graph-positions" width="360" height="240"></svg>
+<svg class="graph-battery" width="360" height="240"></svg>
+<svg class="graph-memory" width="360" height="240"></svg>
 
 <script>
     var graph_status = {{ graph_status | safe }};
@@ -18,13 +19,13 @@
       <th>device id</th>
       <th>timestamp</th>
       <th>device name</th>
-      <th>images</br>taken</th>
-      <th>images</br>in memory</th>
-      <th>free space</br>int</th>
-      <th>free space</br>ext</th>
-      <th>battery</br>int</th>
+      <th class="text-right">images</br>taken</th>
+      <th class="text-right">images</br>in memory</th>
+      <th class="text-right">free space</br>int</th>
+      <th class="text-right">free space</br>ext</th>
+      <th class="text-right">battery</br>int</th>
       <!-- <th>battery</br>ext</th> -->
-      <th>state</br>charging</th>
+      <th class="text-right">state</br>charging</th>
     </tr>
   </thead>
   <tbody>
