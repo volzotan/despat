@@ -1,6 +1,8 @@
 package de.volzo.despat;
 
 import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -64,6 +66,44 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
     }
 
+    // The authority for the sync adapter's content provider
+    public static final String AUTHORITY = "com.example.android.datasync.provider";
+    // An account type, in the form of a domain name
+    public static final String ACCOUNT_TYPE = "example.com";
+    // The account name
+    public static final String ACCOUNT = "dummyaccount";
+    // Instance fields
+    Account mAccount;
+
+    public static Account CreateSyncAccount(Context context) {
+        // Create the account type and default account
+        Account newAccount = new Account(
+                ACCOUNT, ACCOUNT_TYPE);
+        // Get an instance of the Android account manager
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(
+                        ACCOUNT_SERVICE);
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call context.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+        } else {
+            /*
+             * The account exists or some other error occurred. Log this, report it,
+             * or handle it internally.
+             */
+        }
+
+        return newAccount;
+    }
+
     public void init() {
 
         Config.init(activity);
@@ -84,6 +124,15 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 
+
+        Button btConfigure = (Button) findViewById(R.id.bt_configure);
+        btConfigure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(activity, ConfigureActivity.class);
+                startActivity(intent);
+            }
+        });
         final ToggleButton startStopCapturing = (ToggleButton) findViewById(R.id.bt_startStopCapturing);
         startStopCapturing.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -305,6 +354,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    public void stopCamera() {
+        // do not close Camera if shutterService is running
+
+        // TODO
     }
 
     public void takePhoto() {

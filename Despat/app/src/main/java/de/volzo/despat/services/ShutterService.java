@@ -168,7 +168,7 @@ public class ShutterService extends Service {
         timer.cancel();
 
         Despat despat = ((Despat) getApplicationContext());
-        despat.closeCamera();// TODO: close camera?
+        despat.closeCamera();
         despat.releaseWakeLock();
 
         stopForeground(true);

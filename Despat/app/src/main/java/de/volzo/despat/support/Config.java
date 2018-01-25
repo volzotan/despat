@@ -32,7 +32,7 @@ public class Config {
 
     public static final String ACRA_REPORT_URL                  = "http://zoltep.de/report";
 
-    public static final boolean BACKUP_LOGCAT                   = false;
+    public static final boolean BACKUP_LOGCAT                   = true;
     public static final File LOGCAT_DIR                         = new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final String DATEFORMAT_LOGFILE               = "yyyy-MM-dd"; // only used for file name
 
