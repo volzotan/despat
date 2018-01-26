@@ -12,13 +12,13 @@ import java.io.File;
  */
 
 @Entity(foreignKeys = @ForeignKey(  entity = Capture.class,
-                                    parentColumns = "cid",
+                                    parentColumns = "id",
                                     childColumns = "capture_id"))
 
 public class Position {
 
     @PrimaryKey(autoGenerate = true)
-    private long pid;
+    private long id;
 
     @ColumnInfo(name = "capture_id")
     private long captureId;
@@ -35,12 +35,12 @@ public class Position {
     @ColumnInfo(name = "longitude")
     private String longitude;
 
-    public long getPid() {
-        return pid;
+    public long getId() {
+        return id;
     }
 
-    public void setPid(long pid) {
-        this.pid = pid;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public long getCaptureId() {

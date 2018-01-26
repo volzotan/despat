@@ -7,6 +7,18 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.util.Log;
+
+import com.android.volley.NetworkResponse;
+
+import java.util.List;
+
+import de.volzo.despat.Despat;
+import de.volzo.despat.MainActivity;
+import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Status;
+import de.volzo.despat.persistence.StatusDao;
+import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 25.01.18.
@@ -14,9 +26,10 @@ import android.os.Bundle;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
-    // Global variables
-    // Define a variable to contain a content resolver instance
-    ContentResolver mContentResolver;
+    public static final String TAG = SyncAdapter.class.getSimpleName();
+
+    ContentResolver contentResolver;
+    Context context;
 
     /**
      * Set up the sync adapter
@@ -27,7 +40,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
          * If your app uses a content resolver, get an instance of it
          * from the incoming Context
          */
-        mContentResolver = context.getContentResolver();
+        this.contentResolver = context.getContentResolver();
+        this.context = context;
     }
 
     /**
@@ -41,7 +55,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
          * If your app uses a content resolver, get an instance of it
          * from the incoming Context
          */
-        mContentResolver = context.getContentResolver();
+        contentResolver = context.getContentResolver();
 
     }
 
@@ -57,8 +71,39 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             String authority,
             ContentProviderClient provider,
             SyncResult syncResult) {
-    /*
-     * Put the data transfer code here.
-     */
+
+        Log.d(TAG, "sync started");
+
+        ServerConnector serverConnector = new ServerConnector(context);
+
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        StatusDao statusDao = db.statusDao();
+//        List<Status> statusIds = statusDao.getIdsForSyncCheck(); TODO
+        List<Status> statusIds = statusDao.getAll();
+
+
+        try {
+            serverConnector.syncCheck(statusIds, new ServerConnector.RequestCallback() {
+                @Override
+                public void success(Object response) {
+                    List<Integer> missingIds;
+                    runStatusSync();
+                }
+
+                @Override
+                public void failure(NetworkResponse response) {
+
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+//            syncResult.
+        }
+
+//        serverConnector.sendStatus(statusMessage);
+    }
+
+    private void runStatusSync() {
+
     }
 }

@@ -13,7 +13,7 @@ import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 @Dao
 public interface SessionDao {
 
-    @Query("SELECT * FROM session WHERE sid = :sessionId")
+    @Query("SELECT * FROM session WHERE id = :sessionId")
     Session getById(long sessionId);
 
     @Query("SELECT * FROM session")

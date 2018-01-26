@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -76,6 +77,25 @@ public class ServerConnector {
     stateCharging           true
 
     */
+
+    public void syncCheck(List<Status> statusIds, RequestCallback callback) throws Exception {
+        Writer writer = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(writer);
+
+        for (Status status : statusIds) {
+            jsonWriter.beginObject();
+
+            jsonWriter.name("did").value(Config.getUniqueDeviceId(context));
+            jsonWriter.name("mid").value(status.getId());
+            jsonWriter.name("timestamp").value(dateFormat.format(status.getTimestamp()));
+
+            jsonWriter.endObject();
+        }
+
+        jsonWriter.close();
+
+        send("/sync/" + "status", new JSONObject(writer.toString()), callback);
+    }
 
     public void sendStatus(Status status) {
         try {
@@ -149,7 +169,12 @@ public class ServerConnector {
         }
     }
 
+
     private void send(String endpoint, JSONObject jsonMessage) {
+        send(endpoint, jsonMessage, null);
+    }
+
+    private void send(String endpoint, JSONObject jsonMessage, final RequestCallback callback) {
 
         String url = this.serverAddress + endpoint;
 
@@ -177,6 +202,8 @@ public class ServerConnector {
                         }
                     } catch (UnsupportedEncodingException e1) {
                         Log.e(TAG, "parsing error response failed");
+                    } finally {
+                        if (callback != null) callback.failure(response);
                     }
                 }
             }
@@ -192,6 +219,8 @@ public class ServerConnector {
                 } else {
                     Log.d(TAG, String.format("Success Response: %s", response.toString()));
                 }
+
+                callback.success(response);
             }
         };
 
@@ -302,6 +331,13 @@ public class ServerConnector {
     }
 
     // --------------------------------------------------------------------------------------------------------------
+
+    public static abstract class RequestCallback {
+
+        public void success(Object response) {}
+        public void failure(NetworkResponse response) {}
+
+    }
 
     public static class UploadMessage {
 

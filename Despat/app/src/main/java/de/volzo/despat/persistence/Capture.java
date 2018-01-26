@@ -13,13 +13,13 @@ import java.util.Date;
  */
 
 @Entity(foreignKeys = @ForeignKey(  entity = Session.class,
-                                    parentColumns = "sid",
+                                    parentColumns = "id",
                                     childColumns = "session_id"))
 
 public class Capture {
 
     @PrimaryKey(autoGenerate = true)
-    private long cid;
+    private long id;
 
     @ColumnInfo(name = "session_id")
     private long sessionId;
@@ -30,12 +30,12 @@ public class Capture {
     @ColumnInfo(name = "image_path")
     private File image;
 
-    public long getCid() {
-        return cid;
+    public long getId() {
+        return id;
     }
 
-    public void setCid(long cid) {
-        this.cid = cid;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public long getSessionId() {

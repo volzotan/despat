@@ -14,7 +14,7 @@ import java.util.Date;
 public class Event {
 
     @PrimaryKey(autoGenerate = true)
-    private long eid;
+    private long id;
 
     @ColumnInfo(name = "timestamp")
     private Date timestamp;
@@ -25,12 +25,12 @@ public class Event {
     @ColumnInfo(name = "payload")
     private String payload;
 
-    public long getEid() {
-        return eid;
+    public long getId() {
+        return id;
     }
 
-    public void setEid(long eid) {
-        this.eid = eid;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Date getTimestamp() {

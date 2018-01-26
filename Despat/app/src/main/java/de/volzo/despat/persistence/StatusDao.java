@@ -17,6 +17,9 @@ public interface StatusDao {
     @Query("SELECT * FROM status")
     List<Status> getAll();
 
+//    @Query("SELECT id, timestamp FROM status")
+//    List<Status> getIdsForSyncCheck();
+
 //    @Query("SELECT * FROM status SORT BY ... ASC LIMIT 1")
 //    Status getLast();
 //

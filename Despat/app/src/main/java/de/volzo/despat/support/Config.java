@@ -44,7 +44,7 @@ public class Config {
     private static final long DEFAULT_HEARTBEAT_INTERVAL        = 15 * 60 * 1000L; // Minimum interval is 15m
     private static final long DEFAULT_UPLOAD_INTERVAL           = 15 * 60 * 1000L;
     private static final File DEFAULT_IMAGE_FOLDER              = new File(Environment.getExternalStorageDirectory(), ("despat"));
-    private static final String DEFAULT_SERVER_ADDRESS          = "http://zoltep.de";
+    private static final String DEFAULT_SERVER_ADDRESS          = "http://zoltep.de"; // format protocol://example.com
     private static final boolean DEFAULT_RESUME_AFTER_REBOOT    = false;
 
     private static final String SHAREDPREFNAME                  = "de.volzo.despat.DEFAULT_PREFERENCES";

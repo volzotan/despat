@@ -2,7 +2,7 @@
 <sync-adapter
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:contentAuthority="de.volzo.despat.web.provider"
-    android:accountType="com.android.example.datasync"
+    android:accountType="de.volzo.despat.servpat"
     android:userVisible="false"
     android:supportsUploading="false"
     android:allowParallelSyncs="false"

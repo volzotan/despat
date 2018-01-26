@@ -19,25 +19,8 @@ import java.util.Date;
 
 public class Session {
 
-    /*
-
-    sid
-
-    name
-    start
-    end
-
-    location
-
-    exclusion_image
-    compressed_image
-
-    [pointer to positionSets]
-
-     */
-
     @PrimaryKey(autoGenerate = true)
-    private long sid;
+    private long id;
 
     @ColumnInfo(name = "name")
     private String sessionName;
@@ -49,10 +32,10 @@ public class Session {
     private Date end;
 
     @ColumnInfo(name = "latitude")
-    private double latitude;
+    private Double latitude;
 
     @ColumnInfo(name = "longitude")
-    private double longitude;
+    private Double longitude;
 
     @ColumnInfo(name = "exclusion_image", typeAffinity = ColumnInfo.BLOB)
     private byte[] exclusionImage;
@@ -63,9 +46,10 @@ public class Session {
     @ColumnInfo(name = "resumed")
     private boolean resumed = false;
 
-
-
     public Location getLocation() {
+
+        if (getLatitude() == null || getLongitude() == null) return null;
+
         Location loc = new Location("despatProvider");
         loc.setLatitude(getLatitude());
         loc.setLongitude(getLongitude());
@@ -79,12 +63,12 @@ public class Session {
         setLongitude(location.getLongitude());
     }
 
-    public long getSid() {
-        return sid;
+    public long getId() {
+        return id;
     }
 
-    public void setSid(long sid) {
-        this.sid = sid;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getSessionName() {
@@ -111,19 +95,19 @@ public class Session {
         this.end = end;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 

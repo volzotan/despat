@@ -184,7 +184,7 @@ public class RecordingSession {
         // check if last capture from the same session is not more than
         // X seconds in the past, otherwise create error event
 
-        Capture lastCap = captureDao.getLastFromSession(session.getSid());
+        Capture lastCap = captureDao.getLastFromSession(session.getId());
         if (lastCap != null) {
             Date now = Calendar.getInstance().getTime();
             long diff = now.getTime() - lastCap.getRecordingTime().getTime();
@@ -197,7 +197,7 @@ public class RecordingSession {
         }
 
         Capture capture = new Capture();
-        capture.setSessionId(session.getSid());
+        capture.setSessionId(session.getId());
         capture.setRecordingTime(Calendar.getInstance().getTime());
         capture.setImage(image);
 
@@ -209,7 +209,7 @@ public class RecordingSession {
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
-        int numberImagesTaken = sessionDao.getNumberOfCaptures(session.getSid());
+        int numberImagesTaken = sessionDao.getNumberOfCaptures(session.getId());
 
         return numberImagesTaken;
     }
@@ -223,7 +223,7 @@ public class RecordingSession {
         AppDatabase db = AppDatabase.getAppDatabase(context);
         CaptureDao captureDao = db.captureDao();
 
-        List<Capture> captures = captureDao.getAllBySession(session.getSid());
+        List<Capture> captures = captureDao.getAllBySession(session.getId());
 
         long maxTimeDiff = Config.getShutterInterval(context) * 1000 + 3 * 1000;
         Date comp = session.getStart();

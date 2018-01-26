@@ -66,17 +66,7 @@ public class HeartbeatService extends JobService {
         StatusDao statusDao = db.statusDao();
         statusDao.insert(status);
 
-//        ServerConnector.StatusMessage statusMessage = new ServerConnector.StatusMessage();
-
-//        if (!systemController.isNetworkConnectionAvailable()) {
-//            Log.w(TAG, "no network connection available. abort.");
-//            return true;
-//        }
-//
-//        ServerConnector serverConnector = new ServerConnector(this);
-//        serverConnector.sendStatus(statusMessage);
-
-        jobFinished(jobParameters, false); // <-- needs to be called from volley callback
+        jobFinished(jobParameters, false);
         return false;
     }
 
