@@ -35,8 +35,8 @@
       <td class="col-md-2"><a href="{{ url_for("device", device_id=msg.deviceId) }}">{{ msg.deviceId }}</a></td>
       <td class="col-md-2">{{ msg.timestamp | dateformat }}</td>
       <td class="col-md-1">{{ msg.deviceName }}</td>
-      <td class="col-md-1 text-right">{{ msg.numberImagesTaken | suppresszero }}</td>
-      <td class="col-md-1 text-right">{{ msg.numberImagesSaved | suppresszero }}</td>
+      <td class="col-md-1 text-right">{{ msg.imagesTaken | suppresszero }}</td>
+      <td class="col-md-1 text-right">{{ msg.imagesInMemory | suppresszero }}</td>
       <td class="col-md-1 text-right {% if msg.freeSpaceInternal < 100 %} bg-danger {% endif %}">{{ msg.freeSpaceInternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right">{{ msg.freeSpaceExternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right {% if msg.batteryInternal < 20 %} bg-danger {% endif %}">{{ msg.batteryInternal | round | int | suppressnegative }}</td>
@@ -60,7 +60,7 @@
   </tbody>
 </table>
 
-{% for item in data_uploads %}
+{% for item in data_upload %}
     <a href="{{ url_for("image", path=item.filename) }}"><img height="200" src="{{ url_for("image", path=item.filename, _external=True) }}"></a></td>
 {% endfor %}
 

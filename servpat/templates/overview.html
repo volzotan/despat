@@ -76,7 +76,7 @@
       <td class="col-md-2 text-right">{{ entry.start | dateformat }}</td>
       <td class="col-md-2 text-right">{{ entry.end | dateformat }}</td>
       <td class="col-md-1 text-right">
-        <a href="{{ ''|location(entry.latitude, entry.longitude) }}">
+        <a href="{{ [entry.latitude, entry.longitude] | location }}">
           {{ entry.latitude}}, {{entry.longitude}}
         </a>
       </td>
