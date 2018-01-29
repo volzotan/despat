@@ -35,14 +35,14 @@ def overview(option):
         pass
         # TODO last hour ...
 
-    cur = db.execute("SELECT * FROM status ORDER BY datetime(timestamp) DESC")
-    data_status = cur.fetchall()
-    cur = db.execute("SELECT * FROM events ORDER BY datetime(timestamp) DESC")
-    data_events = cur.fetchall()
-    cur = db.execute("SELECT * FROM uploads ORDER BY datetime(timestamp) DESC")
-    data_uploads = cur.fetchall()
+    # TODO: really sort by serverTimestamp?
+    data_status = query_db("SELECT * FROM status ORDER BY datetime(timestamp) DESC")
+    data_session = query_db("SELECT * FROM session ORDER BY datetime(start) DESC")
+    data_capture = query_db("SELECT * FROM capture ORDER BY datetime(recordingTime) DESC")
+    data_event 	= query_db("SELECT * FROM event ORDER BY datetime(timestamp) DESC")
+    data_upload = query_db("SELECT * FROM upload ORDER BY datetime(timestamp) DESC")
 
-    return render_template("overview.html", data_status=data_status, data_events=data_events, data_commands=(), data_uploads=data_uploads)
+    return render_template("overview.html", data_status=data_status, data_events=data_event, data_commands=(), data_uploads=data_upload)
 
 
 @app.route("/device/<device_id>")
@@ -94,24 +94,50 @@ def status():
     if content is None:
         return ("empty request", 400)
 
-    timestamp = datetime.strptime(content["timestamp"], DATEFORMAT_INPUT)
-    timestamp = timestamp.strftime(DATEFORMAT_STORE)
+    if (len(content) == 0):
+    	print ("no status to import")
+    	return ("", 204)
 
-    # insert into db
-    values = [  content["deviceId"], 
-                content["deviceName"],
-                timestamp, 
-                content["numberImagesTaken"],
-                content["numberImagesSaved"], 
-                content["freeSpaceInternal"], 
-                content["freeSpaceExternal"], 
-                content["batteryInternal"],
-                content["batteryExternal"],
-                content["stateCharging"]]
+    for s in content:
+	    timestamp = datetime.strptime(s["timestamp"], DATEFORMAT_INPUT)
+	    timestamp = timestamp.strftime(DATEFORMAT_STORE)
+	    serverTimestamp = datetime.now().strftime(DATEFORMAT_STORE)
 
-    db = get_db()
-    db.execute("insert into status (deviceId, deviceName, timestamp, numberImagesTaken, numberImagesSaved, freeSpaceInternal, freeSpaceExternal, batteryInternal, batteryExternal, stateCharging) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", values)
-    db.commit()
+	    # insert into db
+	    values = [  s["deviceId"], 
+	    			serverTimestamp,
+
+	    			s["statusId"],
+        			timestamp, 
+	                s["deviceName"],
+	        
+	                s["imagesTaken"],
+	                s["imagesInMemory"],
+
+	                s["freeSpaceInternal"], 
+	                s["freeSpaceExternal"], 
+
+	                s["batteryInternal"],
+	                s["batteryExternal"],
+
+	                s["stateCharging"]]
+
+	    db = get_db()
+	    db.execute("""
+	    	insert into status (deviceId, 
+	    						serverTimestamp, 
+	    						statusId,
+	    						timestamp, 
+	    						deviceName, 
+	    						imagesTaken, 
+	    						imagesInMemory, 
+	    						freeSpaceInternal, 
+	    						freeSpaceExternal, 
+	    						batteryInternal, 
+	    						batteryExternal, 
+	    						stateCharging
+	    	) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
+	    db.commit()
 
     return ("", 204)
 
@@ -120,24 +146,41 @@ def status():
 def event():
     content = request.json
 
-    timestamp = datetime.strptime(content["timestamp"], DATEFORMAT_INPUT)
-    timestamp = timestamp.strftime(DATEFORMAT_STORE)
+    if content is None:
+        return ("empty request", 400)
 
-    # if content["eventtype"] is not in EVENTTYPESDICTIONARY... # TODO
+    if (len(content) == 0):
+        print ("no event to import")
+        return ("", 204)
 
-    if content["payload"] is None:
-        content["payload"] = ""
+    for e in content:
 
-    # insert into db
-    values = [  content["deviceId"], 
-                content["deviceName"],
-                timestamp, 
-                content["eventtype"],
-                content["payload"]]
+        timestamp = datetime.strptime(e["timestamp"], DATEFORMAT_INPUT)
+        timestamp = timestamp.strftime(DATEFORMAT_STORE)
+        serverTimestamp = datetime.now().strftime(DATEFORMAT_STORE)
 
-    db = get_db()
-    db.execute("insert into events (deviceId, deviceName, timestamp, eventtype, payload) values (?, ?, ?, ?, ?)", values)
-    db.commit()
+        # if content["eventtype"] is not in EVENTTYPESDICTIONARY... # TODO
+
+        # insert into db
+        values = [  e["deviceId"], 
+                    serverTimestamp,
+
+                    e["eventId"],
+                    timestamp, 
+
+                    e["type"],
+                    e["payload"]]
+
+        db = get_db()
+        db.execute("""
+            insert into event (deviceId, 
+                                serverTimestamp, 
+                                eventId,
+                                timestamp, 
+                                type, 
+                                payload
+            ) values (?, ?, ?, ?, ?, ?)""", values)
+        db.commit()
 
     return ("", 204)
 
@@ -184,7 +227,7 @@ def upload():
                 unique_filename
             ]
     db = get_db()
-    db.execute("insert into uploads (deviceId, timestamp, filename) values (?, ?, ?)", values)
+    db.execute("insert into upload (deviceId, timestamp, filename) values (?, ?, ?)", values)
     db.commit()
 
     return ("", 204)
@@ -195,9 +238,42 @@ def image(path):
     return send_from_directory(app.config["UPLOAD_FOLDER"], path)
 
 
-@app.route("/sync")
-def sync():
-    return "sync"
+# @app.route("/sync")
+# def sync():
+#     return "sync"
+
+
+@app.route("/sync/<param>", methods=["POST"])
+def sync(param):
+    content = request.get_json()
+
+    if content is None:
+        return ("empty request", 400)
+
+    ids = []
+
+    if (param == "status"): 
+        for o in content:
+            duplicate = query_db("SELECT * FROM status WHERE deviceId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["timestamp"]))
+            if duplicate is None or len(duplicate) == 0:
+                ids.append(o["id"])
+    elif (param == "event"):
+        for o in content:
+            duplicate = query_db("SELECT * FROM event WHERE deviceId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["timestamp"]))
+            if duplicate is None or len(duplicate) == 0:
+                ids.append(o["id"])
+    else:
+        abort(404)
+
+    response = app.response_class(
+        response=json.dumps(ids),
+        status=200,
+        mimetype="application/json"
+    )
+
+    return response
+
+
 
 # --------------------------------------------------------------------------- #
 
