@@ -17,6 +17,9 @@ public interface EventDao {
     @Query("SELECT * FROM event")
     List<Event> getAll();
 
+    @Query("SELECT * FROM event WHERE id IN (:ids)")
+    List<Event> getAllById(List<Integer> ids);
+
     @Insert
     void insert(Event... events);
 

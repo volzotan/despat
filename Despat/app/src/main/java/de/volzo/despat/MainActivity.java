@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -51,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     Recognizer recognizer;
 
     final String SYNC_AUTHORITY = "de.volzo.despat.web.provider";
+    final String SYNC_ACCOUNT   = "despatSyncAccount";
+
     Account syncAccount;
 
     TextureView textureView;
@@ -194,16 +197,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         fabSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Pass the settings flags by inserting them in a bundle
+
                 Bundle settingsBundle = new Bundle();
                 settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
                 settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-                /*
-                 * Request the sync for the default account, authority, and
-                 * manual sync settings
-                 */
-                ContentResolver.requestSync(syncAccount, SYNC_AUTHORITY, settingsBundle);
 
+                ContentResolver.requestSync(syncAccount, SYNC_AUTHORITY, settingsBundle);
+                Log.d(TAG, "sync requested");
             }
         });
 
@@ -225,14 +225,20 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        btConfig.callOnClick();
 
         syncAccount = createSyncAccount(this);
+
+        ContentResolver.addPeriodicSync(
+                syncAccount,
+                SYNC_AUTHORITY,
+                Bundle.EMPTY,
+                10*60);
+
     }
 
     public Account createSyncAccount(Context context) {
 
         final String ACCOUNT_TYPE = "de.volzo.despat.servpat";
-        final String ACCOUNT = "dummyaccount";
 
-        Account newAccount = new Account(ACCOUNT, ACCOUNT_TYPE);
+        Account newAccount = new Account(SYNC_ACCOUNT, ACCOUNT_TYPE);
         AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
 
         if (accountManager.addAccountExplicitly(newAccount, null, null)) {

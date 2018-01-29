@@ -9,16 +9,17 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.android.volley.NetworkResponse;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.List;
 
-import de.volzo.despat.Despat;
-import de.volzo.despat.MainActivity;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Event;
+import de.volzo.despat.persistence.EventDao;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
-import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 25.01.18.
@@ -74,36 +75,72 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         Log.d(TAG, "sync started");
 
-        ServerConnector serverConnector = new ServerConnector(context);
+        final ServerConnector serverConnector = new ServerConnector(context);
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
-        StatusDao statusDao = db.statusDao();
-//        List<Status> statusIds = statusDao.getIdsForSyncCheck(); TODO
-        List<Status> statusIds = statusDao.getAll();
 
+        final StatusDao statusDao = db.statusDao();
+        final EventDao eventDao = db.eventDao();
+
+        List<Status> statusIds = statusDao.getAll(); // statusDao.getIdsForSyncCheck(); TODO
+        List<Event> eventIds = eventDao.getAll();
 
         try {
-            serverConnector.syncCheck(statusIds, new ServerConnector.RequestCallback() {
-                @Override
-                public void success(Object response) {
-                    List<Integer> missingIds;
-                    runStatusSync();
-                }
 
+            final ServerConnector.RequestSuccessCallback genericSuccessCallback = new ServerConnector.RequestSuccessCallback() {
                 @Override
-                public void failure(NetworkResponse response) {
-
+                public void success(JSONArray response) {
+                    Log.d(TAG, "sync successful");
                 }
-            });
+            };
+
+            final ServerConnector.RequestFailureCallback genericFailureCallback = new ServerConnector.RequestFailureCallback() {
+                @Override
+                public void failure(JSONArray response) {
+                    if (response != null) {
+                        Log.e(TAG, "sync failed: " + response.toString());
+                    } else {
+                        Log.w(TAG, "sync failed, response null");
+                    }
+                }
+            };
+
+            // ---
+
+            final ServerConnector.RequestSuccessCallback statusCallback = new ServerConnector.RequestSuccessCallback() {
+                @Override
+                public void success(JSONArray response) {
+                    try {
+                        List<Integer> missingIds = serverConnector.parseJsonResponse(response);
+                        serverConnector.sendStatus(statusDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
+                        Log.i(TAG, "sync elements for STATUS: " + missingIds.size());
+                    } catch (JSONException e) {
+                        Log.w(TAG, "parsing missing IDs response failed", e);
+                    }
+                }
+            };
+
+            final ServerConnector.RequestSuccessCallback eventCallback = new ServerConnector.RequestSuccessCallback() {
+                @Override
+                public void success(JSONArray response) {
+                    try {
+                        List<Integer> missingIds = serverConnector.parseJsonResponse(response);
+                        serverConnector.sendEvent(eventDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
+                        Log.i(TAG, "sync elements for EVENT: " + missingIds.size());
+                    } catch (JSONException e) {
+                        Log.w(TAG, "parsing missing IDs response failed", e);
+                    }
+                }
+            };
+
+            // serverConnector.syncCheckStatus(statusIds, statusCallback, genericFailureCallback);
+            serverConnector.syncCheckEvent(eventIds, eventCallback, genericFailureCallback);
+
+            Log.d(TAG, "syncCheck status");
+
         } catch (Exception e) {
             e.printStackTrace();
-//            syncResult.
         }
-
-//        serverConnector.sendStatus(statusMessage);
     }
 
-    private void runStatusSync() {
-
-    }
 }

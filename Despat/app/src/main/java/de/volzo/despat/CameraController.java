@@ -150,7 +150,8 @@ public class CameraController {
         @Override
         public void onClosed(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onClosed");
-            cameraOpenCloseLock.release();
+
+            //cameraOpenCloseLock.release();
 
             stopBackgroundThread();
 
@@ -231,6 +232,14 @@ public class CameraController {
                     ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                     byte[] bytes = new byte[buffer.remaining()];
                     buffer.get(bytes);
+
+                    // BUG: on some devices (Moto Z) the buffer is empty
+                    boolean empty = true;
+                    for (byte b : bytes) {
+                        if (b > 0) {empty = false; break;}
+                    }
+                    if (empty) Log.e(TAG, "empty image buffer");
+
                     FileOutputStream output = null;
                     try {
                         output = new FileOutputStream(file);
@@ -282,8 +291,11 @@ public class CameraController {
 
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    Log.d(TAG, "# onConfigured");
+
                     // The camera is already closed
-                    if (null == cameraDevice) {
+                    if (cameraDevice == null) {
+                        Log.w(TAG, "camera device already closed");
                         return;
                     }
 

@@ -11,6 +11,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,18 +25,18 @@ import de.volzo.despat.R;
  * Created by christophergetschmann on 05.10.17.
  */
 
-public class JSONRequest extends Request<JSONObject> {
+public class JSONArrayRequest extends Request<JSONArray> {
 
-    public static final String TAG = JSONRequest.class.getSimpleName();
+    public static final String TAG = JSONArrayRequest.class.getSimpleName();
 
     private Context context;
 
-    private Response.Listener<JSONObject> listener;
+    private Response.Listener<JSONArray> listener;
     private Map<String, String> params;
-    private JSONObject payload;
+    private JSONArray payload;
 
-    public JSONRequest(int method, String url, JSONObject payload, Map<String, String> params,
-                         Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener, Context context) {
+    public JSONArrayRequest(int method, String url, JSONArray payload, Map<String, String> params,
+                            Response.Listener<JSONArray> responseListener, Response.ErrorListener errorListener, Context context) {
         super(method, url, errorListener);
         this.payload = payload;
         this.listener = responseListener;
@@ -45,7 +46,7 @@ public class JSONRequest extends Request<JSONObject> {
     }
 
     @Override
-    protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+    protected Map<String, String> getParams() throws AuthFailureError {
         return params;
     }
 
@@ -82,23 +83,28 @@ public class JSONRequest extends Request<JSONObject> {
     }
 
     @Override
-    protected void deliverResponse(JSONObject response) {
+    protected void deliverResponse(JSONArray response) {
         listener.onResponse(response);
     }
 
     @Override
-    protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+    protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
 
         Log.d(TAG, String.format("HTTP response: %d", response.statusCode));
 
         try {
             String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
 
-            if (jsonString.length() != 0) {
-                return Response.success(new JSONObject(jsonString), HttpHeaderParser.parseCacheHeaders(response));
-            } else {
-                return Response.success(new JSONObject(), HttpHeaderParser.parseCacheHeaders(response));
+            if (jsonString == null) {
+                return Response.success(null, HttpHeaderParser.parseCacheHeaders(response));
             }
+
+            if (jsonString.length() == 0) {
+                return Response.success(new JSONArray(), HttpHeaderParser.parseCacheHeaders(response));
+            }
+
+            return Response.success(new JSONArray(jsonString), HttpHeaderParser.parseCacheHeaders(response));
+
         } catch (UnsupportedEncodingException e) {
             return Response.error(new ParseError(e));
         } catch (JSONException je) {

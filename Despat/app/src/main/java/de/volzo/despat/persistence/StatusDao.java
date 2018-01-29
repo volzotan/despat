@@ -17,6 +17,9 @@ public interface StatusDao {
     @Query("SELECT * FROM status")
     List<Status> getAll();
 
+    @Query("SELECT * FROM status WHERE id IN (:ids)")
+    List<Status> getAllById(List<Integer> ids);
+
 //    @Query("SELECT id, timestamp FROM status")
 //    List<Status> getIdsForSyncCheck();
 

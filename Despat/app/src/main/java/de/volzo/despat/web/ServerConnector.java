@@ -13,6 +13,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +26,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,9 +34,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import de.volzo.despat.SystemController;
+import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Status;
-import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
 
@@ -78,103 +79,112 @@ public class ServerConnector {
 
     */
 
-    public void syncCheck(List<Status> statusIds, RequestCallback callback) throws Exception {
-        Writer writer = new StringWriter();
-        JsonWriter jsonWriter = new JsonWriter(writer);
+    public void syncCheckStatus(List<Status> statusIds, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
 
+        JSONArray arr = new JSONArray();
         for (Status status : statusIds) {
-            jsonWriter.beginObject();
+            JSONObject o = new JSONObject();
 
-            jsonWriter.name("did").value(Config.getUniqueDeviceId(context));
-            jsonWriter.name("mid").value(status.getId());
-            jsonWriter.name("timestamp").value(dateFormat.format(status.getTimestamp()));
+            o.put("deviceId", Config.getUniqueDeviceId(context));
+            o.put("id", status.getId());
+            o.put("timestamp", dateFormat.format(status.getTimestamp()));
 
-            jsonWriter.endObject();
+            arr.put(o);
         }
 
-        jsonWriter.close();
-
-        send("/sync/" + "status", new JSONObject(writer.toString()), callback);
+        send("/sync/" + "status", arr, successCallback, failureCallback);
     }
 
-    public void sendStatus(Status status) {
+    public void syncCheckEvent(List<Event> eventIds, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
+
+        JSONArray arr = new JSONArray();
+        for (Event event : eventIds) {
+            JSONObject o = new JSONObject();
+
+            o.put("deviceId", Config.getUniqueDeviceId(context));
+            o.put("id", event.getId());
+            o.put("timestamp", dateFormat.format(event.getTimestamp()));
+
+            arr.put(o);
+        }
+
+        send("/sync/" + "event", arr, successCallback, failureCallback);
+    }
+
+    public void sendStatus(List<Status> statusList, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) {
         try {
 
-            // TODO: json list of status, not single status
+            JSONArray arr = new JSONArray();
+            for (Status status : statusList) {
+                JSONObject o = new JSONObject();
 
-            Writer writer = new StringWriter();
-            JsonWriter jsonWriter = new JsonWriter(writer);
-            jsonWriter.beginObject();
+                o.put("deviceId", Config.getUniqueDeviceId(context));
 
-            jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
-            jsonWriter.name("deviceName").value(Config.getDeviceName(context));
-            jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
+                o.put("statusId", status.getId());
+                o.put("timestamp", dateFormat.format(status.getTimestamp()));
+                o.put("deviceName", Config.getDeviceName(context)); // ?
+
+                o.put("imagesTaken", status.getNumberImagesTaken());
+                o.put("imagesInMemory", status.getNumberImagesInMemory());
+
+                o.put("freeSpaceInternal", status.getFreeSpaceInternal());
+                o.put("freeSpaceExternal", status.getFreeSpaceExternal());
+
+                o.put("batteryInternal", status.getBatteryInternal());
+                o.put("batteryExternal", status.getBatteryExternal());
+
+                o.put("stateCharging", status.isStateCharging());
+
+                arr.put(o);
+            }
 
 //            if (Util.isServiceRunning(context, ShutterService.class)) {
-//                jsonWriter.name("status").value(StatusType.CAPTURING);
+//                o.put("status", StatusType.CAPTURING);
 //            } else {
 //                SystemController systemController = new SystemController(context);
 //                if (systemController.isDisplayOn()) {
-//                    jsonWriter.name("status").value(StatusType.DISPLAY_ON);
+//                    o.put("status", StatusType.DISPLAY_ON);
 //                } else {
-//                    jsonWriter.name("status").value(StatusType.IDLE);
+//                    o.put("status", StatusType.IDLE);
 //                }
 //            }
 
-            jsonWriter.name("numberImagesTaken").value(status.getNumberImagesTaken());
-            jsonWriter.name("numberImagesSaved").value(status.getNumberImagesInMemory());
-            jsonWriter.name("freeSpaceInternal").value(status.getFreeSpaceInternal());
-            jsonWriter.name("freeSpaceExternal").value(status.getFreeSpaceExternal());
-            jsonWriter.name("batteryInternal").value(status.getBatteryInternal());
-            jsonWriter.name("batteryExternal").value(status.getBatteryExternal());
-            jsonWriter.name("stateCharging").value(status.isStateCharging());
-
-            jsonWriter.endObject();
-            jsonWriter.close();
-
-            // Log.d(TAG, writer.toString());
-
-            send("/status", new JSONObject(writer.toString()));
+            send("/status", arr, successCallback, failureCallback);
         } catch (Exception e) {
             Log.e(TAG, "sending status failed", e);
         }
     }
 
-    public void sendEvent(int type, String payload) {
+    public void sendEvent(List<Event> eventList, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) {
         try {
 
-            if (payload == null) {
-                payload = new String();
+            JSONArray arr = new JSONArray();
+            for (Event event : eventList) {
+                JSONObject o = new JSONObject();
+
+                o.put("deviceId", Config.getUniqueDeviceId(context));
+
+                o.put("eventId", event.getId());
+                o.put("timestamp", dateFormat.format(Calendar.getInstance().getTime()));
+
+                o.put("type", event.getType());
+                o.put("payload", allowNull(event.getPayload()));
+
+                arr.put(o);
             }
 
-//            EventMessage msg = new EventMessage();
-
-            Writer writer = new StringWriter();
-            JsonWriter jsonWriter = new JsonWriter(writer);
-            jsonWriter.beginObject();
-
-            jsonWriter.name("deviceId").value(Config.getUniqueDeviceId(context));
-            jsonWriter.name("deviceName").value(Config.getDeviceName(context));
-            jsonWriter.name("timestamp").value(dateFormat.format(Calendar.getInstance().getTime()));
-
-            jsonWriter.name("eventtype").value(type);
-            jsonWriter.name("payload").value(payload);
-
-            jsonWriter.endObject();
-            jsonWriter.close();
-
-            send("/event", new JSONObject(writer.toString()));
+            send("/event", arr, successCallback, failureCallback);
         } catch (Exception e) {
-            Log.e(TAG, "sending status failed", e);
+            Log.e(TAG, "sending event failed", e);
         }
     }
 
 
-    private void send(String endpoint, JSONObject jsonMessage) {
-        send(endpoint, jsonMessage, null);
+    private void send(String endpoint, JSONArray messages) {
+        send(endpoint, messages, null, null);
     }
 
-    private void send(String endpoint, JSONObject jsonMessage, final RequestCallback callback) {
+    private void send(String endpoint, JSONArray jsonMessages, final RequestSuccessCallback successCallback, final RequestFailureCallback failureCallback) {
 
         String url = this.serverAddress + endpoint;
 
@@ -188,48 +198,51 @@ public class ServerConnector {
 
                 NetworkResponse response = error.networkResponse;
                 if (error instanceof ServerError && response != null) {
+                    JSONArray obj = null;
                     try {
                         String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
 
                         try {
-                            JSONObject obj = new JSONObject(res);
+                            obj = new JSONArray(res);
 
-                            // error response is a JSON Object ...
+                            // error response is a JSON Array ...
                         } catch (JSONException e2) {
                             // error response is probably HTML
 
                             System.out.println(res);
                         }
-                    } catch (UnsupportedEncodingException e1) {
+                    } catch (UnsupportedEncodingException uee) {
                         Log.e(TAG, "parsing error response failed");
                     } finally {
-                        if (callback != null) callback.failure(response);
+                        if (failureCallback != null) failureCallback.failure(obj);
                     }
+                } else {
+                    if (failureCallback != null) failureCallback.failure(null);
                 }
             }
         };
 
-        Response.Listener successListener = new Response.Listener() {
+        Response.Listener<JSONArray> successListener = new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(Object response) {
+            public void onResponse(JSONArray response) {
                 if (response == null) {
                     Log.d(TAG, String.format("Success. Response null"));
-                } else if (response.toString().equals("{}")) {
+                } else if (response.toString().equals("{}") || response.toString().equals("[]") ) {
                     Log.d(TAG, String.format("Success Response empty"));
                 } else {
                     Log.d(TAG, String.format("Success Response: %s", response.toString()));
                 }
 
-                callback.success(response);
+                if (successCallback != null) successCallback.success(response);
             }
         };
 
         Map<String, String> params = new HashMap<String, String>();
-        JSONRequest jsObjRequest = new JSONRequest(Request.Method.POST, url, jsonMessage, params, successListener, errorListener, context);
+        JSONArrayRequest request = new JSONArrayRequest(Request.Method.POST, url, jsonMessages, params, successListener, errorListener, context);
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(context);
-        queue.add(jsObjRequest);
+        queue.add(request);
     }
 
     public void sendUpload(UploadMessage msg) {
@@ -330,13 +343,30 @@ public class ServerConnector {
         dataOutputStream.writeBytes(lineEnd);
     }
 
+    public List<Integer> parseJsonResponse(JSONArray response) throws JSONException {
+
+        List<Integer> ids = new ArrayList<Integer>(response.length());
+
+        for (int i=0; i < response.length(); i++) {
+            ids.add(response.getInt(i));
+        }
+
+        return ids;
+    }
+
+    public Object allowNull(Object o) {
+        if (o == null) return JSONObject.NULL;
+        return o;
+    }
+
     // --------------------------------------------------------------------------------------------------------------
 
-    public static abstract class RequestCallback {
+    public static abstract class RequestSuccessCallback {
+        public void success(JSONArray response) {}
+    }
 
-        public void success(Object response) {}
-        public void failure(NetworkResponse response) {}
-
+    public static abstract class RequestFailureCallback {
+        public void failure(JSONArray response) {}
     }
 
     public static class UploadMessage {
