@@ -13,6 +13,9 @@ public interface CaptureDao {
     @Query("SELECT * FROM capture")
     List<Capture> getAll();
 
+    @Query("SELECT * FROM capture WHERE id IN (:ids)")
+    List<Capture> getAllById(List<Integer> ids);
+
     @Query("SELECT * FROM capture WHERE session_id = :sessionId")
     List<Capture> getAllBySession(long sessionId);
 

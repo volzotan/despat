@@ -58,6 +58,50 @@
     <tr>
       <th>#</th>
       <th>device id</th>
+      <th>serverTimestamp</th>
+      <th class="text-right">sessionId</th>
+      <th class="text-right">start</th>
+      <th class="text-right">end</th>
+      <th class="text-right">location</th>
+      <th class="text-right">resumed</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in data_session %}
+    <tr>
+      <td class="col-md-1">{{ entry.id }}</td>
+      <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>
+      <td class="col-md-2">{{ entry.serverTimestamp | dateformat }}</td>
+      <td class="col-md-1 text-right">{{ entry.sessionId }}</td>
+      <td class="col-md-2 text-right">{{ entry.start | dateformat }}</td>
+      <td class="col-md-2 text-right">{{ entry.end | dateformat }}</td>
+      <td class="col-md-1 text-right">
+        <a href="{{ ''|location(entry.latitude, entry.longitude) }}">
+          {{ entry.latitude}}, {{entry.longitude}}
+        </a>
+      </td>
+      <td class="col-md-1 text-right">{{ entry.resumed }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-2"> - </td>
+      <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-2"> - </td>
+      <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-1"> - </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<table class="table table-sm table-bordered table-striped ">
+  <thead class="thead-inverse">
+    <tr>
+      <th>#</th>
+      <th>device id</th>
       <th>time</th>
       <th>device name</th>
       <th>event type</th>
@@ -65,7 +109,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for entry in data_events %}
+    {% for entry in data_event %}
     <tr>
       <td class="col-md-1">{{ entry.id }}</td>
       <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>
@@ -98,7 +142,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for entry in data_commands %}
+    {% for entry in data_command %}
     <tr>
       <td class="col-md-1">{{ entry.id }}</td>
       <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>
@@ -128,7 +172,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for entry in data_uploads %}
+    {% for entry in data_upload %}
     <tr>
       <td class="col-md-1">{{ entry.id }}</td>
       <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>

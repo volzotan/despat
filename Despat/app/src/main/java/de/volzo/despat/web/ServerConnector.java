@@ -34,7 +34,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.Event;
+import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
@@ -79,10 +81,10 @@ public class ServerConnector {
 
     */
 
-    public void syncCheckStatus(List<Status> statusIds, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
+    public void syncCheckStatus(List<Status> ids, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
 
         JSONArray arr = new JSONArray();
-        for (Status status : statusIds) {
+        for (Status status : ids) {
             JSONObject o = new JSONObject();
 
             o.put("deviceId", Config.getUniqueDeviceId(context));
@@ -95,10 +97,42 @@ public class ServerConnector {
         send("/sync/" + "status", arr, successCallback, failureCallback);
     }
 
-    public void syncCheckEvent(List<Event> eventIds, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
+    public void syncCheckSession(List<Session> ids, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
 
         JSONArray arr = new JSONArray();
-        for (Event event : eventIds) {
+        for (Session session : ids) {
+            JSONObject o = new JSONObject();
+
+            o.put("deviceId", Config.getUniqueDeviceId(context));
+            o.put("id", session.getId());
+            o.put("timestamp", dateFormat.format(session.getStart()));
+
+            arr.put(o);
+        }
+
+        send("/sync/" + "session", arr, successCallback, failureCallback);
+    }
+
+    public void syncCheckCapture(List<Capture> ids, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
+
+        JSONArray arr = new JSONArray();
+        for (Capture capture : ids) {
+            JSONObject o = new JSONObject();
+
+            o.put("deviceId", Config.getUniqueDeviceId(context));
+            o.put("id", capture.getId());
+            o.put("timestamp", dateFormat.format(capture.getRecordingTime()));
+
+            arr.put(o);
+        }
+
+        send("/sync/" + "session", arr, successCallback, failureCallback);
+    }
+
+    public void syncCheckEvent(List<Event> ids, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
+
+        JSONArray arr = new JSONArray();
+        for (Event event : ids) {
             JSONObject o = new JSONObject();
 
             o.put("deviceId", Config.getUniqueDeviceId(context));
@@ -152,6 +186,57 @@ public class ServerConnector {
             send("/status", arr, successCallback, failureCallback);
         } catch (Exception e) {
             Log.e(TAG, "sending status failed", e);
+        }
+    }
+
+    public void sendSession(List<Session> sessionList, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) {
+        try {
+
+            JSONArray arr = new JSONArray();
+            for (Session session : sessionList) {
+                JSONObject o = new JSONObject();
+
+                o.put("deviceId", Config.getUniqueDeviceId(context));
+
+                o.put("sessionId", session.getId());
+                o.put("start", dateFormat.format(session.getStart()));
+
+                String end = session.getEnd() == null ? null : dateFormat.format(session.getStart());
+                o.put("end", allowNull(end));
+
+                o.put("latitude", allowNull(session.getLatitude()));
+                o.put("longitude", allowNull(session.getLongitude()));
+
+                o.put("resumed", allowNull(session.isResumed()));
+
+                arr.put(o);
+            }
+
+            send("/session", arr, successCallback, failureCallback);
+        } catch (Exception e) {
+            Log.e(TAG, "sending session failed", e);
+        }
+    }
+
+    public void sendCapture(List<Capture> captureList, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) {
+        try {
+
+            JSONArray arr = new JSONArray();
+            for (Capture capture : captureList) {
+                JSONObject o = new JSONObject();
+
+                o.put("deviceId", Config.getUniqueDeviceId(context));
+
+                o.put("captureId", capture.getId());
+                o.put("sessionId", capture.getSessionId());
+                o.put("recordingTime", dateFormat.format(capture.getRecordingTime()));
+
+                arr.put(o);
+            }
+
+            send("/capture", arr, successCallback, failureCallback);
+        } catch (Exception e) {
+            Log.e(TAG, "sending capture failed", e);
         }
     }
 

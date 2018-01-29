@@ -30,7 +30,7 @@ create table session (
   deviceId text not null,
   serverTimestamp text not null,
 
-  sessionid integer not null,
+  sessionId integer not null,
   start text not null,
   end text,
 
@@ -73,7 +73,7 @@ create table upload (
   deviceId text not null,
   serverTimestamp text not null,
 
-  timestamp integer not null,
+  timestamp text not null,
 
   filename text not null
 );

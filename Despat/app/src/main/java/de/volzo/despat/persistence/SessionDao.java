@@ -19,6 +19,9 @@ public interface SessionDao {
     @Query("SELECT * FROM session")
     List<Session> getAll();
 
+    @Query("SELECT * FROM session WHERE id IN (:ids)")
+    List<Session> getAllById(List<Integer> ids);
+
     @Query("SELECT * FROM session ORDER BY start DESC LIMIT 1")
     Session getLast();
 

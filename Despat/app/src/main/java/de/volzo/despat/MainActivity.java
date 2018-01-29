@@ -225,12 +225,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        btConfig.callOnClick();
 
         syncAccount = createSyncAccount(this);
-
-        ContentResolver.addPeriodicSync(
-                syncAccount,
-                SYNC_AUTHORITY,
-                Bundle.EMPTY,
-                10*60);
+        ContentResolver.addPeriodicSync(syncAccount, SYNC_AUTHORITY, Bundle.EMPTY, 10*60);
 
     }
 

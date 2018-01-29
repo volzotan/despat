@@ -42,7 +42,12 @@ def overview(option):
     data_event 	= query_db("SELECT * FROM event ORDER BY datetime(timestamp) DESC")
     data_upload = query_db("SELECT * FROM upload ORDER BY datetime(timestamp) DESC")
 
-    return render_template("overview.html", data_status=data_status, data_events=data_event, data_commands=(), data_uploads=data_upload)
+    return render_template("overview.html", data_status=data_status, 
+                                            data_session=data_session, 
+                                            data_capture=data_capture, 
+                                            data_event=data_event, 
+                                            data_command=(), 
+                                            data_upload=data_upload)
 
 
 @app.route("/device/<device_id>")
@@ -60,7 +65,7 @@ def device(device_id):
     graph_status = query_db("SELECT * FROM status WHERE deviceid LIKE (?) AND timestamp > (?) ORDER BY datetime(timestamp) DESC", (device_id, comp))
     graph_status = rows_to_list(graph_status)
 
-    cur = db.execute("SELECT * FROM uploads WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC LIMIT 4", (device_id,))
+    cur = db.execute("SELECT * FROM upload WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC LIMIT 4", (device_id,))
     device_uploads = cur.fetchall()
 
     return render_template("device.html", graph_status=graph_status, data_status=device_status, data_uploads=device_uploads, page_title=device_id)
@@ -142,6 +147,57 @@ def status():
     return ("", 204)
 
 
+@app.route("/session", methods=["POST"])
+def session():
+    content = request.get_json()
+
+    if content is None:
+        return ("empty request", 400)
+
+    if (len(content) == 0):
+        print ("no session to import")
+        return ("", 204)
+
+    for s in content:
+        start = (datetime.strptime(s["start"], DATEFORMAT_INPUT)).strftime(DATEFORMAT_STORE)
+
+        end = s["end"]
+        if end is not None:
+            end = (datetime.strptime(end, DATEFORMAT_INPUT)).strftime(DATEFORMAT_STORE)
+        else:
+            end = None
+
+        serverTimestamp = datetime.now().strftime(DATEFORMAT_STORE)
+
+        # insert into db
+        values = [  s["deviceId"], 
+                    serverTimestamp,
+
+                    s["sessionId"],
+                    start, 
+                    end,
+            
+                    s["latitude"],
+                    s["longitude"],
+
+                    s["resumed"]]
+
+        db = get_db()
+        db.execute("""
+            insert into session (   deviceId, 
+                                    serverTimestamp, 
+                                    sessionId,
+                                    start, 
+                                    end, 
+                                    latitude, 
+                                    longitude, 
+                                    resumed
+            ) values (?, ?, ?, ?, ?, ?, ?, ?)""", values)
+        db.commit()
+
+    return ("", 204)
+
+
 @app.route("/event", methods=["POST"])
 def event():
     content = request.json
@@ -173,7 +229,7 @@ def event():
 
         db = get_db()
         db.execute("""
-            insert into event (deviceId, 
+            insert into event ( deviceId, 
                                 serverTimestamp, 
                                 eventId,
                                 timestamp, 
@@ -222,12 +278,18 @@ def upload():
     app.logger.info("uploaded: {}".format(unique_filename))
 
     # insert into db
+
+    timestamp = datetime.strptime(content["timestamp"], DATEFORMAT_INPUT)
+    timestamp = timestamp.strftime(DATEFORMAT_STORE)
+    serverTimestamp = datetime.now().strftime(DATEFORMAT_STORE)
+
     values = [  content["deviceId"], 
-                timestamp.strftime(DATEFORMAT_STORE),
+                serverTimestamp,
+                timestamp,
                 unique_filename
             ]
     db = get_db()
-    db.execute("insert into upload (deviceId, timestamp, filename) values (?, ?, ?)", values)
+    db.execute("insert into upload (deviceId, serverTimestamp, timestamp, filename) values (?, ?, ?, ?)", values)
     db.commit()
 
     return ("", 204)
@@ -243,8 +305,8 @@ def image(path):
 #     return "sync"
 
 
-@app.route("/sync/<param>", methods=["POST"])
-def sync(param):
+@app.route("/sync/<table>", methods=["POST"])
+def sync(table):
     content = request.get_json()
 
     if content is None:
@@ -252,14 +314,24 @@ def sync(param):
 
     ids = []
 
-    if (param == "status"): 
+    if (table == "status"): 
         for o in content:
-            duplicate = query_db("SELECT * FROM status WHERE deviceId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["timestamp"]))
+            duplicate = query_db("SELECT * FROM status WHERE deviceId LIKE (?) AND statusId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["id"], o["timestamp"]))
             if duplicate is None or len(duplicate) == 0:
                 ids.append(o["id"])
-    elif (param == "event"):
+    elif (table == "session"): 
         for o in content:
-            duplicate = query_db("SELECT * FROM event WHERE deviceId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["timestamp"]))
+            duplicate = query_db("SELECT * FROM session WHERE deviceId LIKE (?) AND sessionId LIKE (?) AND start LIKE (?)", (o["deviceId"], o["id"], o["timestamp"]))
+            if duplicate is None or len(duplicate) == 0:
+                ids.append(o["id"])
+    elif (table == "capture"): 
+        for o in content:
+            duplicate = query_db("SELECT * FROM capture WHERE deviceId LIKE (?) AND captureId LIKE (?) AND recordingTime LIKE (?)", (o["deviceId"], o["id"], o["timestamp"]))
+            if duplicate is None or len(duplicate) == 0:
+                ids.append(o["id"])
+    elif (table == "event"):
+        for o in content:
+            duplicate = query_db("SELECT * FROM event WHERE deviceId LIKE (?) AND eventId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["id"], o["timestamp"]))
             if duplicate is None or len(duplicate) == 0:
                 ids.append(o["id"])
     else:
@@ -303,14 +375,19 @@ def bool_filter(e):
 @app.template_filter("eventtype")
 def eventtype_filter(e):
     types = {
-        0x10: "INIT",
-        0x11: "BOOT",
-        0x12: "SHUTDOWN",
+        10: "INIT",
+        20: "BOOT",
+        30: "SHUTDOWN",
 
-        0x20: "START",
-        0x21: "STOP",
+        40: "START",
+        41: "STOP",
+        42: "RESTART",
 
-        0x30: "ERROR"
+        50: "ERROR",
+        51: "SCHEDULE GLITCH",
+
+        60: "DISPLAY ON",
+        61: "DISPLAY OFF"
     }
     try:
         return types[e]
@@ -318,8 +395,17 @@ def eventtype_filter(e):
         return e
 
 
+@app.template_filter("location")
+def location_filter(foo, lat, lon):
+    if lat is None or lon is None:
+        return ""
+    return "http://maps.google.com/?q={},{}".format(lat, lon)
+
+
 @app.template_filter("dateformat")
 def dateformat_filter(inp):
+    if inp is None or inp == "":
+        return ""
     return datetime.strptime(inp, DATEFORMAT_STORE).strftime(DATEFORMAT_OUTPUT)[:-3]
 
 

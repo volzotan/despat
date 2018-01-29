@@ -16,8 +16,10 @@ import org.json.JSONException;
 import java.util.List;
 
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
+import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
 
@@ -76,14 +78,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "sync started");
 
         final ServerConnector serverConnector = new ServerConnector(context);
-
         AppDatabase db = AppDatabase.getAppDatabase(context);
 
         final StatusDao statusDao = db.statusDao();
+        final SessionDao sessionDao = db.sessionDao();
+        final CaptureDao captureDao = db.captureDao();
         final EventDao eventDao = db.eventDao();
-
-        List<Status> statusIds = statusDao.getAll(); // statusDao.getIdsForSyncCheck(); TODO
-        List<Event> eventIds = eventDao.getAll();
 
         try {
 
@@ -120,6 +120,32 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             };
 
+            final ServerConnector.RequestSuccessCallback sessionCallback = new ServerConnector.RequestSuccessCallback() {
+                @Override
+                public void success(JSONArray response) {
+                    try {
+                        List<Integer> missingIds = serverConnector.parseJsonResponse(response);
+                        serverConnector.sendSession(sessionDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
+                        Log.i(TAG, "sync elements for EVENT: " + missingIds.size());
+                    } catch (JSONException e) {
+                        Log.w(TAG, "parsing missing IDs response failed", e);
+                    }
+                }
+            };
+
+            final ServerConnector.RequestSuccessCallback captureCallback = new ServerConnector.RequestSuccessCallback() {
+                @Override
+                public void success(JSONArray response) {
+                    try {
+                        List<Integer> missingIds = serverConnector.parseJsonResponse(response);
+                        serverConnector.sendCapture(captureDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
+                        Log.i(TAG, "sync elements for EVENT: " + missingIds.size());
+                    } catch (JSONException e) {
+                        Log.w(TAG, "parsing missing IDs response failed", e);
+                    }
+                }
+            };
+
             final ServerConnector.RequestSuccessCallback eventCallback = new ServerConnector.RequestSuccessCallback() {
                 @Override
                 public void success(JSONArray response) {
@@ -133,10 +159,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             };
 
-            // serverConnector.syncCheckStatus(statusIds, statusCallback, genericFailureCallback);
-            serverConnector.syncCheckEvent(eventIds, eventCallback, genericFailureCallback);
-
-            Log.d(TAG, "syncCheck status");
+            serverConnector.syncCheckStatus(statusDao.getAll(), statusCallback, genericFailureCallback);
+            serverConnector.syncCheckSession(sessionDao.getAll(), sessionCallback, genericFailureCallback);
+            // serverConnector.syncCheckCapture(captureDao.getAll(), captureCallback, genericFailureCallback);
+            serverConnector.syncCheckEvent(eventDao.getAll(), eventCallback, genericFailureCallback);
 
         } catch (Exception e) {
             e.printStackTrace();
