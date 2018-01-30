@@ -51,11 +51,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     PowerbrainConnector powerbrain;
     Recognizer recognizer;
 
-    final String SYNC_AUTHORITY = "de.volzo.despat.web.provider";
-    final String SYNC_ACCOUNT   = "despatSyncAccount";
-
-    Account syncAccount;
-
     TextureView textureView;
 
     @Override
@@ -197,13 +192,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         fabSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Bundle settingsBundle = new Bundle();
-                settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-                settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-
-                ContentResolver.requestSync(syncAccount, SYNC_AUTHORITY, settingsBundle);
-                Log.d(TAG, "sync requested");
+                Util.startSyncManually(Util.createSyncAccount(activity));
             }
         });
 
@@ -224,34 +213,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();
 
-        syncAccount = createSyncAccount(this);
-        ContentResolver.addPeriodicSync(syncAccount, SYNC_AUTHORITY, Bundle.EMPTY, 10*60);
-
-    }
-
-    public Account createSyncAccount(Context context) {
-
-        final String ACCOUNT_TYPE = "de.volzo.despat.servpat";
-
-        Account newAccount = new Account(SYNC_ACCOUNT, ACCOUNT_TYPE);
-        AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
-
-        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-            /*
-             * If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call context.setIsSyncable(account, AUTHORITY, 1)
-             * here.
-             */
-        } else {
-            /*
-             * The account exists or some other error occurred. Log this, report it,
-             * or handle it internally.
-             */
-            Log.w(TAG, "account creation failed");
-        }
-
-        return newAccount;
+        ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1*60);
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

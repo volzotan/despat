@@ -24,6 +24,10 @@ public class Config {
 
     public static final boolean PHONE_HOME                      = true;
 
+    public static final String SYNC_AUTHORITY                   = "de.volzo.despat.web.provider";
+    public static final String SYNC_ACCOUNT_TYPE                = "de.volzo.despat.servpat";
+    public static final String SYNC_ACCOUNT                     = "despatSyncAccount";
+
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = true;
     public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
     public static final int NUMBER_OF_BURST_IMAGES              = 2;

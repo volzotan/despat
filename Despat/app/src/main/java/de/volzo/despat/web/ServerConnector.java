@@ -250,7 +250,7 @@ public class ServerConnector {
                 o.put("deviceId", Config.getUniqueDeviceId(context));
 
                 o.put("eventId", event.getId());
-                o.put("timestamp", dateFormat.format(Calendar.getInstance().getTime()));
+                o.put("timestamp", dateFormat.format(event.getTimestamp()));
 
                 o.put("type", event.getType());
                 o.put("payload", allowNull(event.getPayload()));
