@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
+import de.volzo.despat.support.Util;
 
 
 /**
@@ -84,11 +85,17 @@ public class CameraController {
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
 
-        startBackgroundThread();
+        // startBackgroundThread();
         // stopping the background thread kills the whole application when its
         // done by the ShutterService
 
-        openCamera();
+        try {
+            openCamera();
+        } catch (Exception e) {
+            Util.playSound(context);
+            Log.e(TAG, "opening camera failed", e);
+            throw e;
+        }
     }
 
     public void openCamera() throws Exception {
@@ -105,7 +112,7 @@ public class CameraController {
 
             cameraManager.openCamera(cameraId, cameraStateCallback, null); //backgroundHandler);
         } catch (CameraAccessException e) {
-            Log.e(TAG, "opening camera failed");
+            Log.e(TAG, "accessing camera failed");
             throw e;
         } catch (SecurityException e) {
             Log.w(TAG, "opening camera failed [missing permissions]");
@@ -143,7 +150,7 @@ public class CameraController {
             }
 
             if (controllerCallback != null) {
-                controllerCallback.cameraFailed();
+                controllerCallback.cameraFailed(null);
             }
         }
 
@@ -151,9 +158,9 @@ public class CameraController {
         public void onClosed(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onClosed");
 
-            //cameraOpenCloseLock.release();
+            // cameraOpenCloseLock.release();
 
-            stopBackgroundThread();
+            // stopBackgroundThread();
 
             if (imageReader != null) {
                 imageReader.close();
@@ -190,7 +197,7 @@ public class CameraController {
             }
 
             if (controllerCallback != null) {
-                controllerCallback.cameraFailed();
+                controllerCallback.cameraFailed(error);
             }
         }
     };
@@ -441,6 +448,15 @@ public class CameraController {
     };
 
     public void captureImages() {
+        if (cameraDevice == null) {
+            Log.e(TAG, "camera device missing. trying to reopen");
+            try {
+                openCamera();
+            } catch (Exception e) {
+                Log.e(TAG, "reopening failed", e);
+            }
+        }
+
         lockFocus();
     }
 
@@ -450,6 +466,7 @@ public class CameraController {
 
             state = STATE_WAITING_LOCK;
             captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
+            Log.d(TAG, "# lockFocus");
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -463,6 +480,7 @@ public class CameraController {
             // Tell captureCallback to wait for the precapture sequence to be set.
             state = STATE_WAITING_PRECAPTURE;
             captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
+            Log.d(TAG, "# precapture");
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -532,6 +550,8 @@ public class CameraController {
 
                 captureSession.captureBurst(captureList, localCaptureCallback, backgroundHandler);
             }
+
+            Log.d(TAG, "# captureStill");
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -725,7 +745,7 @@ public class CameraController {
 
         public void cameraOpened() {}
         public void cameraClosed() {}
-        public void cameraFailed() {}
+        public void cameraFailed(Object error) {}
 
         public void intermediateImageTaken() {}
         public void finalImageTaken() {}

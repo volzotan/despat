@@ -28,11 +28,11 @@ public class Config {
     public static final String SYNC_ACCOUNT_TYPE                = "de.volzo.despat.servpat";
     public static final String SYNC_ACCOUNT                     = "despatSyncAccount";
 
-    public static final boolean START_CAMERA_ON_ACTIVITY_START  = true;
+    public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
     public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
     public static final int NUMBER_OF_BURST_IMAGES              = 2;
-    public static final long WAKELOCK_MAX_LIFETIME              = 5000;
-    public static final long SHUTTER_SERVICE_MAX_LIFETIME       = 4000;
+    public static final long WAKELOCK_MAX_LIFETIME              = 9000;
+    public static final long SHUTTER_SERVICE_MAX_LIFETIME       = 8000;
 
     public static final String ACRA_REPORT_URL                  = "http://zoltep.de/report";
 

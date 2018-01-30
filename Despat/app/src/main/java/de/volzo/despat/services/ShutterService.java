@@ -10,8 +10,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.hardware.camera2.CameraAccessException;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.util.Timer;
@@ -49,6 +53,24 @@ public class ShutterService extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    /*
+
+    onStartCommand
+        timer started
+        releaseShutter -->
+
+    releaseShutter / on error --> killServiceDelayed --> onDestroy
+        callback --> complete --> closed
+                     closed   --> killServiceDelayed --> onDestroy
+                     failed   --> onDestroy
+
+    timer --> onDestroy
+
+    onDestroy releaseWakelock|stopForeground
+
+
+    */
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -79,7 +101,7 @@ public class ShutterService extends Service {
         // start and release shutter
         releaseShutter();
 
-        // watchdog: Service must be dead 5 seconds after start
+        // watchdog: Service must be dead X seconds after start
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -127,16 +149,27 @@ public class ShutterService extends Service {
 
             @Override
             public void cameraClosed() {
-
                 // Nexus 5: nasty camera-close-bug workaround
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent shutterServiceIntent = new Intent(despat, ShutterService.class);
-                        stopService(shutterServiceIntent);
+                killServiceDelayed();
+            }
+
+            @Override
+            public void cameraFailed(Object o) {
+                Log.e(TAG, "camera failed");
+
+                String msg = "";
+                if (o != null) {
+                    try {
+                        msg = o.toString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                }, 500);
+                }
+
+                Util.saveEvent(despat, Event.EventType.ERROR, "camera failed: " + msg);
+
+                // camera should already be closed
+                killServiceDelayed();
             }
         };
 
@@ -150,25 +183,48 @@ public class ShutterService extends Service {
                 camera.captureImages();
             }
         } catch (Exception e) {
-            Log.e(TAG, "taking photo failed", e);
+            // opening camera failed
+
+            Log.e(TAG, "taking photo failed (error during opening camera)", e);
 
             Util.saveEvent(this, Event.EventType.ERROR, "shutter failed: " + e.getMessage());
 
             // critical error
             if (Config.REBOOT_ON_CRITICAL_ERROR) despat.criticalErrorReboot();
 
-            despat.releaseWakeLock();
+            killServiceDelayed();
         }
+    }
+
+    private void killServiceDelayed() {
+        Log.d(TAG, "killServiceDelayed");
+
+        final Despat despat = Util.getDespat(this);
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent shutterServiceIntent = new Intent(despat, ShutterService.class);
+                stopService(shutterServiceIntent);
+            }
+        }, 1000);
     }
 
     @Override
     public void onDestroy() {
+        Despat despat = ((Despat) getApplicationContext());
+
+        // is the camera still alive?
+        if (despat.getCamera() != null && !despat.getCamera().isDead()) {
+            Log.e(TAG, "camera still alive on ShutterService destroy");
+            Util.saveEvent(despat, Event.EventType.ERROR, "camera still alive on ShutterService destroy");
+        }
+
         unregisterReceiver(broadcastReceiver);
 
         timer.cancel();
 
-        Despat despat = ((Despat) getApplicationContext());
-        despat.closeCamera();
+        // despat.closeCamera();
         despat.releaseWakeLock();
 
         stopForeground(true);
