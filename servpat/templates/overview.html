@@ -5,6 +5,21 @@
 <a href="{{ url_for('overview', option='today') }}">today</a>  | 
 <a href="{{ url_for('overview', option='all') }}">all time</a>
 
+{% if graph_status %} 
+  
+  <h3><span class="page-title">{{ page_title }}</span></h3>
+
+  <svg class="graph-positions" width="360" height="240"></svg>
+  <svg class="graph-battery" width="360" height="240"></svg>
+  <svg class="graph-memory" width="360" height="240"></svg>
+
+  <script>
+      var graph_status = {{ graph_status | safe }};
+  </script>
+  <script src="{{ url_for('static', filename='device.js') }}"></script>
+
+{% endif %}
+
 <table class="table table-sm table-bordered table-striped ">
   <thead class="thead-inverse">
     <tr>
@@ -25,7 +40,7 @@
     {% for entry in data_status %}
     <tr>
       <td class="col-md-1">{{ entry.id }}</td>
-      <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>
+      <td class="col-md-2"><a href="{{ url_for("overview", option="all") }}?device={{ entry.deviceId }}">{{ entry.deviceId }}</a></td>
       <td class="col-md-2">{{ entry.timestamp | dateformat }}</td>
       <td class="col-md-1">{{ entry.deviceName }}</td>
       <td class="col-md-1 text-right">{{ entry.imagesTaken | suppresszero }}</td>
@@ -58,8 +73,8 @@
     <tr>
       <th>#</th>
       <th>device id</th>
-      <th>serverTimestamp</th>
-      <th class="text-right">sessionId</th>
+      <th>sessionId</th>
+      <th class="text-right">captures</th>
       <th class="text-right">start</th>
       <th class="text-right">end</th>
       <th class="text-right">location</th>
@@ -71,12 +86,12 @@
     <tr>
       <td class="col-md-1">{{ entry.id }}</td>
       <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>
-      <td class="col-md-2">{{ entry.serverTimestamp | dateformat }}</td>
-      <td class="col-md-1 text-right">{{ entry.sessionId }}</td>
+      <td class="col-md-1">{{ entry.sessionId }}</td>
+      <td class="col-md-1 text-right">{{ TODO }}</td>
       <td class="col-md-2 text-right">{{ entry.start | dateformat }}</td>
       <td class="col-md-2 text-right">{{ entry.end | dateformat }}</td>
-      <td class="col-md-1 text-right">
-        <a href="{{ [entry.latitude, entry.longitude] | location }}">
+      <td class="col-md-2 text-right">
+        <a href="{{ [entry.latitude, entry.longitude] | location }}" target="_blank">
           {{ entry.latitude}}, {{entry.longitude}}
         </a>
       </td>
@@ -86,12 +101,43 @@
     <tr>
       <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
+      <td class="col-md-2"> - </td>
+      <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<table class="table table-sm table-bordered table-striped ">
+  <thead class="thead-inverse">
+    <tr>
+      <th>#</th>
+      <th>device id</th>
+      <th>captureId</th>
+      <th>sessionId</th>
+      <th class="text-right">recordingTime</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in data_capture %}
+    <tr>
+      <td class="col-md-1">{{ entry.id }}</td>
+      <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>
+      <td class="col-md-2">{{ entry.captureId }}</td>
+      <td class="col-md-2">{{ entry.sessionId }}</td>
+      <td class="col-md-5 text-right">{{ entry.recordingTime | dateformat }}</td>
+    </tr>
+    {% else %}
+    <tr>
       <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
       <td class="col-md-2"> - </td>
-      <td class="col-md-1"> - </td>
-      <td class="col-md-1"> - </td>
+      <td class="col-md-2"> - </td>
+      <td class="col-md-5"> - </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -116,7 +162,7 @@
       <td class="col-md-2">{{ entry.timestamp | dateformat }}</td>
       <td class="col-md-1">{{ entry.deviceName }}</td>
       <td class="col-md-2">{{ entry.type | eventtype }}</td>
-      <td class="col-md-4">{{ entry.payload }}</td>
+      <td class="col-md-4">{{ entry.payload | suppressnull }}</td>
     </tr>
     {% else %}
     <tr>
