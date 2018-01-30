@@ -83,6 +83,8 @@ public class ServerConnector {
 
     public void syncCheckStatus(List<Status> ids, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
 
+        if (ids.size() == 0) return;
+
         JSONArray arr = new JSONArray();
         for (Status status : ids) {
             JSONObject o = new JSONObject();
@@ -98,6 +100,8 @@ public class ServerConnector {
     }
 
     public void syncCheckSession(List<Session> ids, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
+
+        if (ids.size() == 0) return;
 
         JSONArray arr = new JSONArray();
         for (Session session : ids) {
@@ -115,6 +119,8 @@ public class ServerConnector {
 
     public void syncCheckCapture(List<Capture> ids, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
 
+        if (ids.size() == 0) return;
+
         JSONArray arr = new JSONArray();
         for (Capture capture : ids) {
             JSONObject o = new JSONObject();
@@ -126,10 +132,12 @@ public class ServerConnector {
             arr.put(o);
         }
 
-        send("/sync/" + "session", arr, successCallback, failureCallback);
+        send("/sync/" + "capture", arr, successCallback, failureCallback);
     }
 
     public void syncCheckEvent(List<Event> ids, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) throws Exception {
+
+        if (ids.size() == 0) return;
 
         JSONArray arr = new JSONArray();
         for (Event event : ids) {

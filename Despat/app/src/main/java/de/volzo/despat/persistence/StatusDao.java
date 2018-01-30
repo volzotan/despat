@@ -38,4 +38,7 @@ public interface StatusDao {
 
     @Delete
     void delete(Status status);
+
+    @Query("DELETE FROM status")
+    public void dropTable();
 }

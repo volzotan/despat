@@ -27,4 +27,7 @@ public interface CaptureDao {
 
     @Delete
     void delete(Capture capture);
+
+    @Query("DELETE FROM capture")
+    public void dropTable();
 }

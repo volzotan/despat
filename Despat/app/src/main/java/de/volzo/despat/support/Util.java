@@ -10,9 +10,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.StatFs;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
@@ -45,6 +48,8 @@ import de.volzo.despat.SystemController;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
+import de.volzo.despat.persistence.StatusDao;
+import de.volzo.despat.services.ShutterService;
 
 import static android.content.Context.ACCOUNT_SERVICE;
 
@@ -227,6 +232,29 @@ public class Util {
 
         ContentResolver.requestSync(syncAccount, Config.SYNC_AUTHORITY, settingsBundle);
         Log.i(TAG, "MANUAL SYNC REQUESTED");
+    }
+
+    public static void purgeDatabase(Context context) {
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+
+        db.eventDao().dropTable();
+        db.captureDao().dropTable();
+        db.sessionDao().dropTable();
+        db.statusDao().dropTable();
+    }
+
+    public static void playSound(Context context) {
+
+        final MediaPlayer mp = MediaPlayer.create(context, Settings.System.DEFAULT_NOTIFICATION_URI);
+        mp.start();
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mp.release();
+            }
+        }, 1000);
     }
 
     public static String getHumanReadableTimediff(Date d1, Date d2) {

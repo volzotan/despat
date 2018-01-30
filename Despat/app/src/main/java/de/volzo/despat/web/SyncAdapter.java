@@ -126,7 +126,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     try {
                         List<Integer> missingIds = serverConnector.parseJsonResponse(response);
                         serverConnector.sendSession(sessionDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
-                        Log.i(TAG, "sync elements for EVENT: " + missingIds.size());
+                        Log.i(TAG, "sync elements for SESSION: " + missingIds.size());
                     } catch (JSONException e) {
                         Log.w(TAG, "parsing missing IDs response failed", e);
                     }
@@ -139,7 +139,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     try {
                         List<Integer> missingIds = serverConnector.parseJsonResponse(response);
                         serverConnector.sendCapture(captureDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
-                        Log.i(TAG, "sync elements for EVENT: " + missingIds.size());
+                        Log.i(TAG, "sync elements for CAPTURE: " + missingIds.size());
                     } catch (JSONException e) {
                         Log.w(TAG, "parsing missing IDs response failed", e);
                     }
@@ -161,7 +161,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             serverConnector.syncCheckStatus(statusDao.getAll(), statusCallback, genericFailureCallback);
             serverConnector.syncCheckSession(sessionDao.getAll(), sessionCallback, genericFailureCallback);
-            // serverConnector.syncCheckCapture(captureDao.getAll(), captureCallback, genericFailureCallback);
+            serverConnector.syncCheckCapture(captureDao.getAll(), captureCallback, genericFailureCallback);
             serverConnector.syncCheckEvent(eventDao.getAll(), eventCallback, genericFailureCallback);
 
         } catch (Exception e) {

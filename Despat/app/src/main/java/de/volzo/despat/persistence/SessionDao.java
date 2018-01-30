@@ -36,4 +36,7 @@ public interface SessionDao {
 
     @Delete
     void delete(Session session);
+
+    @Query("DELETE FROM session")
+    public void dropTable();
 }
