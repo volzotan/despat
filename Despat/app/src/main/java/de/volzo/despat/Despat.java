@@ -1,7 +1,6 @@
 package de.volzo.despat;
 
 import android.app.Application;
-import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
@@ -11,11 +10,9 @@ import com.facebook.stetho.Stetho;
 import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
 
-import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
-import de.volzo.despat.web.ServerConnector;
 
 @AcraCore(buildConfigClass = BuildConfig.class)
 public class Despat extends Application {

@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -104,8 +105,19 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             public void onClick(View view) {
                 if (!RecordingSession.getInstance(activity).isActive()) { // if (!Util.isServiceRunning(activity, ShutterService.class)) {
                     Log.d(TAG, "startCapturing");
-                    RecordingSession session = RecordingSession.getInstance(activity);
-                    session.startRecordingSession(null);
+
+                    Despat despat = Util.getDespat(activity);
+                    despat.closeCamera();
+
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            RecordingSession session = RecordingSession.getInstance(activity);
+                            session.startRecordingSession(null);
+                        }
+                    }, 1000);
+
                     startStopCapturing.setChecked(true);
                 } else {
                     Log.d(TAG, "stopCapturing");
@@ -166,16 +178,18 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onClick(View view) {
 
-                // FIXME
-                Despat despat = Util.getDespat(activity);
-                SystemController systemController = despat.getSystemController();
-                systemController.reboot();
-
                 Intent killIntent = new Intent(activity, Orchestrator.class);
                 killIntent.putExtra("service", Broadcast.ALL_SERVICES);
                 killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
                 sendBroadcast(killIntent);
 
+                Util.purgeDatabase(activity);
+
+                Log.i(TAG, "KILL: db purged. now attempting reboot!");
+
+                Despat despat = Util.getDespat(activity);
+                SystemController systemController = despat.getSystemController();
+                systemController.reboot();
             }
         });
 
@@ -320,6 +334,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     public void startCamera() {
+
+        if (RecordingSession.getInstance(activity).isActive()) {
+            Log.i(TAG, "no preview while recordingSession is active");
+            return;
+        }
 
         despat.closeCamera();
         try {
