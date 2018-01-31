@@ -46,6 +46,17 @@ public class Session {
     @ColumnInfo(name = "resumed")
     private boolean resumed = false;
 
+    // --- additional information --- //
+
+    @ColumnInfo(name = "shutter_interval")
+    private Integer shutterIntervall;
+
+    @ColumnInfo(name = "shutter_interval")
+    private Double exposureThreshold;
+
+    @ColumnInfo(name = "exposure_compensation")
+    private Double exposureCompensation;
+
     public Location getLocation() {
 
         if (getLatitude() == null || getLongitude() == null) return null;
@@ -133,5 +144,29 @@ public class Session {
 
     public void setResumed(boolean resumed) {
         this.resumed = resumed;
+    }
+
+    public Integer getShutterIntervall() {
+        return shutterIntervall;
+    }
+
+    public void setShutterIntervall(Integer shutterIntervall) {
+        this.shutterIntervall = shutterIntervall;
+    }
+
+    public Double getExposureThreshold() {
+        return exposureThreshold;
+    }
+
+    public void setExposureThreshold(Double exposureThreshold) {
+        this.exposureThreshold = exposureThreshold;
+    }
+
+    public Double getExposureCompensation() {
+        return exposureCompensation;
+    }
+
+    public void setExposureCompensation(Double exposureCompensation) {
+        this.exposureCompensation = exposureCompensation;
     }
 }
