@@ -15,6 +15,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -62,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         Log.i(TAG, "application init");
 
         despat = ((Despat) getApplicationContext());
+
+//        Util.disableDoze();
+        whitelistAppForDoze();
 
         if (!checkPermissionsAreGiven()) {
             requestPermissions();
@@ -429,7 +434,18 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         tvStatus.setText("n: " + res.coordinates.length);
     }
 
-    public boolean checkPermissionsAreGiven() {
+    private void whitelistAppForDoze() {
+        PowerManager powerManger = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+        if (!powerManger.isIgnoringBatteryOptimizations("de.volzo.despat")) { // getPackageName()
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            Uri uri = Uri.fromParts("package", getPackageName(), null);
+            intent.setData(uri);
+            startActivity(intent);
+        }
+    }
+
+    private boolean checkPermissionsAreGiven() {
 
         Activity activity = this;
 
@@ -443,7 +459,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
     }
 
-    public void requestPermissions() {
+    private void requestPermissions() {
         ActivityCompat.requestPermissions(activity,
                 new String[]{Manifest.permission.CAMERA,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
