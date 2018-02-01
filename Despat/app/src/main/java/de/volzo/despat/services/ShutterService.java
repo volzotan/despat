@@ -43,7 +43,8 @@ public class ShutterService extends Service {
     public static final int REQUEST_CODE                = 0x1200;
     public static final int FOREGROUND_NOTIFICATION_ID  = 0x0500;
 
-    Timer timer;
+    Context context;
+    Handler handler;
 
     public ShutterService() {}
 
@@ -62,7 +63,7 @@ public class ShutterService extends Service {
     releaseShutter / on error --> killServiceDelayed --> onDestroy
         callback --> complete --> closed
                      closed   --> killServiceDelayed --> onDestroy
-                     failed   --> onDestroy
+                     failed   --> closed
 
     timer --> onDestroy
 
@@ -71,22 +72,34 @@ public class ShutterService extends Service {
 
     */
 
+    Runnable cameraKillRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.wtf(TAG, "CAMERA WATCHDOG KILL");
+            Util.saveEvent(context, Event.EventType.ERROR, "camera: watchdog kill");
+
+            Despat despat = Util.getDespat(context);
+            despat.closeCamera();
+        }
+    };
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.d(TAG, "SHUTTER SERVICE invoked");
 
-        final Context context = this;
+        context = this;
+
+        handler = new Handler();
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = new Notification.Builder(context.getApplicationContext())
                 .setContentTitle("despat Shutter Service")
                 .setContentText("active")
                 .setSmallIcon(R.drawable.ic_notification)
-                //.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentIntent(pendingIntent)
                 .setTicker("ticker text")
                 .setPriority(Notification.PRIORITY_HIGH)
@@ -101,20 +114,7 @@ public class ShutterService extends Service {
         // start and release shutter
         releaseShutter();
 
-        // watchdog: Service must be dead X seconds after start
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Log.wtf(TAG, "SHUTTER SERVICE WATCHDOG KILL");
-                Util.saveEvent(context, Event.EventType.ERROR, "ShutterService: watchdog kill");
-
-                Intent shutterServiceIntent = new Intent(context, ShutterService.class);
-                context.stopService(shutterServiceIntent);
-            }
-        }, Config.SHUTTER_SERVICE_MAX_LIFETIME);
-
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -130,6 +130,7 @@ public class ShutterService extends Service {
         SystemController systemController = despat.getSystemController();
 
         despat.acquireWakeLock();
+        handler.postDelayed(cameraKillRunnable, Config.SHUTTER_CAMERA_MAX_LIFETIME);
 
         RecordingSession session = RecordingSession.getInstance(this);
         Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + session.getImagesTaken());
@@ -149,8 +150,7 @@ public class ShutterService extends Service {
 
             @Override
             public void cameraClosed() {
-                // Nexus 5: nasty camera-close-bug workaround
-                killServiceDelayed();
+                shutterReleaseFinished();
             }
 
             @Override
@@ -168,15 +168,14 @@ public class ShutterService extends Service {
 
                 Util.saveEvent(despat, Event.EventType.ERROR, "camera failed: " + msg);
 
-                // camera should already be closed
-                killServiceDelayed();
+                // camera should close itself and call onClosed
             }
         };
 
         try {
             if (camera == null || camera.isDead()) {
                 Log.d(TAG, "CamController created");
-                camera = new CameraController(this, callback, null);
+                camera = new CameraController(this, callback, null, this.getMainLooper());
                 despat.setCamera(camera);
             } else {
                 Log.d(TAG, "CamController already up and running");
@@ -192,22 +191,15 @@ public class ShutterService extends Service {
             // critical error
             if (Config.REBOOT_ON_CRITICAL_ERROR) despat.criticalErrorReboot();
 
-            killServiceDelayed();
+            shutterReleaseFinished();
         }
     }
 
-    private void killServiceDelayed() {
-        Log.d(TAG, "killServiceDelayed");
+    private void shutterReleaseFinished() {
+        handler.removeCallbacks(cameraKillRunnable);
 
-        final Despat despat = Util.getDespat(this);
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent shutterServiceIntent = new Intent(despat, ShutterService.class);
-                stopService(shutterServiceIntent);
-            }
-        }, 1000);
+        Despat despat = Util.getDespat(this);
+        despat.releaseWakeLock();
     }
 
     @Override
@@ -221,12 +213,8 @@ public class ShutterService extends Service {
         }
 
         unregisterReceiver(broadcastReceiver);
-
-        timer.cancel();
-
-        // despat.closeCamera();
+        handler.removeCallbacksAndMessages(null);
         despat.releaseWakeLock();
-
         stopForeground(true);
 
         Log.d(TAG, "shutterService destroyed");

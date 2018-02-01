@@ -11,6 +11,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
@@ -18,6 +19,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Size;
@@ -62,7 +64,7 @@ public class CameraController {
 
     private CaptureRequest previewRequest;
 
-    private Handler backgroundHandler;
+    private Handler backgroundHandler = null;
     private HandlerThread backgroundThread;
 
     private ImageReader imageReader;
@@ -80,12 +82,12 @@ public class CameraController {
     public static final int STATE_WAITING_NON_PRECAPTURE    = 5;
     public static final int STATE_PICTURE_TAKEN             = 6;
 
-    public CameraController(Context context, ControllerCallback controllerCallback, TextureView textureView) throws Exception {
+    public CameraController(Context context, ControllerCallback controllerCallback, TextureView textureView, Looper looper) throws Exception {
         this.context = context;
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
 
-        // startBackgroundThread();
+        startBackgroundThread(looper);
         // stopping the background thread kills the whole application when its
         // done by the ShutterService
 
@@ -160,7 +162,7 @@ public class CameraController {
 
             // cameraOpenCloseLock.release();
 
-            // stopBackgroundThread();
+            stopBackgroundThread();
 
             if (imageReader != null) {
                 imageReader.close();
@@ -331,18 +333,29 @@ public class CameraController {
                 public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
                     Log.e(TAG, "creating capture session failed");
                 }
-            }, null);
+
+                @Override
+                public void onClosed(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    Log.d(TAG, "# onClosed CaptureSession");
+                }
+
+            }, backgroundHandler);
         } catch (CameraAccessException e) {
             Log.d(TAG, "creating capture session failed", e);
             throw e;
         }
     }
 
-    protected void startBackgroundThread() {
+    protected void startBackgroundThread(Looper looper) {
         Log.d(TAG, "# startBackgroundThread");
-        backgroundThread = new HandlerThread("Camera Background");
-        backgroundThread.start();
-        backgroundHandler = new Handler(backgroundThread.getLooper());
+
+        if (looper == null) {
+            backgroundThread = new HandlerThread("Camera Background");
+            backgroundThread.start();
+            backgroundHandler = new Handler(backgroundThread.getLooper());
+        } else {
+            backgroundHandler = new Handler(looper);
+        }
     }
 
     protected void stopBackgroundThread() {
@@ -376,16 +389,16 @@ public class CameraController {
 
         private void process(CaptureResult result) {
 
-//            if (state != STATE_PREVIEW){
-//                Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-//                Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-//
-//                if (afState == null || aeState == null) {
-//                    Log.e(TAG, "control state null");
-//                } else {
-//                    logCameraAutomaticModeState(afState, aeState);
-//                }
-//            }
+            if (state != STATE_PREVIEW){
+                Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+
+                if (afState == null || aeState == null) {
+                    Log.e(TAG, "control state null");
+                } else {
+                    logCameraAutomaticModeState(afState, aeState);
+                }
+            }
 
             switch (state) {
                 case STATE_PREVIEW: {
@@ -523,15 +536,28 @@ public class CameraController {
                     }
                     // final image of burstSequence
 
+                    // beware, the image may not be written to disk at this point
+
                     Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
                     ImageRollover imgroll = new ImageRollover(context);
                     File image = imgroll.getNewestImage();
-                    intent.putExtra(Broadcast.DATA_PICTURE_PATH, image.getAbsolutePath());
+                    if (image != null) intent.putExtra(Broadcast.DATA_PICTURE_PATH, image.getAbsolutePath());
                     context.sendBroadcast(intent);
 
                     if (controllerCallback != null) controllerCallback.finalImageTaken();
 
                     unlockFocus();
+                }
+
+                public void onCaptureFailed(@NonNull CameraCaptureSession session,
+                                            @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
+                    Log.d(TAG, "# onCaptureFailed");
+                }
+
+
+                public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession session,
+                                                       int sequenceId, long frameNumber) {
+                    Log.d(TAG, "# onSequenceCompleted");
                 }
             };
 
@@ -593,6 +619,11 @@ public class CameraController {
 
         try {
             cameraOpenCloseLock.acquire();
+
+            if (captureSession != null) {
+                captureSession.close();
+                captureSession = null;
+            }
 
             if (cameraDevice != null) {
                 cameraDevice.close();

@@ -9,6 +9,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
+import android.os.PowerManager;
 import android.util.Log;
 
 import java.io.File;
@@ -36,7 +38,7 @@ public class Orchestrator extends BroadcastReceiver {
     private Context context;
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
 
         this.context = context;
 
@@ -46,7 +48,19 @@ public class Orchestrator extends BroadcastReceiver {
 //            Util.backupLogcat(null);
 //        }
 
-        if (Config.BACKUP_LOGCAT) Util.backupLogcat(null);
+        if (Config.BACKUP_LOGCAT) {
+
+            // during saving and clearing the log some
+            // lines get lost if theres a lot of output happening
+
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Util.backupLogcat(null);
+                }
+            }, 500);
+        }
 
         String action       = intent.getAction();
         String service      = intent.getStringExtra("service");
@@ -71,22 +85,30 @@ public class Orchestrator extends BroadcastReceiver {
                             // TODO: simply start a new one? in which cases could resuming fail? (empty db)
                         }
 
-                        Config.setResumeAfterReboot(context, false);
+                        Config.setResumeAfterReboot(context, false); // TODO
                     }
 
                     break;
+                case "android.os.action.POWER_SAVE_MODE_CHANGED":
+                    Util.saveEvent(context, Event.EventType.SLEEP_MODE_CHANGE, "POWER_SAVE_MODE_CHANGED");
+                    Log.d(TAG, "+++ power save mode change");
+                case "android.os.action.DEVICE_IDLE_MODE_CHANGED": // PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED
+                    Util.saveEvent(context, Event.EventType.SLEEP_MODE_CHANGE, "DEVICE_IDLE_MODE_CHANGED");
+                    Log.d(TAG, "+++ power manager mode change");
                 case "android.intent.action.SCREEN_OFF":
                     Util.saveEvent(context, Event.EventType.DISPLAY_OFF, null);
+                    Log.d(TAG, "+++ display off");
                     break;
                 case "android.intent.action.SCREEN_ON":
                     Util.saveEvent(context, Event.EventType.DISPLAY_ON, null);
+                    Log.d(TAG, "+++ display on");
                     break;
 
                 case Broadcast.PICTURE_TAKEN:
                     try {
                         RecordingSession session = RecordingSession.getInstance(context);
                         String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
-                        session.addCapture(new File(path));
+                        if (path != null) session.addCapture(new File(path));
                         Util.updateNotification(context, session.getImagesTaken());
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "image taken after recordingSession stopped");
@@ -181,13 +203,16 @@ public class Orchestrator extends BroadcastReceiver {
         if (!Util.isServiceRunning(context, ShutterService.class)) {
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
             context.startService(shutterServiceIntent);
-        } else {
-//            Intent triggerIntent = new Intent();
-//            triggerIntent.setAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
-//            context.sendBroadcast(triggerIntent);
 
-            Util.saveEvent(context, Event.EventType.ERROR, "shutter running overtime");
-            Log.wtf(TAG, "SHUTTER RUNNING OVERTIME");
+            Util.saveEvent(context, Event.EventType.INFO, "ShutterService START");
+            Log.i(TAG, "ShutterService start");
+        } else {
+            Intent triggerIntent = new Intent();
+            triggerIntent.setAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
+            context.sendBroadcast(triggerIntent);
+
+//            Util.saveEvent(context, Event.EventType.ERROR, "shutter running overtime");
+//            Log.wtf(TAG, "SHUTTER RUNNING OVERTIME");
         }
 
         // trigger the next invocation
@@ -203,8 +228,21 @@ public class Orchestrator extends BroadcastReceiver {
 
         long nextExecution = ((now + Config.getShutterInterval(context)) / 1000) * 1000;
 
-        // as of API lvl 19, all repeating alarms are inexact,
-        // so a single alarm needs to schedule the next one
+        /*
+         * A note on alarms:
+         *
+         * as of API lvl 19, all repeating alarms are inexact,
+         * so a single alarm needs to schedule the next one.
+         * If that's the strategy of choice, this works for about
+         * 60 to 70 minutes till Doze mode kicks in.
+         * Upside: .andAllowWhileIdle(...) fires in Doze mode too
+         * Downside: at most once every 9 minutes.
+         *
+         * So despat needs to be whitelisted on
+         * settings > battery optimization
+         *
+         * */
+
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
 
         // update the notification

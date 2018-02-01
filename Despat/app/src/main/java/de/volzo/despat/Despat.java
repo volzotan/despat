@@ -74,6 +74,10 @@ public class Despat extends Application {
         } else {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DespatWakeLockTag");
+
+            if (wakeLock == null) {
+                Log.e(TAG, "acquiring wake lock failed");
+            }
         }
 
         wakeLock.acquire(Config.WAKELOCK_MAX_LIFETIME);

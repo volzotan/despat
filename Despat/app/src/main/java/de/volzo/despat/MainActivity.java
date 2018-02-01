@@ -14,7 +14,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
@@ -83,18 +85,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             despat.getSystemController().startTemperatureMeasurement();
         }
 
-        // kill all services remaining from prior app starts
-//        Intent killIntent = new Intent(activity, Orchestrator.class);
-//        killIntent.putExtra("service", Broadcast.ALL_SERVICES);
-//        killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
-//        sendBroadcast(killIntent);
-
         powerbrain = new PowerbrainConnector(this);
         powerbrain.connect();
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
-
 
         Button btConfigure = (Button) findViewById(R.id.bt_configure);
         btConfigure.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 startActivity(intent);
             }
         });
-        final ToggleButton startStopCapturing = (ToggleButton) findViewById(R.id.bt_startStopCapturing);
+        final ToggleButton startStopCapturing = findViewById(R.id.bt_startStopCapturing);
         startStopCapturing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -155,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 CameraController camera = despat.getCamera();
 
                 if (camera == null || camera.isDead()){
-                    activity.startCamera();
+                    activity.startCamera(null);
                 } else {
                     despat.closeCamera();
                 }
@@ -207,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        FloatingActionButton fabSync = (FloatingActionButton) findViewById(R.id.fab_sync);
+        FloatingActionButton fabSync = findViewById(R.id.fab_sync);
         fabSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -297,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
             if (checkPermissionsAreGiven()) {
-                startCamera();
+                startCamera(null);
             }
         }
     }
@@ -338,7 +333,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
     }
 
-    public void startCamera() {
+    public void startCamera(Looper looper) {
 
         if (RecordingSession.getInstance(activity).isActive()) {
             Log.i(TAG, "no preview while recordingSession is active");
@@ -347,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            despat.setCamera(new CameraController(this, null, textureView));
+            despat.setCamera(new CameraController(this, null, textureView, looper));
         } catch (Exception cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -392,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         if (camera == null || camera.isDead()) {
             try {
-                despat.setCamera(new CameraController(this, callback, null));
+                despat.setCamera(new CameraController(this, callback, null, null));
             } catch (Exception e) {
                 Log.e(TAG, "starting camera failed", e);
             }
