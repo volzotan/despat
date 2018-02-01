@@ -133,6 +133,36 @@ public class Util {
     }
 
 
+    public static void redirectLogcat() {
+        File appDirectory = Config.LOGCAT_DIR;
+        File logDirectory = new File(appDirectory + "/log");
+
+        DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT_LOGFILE, new Locale("de", "DE"));
+        File logFile = new File(logDirectory, "logcat_" + dateFormat.format(Calendar.getInstance().getTime()) + ".txt");
+
+        // create app folder
+        if (!appDirectory.exists()) {
+            appDirectory.mkdir();
+        }
+
+        // create log folder
+        if (!logDirectory.exists()) {
+            logDirectory.mkdir();
+        }
+
+        if (logFile.exists()) {
+            logFile.delete();
+        }
+
+        // clear the previous logcat and then write the new one to the file
+        try {
+            Process process = Runtime.getRuntime().exec("logcat -c");
+            process = Runtime.getRuntime().exec("logcat -f " + logFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void clearLogcat() {
         try {
             Process process = Runtime.getRuntime().exec("logcat -c");
@@ -164,14 +194,6 @@ public class Util {
             logDirectory.mkdir();
         }
 
-        // clear the previous logcat and then write the new one to the file
-//        try {
-//            Process process = Runtime.getRuntime().exec("logcat -c");
-//            process = Runtime.getRuntime().exec("logcat -f " + logFile); // + " *:S MyActivity:D MyActivity2:D");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
         BufferedReader bufferedReader = null;
         BufferedWriter bufferedWriter = null;
         try {
@@ -182,7 +204,7 @@ public class Util {
 
             String line = "";
             while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains("beginning of main")) continue;
+                if (line.startsWith("beginning of main")) continue;
 
                 bufferedWriter.write(line);
                 bufferedWriter.write("\n");

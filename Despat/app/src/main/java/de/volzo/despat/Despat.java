@@ -38,6 +38,8 @@ public class Despat extends Application {
         // Stetho Debug Library
         Stetho.initializeWithDefaults(this);
 
+        if (Config.REDIRECT_LOGCAT) Util.redirectLogcat();
+
         systemController = new SystemController(this);
 
         // send APPSTART event
