@@ -49,9 +49,9 @@ public class Session {
     // --- additional information --- //
 
     @ColumnInfo(name = "shutter_interval")
-    private Integer shutterIntervall;
+    private Integer shutterInterval;
 
-    @ColumnInfo(name = "shutter_interval")
+    @ColumnInfo(name = "exposure_threshold")
     private Double exposureThreshold;
 
     @ColumnInfo(name = "exposure_compensation")
@@ -146,12 +146,12 @@ public class Session {
         this.resumed = resumed;
     }
 
-    public Integer getShutterIntervall() {
-        return shutterIntervall;
+    public Integer getShutterInterval() {
+        return shutterInterval;
     }
 
-    public void setShutterIntervall(Integer shutterIntervall) {
-        this.shutterIntervall = shutterIntervall;
+    public void setShutterInterval(Integer shutterInterval) {
+        this.shutterInterval = shutterInterval;
     }
 
     public Double getExposureThreshold() {

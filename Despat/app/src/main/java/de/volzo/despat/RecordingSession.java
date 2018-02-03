@@ -18,6 +18,7 @@ import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.services.Orchestrator;
+import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
@@ -35,11 +36,30 @@ public class RecordingSession {
     private Session session;
 
     //private constructor.
-    private RecordingSession(){
+    private RecordingSession(Context context){
 
         //Prevent form the reflection api.
         if (instance != null){
             throw new RuntimeException("Use getInstance() method to get the single instance of this class.");
+        }
+
+        this.context = context;
+
+        // reopen session?
+
+        if (!Util.isServiceRunning(context, ShutterService.class)) return;
+
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+        session = sessionDao.getLast();
+
+        if (session == null) return;
+
+        // if the newest session was closed, don't reopen it.
+        if (session.getEnd() != null) {
+            session = null;
+        } else {
+            Log.i(TAG, "reopened session: " + session.getSessionName());
         }
     }
 
@@ -47,14 +67,7 @@ public class RecordingSession {
         if (instance == null) { //if there is no instance available... create new one
             synchronized (RecordingSession.class) {
                 if (instance == null) {
-                    instance = new RecordingSession();
-
-                    // TODO:
-                    // There is the potential for fuckup here:
-                    // if the context is the activity and the RecordingSession-object
-                    // lives long enough to be called by the ShutterService (which is its own context)
-                    // there may be two different contextes at work
-                    instance.context = context;
+                    instance = new RecordingSession(context);
                 }
             }
         }
@@ -121,7 +134,6 @@ public class RecordingSession {
             throw new Exception("Session still recording");
         }
 
-        Despat despat = Util.getDespat(context);
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
 
@@ -138,7 +150,7 @@ public class RecordingSession {
         }
         session.setResumed(true);
 
-        sessionDao.insert(session);
+        sessionDao.update(session);
 
         Log.d(TAG, "resume RecordingSession [" + session.getSessionName() + "]");
 
@@ -160,7 +172,11 @@ public class RecordingSession {
         shutterIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
         context.sendBroadcast(shutterIntent);
 
-        if (!isActive()) throw new NotRecordingException();
+        session.setEnd(Calendar.getInstance().getTime());
+
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+        sessionDao.update(session);
 
         session = null;
 

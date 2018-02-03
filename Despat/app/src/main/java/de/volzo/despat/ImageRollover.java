@@ -146,21 +146,25 @@ public class ImageRollover {
             }
         }
 
-        imageFiles.sort(new Comparator<File>() {
-            @Override
-            public int compare(File file, File t1) {
-                Date dateFile = new Date(file.lastModified());
-                Date dateCompare = new Date(t1.lastModified());
+        if (android.os.Build.VERSION.SDK_INT >= 24) {
+            imageFiles.sort(new Comparator<File>() {
+                @Override
+                public int compare(File file, File t1) {
+                    Date dateFile = new Date(file.lastModified());
+                    Date dateCompare = new Date(t1.lastModified());
 
-                if (dateFile.after(dateCompare)) {
-                    return +1;
-                } else if (dateCompare.after(dateFile)) {
-                    return -1;
-                } else {
-                    return 0;
+                    if (dateFile.after(dateCompare)) {
+                        return +1;
+                    } else if (dateCompare.after(dateFile)) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            Log.w(TAG, "deleting in unsorted order");
+        }
 
         int deleteCounter = 0;
         for (File f : imageFiles) {

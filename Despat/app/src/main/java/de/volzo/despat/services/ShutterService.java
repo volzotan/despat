@@ -15,9 +15,12 @@ import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -102,14 +105,18 @@ public class ShutterService extends Service {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentIntent(pendingIntent)
                 .setTicker("ticker text")
-                .setPriority(Notification.PRIORITY_HIGH)
+                .setPriority(Notification.PRIORITY_MAX)
                 .build();
 
         startForeground(FOREGROUND_NOTIFICATION_ID, notification);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
-        registerReceiver(broadcastReceiver, filter);
+        registerReceiver(shutterReceiver, filter);
+
+        filter = new IntentFilter();
+        filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        registerReceiver(powerReceiver, filter);
 
         // start and release shutter
         releaseShutter();
@@ -117,7 +124,15 @@ public class ShutterService extends Service {
         return START_STICKY;
     }
 
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver powerReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            Util.saveEvent(context, Event.EventType.SLEEP_MODE_CHANGE, "in idle mode: " + pm.isDeviceIdleMode());
+            Log.d(TAG, "+++ in idle mode: " + pm.isDeviceIdleMode());
+        }
+    };
+
+    private final BroadcastReceiver shutterReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             releaseShutter();
@@ -125,6 +140,20 @@ public class ShutterService extends Service {
     };
 
     public void releaseShutter() {
+
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
+//                intent.putExtra(Broadcast.DATA_PICTURE_PATH, "");
+//                context.sendBroadcast(intent);
+//
+//                shutterReleaseFinished();
+//            }
+//        }, 4000);
+//
+//        if (true) return;
 
         final Despat despat = Util.getDespat(this);
         SystemController systemController = despat.getSystemController();
@@ -175,7 +204,7 @@ public class ShutterService extends Service {
         try {
             if (camera == null || camera.isDead()) {
                 Log.d(TAG, "CamController created");
-                camera = new CameraController(this, callback, null, this.getMainLooper());
+                camera = new CameraController(this, callback, null);
                 despat.setCamera(camera);
             } else {
                 Log.d(TAG, "CamController already up and running");
@@ -212,7 +241,8 @@ public class ShutterService extends Service {
             Util.saveEvent(despat, Event.EventType.ERROR, "camera still alive on ShutterService destroy");
         }
 
-        unregisterReceiver(broadcastReceiver);
+        unregisterReceiver(shutterReceiver);
+        unregisterReceiver(powerReceiver);
         handler.removeCallbacksAndMessages(null);
         despat.releaseWakeLock();
         stopForeground(true);

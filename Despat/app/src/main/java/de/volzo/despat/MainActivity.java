@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 CameraController camera = despat.getCamera();
 
                 if (camera == null || camera.isDead()){
-                    activity.startCamera(null);
+                    activity.startCamera();
                 } else {
                     despat.closeCamera();
                 }
@@ -292,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
             if (checkPermissionsAreGiven()) {
-                startCamera(null);
+                startCamera();
             }
         }
     }
@@ -333,7 +333,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
     }
 
-    public void startCamera(Looper looper) {
+    public void startCamera() {
 
         if (RecordingSession.getInstance(activity).isActive()) {
             Log.i(TAG, "no preview while recordingSession is active");
@@ -342,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            despat.setCamera(new CameraController(this, null, textureView, looper));
+            despat.setCamera(new CameraController(this, null, textureView));
         } catch (Exception cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -387,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         if (camera == null || camera.isDead()) {
             try {
-                despat.setCamera(new CameraController(this, callback, null, null));
+                despat.setCamera(new CameraController(this, callback, null));
             } catch (Exception e) {
                 Log.e(TAG, "starting camera failed", e);
             }

@@ -89,12 +89,6 @@ public class Orchestrator extends BroadcastReceiver {
                     }
 
                     break;
-                case "android.os.action.POWER_SAVE_MODE_CHANGED":
-                    Util.saveEvent(context, Event.EventType.SLEEP_MODE_CHANGE, "POWER_SAVE_MODE_CHANGED");
-                    Log.d(TAG, "+++ power save mode change");
-                case "android.os.action.DEVICE_IDLE_MODE_CHANGED": // PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED
-                    Util.saveEvent(context, Event.EventType.SLEEP_MODE_CHANGE, "DEVICE_IDLE_MODE_CHANGED");
-                    Log.d(TAG, "+++ power manager mode change");
                 case "android.intent.action.SCREEN_OFF":
                     Util.saveEvent(context, Event.EventType.DISPLAY_OFF, null);
                     Log.d(TAG, "+++ display off");

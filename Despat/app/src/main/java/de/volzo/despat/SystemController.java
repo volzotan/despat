@@ -189,23 +189,10 @@ public class SystemController {
 //        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
 //        devicePolicyManager.reboot(new ComponentName("de.volzo.despat", "despat")); // TODO
 
-        Shell.SU.run("reboot");
-
-//        try {
-//            Runtime.getRuntime().exec(new String[]{"/system/xbin/su","-c","reboot now"});
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        try {
-//            Process proc = Runtime.getRuntime().exec(new String[]{"/system/bin/su", "-c", "reboot"});
-//            proc.waitFor();
-//        } catch (Exception ex) {
-//            Log.e(TAG, "Error ", ex);
-//        }
-//
 //        PowerManager powerManger = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 //        powerManger.reboot(null);
+
+        Shell.SU.run("reboot");
     }
 
     // TEMP SENSOR

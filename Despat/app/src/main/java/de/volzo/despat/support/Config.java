@@ -20,16 +20,16 @@ public class Config {
     public static final String IMAGE_FILEEXTENSION              = ".jpg";
 
     public static final float IMGROLL_FREE_SPACE_THRESHOLD      = 300; // in MB
-    public static final boolean IMGROLL_DELETE_IF_FULL          = false;
+    public static final boolean IMGROLL_DELETE_IF_FULL          = true;
 
     public static final boolean PHONE_HOME                      = true;
 
     public static final String SYNC_AUTHORITY                   = "de.volzo.despat.web.provider";
     public static final String SYNC_ACCOUNT_TYPE                = "de.volzo.despat.servpat";
-    public static final String SYNC_ACCOUNT                     = "despatSyncAccount";
+    public static final String SYNC_ACCOUNT                     = "despatSync";
 
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
-    public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
+    public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = false;
     public static final int NUMBER_OF_BURST_IMAGES              = 2;
 
     public static final long SHUTTER_CAMERA_MAX_LIFETIME        = 6000;

@@ -82,12 +82,12 @@ public class CameraController {
     public static final int STATE_WAITING_NON_PRECAPTURE    = 5;
     public static final int STATE_PICTURE_TAKEN             = 6;
 
-    public CameraController(Context context, ControllerCallback controllerCallback, TextureView textureView, Looper looper) throws Exception {
+    public CameraController(Context context, ControllerCallback controllerCallback, TextureView textureView) throws Exception {
         this.context = context;
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
 
-        startBackgroundThread(looper);
+        // startBackgroundThread();
         // stopping the background thread kills the whole application when its
         // done by the ShutterService
 
@@ -112,7 +112,19 @@ public class CameraController {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
 
-            cameraManager.openCamera(cameraId, cameraStateCallback, null); //backgroundHandler);
+            cameraManager.registerAvailabilityCallback(new CameraManager.AvailabilityCallback() {
+                @Override
+                public void onCameraAvailable(@NonNull String cameraId) {
+                    // Log.d(TAG, "*** cameraAvailable");
+                }
+
+                @Override
+                public void onCameraUnavailable(@NonNull String cameraId) {
+                    // Log.d(TAG, "*** cameraUnavailable");
+                }
+            }, backgroundHandler);
+
+            cameraManager.openCamera(cameraId, cameraStateCallback, backgroundHandler);
         } catch (CameraAccessException e) {
             Log.e(TAG, "accessing camera failed");
             throw e;
@@ -349,13 +361,9 @@ public class CameraController {
     protected void startBackgroundThread(Looper looper) {
         Log.d(TAG, "# startBackgroundThread");
 
-        if (looper == null) {
-            backgroundThread = new HandlerThread("Camera Background");
-            backgroundThread.start();
-            backgroundHandler = new Handler(backgroundThread.getLooper());
-        } else {
-            backgroundHandler = new Handler(looper);
-        }
+        backgroundThread = new HandlerThread("Camera Background");
+        backgroundThread.start();
+        backgroundHandler = new Handler(backgroundThread.getLooper());
     }
 
     protected void stopBackgroundThread() {
@@ -585,6 +593,12 @@ public class CameraController {
 
     private void unlockFocus() {
         Log.d(TAG, "# unlockFocus");
+
+        if (captureSession == null || cameraDevice == null) {
+            Log.e(TAG, "camera died in the background. close.");
+            closeCamera();
+        }
+
         try {
             // Reset the auto-focus trigger
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
@@ -625,10 +639,16 @@ public class CameraController {
                 captureSession = null;
             }
 
-            if (cameraDevice != null) {
-                cameraDevice.close();
-                cameraDevice = null;
-            }
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (cameraDevice != null) {
+                        cameraDevice.close();
+                        cameraDevice = null;
+                    }
+                }
+            }, 1000); // TODO: delay really necessary?
 
         } catch (InterruptedException ie) {
             Log.e(TAG, "lock could not be acquired", ie);

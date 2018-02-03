@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
 
     <!-- logcat backup -->
     <uses-permission android:name="android.permission.READ_LOGS" />
@@ -33,9 +34,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
 
-        <activity
+    <activity
             android:name=".MainActivity"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -53,13 +54,17 @@
         <activity android:name=".SettingsActivity"
             android:screenOrientation="landscape" />
 
-        <receiver android:name=".services.Orchestrator">
+        <receiver android:name=".services.Orchestrator"
+            android:exported="true"
+            android:enabled="true" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+
                 <action android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
                 <action android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
                 <action android:name="android.intent.action.SCREEN_OFF" />
                 <action android:name="android.intent.action.SCREEN_ON" />
+
                 <action android:name="de.volzo.despat.ALL_SERVICES" />
                 <action android:name="de.volzo.despat.SHUTTER_SERVICE" />
                 <action android:name="de.volzo.despat.RECOGNITION_SERVICE" />
