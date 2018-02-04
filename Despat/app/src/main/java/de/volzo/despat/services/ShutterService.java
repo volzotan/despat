@@ -91,24 +91,10 @@ public class ShutterService extends Service {
 
         Log.d(TAG, "SHUTTER SERVICE invoked");
 
-        context = this;
+        this.context = this;
+        this.handler = new Handler();
 
-        handler = new Handler();
-
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-        Notification notification = new Notification.Builder(context.getApplicationContext())
-                .setContentTitle("despat Shutter Service")
-                .setContentText("active")
-                .setSmallIcon(R.drawable.ic_notification)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                .setContentIntent(pendingIntent)
-                .setTicker("ticker text")
-                .setPriority(Notification.PRIORITY_MAX)
-                .build();
-
-        startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+        startForeground(FOREGROUND_NOTIFICATION_ID, Util.getNotification(context, 0));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
@@ -214,7 +200,6 @@ public class ShutterService extends Service {
             // opening camera failed
 
             Log.e(TAG, "taking photo failed (error during opening camera)", e);
-
             Util.saveEvent(this, Event.EventType.ERROR, "shutter failed: " + e.getMessage());
 
             // critical error

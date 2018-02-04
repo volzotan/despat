@@ -60,41 +60,41 @@ import static android.content.Context.ACCOUNT_SERVICE;
 public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
-    public static final int NOTIFICATION_IDENTIFIER = 0x1002;
 
-    public static void startNotification(Context context, int numberOfImages) {
+    public static Notification getNotification(Context context, int numberOfCaptures) {
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
-        final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = new Notification.Builder(context.getApplicationContext())
-                .setContentTitle("Despat active")
-                .setContentText("Number of images: " + numberOfImages)
+                .setContentTitle("despat active")
+                .setContentText(numberOfCaptures + " captures")
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                .setContentIntent(contentIntent)
-                .setOngoing(true)
+                .setContentIntent(pendingIntent)
+                .setPriority(Notification.PRIORITY_MAX)
                 .build();
 
-        notificationManager.notify(NOTIFICATION_IDENTIFIER, notification);
+        return notification;
     }
 
-    public static void updateNotification(Context context, int numberOfImages) {
+    public static void updateNotification(Context context, int notificationIdentifier, int numberOfCaptures) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         StatusBarNotification[] notifications = notificationManager.getActiveNotifications();
         for (StatusBarNotification not : notifications) {
-            if (not.getId() == NOTIFICATION_IDENTIFIER) {
+            if (not.getId() == notificationIdentifier) {
                 // only update if already existing
-                startNotification(context, numberOfImages);
-                break;
+                notificationManager.notify(notificationIdentifier, getNotification(context, numberOfCaptures));
+                return;
             }
         }
+
+        Log.w(TAG, "no notification to update");
     }
 
-    public static void stopNotification(Context context) {
+    public static void stopNotification(Context context, int notificationIdentifier) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(NOTIFICATION_IDENTIFIER);
+        notificationManager.cancel(notificationIdentifier);
     }
 
     public static boolean isServiceRunning(Context context, Class<?> serviceClass) {

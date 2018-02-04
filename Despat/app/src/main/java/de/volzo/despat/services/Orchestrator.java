@@ -103,7 +103,7 @@ public class Orchestrator extends BroadcastReceiver {
                         RecordingSession session = RecordingSession.getInstance(context);
                         String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
                         if (path != null) session.addCapture(new File(path));
-                        Util.updateNotification(context, session.getImagesTaken());
+                        Util.updateNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken());
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "image taken after recordingSession stopped");
                     }
@@ -238,10 +238,6 @@ public class Orchestrator extends BroadcastReceiver {
          * */
 
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
-
-        // update the notification
-        RecordingSession session = RecordingSession.getInstance(context);
-        Util.startNotification(context, session.getImagesTaken());
     }
 
     private void shutterServiceStop() {
@@ -255,9 +251,6 @@ public class Orchestrator extends BroadcastReceiver {
         // shutter Service
         Intent shutterServiceIntent = new Intent(context, ShutterService.class);
         context.stopService(shutterServiceIntent);
-
-        // Notification
-        Util.stopNotification(context);
     }
 
     // ----------------------------------------------------------------------------------------------------

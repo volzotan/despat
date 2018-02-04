@@ -78,7 +78,7 @@
             android:id="@+id/bt_runRecognizer" />
 
         <Button
-            android:text="Kill Services"
+            android:text="HaltAndCatchFire"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/bt_kill" />
