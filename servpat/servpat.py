@@ -35,19 +35,29 @@ def overview(option):
         pass
         # TODO last hour ...
 
-    # TODO: really sort by serverTimestamp?
-    data_status = query_db("SELECT * FROM status ORDER BY datetime(timestamp) DESC")
-    data_session = query_db("SELECT * FROM session ORDER BY datetime(start) DESC")
-    data_capture = query_db("SELECT * FROM capture ORDER BY datetime(recordingTime) DESC")
-    data_event 	= query_db("SELECT * FROM event ORDER BY datetime(timestamp) DESC")
-    data_upload = query_db("SELECT * FROM upload ORDER BY datetime(timestamp) DESC")
+    filter_device = get_filter("device")
+
+    if filter_device is None:
+        filter_device = "%"
+
+    data_status = query_db("SELECT * FROM status WHERE deviceId LIKE (?) ORDER BY datetime(timestamp) DESC", (filter_device,))
+    data_session = query_db("SELECT * FROM session WHERE deviceId LIKE (?) ORDER BY datetime(start) DESC", (filter_device,))
+    data_capture = query_db("SELECT * FROM capture WHERE deviceId LIKE (?) ORDER BY datetime(recordingTime) DESC", (filter_device,))
+    data_event 	= query_db("SELECT * FROM event WHERE deviceId LIKE (?) ORDER BY datetime(timestamp) DESC", (filter_device,))
+    data_upload = query_db("SELECT * FROM upload WHERE deviceId LIKE (?) ORDER BY datetime(timestamp) DESC", (filter_device,))
+
+    graph_status = None
+
+    if filter_device != "%":
+        graph_status = rows_to_list(data_status)
 
     return render_template("overview.html", data_status=data_status, 
                                             data_session=data_session, 
                                             data_capture=data_capture, 
                                             data_event=data_event, 
                                             data_command=(), 
-                                            data_upload=data_upload)
+                                            data_upload=data_upload,
+                                            graph_status=graph_status)
 
 
 @app.route("/device/<device_id>")
@@ -62,13 +72,13 @@ def device(device_id):
     # TODO: add some serious filtering
     now = datetime.now()
     comp = now - timedelta(days=3)
-    graph_status = query_db("SELECT * FROM status WHERE deviceid LIKE (?) AND timestamp > (?) ORDER BY datetime(timestamp) DESC", (device_id, comp))
+    graph_status = query_db("SELECT * FROM status WHERE deviceId LIKE (?) AND timestamp > (?) ORDER BY datetime(timestamp) DESC", (device_id, comp))
     graph_status = rows_to_list(graph_status)
 
     cur = db.execute("SELECT * FROM upload WHERE deviceid LIKE (?) ORDER BY datetime(timestamp) DESC LIMIT 4", (device_id,))
-    device_uploads = cur.fetchall()
+    device_upload = cur.fetchall()
 
-    return render_template("device.html", graph_status=graph_status, data_status=device_status, data_uploads=device_uploads, page_title=device_id)
+    return render_template("device.html", graph_status=graph_status, data_status=device_status, data_upload=device_upload, page_title=device_id)
 
 
 @app.route("/command")
@@ -94,8 +104,6 @@ def command():
 def status():
     content = request.get_json()
 
-    print(content)
-
     if content is None:
         return ("empty request", 400)
 
@@ -103,17 +111,13 @@ def status():
     	print ("no status to import")
     	return ("", 204)
 
+    # insert into db
     for s in content:
-	    timestamp = datetime.strptime(s["timestamp"], DATEFORMAT_INPUT)
-	    timestamp = timestamp.strftime(DATEFORMAT_STORE)
-	    serverTimestamp = datetime.now().strftime(DATEFORMAT_STORE)
-
-	    # insert into db
 	    values = [  s["deviceId"], 
-	    			serverTimestamp,
+	    			datetime.now().strftime(DATEFORMAT_STORE),
 
 	    			s["statusId"],
-        			timestamp, 
+        			time_to_store(s["timestamp"]), 
 	                s["deviceName"],
 	        
 	                s["imagesTaken"],
@@ -159,7 +163,6 @@ def session():
         return ("", 204)
 
     for s in content:
-        start = (datetime.strptime(s["start"], DATEFORMAT_INPUT)).strftime(DATEFORMAT_STORE)
 
         end = s["end"]
         if end is not None:
@@ -167,14 +170,12 @@ def session():
         else:
             end = None
 
-        serverTimestamp = datetime.now().strftime(DATEFORMAT_STORE)
-
         # insert into db
         values = [  s["deviceId"], 
-                    serverTimestamp,
+                    datetime.now().strftime(DATEFORMAT_STORE),
 
                     s["sessionId"],
-                    start, 
+                    time_to_store(s["start"]), 
                     end,
             
                     s["latitude"],
@@ -198,6 +199,42 @@ def session():
     return ("", 204)
 
 
+
+@app.route("/capture", methods=["POST"])
+def capture():
+    content = request.get_json()
+
+    if content is None:
+        return ("empty request", 400)
+
+    if (len(content) == 0):
+        print ("no capture to import")
+        return ("", 204)
+
+    for c in content:
+
+        # insert into db
+        values = [  c["deviceId"], 
+                    datetime.now().strftime(DATEFORMAT_STORE),
+
+                    c["captureId"],
+                    c["sessionId"],
+                    time_to_store(c["recordingTime"])]
+
+        db = get_db()
+        db.execute("""
+            insert into capture (   deviceId, 
+                                    serverTimestamp, 
+                                    captureId,
+                                    sessionId, 
+                                    recordingTime
+            ) values (?, ?, ?, ?, ?)""", values)
+        db.commit()
+
+    return ("", 204)
+
+
+
 @app.route("/event", methods=["POST"])
 def event():
     content = request.json
@@ -210,19 +247,14 @@ def event():
         return ("", 204)
 
     for e in content:
-
-        timestamp = datetime.strptime(e["timestamp"], DATEFORMAT_INPUT)
-        timestamp = timestamp.strftime(DATEFORMAT_STORE)
-        serverTimestamp = datetime.now().strftime(DATEFORMAT_STORE)
-
         # if content["eventtype"] is not in EVENTTYPESDICTIONARY... # TODO
 
         # insert into db
         values = [  e["deviceId"], 
-                    serverTimestamp,
+                    datetime.now().strftime(DATEFORMAT_STORE),
 
                     e["eventId"],
-                    timestamp, 
+                    time_to_store(e["timestamp"]), 
 
                     e["type"],
                     e["payload"]]
@@ -316,22 +348,22 @@ def sync(table):
 
     if (table == "status"): 
         for o in content:
-            duplicate = query_db("SELECT * FROM status WHERE deviceId LIKE (?) AND statusId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["id"], o["timestamp"]))
+            duplicate = query_db("SELECT * FROM status WHERE deviceId LIKE (?) AND statusId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["id"], time_to_store(o["timestamp"])))
             if duplicate is None or len(duplicate) == 0:
                 ids.append(o["id"])
     elif (table == "session"): 
         for o in content:
-            duplicate = query_db("SELECT * FROM session WHERE deviceId LIKE (?) AND sessionId LIKE (?) AND start LIKE (?)", (o["deviceId"], o["id"], o["timestamp"]))
+            duplicate = query_db("SELECT * FROM session WHERE deviceId LIKE (?) AND sessionId LIKE (?) AND start LIKE (?)", (o["deviceId"], o["id"], time_to_store(o["timestamp"])))
             if duplicate is None or len(duplicate) == 0:
                 ids.append(o["id"])
     elif (table == "capture"): 
         for o in content:
-            duplicate = query_db("SELECT * FROM capture WHERE deviceId LIKE (?) AND captureId LIKE (?) AND recordingTime LIKE (?)", (o["deviceId"], o["id"], o["timestamp"]))
+            duplicate = query_db("SELECT * FROM capture WHERE deviceId LIKE (?) AND captureId LIKE (?) AND recordingTime LIKE (?)", (o["deviceId"], o["id"], time_to_store(o["timestamp"])))
             if duplicate is None or len(duplicate) == 0:
                 ids.append(o["id"])
     elif (table == "event"):
         for o in content:
-            duplicate = query_db("SELECT * FROM event WHERE deviceId LIKE (?) AND eventId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["id"], o["timestamp"]))
+            duplicate = query_db("SELECT * FROM event WHERE deviceId LIKE (?) AND eventId LIKE (?) AND timestamp LIKE (?)", (o["deviceId"], o["id"], time_to_store(o["timestamp"])))
             if duplicate is None or len(duplicate) == 0:
                 ids.append(o["id"])
     else:
@@ -357,8 +389,15 @@ def suppressnegative_filter(e):
 
 
 @app.template_filter("suppresszero")
-def suppressnegative_filter(e):
+def suppresszero_filter(e):
     if e < 1:
+        return ""
+    return e
+    
+
+@app.template_filter("suppressnull")
+def suppressnull_filter(e):
+    if e is None:
         return ""
     return e
 
@@ -383,12 +422,16 @@ def eventtype_filter(e):
         41: "STOP",
         42: "RESTART",
 
+        45: "INFO",
+
         50: "ERROR",
         51: "SCHEDULE GLITCH",
 
-        60: "DISPLAY ON",
-        61: "DISPLAY OFF"
+        60: "SLEEP MODE CHANGE",
+        61: "DISPLAY ON",
+        62: "DISPLAY OFF",
     }
+
     try:
         return types[e]
     except KeyError as ke:
@@ -396,10 +439,10 @@ def eventtype_filter(e):
 
 
 @app.template_filter("location")
-def location_filter(foo, lat, lon):
-    if lat is None or lon is None:
+def location_filter(loc):
+    if loc is None or len(loc) != 2:
         return ""
-    return "http://maps.google.com/?q={},{}".format(lat, lon)
+    return "http://maps.google.com/?q={},{}".format(loc[0], loc[1])
 
 
 @app.template_filter("dateformat")
@@ -407,6 +450,14 @@ def dateformat_filter(inp):
     if inp is None or inp == "":
         return ""
     return datetime.strptime(inp, DATEFORMAT_STORE).strftime(DATEFORMAT_OUTPUT)[:-3]
+
+
+def get_filter(param):
+    val = request.args.get(param)
+    if val is None:
+        return "%"
+    else:
+        return val
 
 
 def get_unique_filename(path, filename):
@@ -436,6 +487,11 @@ def get_db():
     if not hasattr(g, 'sqlite_db'):
         g.sqlite_db = connect_db()
     return g.sqlite_db
+
+
+def time_to_store(inp):
+    ret = datetime.strptime(inp, DATEFORMAT_INPUT)
+    return ret.strftime(DATEFORMAT_STORE)
 
 
 # as taken from http://flask.pocoo.org/docs/0.12/patterns/sqlite3/
