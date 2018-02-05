@@ -76,6 +76,8 @@ public class Despat extends Application {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DespatWakeLockTag");
 
+            Util.saveEvent(this, Event.EventType.WAKELOCK_ACQUIRE, null);
+
             if (wakeLock == null) {
                 Log.e(TAG, "acquiring wake lock failed");
             }
@@ -92,6 +94,8 @@ public class Despat extends Application {
         } else {
             if (wakeLock.isHeld()){
                 wakeLock.release();
+
+                Util.saveEvent(this, Event.EventType.WAKELOCK_RELEASE, null);
             } else{
                 Log.d(TAG, "wake lock already released");
             }

@@ -74,5 +74,8 @@ public class Event {
         public static final int SLEEP_MODE_CHANGE   = 60;
         public static final int DISPLAY_ON          = 61;
         public static final int DISPLAY_OFF         = 62;
+
+        public static final int WAKELOCK_ACQUIRE    = 90;
+        public static final int WAKELOCK_RELEASE    = 91;
     }
 }
