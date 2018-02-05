@@ -190,8 +190,7 @@ public class ShutterService extends Service {
         try {
             if (camera == null || camera.isDead()) {
                 Log.d(TAG, "CamController created");
-                camera = new CameraController(this, callback, null);
-                despat.setCamera(camera);
+                despat.initCamera(this, callback, null);
             } else {
                 Log.d(TAG, "CamController already up and running");
                 camera.captureImages();

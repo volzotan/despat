@@ -28,8 +28,11 @@ public class Config {
     public static final String SYNC_ACCOUNT_TYPE                = "de.volzo.despat.servpat";
     public static final String SYNC_ACCOUNT                     = "despatSync";
 
+    public static final boolean USE_OLD_CAMERA_CONTROLLER       = true;
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
-    public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = false;
+    public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
+    public static final boolean END_CAPTURE_WITHOUT_UNLOCKING_FOCUS = true;
+    public static final int SHUTTER_RELEASE_DELAY               = 0;
     public static final int NUMBER_OF_BURST_IMAGES              = 2;
 
     public static final long SHUTTER_CAMERA_MAX_LIFETIME        = 6000;

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
+import android.view.TextureView;
 
 import com.facebook.stetho.Stetho;
 
@@ -107,8 +108,18 @@ public class Despat extends Application {
         systemController.reboot();
     }
 
-    public void setCamera(CameraController cameraController) {
-        this.camera = cameraController;
+
+
+//    public void setCamera(CameraController cameraController) {
+//        this.camera = cameraController;
+//    }
+
+    public void initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {
+        if (Config.USE_OLD_CAMERA_CONTROLLER) {
+            this.camera = new CameraController1(context, controllerCallback, textureView);
+        } else {
+            this.camera = new CameraController2(context, controllerCallback, textureView);
+        }
     }
 
     public CameraController getCamera() {
@@ -116,7 +127,6 @@ public class Despat extends Application {
     }
 
     public void closeCamera() {
-
         if (camera != null) {
             camera.closeCamera();
             camera = null;

@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
             Log.d("image taken", "path: " + path);
 
-            Toast.makeText(activity, "image taken", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(activity, "image taken", Toast.LENGTH_SHORT).show();
 
             StringBuilder sb = new StringBuilder();
             RecordingSession session = RecordingSession.getInstance(context);
@@ -342,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            despat.setCamera(new CameraController(this, null, textureView));
+            despat.initCamera(this, null, textureView);
         } catch (Exception cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -358,10 +358,28 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void takePhoto() {
 
-        // Caveat: Camera keeps running after taking a photo this way
-
         CameraController camera = despat.getCamera();
         final Context context = this;
+
+        final Runnable displayPhotoRunnable = new Runnable() {
+            @Override
+            public void run() {
+                ImageRollover imgroll = new ImageRollover(context);
+                File newestImage = imgroll.getNewestImage();
+
+                if (newestImage == null) return;
+
+                Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
+                ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                imageView.setImageBitmap(imgBitmap);
+
+                PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+                photoViewAttacher.update();
+
+                Despat despat = Util.getDespat(context);
+                despat.closeCamera();
+            }
+        };
 
         CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
 
@@ -369,17 +387,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             public void finalImageTaken() {
                 MainActivity.this.runOnUiThread(new Runnable() {
                     public void run() {
-                        ImageRollover imgroll = new ImageRollover(context);
-                        File newestImage = imgroll.getNewestImage();
-
-                        if (newestImage == null) return;
-
-                        Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
-                        ImageView imageView = (ImageView) findViewById(R.id.imageView);
-                        imageView.setImageBitmap(imgBitmap);
-
-                        PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
-                        photoViewAttacher.update();}
+                        Handler handler = new Handler();
+                        handler.postDelayed(displayPhotoRunnable, 500);
+                    }
                 });
             }
 
@@ -387,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         if (camera == null || camera.isDead()) {
             try {
-                despat.setCamera(new CameraController(this, callback, null));
+                despat.initCamera(this, callback, null);
             } catch (Exception e) {
                 Log.e(TAG, "starting camera failed", e);
             }
