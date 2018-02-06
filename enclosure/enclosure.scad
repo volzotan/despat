@@ -9,14 +9,14 @@ crad       = 10;
 w          = 3.2+.1;
 wb         = 1.2;
 
-difference(){
-    union() {
-        bottom();
-        translate([0, sizeTop[1], 44+0.1]) rotate([180, 0, 0]) top();
-//        translate([0, 0, 20.1]) seal();
-    }
-    translate([-1, -1, -1]) cube([15, 100, 100]);
-}
+//difference(){
+//    union() {
+//        bottom();
+//        translate([0, sizeTop[1], 44+0.1]) rotate([180, 0, 0]) top();
+////        translate([0, 0, 20.1]) seal();
+//    }
+//    translate([-1, -1, -1]) cube([15, 100, 100]);
+//}
 
 //translate([50, 220+80, 0]) rotate([0, -90, 180]) scale([0.5, 0.5, 0.5]) {
 //    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
@@ -39,12 +39,12 @@ difference(){
 //% translate([127, 40, -10]) uvfilter();
 //% translate([5, 36, 4]) usbplug();
 
-% translate([0, sizeBot[1]-2.6, 18.2]) rotate([0, 90, 0]) color([1, 1, 1], 0.6) cylinder($fn=32, d=1.75, h=100);
+% translate([0, sizeBot[1]-2.6, 17.9]) rotate([0, 90, 0]) color([1, 1, 1], 0.6) cylinder($fn=32, d=1.75, h=100);
 
 // --------------------------- PRINT ---------------------------
 
 //top();
-//bottom();
+bottom();
 //translate([sizeBot[0], 0, 1.3]) rotate([0, 180, 0]) seal();
 
 // ----------------------- add. elements -----------------------
@@ -64,7 +64,7 @@ translate([0, 14.5, 0]) latch_knob();
 // ------------------------------------------------------------
 
 module latch_knob() {
-    height = 5;
+    height = 4.5;
     
     difference() {
         union() {
@@ -77,7 +77,7 @@ module latch_knob() {
 }
 
 module latch() {
-    height = 5+1;
+    height = 4.5;
     
     depth = 18;
     depth_knob = 14.5;
@@ -90,9 +90,18 @@ module latch() {
 //            translate([]) linear_extrude(height=height) polygon(points);
             
             hull() {
-                translate([]) cylinder($fn=32, d=10, h=height);
-                translate([4, depth, 0]) cylinder($fn=32, d=8, h=height);
-                translate([-4-3, depth+3, 0]) cylinder($fn=32, d=2, h=height);
+                translate([]) cylinder($fn=32, d=12, h=height);
+                translate([4-2, depth, 0]) cylinder($fn=32, d=8, h=height);
+                translate([-4-0.5, depth+2.5, 0]) cylinder($fn=32, d=3, h=height);
+            }
+            
+            hull() {
+                x = 4;
+                y = 9.5;
+                translate([x, y]) cylinder($fn=32, d=2, h=height+2);
+                translate([x+1, y]) cylinder($fn=32, d=2, h=height+2);
+                translate([x, y+10]) cylinder($fn=32, d=2, h=height+2);
+                translate([x+1, y+10]) cylinder($fn=32, d=2, h=height+2);
             }
         }
         
@@ -250,7 +259,7 @@ module top() {
             translate([0, 0, sizeTop[2]-.1]) color("red") difference() {
                 dist = 2;
                 width = 1.2;
-                height = 1.2-0.3;
+                height = 1.5-0.3;
                 block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist);
                 translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width);
             }
@@ -259,17 +268,20 @@ module top() {
                 dist = 2;
                 width = 1.2;
                 red = 0.2;
-                height = 1.2;
+                height = 1.5;
                 block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist+red);
                 translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width-red);
             }
             // seal3
-            * translate([0, 0, sizeTop[2]-.1]) {
+            translate([0, 0, sizeTop[2]-.1]) {
+                dist = 2;
+                width = 1.2;
+                red = 0.2;
+                height = 1.5+0.3;
                 color("purple") intersection() {
                     difference() {
-                        height = 1.8+0.3;
-                        block(sizeTop[0], sizeTop[1], height, crad=crad, red=1.6+0.2);
-                        translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=1.6+1.4-0.2);
+                        block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist+red);
+                        translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width-red);
                     }
                     union() {
                         translate([0, 0, 0]) cube([8, 8, 10]);
@@ -446,7 +458,7 @@ module bottom() {
         }
         
         // seal
-        translate([0, 0, sizeBot[2]-2.2]) color("red") difference() {
+        translate([0, 0, sizeBot[2]-2.5]) color("red") difference() {
             dist = 1.6 + 0.05; // distance outer wall / 1.65 + 1.9 + 1.25 = 4.8
             height = 3;
             width = 1.9;
@@ -597,6 +609,7 @@ module nexus5cavity(height) {
         translate([-12, 68-.1, -.1]) rotate([90, 0, 90]) linear_extrude(height=200) polygon(points_cav);
     }
     
+    translate([20, 28, -1]) linear_extrude(height=10) color("DarkRed" ) text("NEXUS 5");
     
     translate([102, -4.9, 0])cube([16, 5, height]);
     translate([82, 65, 0])cube([26, 5, height]);
