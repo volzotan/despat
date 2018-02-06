@@ -5,7 +5,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
-import android.hardware.camera2.CameraAccessException;
+import android.os.Handler;
 import android.util.Log;
 import android.view.TextureView;
 
@@ -28,14 +28,20 @@ public class CameraController1 extends CameraController implements Camera.Previe
     private TextureView textureView;
     private CameraController.ControllerCallback controllerCallback;
 
+    private CameraController1 controller;
+
     Camera camera;
-    private Camera.Parameters param;
+    private Camera.Parameters params;
     private int[] pictureSize;
+
+    private int shutterCount = 0;
 
     public CameraController1(Context context, ControllerCallback controllerCallback, TextureView textureView) throws Exception {
         this.context = context;
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
+
+        this.controller = this;
 
         try {;
             openCamera();
@@ -51,21 +57,47 @@ public class CameraController1 extends CameraController implements Camera.Previe
         camera.setAutoFocusMoveCallback(this);
         camera.setErrorCallback(this);
 
-        param = camera.getParameters();
-        List<Camera.Size> pvsizes = param.getSupportedPreviewSizes();
+        params = camera.getParameters();
 
-        pictureSize = new int[] {param.getPictureSize().width, param.getPictureSize().height};
+        // Preview Size
+        List<Camera.Size> previewSizes = params.getSupportedPreviewSizes();
+        params.setPreviewFormat( ImageFormat.NV21 );
+        //param.setPreviewSize( previewSizes.get(len-1).width, previewSizes.get(len-1).height );
+        params.setPreviewSize(1280, 960); // TODO: hardcoded
+
+        // Picture Size
+        List<Camera.Size> pictureSizes = params.getSupportedPictureSizes();
+        int max_width = 0;
+        int max_height = 0;
+        for (int i = 0; i < pictureSizes.size(); i++) {
+            int w = pictureSizes.get(i).width; int h = pictureSizes.get(i).height;
+//            Log.v(TAG, "camera preview format: " + w + "x" + h);
+            if (w > max_width || h > max_height) {
+                max_width = w;
+                max_height = h;
+            }
+        }
+        params.setPictureSize(max_width, max_height);
+        pictureSize = new int[] {params.getPictureSize().width, params.getPictureSize().height};
         Log.d(TAG, "supported picture size: " + pictureSize[0] + " x " + pictureSize[1]);
 
-        int len = pvsizes.size();
-        for (int i = 0; i < len; i++)
-            Log.v( TAG, "camera preview format: "+pvsizes.get(i).width+"x"+pvsizes.get(i).height );
+        // AF/AE
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        params.setExposureCompensation(Config.EXPOSURE_COMPENSATION);
 
-        param.setPreviewFormat( ImageFormat.NV21 );
-        //param.setPreviewSize( pvsizes.get(len-1).width, pvsizes.get(len-1).height );
-        param.setPreviewSize(1280, 960);
+        // Log
+        Log.d(TAG, "param: exposureCompensation: " + params.getExposureCompensation());
+        Log.d(TAG, "param: exposureCompensationStep: " + params.getExposureCompensationStep());
+        Log.d(TAG, "param: minExposureCompensation: " + params.getMinExposureCompensation());
+        Log.d(TAG, "param: maxExposureCompensation: " + params.getMaxExposureCompensation());
+        Log.d(TAG, "param: whiteBalance: " + params.getWhiteBalance());
+        Log.d(TAG, "param: focusMode: " + params.getFocusMode());
+        Log.d(TAG, "param: focalLength: " + params.getFocalLength());
+        Log.d(TAG, "param: zoomSupported: " + params.isZoomSupported());
+        Log.d(TAG, "param: pictureFormat: " + params.getPictureFormat());
+        Log.d(TAG, "param: pictureSize: " + params.getPictureSize().width + "x" + params.getPictureSize().height);
 
-        camera.setParameters(param);
+        camera.setParameters(params);
         camera.setPreviewTexture(getSurfaceTexture(textureView));
         // camera.setDisplayOrientation(90);
 
@@ -78,6 +110,8 @@ public class CameraController1 extends CameraController implements Camera.Previe
         if (controllerCallback != null) {
             controllerCallback.cameraOpened();
         }
+
+        shutterCount = 0;
     }
 
     @Override
@@ -86,15 +120,18 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         camera.startPreview();
         try {
-            Thread.sleep(1000); // TODO
+            Thread.sleep(500); // TODO: AF/AE adjust
         } catch (Exception e) {
             e.printStackTrace();
         }
-        camera.takePicture(this, this, this);
+
+        camera.takePicture(controller, controller, controller);
     }
 
     @Override
     public void closeCamera() {
+        Log.d(TAG, "# closeCamera");
+
         camera.stopPreview();
         camera.release();
 
@@ -122,7 +159,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
             return;
         }
 
-        if (param.getPictureFormat() == ImageFormat.JPEG) {
+        if (params.getPictureFormat() == ImageFormat.JPEG) {
             // it's already JPEG
             try {
                 FileOutputStream fos = new FileOutputStream(imageFullPath);
@@ -133,11 +170,12 @@ public class CameraController1 extends CameraController implements Camera.Previe
                 return;
             }
         } else {
+            Log.i(TAG, "image in YUV format");
             // try to store YUV data
             try {
                 FileOutputStream fos = new FileOutputStream(imageFullPath);
-                Log.d(TAG, "image format: " + param.getPictureFormat());
-                YuvImage image = new YuvImage(bytes, param.getPictureFormat(), pictureSize[0], pictureSize[1], null);
+                Log.d(TAG, "image format: " + params.getPictureFormat());
+                YuvImage image = new YuvImage(bytes, params.getPictureFormat(), pictureSize[0], pictureSize[1], null);
                 image.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 90, fos);
 
                 // fos.close();
@@ -148,11 +186,20 @@ public class CameraController1 extends CameraController implements Camera.Previe
             }
         }
 
-        try {
-            Log.d(TAG, "picture stored:  " + imageFullPath.getCanonicalPath());
+        shutterCount++;
 
-            sendBroadcast(context, imageFullPath.getAbsolutePath());
+        Log.d(TAG, "picture taken [" + shutterCount + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
+        sendBroadcast(context, imageFullPath.getAbsolutePath());
 
+        if (shutterCount < Config.NUMBER_OF_BURST_IMAGES) {
+            if (controllerCallback != null) {
+                controllerCallback.intermediateImageTaken();
+            }
+
+            camera.startPreview();
+            camera.takePicture(controller, controller, controller);
+        } else {
+            Log.d(TAG, "# captureComplete");
             if (controllerCallback != null) {
                 controllerCallback.finalImageTaken();
             }
@@ -160,13 +207,13 @@ public class CameraController1 extends CameraController implements Camera.Previe
                 controllerCallback.captureComplete();
             }
 
+            shutterCount = 0;
+        }
+
 //            if (textureView == null) {
 //                this.closeCamera();
 //            }
-        } catch (IOException e) {
-            Log.e(TAG, "accessing image path failed ", e);
-            return;
-        }
+
     }
 
     @Override
@@ -182,13 +229,11 @@ public class CameraController1 extends CameraController implements Camera.Previe
     @Override
     public void onAutoFocus(boolean success, Camera camera) {
         Log.d(TAG, "# onAutoFocus");
-
     }
 
     @Override
     public void onAutoFocusMoving(boolean start, Camera camera) {
         Log.d(TAG, "# onAutoFocusMoving");
-
     }
 
     @Override
