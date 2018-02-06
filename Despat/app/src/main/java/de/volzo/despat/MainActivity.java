@@ -280,7 +280,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         cleanup();
 
-
         if (Util.isServiceRunning(activity, ShutterService.class)) {
             Toast.makeText(activity, "running in background", Toast.LENGTH_SHORT).show();
         }
@@ -439,6 +438,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         tvStatus.setText("n: " + res.coordinates.length);
     }
 
+    /* Request a confirmation from the user that the app should be put on the Doze whitelist.
+     * That allows the alarm manager to fire more often than once in 9 minutes.
+     */
     private void whitelistAppForDoze() {
         PowerManager powerManger = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
         if (!powerManger.isIgnoringBatteryOptimizations("de.volzo.despat")) { // getPackageName()
@@ -451,7 +453,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     private boolean checkPermissionsAreGiven() {
-
         Activity activity = this;
 
         if (    ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||

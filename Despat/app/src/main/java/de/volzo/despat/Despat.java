@@ -22,7 +22,6 @@ public class Despat extends Application {
 
     private CameraController camera;
     private SystemController systemController;
-//    private int imagesTaken = 0;
 
     private PowerManager.WakeLock wakeLock;
 
@@ -37,15 +36,11 @@ public class Despat extends Application {
         super.onCreate();
 
         // Stetho Debug Library
-        Stetho.initializeWithDefaults(this);
+        // Stetho.initializeWithDefaults(this);
 
         if (Config.REDIRECT_LOGCAT) Util.redirectLogcat();
 
         systemController = new SystemController(this);
-
-        // send APPSTART event
-//        ServerConnector serverConnector = new ServerConnector(this);
-//        serverConnector.sendEvent(ServerConnector.EventType.INIT, null);
 
         Util.saveEvent(this, Event.EventType.INIT, null);
     }
@@ -55,12 +50,7 @@ public class Despat extends Application {
         super.onTerminate();
 
         Log.i(TAG, "despat terminate.");
-
         closeCamera();
-
-//        ServerConnector serverConnector = new ServerConnector(this);
-//        serverConnector.sendEvent(ServerConnector.EventType.SHUTDOWN, null);
-
         Util.saveEvent(this, Event.EventType.SHUTDOWN, null);
     }
 
@@ -76,13 +66,13 @@ public class Despat extends Application {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DespatWakeLockTag");
 
-            Util.saveEvent(this, Event.EventType.WAKELOCK_ACQUIRE, null);
-
             if (wakeLock == null) {
                 Log.e(TAG, "acquiring wake lock failed");
+                return;
             }
         }
 
+        Util.saveEvent(this, Event.EventType.WAKELOCK_ACQUIRE, null);
         wakeLock.acquire(Config.WAKELOCK_MAX_LIFETIME);
     }
 
@@ -111,12 +101,6 @@ public class Despat extends Application {
         Config.setResumeAfterReboot(this, true);
         systemController.reboot();
     }
-
-
-
-//    public void setCamera(CameraController cameraController) {
-//        this.camera = cameraController;
-//    }
 
     public void initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {
         if (Config.USE_OLD_CAMERA_CONTROLLER) {

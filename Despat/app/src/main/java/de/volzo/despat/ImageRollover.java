@@ -1,7 +1,6 @@
 package de.volzo.despat;
 
 import android.content.Context;
-import android.os.StatFs;
 import android.util.Log;
 
 import java.io.File;
@@ -42,7 +41,7 @@ public class ImageRollover {
     }
 
     /*
-    Check for the highest index in the naming scheme 'n.jpg' and return 'n+1.jpg'
+     *  Check for the highest index in the naming scheme 'n.jpg' and return 'n+1.jpg'
      */
     public String getUnusedFilename() {
         int max = 0;
