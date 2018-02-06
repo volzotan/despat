@@ -102,7 +102,7 @@ module top() {
             translate([0, 0, sizeTop[2]-.1]) color("red") difference() {
                 dist = 2;
                 width = 1.2;
-                height = 1.2-0.3;
+                height = 1.5-0.3;
                 block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist);
                 translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width);
             }
@@ -111,17 +111,20 @@ module top() {
                 dist = 2;
                 width = 1.2;
                 red = 0.2;
-                height = 1.2;
+                height = 1.5;
                 block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist+red);
                 translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width-red);
             }
             // seal3
-            * translate([0, 0, sizeTop[2]-.1]) {
+            translate([0, 0, sizeTop[2]-.1]) {
+                dist = 2;
+                width = 1.2;
+                red = 0.2;
+                height = 1.5+0.3;
                 color("purple") intersection() {
                     difference() {
-                        height = 1.8+0.3;
-                        block(sizeTop[0], sizeTop[1], height, crad=crad, red=1.6+0.2);
-                        translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=1.6+1.4-0.2);
+                        block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist+red);
+                        translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width-red);
                     }
                     union() {
                         translate([0, 0, 0]) cube([8, 8, 10]);
@@ -212,7 +215,7 @@ module bottom() {
         translate([43.2, sizeBot[1]-3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=8);
         
         // seal
-        translate([0, 0, sizeBot[2]-2.2]) color("red") difference() {
+        translate([0, 0, sizeBot[2]-2.5]) color("red") difference() {
             dist = 1.6 + 0.05; // distance outer wall / 1.65 + 1.9 + 1.25 = 4.8
             height = 3;
             width = 1.9;
