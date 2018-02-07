@@ -2,6 +2,8 @@ server {
     listen      80;
     server_name www.zoltep.de zoltep.de;
 
+    client_max_body_size 5M;
+
     # location = /servpat { rewrite ^ /servpat/; }
     location / { try_files $uri @servpat; }
     location @servpat {
