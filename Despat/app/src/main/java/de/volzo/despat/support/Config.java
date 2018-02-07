@@ -28,24 +28,66 @@ public class Config {
     public static final String SYNC_ACCOUNT_TYPE                = "de.volzo.despat.servpat";
     public static final String SYNC_ACCOUNT                     = "despatSync";
 
+    // ---------------------------------------------------------------------------------------------
+
+    // use CameraController v1 (old) or v2
     public static final boolean USE_OLD_CAMERA_CONTROLLER       = true;
+
+    // display a preview on the main activity
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
+
+    // release shutter even without full AF/AE fix | v2 only
     public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
+
+    // close the camera without cancelling the
+    // AF requests | v2 only
     public static final boolean END_CAPTURE_WITHOUT_UNLOCKING_FOCUS = true;
-    public static final int SHUTTER_RELEASE_DELAY               = 0;
+
+    // delay between having AF/AE fix and release | v2
+    // delay between starting AE measurement and release | v1
+    public static final int SHUTTER_RELEASE_DELAY               = 500;
+
+    // number of images taken during every capture
     public static final int NUMBER_OF_BURST_IMAGES              = 2;
 
+    // over- or underexposure compensation | v1 only
+    // array position is image number in burst sequence
+    // if length==1 every image gets [0]
+    public static final int[] EXPOSURE_COMPENSATION             = {0, -12};
+
+    // maximal time the autofocus may try to find a fix
+    // before shutter is released anyway | v1 only
+    public static final int AUTOFOCUS_MAX_TIME                  = 2000;
+
+    // ---------------------------------------------------------------------------------------------
+
+    // ShutterService closes the camera after X seconds
     public static final long SHUTTER_CAMERA_MAX_LIFETIME        = 6000;
+
+    // ShutterService itself is closed after X seconds
     public static final long SHUTTER_SERVICE_MAX_LIFETIME       = 8000;
+
+    // the maximum time the wakelock is guaranteed to be active
     public static final long WAKELOCK_MAX_LIFETIME              = 9000;
+
+    // ---------------------------------------------------------------------------------------------
 
     public static final String ACRA_REPORT_URL                  = "http://zoltep.de/report";
 
+    // copy logcat output and write to file
     public static final boolean BACKUP_LOGCAT                   = false;
-    public static final boolean REDIRECT_LOGCAT                 = true;
-    public static final File LOGCAT_DIR                         = new File(Environment.getExternalStorageDirectory(), ("despat"));
-    public static final String DATEFORMAT_LOGFILE               = "yyyy-MM-dd"; // only used for file name
 
+    // redirect logcat output via -f to file
+    public static final boolean REDIRECT_LOGCAT                 = true;
+
+    // logcat text file directory
+    public static final File LOGCAT_DIR                         = new File(Environment.getExternalStorageDirectory(), ("despat"));
+
+    // dateformat used for the logcat file name
+    public static final String DATEFORMAT_LOGFILE               = "yyyy-MM-dd";
+
+    // reboots the device if sudo rights are granted and a
+    // critical error happened (usually the camera)
     public static final boolean REBOOT_ON_CRITICAL_ERROR        = false;
 
     // DEFAULT_SHUTTER_INTERVAL should not be shorter than 6s (5s is android minimum

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 import de.volzo.despat.support.Config;
+import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 04.02.18.
@@ -36,6 +37,16 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
     private int shutterCount = 0;
 
+    Handler handler;
+    Runnable releaseCall = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "shutter release by timeout");
+            camera.cancelAutoFocus();
+            controller.releaseShutter();
+        }
+    };
+
     public CameraController1(Context context, ControllerCallback controllerCallback, TextureView textureView) throws Exception {
         this.context = context;
         this.controllerCallback = controllerCallback;
@@ -52,6 +63,8 @@ public class CameraController1 extends CameraController implements Camera.Previe
     }
 
     private void openCamera() throws java.io.IOException {
+        Log.d(TAG, "# openCamera");
+
         camera = Camera.open();
 
         camera.setAutoFocusMoveCallback(this);
@@ -81,9 +94,18 @@ public class CameraController1 extends CameraController implements Camera.Previe
         pictureSize = new int[] {params.getPictureSize().width, params.getPictureSize().height};
         Log.d(TAG, "supported picture size: " + pictureSize[0] + " x " + pictureSize[1]);
 
-        // AF/AE
-        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        params.setExposureCompensation(Config.EXPOSURE_COMPENSATION);
+        // AF
+        List<String> modes = params.getSupportedFocusModes();
+        if (modes.contains(Camera.Parameters.FOCUS_MODE_INFINITY)) {
+            Log.d(TAG, "focus mode: infinity");
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
+        } else if (modes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            Log.d(TAG, "focus mode: auto");
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        } else {
+            Log.w(TAG, "focus mode: none (neither infinity focus mode nor auto focus mode available)");
+        }
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY); //TODO
 
         // Log
         Log.d(TAG, "param: exposureCompensation: " + params.getExposureCompensation());
@@ -92,6 +114,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
         Log.d(TAG, "param: maxExposureCompensation: " + params.getMaxExposureCompensation());
         Log.d(TAG, "param: whiteBalance: " + params.getWhiteBalance());
         Log.d(TAG, "param: focusMode: " + params.getFocusMode());
+        Log.d(TAG, "param: supportedFocusModes: " + params.getSupportedFocusModes());
         Log.d(TAG, "param: focalLength: " + params.getFocalLength());
         Log.d(TAG, "param: zoomSupported: " + params.isZoomSupported());
         Log.d(TAG, "param: pictureFormat: " + params.getPictureFormat());
@@ -116,15 +139,70 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
     @Override
     public void captureImages() {
+        Log.d(TAG, "# captureImages");
         // camera.setOneShotPreviewCallback(this);
 
+        precapture(0);
+    }
+
+    private void precapture(int sequenceNumber) {
+        Log.d(TAG, "# precapture [" + (sequenceNumber+1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
+
         camera.startPreview();
-        try {
-            Thread.sleep(500); // TODO: AF/AE adjust
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        // AE
+        boolean ae_measurement_required = false;
+        if (Config.EXPOSURE_COMPENSATION.length > 1) {
+            params.setExposureCompensation(Config.EXPOSURE_COMPENSATION[sequenceNumber]);
+            if (sequenceNumber > 0 && Config.EXPOSURE_COMPENSATION[sequenceNumber-1] != Config.EXPOSURE_COMPENSATION[sequenceNumber]) {
+                ae_measurement_required = true;
+            }
+        } else {
+            params.setExposureCompensation(Config.EXPOSURE_COMPENSATION[0]);
         }
 
+        try {
+            camera.setParameters(params);
+        } catch (RuntimeException re) {
+            Log.w(TAG, "setting exposure compensation params failed. value too higher/lower than maxExposureCompensation?", re);
+        }
+
+        // auto focus only on first image
+        if (sequenceNumber == 0) {
+
+            handler = new Handler();
+            if (params.getFocusMode().equals(Camera.Parameters.FLASH_MODE_AUTO)) {
+                camera.autoFocus(this);
+            }
+
+            switch (params.getFocusMode()) {
+                case Camera.Parameters.FLASH_MODE_AUTO:
+                    handler.postDelayed(releaseCall, Config.AUTOFOCUS_MAX_TIME);
+                    camera.autoFocus(this);
+                    break;
+
+                case Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE:
+                    handler.postDelayed(releaseCall, Config.AUTOFOCUS_MAX_TIME);
+                    camera.autoFocus(this);
+                    break;
+
+                case Camera.Parameters.FOCUS_MODE_INFINITY:
+                    Util.sleep(Config.SHUTTER_RELEASE_DELAY);
+                    controller.releaseShutter();
+                    break;
+
+                default:
+                    Log.w(TAG, "unknown auto focus mode! [" + params.getFocusMode() + "] releasing shutter anyway.");
+                    controller.releaseShutter();
+                    break;
+            }
+        } else {
+            if (ae_measurement_required) Util.sleep(Config.SHUTTER_RELEASE_DELAY);
+            controller.releaseShutter();
+        }
+    }
+
+    private void releaseShutter() {
         camera.takePicture(controller, controller, controller);
     }
 
@@ -142,6 +220,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
     @Override
     public void onPictureTaken(byte[] bytes, Camera camera) {
+        Log.d(TAG, "# onPictureTaken");
 
         if (bytes == null) {
             // this callback is called once with raw image data and once with processed jpeg data
@@ -189,17 +268,18 @@ public class CameraController1 extends CameraController implements Camera.Previe
         shutterCount++;
 
         Log.d(TAG, "picture taken [" + shutterCount + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
-        sendBroadcast(context, imageFullPath.getAbsolutePath());
 
         if (shutterCount < Config.NUMBER_OF_BURST_IMAGES) {
             if (controllerCallback != null) {
                 controllerCallback.intermediateImageTaken();
             }
 
-            camera.startPreview();
-            camera.takePicture(controller, controller, controller);
+            precapture(shutterCount);
         } else {
             Log.d(TAG, "# captureComplete");
+
+            sendBroadcast(context, imageFullPath.getAbsolutePath());
+
             if (controllerCallback != null) {
                 controllerCallback.finalImageTaken();
             }
@@ -210,9 +290,10 @@ public class CameraController1 extends CameraController implements Camera.Previe
             shutterCount = 0;
         }
 
-//            if (textureView == null) {
-//                this.closeCamera();
-//            }
+        if (textureView != null) {
+            // TODO: restart auto focus? / disable autofocus? should be done if continuous
+            camera.startPreview();
+        }
 
     }
 
@@ -229,6 +310,16 @@ public class CameraController1 extends CameraController implements Camera.Previe
     @Override
     public void onAutoFocus(boolean success, Camera camera) {
         Log.d(TAG, "# onAutoFocus");
+        handler.removeCallbacksAndMessages(null);
+        camera.cancelAutoFocus();
+
+        if (success) {
+            Log.d(TAG, "shutter release by autofocus success");
+        } else {
+            Log.d(TAG, "shutter release by autofocus failure");
+        }
+
+        releaseShutter();
     }
 
     @Override

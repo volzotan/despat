@@ -265,6 +265,14 @@ public class Util {
         db.statusDao().dropTable();
     }
 
+    public static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void disableDoze() {
 //        try {
 //            Process process = Runtime.getRuntime().exec("adb shell dumpsys deviceidle disable");

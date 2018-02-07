@@ -101,11 +101,15 @@ public class Orchestrator extends BroadcastReceiver {
                 case Broadcast.PICTURE_TAKEN:
                     try {
                         RecordingSession session = RecordingSession.getInstance(context);
+                        if (session == null) {
+                            Log.w(TAG, "image taken while no recordingSession is active");
+                            break;
+                        }
                         String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
                         if (path != null) session.addCapture(new File(path));
                         Util.updateNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken());
                     } catch (RecordingSession.NotRecordingException nre) {
-                        Log.w(TAG, "image taken after recordingSession stopped");
+                        Log.w(TAG, "resuming recording session failed");
                     }
 
                     break;

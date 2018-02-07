@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         despat = ((Despat) getApplicationContext());
 
 //        Util.disableDoze();
-        whitelistAppForDoze();
+//        whitelistAppForDoze();
 
         if (!checkPermissionsAreGiven()) {
             requestPermissions();
@@ -357,7 +357,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void takePhoto() {
 
-        CameraController camera = despat.getCamera();
         final Context context = this;
 
         final Runnable displayPhotoRunnable = new Runnable() {
@@ -380,8 +379,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         };
 
-        CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
-
+        final CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
             @Override
             public void finalImageTaken() {
                 MainActivity.this.runOnUiThread(new Runnable() {
@@ -394,16 +392,22 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         };
 
-        if (camera == null || camera.isDead()) {
-            try {
-                despat.initCamera(this, callback, null);
-            } catch (Exception e) {
-                Log.e(TAG, "starting camera failed", e);
+        Handler handler = new Handler();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                CameraController camera = despat.getCamera();
+                if (camera == null || camera.isDead()) {
+                    try {
+                        despat.initCamera(context, callback, null);
+                    } catch (Exception e) {
+                        Log.e(TAG, "starting camera failed", e);
+                    }
+                } else {
+                    camera.captureImages();
+                }
             }
-        } else {
-            camera.captureImages();
-        }
-
+        });
     }
 
     public void runRecognizer() {
