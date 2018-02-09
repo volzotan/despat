@@ -11,7 +11,7 @@ import android.view.TextureView;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import de.volzo.despat.support.Config;
@@ -31,7 +31,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
     private CameraController1 controller;
 
-    Camera camera;
+    private Camera camera;
     private Camera.Parameters params;
     private int[] pictureSize;
 
@@ -53,16 +53,32 @@ public class CameraController1 extends CameraController implements Camera.Previe
         this.textureView = textureView;
 
         this.controller = this;
-
-        try {;
-            openCamera();
-        } catch (Exception e) {
-            Log.e(TAG, "onCreate: ", e);
-            throw e;
-        }
     }
 
-    private void openCamera() throws java.io.IOException {
+    public HashMap<String, String> getCameraParameters() {
+        Camera camera = Camera.open();
+        Camera.Parameters params = camera.getParameters();
+
+        HashMap<String, String> dict = new HashMap<String, String>();
+
+        dict.put("exposureCompensation", Integer.toString(params.getExposureCompensation()));
+        dict.put("exposureCompensationStep", Float.toString(params.getExposureCompensationStep()));
+        dict.put("minExposureCompensation", Integer.toString(params.getMinExposureCompensation()));
+        dict.put("maxExposureCompensation", Integer.toString(params.getMaxExposureCompensation()));
+        dict.put("whiteBalance", params.getWhiteBalance());
+        dict.put("focusMode", params.getFocusMode());
+        dict.put("supportedFocusModes", Util.listToString(params.getSupportedFocusModes()));
+        dict.put("focalLength", Float.toString(params.getFocalLength()));
+        dict.put("zoomSupported", Boolean.toString(params.isZoomSupported()));
+        dict.put("pictureFormat", Integer.toString(params.getPictureFormat()));
+        dict.put("pictureSize", params.getPictureSize().width + "x" + params.getPictureSize().height);
+
+        camera.release();
+
+        return dict;
+    }
+
+    public void openCamera() throws java.io.IOException {
         Log.d(TAG, "# openCamera");
 
         camera = Camera.open();
@@ -106,19 +122,6 @@ public class CameraController1 extends CameraController implements Camera.Previe
             Log.w(TAG, "focus mode: none (neither infinity focus mode nor auto focus mode available)");
         }
         params.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY); //TODO
-
-        // Log
-        Log.d(TAG, "param: exposureCompensation: " + params.getExposureCompensation());
-        Log.d(TAG, "param: exposureCompensationStep: " + params.getExposureCompensationStep());
-        Log.d(TAG, "param: minExposureCompensation: " + params.getMinExposureCompensation());
-        Log.d(TAG, "param: maxExposureCompensation: " + params.getMaxExposureCompensation());
-        Log.d(TAG, "param: whiteBalance: " + params.getWhiteBalance());
-        Log.d(TAG, "param: focusMode: " + params.getFocusMode());
-        Log.d(TAG, "param: supportedFocusModes: " + params.getSupportedFocusModes());
-        Log.d(TAG, "param: focalLength: " + params.getFocalLength());
-        Log.d(TAG, "param: zoomSupported: " + params.isZoomSupported());
-        Log.d(TAG, "param: pictureFormat: " + params.getPictureFormat());
-        Log.d(TAG, "param: pictureSize: " + params.getPictureSize().width + "x" + params.getPictureSize().height);
 
         camera.setParameters(params);
         camera.setPreviewTexture(getSurfaceTexture(textureView));

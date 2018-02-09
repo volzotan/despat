@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import de.volzo.despat.BuildConfig;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
@@ -153,9 +154,32 @@ public class ServerConnector {
         send("/sync/" + "event", arr, successCallback, failureCallback);
     }
 
+    public void sendKnock(HashMap<String, String> dict, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) {
+        try {
+            JSONArray arr = new JSONArray();
+            JSONObject o = new JSONObject();
+
+            o.put("deviceId", Config.getUniqueDeviceId(context));
+            o.put("deviceName", Config.getDeviceName(context));
+            o.put("timestamp", dateFormat.format(Calendar.getInstance().getTime()));
+            o.put("apkBuildTime", dateFormat.format(BuildConfig.buildTime));
+
+            JSONObject p = new JSONObject();
+            for (Map.Entry<String, String> entry  : dict.entrySet()) {
+                p.put(entry.getKey(), entry.getValue());
+            }
+            o.put("cameraParameters", p);
+
+            arr.put(o);
+
+            send("/knock", arr, successCallback, failureCallback);
+        } catch (Exception e) {
+            Log.e(TAG, "sending knock failed", e);
+        }
+    }
+
     public void sendStatus(List<Status> statusList, RequestSuccessCallback successCallback, RequestFailureCallback failureCallback) {
         try {
-
             JSONArray arr = new JSONArray();
             for (Status status : statusList) {
                 JSONObject o = new JSONObject();

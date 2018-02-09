@@ -35,6 +35,7 @@ import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
+import de.volzo.despat.web.Sync;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -203,6 +204,8 @@ public class ShutterService extends Service {
 
             // critical error
             if (Config.REBOOT_ON_CRITICAL_ERROR) despat.criticalErrorReboot();
+
+            Sync.run(context, ShutterService.class);
 
             shutterReleaseFinished();
         }

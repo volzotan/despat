@@ -102,11 +102,21 @@ public class Despat extends Application {
         systemController.reboot();
     }
 
+    public void initCamera() throws Exception {
+        if (Config.USE_OLD_CAMERA_CONTROLLER) {
+            this.camera = new CameraController1(null, null, null);
+        } else {
+            this.camera = new CameraController2(null, null, null);
+        }
+    }
+
     public void initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {
         if (Config.USE_OLD_CAMERA_CONTROLLER) {
             this.camera = new CameraController1(context, controllerCallback, textureView);
+            this.camera.openCamera();
         } else {
             this.camera = new CameraController2(context, controllerCallback, textureView);
+            this.camera.openCamera();
         }
     }
 

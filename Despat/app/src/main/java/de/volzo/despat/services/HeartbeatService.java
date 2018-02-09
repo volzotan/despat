@@ -16,6 +16,7 @@ import de.volzo.despat.web.ServerConnector;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
+import de.volzo.despat.web.Sync;
 
 /**
  * Created by volzotan on 10.08.17.
@@ -66,7 +67,8 @@ public class HeartbeatService extends JobService {
         StatusDao statusDao = db.statusDao();
         statusDao.insert(status);
 
-        Util.startSyncManually(Util.createSyncAccount(this));
+//        Util.startSyncManually(Util.createSyncAccount(this));
+        Sync.run(this, HeartbeatService.class);
 
         jobFinished(jobParameters, false);
         return false;

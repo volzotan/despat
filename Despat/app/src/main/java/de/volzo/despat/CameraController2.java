@@ -82,7 +82,7 @@ public class CameraController2 extends CameraController {
     public static final int STATE_WAITING_NON_PRECAPTURE    = 5;
     public static final int STATE_PICTURE_TAKEN             = 6;
 
-    public CameraController2(Context context, ControllerCallback controllerCallback, TextureView textureView) throws Exception {
+    public CameraController2(Context context, ControllerCallback controllerCallback, TextureView textureView) {
         this.context = context;
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
@@ -90,17 +90,9 @@ public class CameraController2 extends CameraController {
         // startBackgroundThread();
         // stopping the background thread kills the whole application when its
         // done by the ShutterService
-
-        try {
-            openCamera();
-        } catch (Exception e) {
-            Util.playSound(context);
-            Log.e(TAG, "opening camera failed", e);
-            throw e;
-        }
     }
 
-    private void openCamera() throws Exception {
+    public void openCamera() throws Exception {
         try {
             cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
 

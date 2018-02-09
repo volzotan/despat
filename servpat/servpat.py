@@ -100,6 +100,14 @@ def command():
     return response
 
 
+@app.route("/knock")
+def knock():
+
+    # TODO
+
+    return ("", 204)
+
+
 @app.route("/status", methods=["POST"])
 def status():
     content = request.get_json()
@@ -450,6 +458,49 @@ def dateformat_filter(inp):
     if inp is None or inp == "":
         return ""
     return datetime.strptime(inp, DATEFORMAT_STORE).strftime(DATEFORMAT_OUTPUT)[:-3]
+
+
+@app.template_filter("timediff")
+def timediff_filter(i):
+
+    if i is None or len(i) != 2:
+        return ""
+
+    if i[0] is None or i[1] is None:
+        return ""
+
+    start = datetime.strptime(i[0], DATEFORMAT_STORE)
+    end   = datetime.strptime(i[1], DATEFORMAT_STORE)
+    diff  = end-start
+    
+    ret = []
+    if (diff.days > 0):
+        ret.append(str(diff.days))
+        ret.append(" day")
+        if diff.days > 1:
+            ret.append("s")
+        ret.append(", ")
+    hours = diff.seconds / (60 * 60)
+    if (hours > 0):
+        ret.append(str(hours))
+        ret.append(" hour")
+        if hours != 1:
+            ret.append("s")
+        ret.append(", ")
+    minutes = diff.seconds / 60
+    if (minutes > 0):
+        ret.append(str(minutes))
+        ret.append(" minute")
+        if minutes != 1:
+            ret.append("s")
+        ret.append(", ")
+    ret.append(str(diff.seconds))
+    ret.append(" second")
+    if diff.seconds != 1:
+        ret.append("s")
+
+    return "".join(ret)
+
 
 
 def get_filter(param):

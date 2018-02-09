@@ -7,6 +7,11 @@ import android.util.Log;
 import android.provider.Settings.Secure;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by volzotan on 20.12.16.
@@ -52,7 +57,7 @@ public class Config {
 
     // over- or underexposure compensation | v1 only
     // array position is image number in burst sequence
-    // if length==1 every image gets [0]
+    // if length==1 every image gets the value of [0]
     public static final int[] EXPOSURE_COMPENSATION             = {0, -12};
 
     // maximal time the autofocus may try to find a fix
@@ -90,6 +95,8 @@ public class Config {
     // critical error happened (usually the camera)
     public static final boolean REBOOT_ON_CRITICAL_ERROR        = false;
 
+    // ---------------------------------------------------------------------------------------------
+
     // DEFAULT_SHUTTER_INTERVAL should not be shorter than 6s (5s is android minimum
     // and a few extra ms are needed for compensation of scheduling irregularities)
     private static final long DEFAULT_SHUTTER_INTERVAL          = 10 * 1000; // in ms
@@ -98,6 +105,7 @@ public class Config {
     private static final File DEFAULT_IMAGE_FOLDER              = new File(Environment.getExternalStorageDirectory(), ("despat"));
     private static final String DEFAULT_SERVER_ADDRESS          = "http://zoltep.de"; // format protocol://example.com
     private static final boolean DEFAULT_RESUME_AFTER_REBOOT    = false;
+    private static final long DEFAULT_MIN_SYNC_INTERVAL         = 5 * 60 * 1000;
 
     private static final String SHAREDPREFNAME                  = "de.volzo.despat.DEFAULT_PREFERENCES";
 
@@ -109,6 +117,8 @@ public class Config {
     public static final String KEY_HEARTBEAT_INTERVAL           = "de.volzo.despat.heartbeatInterval";
     public static final String KEY_UPLOAD_INTERVAL              = "de.volzo.despat.uploadInterval";
     public static final String KEY_RESUME_AFTER_REBOOT          = "de.volzo.despat.resumeAfterReboot";
+    public static final String KEY_LAST_SYNC                    = "de.volzo.despat.lastSync";
+    public static final String KEY_MIN_SYNC_INTERVAL            = "de.volzo.despat.minSyncInterval";
 
     /*
     image folder
@@ -249,6 +259,31 @@ public class Config {
         return settings.getBoolean(key, defaultValue);
     }
 
+    private static Date getPropertyDate(Context context, String key, Date defaultValue) {
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        String retrievedValue = settings.getString(key, null);
+        DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
+
+        if (retrievedValue == null || retrievedValue.isEmpty()) {
+            return defaultValue;
+        } else {
+            try {
+                return dateFormat.parse(retrievedValue);
+            } catch (ParseException e) {
+                Log.e(TAG, "parsing stored date failed", e);
+                return defaultValue;
+            }
+        }
+    }
+
+    private static void setPropertyDate(Context context, String key, Date value) {
+        DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
+        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(key, dateFormat.format(value));
+        editor.apply();
+    }
+
     public static String getDeviceName(Context context) {
         return getProperty(context, KEY_DEVICENAME, android.os.Build.MODEL);
     }
@@ -303,5 +338,21 @@ public class Config {
 
     public static void setResumeAfterReboot(Context context, boolean resumeAfterReboot) {
         setProperty(context, KEY_UPLOAD_INTERVAL, resumeAfterReboot);
+    }
+
+    public static Date getLastSync(Context context) {
+        return getPropertyDate(context, KEY_LAST_SYNC, null);
+    }
+
+    public static void setLastSync(Context context, Date lastSync) {
+        setPropertyDate(context, KEY_UPLOAD_INTERVAL, lastSync);
+    }
+
+    public static long getMinSyncInterval(Context context) {
+        return getPropertyLong(context, KEY_MIN_SYNC_INTERVAL, DEFAULT_MIN_SYNC_INTERVAL);
+    }
+
+    public static void setMinSyncInterval(Context context, String minSyncInterval) {
+        setProperty(context, KEY_MIN_SYNC_INTERVAL, minSyncInterval);
     }
 }

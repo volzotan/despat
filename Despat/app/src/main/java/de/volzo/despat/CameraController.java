@@ -6,6 +6,7 @@ import android.graphics.SurfaceTexture;
 import android.view.TextureView;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 import de.volzo.despat.support.Broadcast;
@@ -16,9 +17,14 @@ import de.volzo.despat.support.Broadcast;
 
 public abstract class CameraController {
 
+    public abstract void openCamera() throws Exception;
     public abstract void captureImages();
     public abstract void closeCamera();
     public abstract boolean isDead();
+
+    public HashMap<String, String> getCameraParameters() {
+        return null;
+    }
 
     void sendBroadcast(Context context, String path) {
         Intent intent = new Intent(Broadcast.PICTURE_TAKEN);

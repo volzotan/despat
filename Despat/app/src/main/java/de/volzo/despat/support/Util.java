@@ -431,6 +431,16 @@ public class Util {
         return ret;
     }
 
+    public static String listToString(List<String> arr) {
+        StringBuilder sb = new StringBuilder();
+
+        for (String item : arr) {
+            sb.append(item);
+        }
+
+        return sb.toString();
+    }
+
     // ---
 
     // taken from the apache commons io library
