@@ -59,22 +59,19 @@ public class CameraController1 extends CameraController implements Camera.Previe
         Camera camera = Camera.open();
         Camera.Parameters params = camera.getParameters();
 
-        HashMap<String, String> dict = new HashMap<String, String>();
+        String flat = params.flatten();
 
-        dict.put("exposureCompensation", Integer.toString(params.getExposureCompensation()));
-        dict.put("exposureCompensationStep", Float.toString(params.getExposureCompensationStep()));
-        dict.put("minExposureCompensation", Integer.toString(params.getMinExposureCompensation()));
-        dict.put("maxExposureCompensation", Integer.toString(params.getMaxExposureCompensation()));
-        dict.put("whiteBalance", params.getWhiteBalance());
-        dict.put("focusMode", params.getFocusMode());
-        dict.put("supportedFocusModes", Util.listToString(params.getSupportedFocusModes()));
-        dict.put("focalLength", Float.toString(params.getFocalLength()));
-        dict.put("zoomSupported", Boolean.toString(params.isZoomSupported()));
-        dict.put("pictureFormat", Integer.toString(params.getPictureFormat()));
-        dict.put("pictureSize", params.getPictureSize().width + "x" + params.getPictureSize().height);
+        HashMap<String, String> dict = new HashMap<String, String>();
+        for (String s : flat.split(";")) {
+            String[] e = s.split("=");
+            if (e.length == 2) {
+                dict.put(e[0], e[1]);
+            } else {
+                dict.put(e[0], "");
+            }
+        }
 
         camera.release();
-
         return dict;
     }
 
@@ -153,21 +150,30 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         camera.startPreview();
 
-        // AE
+        // AE - exposure compensation
         boolean ae_measurement_required = false;
-        if (Config.EXPOSURE_COMPENSATION.length > 1) {
-            params.setExposureCompensation(Config.EXPOSURE_COMPENSATION[sequenceNumber]);
-            if (sequenceNumber > 0 && Config.EXPOSURE_COMPENSATION[sequenceNumber-1] != Config.EXPOSURE_COMPENSATION[sequenceNumber]) {
-                ae_measurement_required = true;
-            }
-        } else {
-            params.setExposureCompensation(Config.EXPOSURE_COMPENSATION[0]);
-        }
-
         try {
+            if (Config.EXPOSURE_COMPENSATION.length > 1) {
+                params.setExposureCompensation(Config.EXPOSURE_COMPENSATION[sequenceNumber]);
+                if (sequenceNumber > 0 && Config.EXPOSURE_COMPENSATION[sequenceNumber-1] != Config.EXPOSURE_COMPENSATION[sequenceNumber]) {
+                    ae_measurement_required = true;
+                }
+            } else {
+                params.setExposureCompensation(Config.EXPOSURE_COMPENSATION[0]);
+            }
             camera.setParameters(params);
         } catch (RuntimeException re) {
             Log.w(TAG, "setting exposure compensation params failed. value too higher/lower than maxExposureCompensation?", re);
+        }
+
+        // AE - iso
+        try {
+            if (Config.FIXED_ISO_VALUE != null) {
+                params.set("iso-value", Config.FIXED_ISO_VALUE);
+                camera.setParameters(params);
+            }
+        } catch (RuntimeException re) {
+            Log.w(TAG, "setting iso params failed. probably not supported", re);
         }
 
         // auto focus only on first image

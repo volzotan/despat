@@ -55,6 +55,9 @@ public class Config {
     // number of images taken during every capture
     public static final int NUMBER_OF_BURST_IMAGES              = 2;
 
+    // use fixed ISO value. null=disabled | v1 only
+    public static final Integer FIXED_ISO_VALUE                 = 200;
+
     // over- or underexposure compensation | v1 only
     // array position is image number in burst sequence
     // if length==1 every image gets the value of [0]

@@ -224,10 +224,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
         sendBroadcast(uploadIntent);
 
+        ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1*60);
+
+
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();
 
-        ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1*60);
+//        Util.printCameraParameters(this);
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

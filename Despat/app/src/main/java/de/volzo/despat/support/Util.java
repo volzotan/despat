@@ -35,12 +35,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
 import de.volzo.despat.R;
@@ -317,6 +320,23 @@ public class Util {
         }, 1000);
     }
 
+    public static void printCameraParameters(Context context) {
+        try {
+            Despat despat = getDespat(context);
+            despat.initCamera();
+            CameraController cameraController = despat.getCamera();
+            HashMap<String, String> dict = cameraController.getCameraParameters();
+
+            if (dict == null) throw new Exception("null parameters");
+
+            for (Map.Entry<String, String> entry  : dict.entrySet()) {
+                Log.i(TAG, entry.getKey() + " : " + entry.getValue());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "printing camera parameters failed: ", e);
+        }
+    }
+
     public static String getHumanReadableTimediff(Date d1, Date d2) {
         long diff = d2.getTime() - d1.getTime();
 
@@ -436,6 +456,7 @@ public class Util {
 
         for (String item : arr) {
             sb.append(item);
+            sb.append(","); // TODO
         }
 
         return sb.toString();

@@ -1,6 +1,7 @@
 package de.volzo.despat.web;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.JsonWriter;
 import android.util.Log;
 
@@ -161,6 +162,8 @@ public class ServerConnector {
 
             o.put("deviceId", Config.getUniqueDeviceId(context));
             o.put("deviceName", Config.getDeviceName(context));
+            o.put("oemDeviceName", android.os.Build.MODEL);
+            o.put("androidVersion", Build.VERSION.RELEASE);
             o.put("timestamp", dateFormat.format(Calendar.getInstance().getTime()));
             o.put("apkBuildTime", dateFormat.format(BuildConfig.buildTime));
 
