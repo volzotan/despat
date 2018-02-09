@@ -18,7 +18,7 @@ import de.volzo.despat.support.Broadcast;
 public abstract class CameraController {
 
     public abstract void openCamera() throws Exception;
-    public abstract void captureImages();
+    public abstract void captureImages() throws IllegalAccessException;
     public abstract void closeCamera();
     public abstract boolean isDead();
 

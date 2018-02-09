@@ -55,27 +55,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
         this.controller = this;
     }
 
-    public HashMap<String, String> getCameraParameters() {
-        Camera camera = Camera.open();
-        Camera.Parameters params = camera.getParameters();
-
-        String flat = params.flatten();
-
-        HashMap<String, String> dict = new HashMap<String, String>();
-        for (String s : flat.split(";")) {
-            String[] e = s.split("=");
-            if (e.length == 2) {
-                dict.put(e[0], e[1]);
-            } else {
-                dict.put(e[0], "");
-            }
-        }
-
-        camera.release();
-        return dict;
-    }
-
-    public void openCamera() throws java.io.IOException {
+    public void openCamera() throws Exception {
         Log.d(TAG, "# openCamera");
 
         camera = Camera.open();
@@ -118,11 +98,11 @@ public class CameraController1 extends CameraController implements Camera.Previe
         } else {
             Log.w(TAG, "focus mode: none (neither infinity focus mode nor auto focus mode available)");
         }
-        params.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY); //TODO
+
+//        params.setPictureFormat();
 
         camera.setParameters(params);
         camera.setPreviewTexture(getSurfaceTexture(textureView));
-        // camera.setDisplayOrientation(90);
 
         if (textureView == null) {
             captureImages();
@@ -138,8 +118,13 @@ public class CameraController1 extends CameraController implements Camera.Previe
     }
 
     @Override
-    public void captureImages() {
+    public void captureImages() throws IllegalAccessException {
         Log.d(TAG, "# captureImages");
+
+        if (camera == null) {
+            throw new IllegalAccessException("camera is dead");
+        }
+
         // camera.setOneShotPreviewCallback(this);
 
         precapture(0);
@@ -219,8 +204,13 @@ public class CameraController1 extends CameraController implements Camera.Previe
     public void closeCamera() {
         Log.d(TAG, "# closeCamera");
 
-        camera.stopPreview();
-        camera.release();
+        if (camera != null) {
+            camera.stopPreview();
+            camera.release();
+            camera = null;
+        } else {
+            Log.d(TAG, "camera closing failed! camera is null");
+        }
 
         if (controllerCallback != null) {
             controllerCallback.cameraClosed();
@@ -247,7 +237,9 @@ public class CameraController1 extends CameraController implements Camera.Previe
             return;
         }
 
-        if (params.getPictureFormat() == ImageFormat.JPEG) {
+        Camera.Parameters p = camera.getParameters();
+
+        if (p.getPictureFormat() == ImageFormat.JPEG) {
             // it's already JPEG
             try {
                 FileOutputStream fos = new FileOutputStream(imageFullPath);
@@ -257,7 +249,12 @@ public class CameraController1 extends CameraController implements Camera.Previe
                 Log.e(TAG, "saving JPEG failed ", e);
                 return;
             }
-        } else {
+        } else if ( p.getPictureFormat() == ImageFormat.YUV_420_888 ||
+                    p.getPictureFormat() == ImageFormat.YUV_422_888 ||
+                    p.getPictureFormat() == ImageFormat.YUV_444_888 ||
+                    p.getPictureFormat() == ImageFormat.YUY2 ||
+                    p.getPictureFormat() == ImageFormat.YV12) {
+
             Log.i(TAG, "image in YUV format");
             // try to store YUV data
             try {
@@ -272,6 +269,8 @@ public class CameraController1 extends CameraController implements Camera.Previe
                 Log.e(TAG, "saving YUV failed ", e);
                 return;
             }
+        } else {
+            Log.wtf(TAG, "RAW");
         }
 
         shutterCount++;
@@ -354,6 +353,26 @@ public class CameraController1 extends CameraController implements Camera.Previe
         } else {
             return false;
         }
+    }
+
+    public HashMap<String, String> getCameraParameters() {
+        Camera camera = Camera.open();
+        Camera.Parameters params = camera.getParameters();
+
+        String flat = params.flatten();
+
+        HashMap<String, String> dict = new HashMap<String, String>();
+        for (String s : flat.split(";")) {
+            String[] e = s.split("=");
+            if (e.length == 2) {
+                dict.put(e[0], e[1]);
+            } else {
+                dict.put(e[0], "");
+            }
+        }
+
+        camera.release();
+        return dict;
     }
 
 }

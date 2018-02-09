@@ -329,7 +329,11 @@ public class CameraController2 extends CameraController {
                             e.printStackTrace();
                         }
                     } else {
-                        captureImages();
+                        try {
+                            captureImages();
+                        } catch (IllegalAccessException e) {
+                            Log.e(TAG, "capture failed: ", e);
+                        }
                     }
                 }
 
@@ -471,13 +475,14 @@ public class CameraController2 extends CameraController {
 
     };
 
-    public void captureImages() {
+    public void captureImages() throws IllegalAccessException {
         if (cameraDevice == null) {
             Log.e(TAG, "camera device missing. trying to reopen");
             try {
                 openCamera();
             } catch (Exception e) {
                 Log.e(TAG, "reopening failed", e);
+                throw new IllegalAccessException("camera was closed and reopening failed");
             }
         }
 
