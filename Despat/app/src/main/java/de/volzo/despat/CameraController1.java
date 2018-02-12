@@ -58,6 +58,20 @@ public class CameraController1 extends CameraController implements Camera.Previe
     public void openCamera() throws Exception {
         Log.d(TAG, "# openCamera");
 
+        openCameraInternal();
+
+        if (textureView == null) {
+            captureImages();
+        } else {
+            camera.startPreview();
+        }
+
+        if (controllerCallback != null) {
+            controllerCallback.cameraOpened();
+        }
+    }
+
+    private void openCameraInternal() throws Exception {
         camera = Camera.open();
 
         camera.setAutoFocusMoveCallback(this);
@@ -77,7 +91,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
         int max_height = 0;
         for (int i = 0; i < pictureSizes.size(); i++) {
             int w = pictureSizes.get(i).width; int h = pictureSizes.get(i).height;
-//            Log.v(TAG, "camera preview format: " + w + "x" + h);
+            // Log.v(TAG, "camera preview format: " + w + "x" + h);
             if (w > max_width || h > max_height) {
                 max_width = w;
                 max_height = h;
@@ -103,18 +117,6 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         camera.setParameters(params);
         camera.setPreviewTexture(getSurfaceTexture(textureView));
-
-        if (textureView == null) {
-            captureImages();
-        } else {
-            camera.startPreview();
-        }
-
-        if (controllerCallback != null) {
-            controllerCallback.cameraOpened();
-        }
-
-        shutterCount = 0;
     }
 
     @Override
@@ -125,15 +127,28 @@ public class CameraController1 extends CameraController implements Camera.Previe
             throw new IllegalAccessException("camera is dead");
         }
 
-        // camera.setOneShotPreviewCallback(this);
-
         precapture(0);
     }
 
     private void precapture(int sequenceNumber) {
         Log.d(TAG, "# precapture [" + (sequenceNumber+1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
 
-        camera.startPreview();
+        if (camera == null) {
+            Log.e(TAG, "camera died unexpectedly");
+            return;
+        }
+
+        try {
+            camera.startPreview();
+        } catch (RuntimeException re) {
+            try {
+                restartCamera();
+                camera.startPreview();
+            } catch (Exception e) {
+                Log.e(TAG, "preview failed. restarting camera failed", e);
+                return;
+            }
+        }
 
         // AE - exposure compensation
         boolean ae_measurement_required = false;
@@ -217,6 +232,22 @@ public class CameraController1 extends CameraController implements Camera.Previe
         }
     }
 
+    private void restartCamera() throws Exception {
+        Log.i(TAG, "# restartCamera");
+
+        if (textureView != null) {
+            throw new Exception("no restart if previewing");
+        }
+
+        if (camera != null) {
+            camera.stopPreview();
+            camera.release();
+            camera = null;
+        }
+
+        openCameraInternal();
+    }
+
     @Override
     public void onPictureTaken(byte[] bytes, Camera camera) {
         Log.d(TAG, "# onPictureTaken");
@@ -282,7 +313,13 @@ public class CameraController1 extends CameraController implements Camera.Previe
                 controllerCallback.intermediateImageTaken();
             }
 
-            precapture(shutterCount);
+//            Handler handler = new Handler();
+//            handler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+                    precapture(shutterCount);
+//                }
+//            }, 500);
         } else {
             Log.d(TAG, "# captureComplete");
 
