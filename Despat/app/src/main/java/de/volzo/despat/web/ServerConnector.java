@@ -236,7 +236,7 @@ public class ServerConnector {
                 o.put("sessionId", session.getId());
                 o.put("start", dateFormat.format(session.getStart()));
 
-                String end = session.getEnd() == null ? null : dateFormat.format(session.getStart());
+                String end = session.getEnd() == null ? null : dateFormat.format(session.getEnd());
                 o.put("end", allowNull(end));
 
                 o.put("latitude", allowNull(session.getLatitude()));
