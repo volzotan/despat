@@ -102,22 +102,26 @@ public class Despat extends Application {
         systemController.reboot();
     }
 
-    public void initCamera() throws Exception {
-        if (Config.USE_OLD_CAMERA_CONTROLLER) {
-            this.camera = new CameraController1(null, null, null);
-        } else {
-            this.camera = new CameraController2(null, null, null);
-        }
+    public CameraController initCamera() throws Exception {
+        return initCamera(null, null, null);
     }
 
-    public void initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {
-        if (Config.USE_OLD_CAMERA_CONTROLLER) {
-            this.camera = new CameraController1(context, controllerCallback, textureView);
-            this.camera.openCamera();
-        } else {
-            this.camera = new CameraController2(context, controllerCallback, textureView);
-            this.camera.openCamera();
+    public CameraController initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {
+        switch (Config.USE_CAMERA_CONTROLLER) {
+            case 1:
+                this.camera = new CameraController1(context, controllerCallback, textureView);
+                break;
+            case 2:
+                this.camera = new CameraController2(context, controllerCallback, textureView);
+                break;
+            case 3:
+                this.camera = new CameraController3(context, controllerCallback, textureView);
+                break;
+            default:
+                throw new Exception("unknown camera controller");
         }
+
+        return this.camera;
     }
 
     public CameraController getCamera() {

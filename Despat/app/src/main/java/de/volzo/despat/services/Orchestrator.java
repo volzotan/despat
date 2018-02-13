@@ -22,6 +22,7 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.ServerConnector;
+import de.volzo.despat.web.Sync;
 
 /**
  * Created by volzotan on 15.08.17.
@@ -89,7 +90,7 @@ public class Orchestrator extends BroadcastReceiver {
                     }
 
                     break;
-                case "android.intent.action.SCREEN_OFF":
+                case "android.intent.action.SCREEN_OFF": // TODO: doesn't work
                     Util.saveEvent(context, Event.EventType.DISPLAY_OFF, null);
                     Log.d(TAG, "+++ display off");
                     break;
@@ -208,10 +209,11 @@ public class Orchestrator extends BroadcastReceiver {
             Intent triggerIntent = new Intent();
             triggerIntent.setAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
             context.sendBroadcast(triggerIntent);
-
-//            Util.saveEvent(context, Event.EventType.ERROR, "shutter running overtime");
-//            Log.wtf(TAG, "SHUTTER RUNNING OVERTIME");
         }
+
+        // check if sync should be run
+        Sync.run(context, ShutterService.class);
+        // TODO: this should be done in its own thread with its own wakelock
 
         // trigger the next invocation
         long now = System.currentTimeMillis(); // alarm is set right away

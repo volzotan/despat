@@ -323,7 +323,8 @@ public class Util {
     public static void printCameraParameters(Context context) {
         try {
             Despat despat = getDespat(context);
-            despat.initCamera();
+            CameraController camera = despat.initCamera();
+            camera.openCamera();
             CameraController cameraController = despat.getCamera();
             HashMap<String, String> dict = cameraController.getCameraParameters();
 

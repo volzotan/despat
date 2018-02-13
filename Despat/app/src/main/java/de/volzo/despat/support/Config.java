@@ -36,7 +36,7 @@ public class Config {
     // ---------------------------------------------------------------------------------------------
 
     // use CameraController v1 (old) or v2
-    public static final boolean USE_OLD_CAMERA_CONTROLLER       = true;
+    public static final int USE_CAMERA_CONTROLLER               = 1;
 
     // display a preview on the main activity
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;

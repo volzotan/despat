@@ -344,7 +344,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            despat.initCamera(this, null, textureView);
+            CameraController camera = despat.initCamera(this, null, textureView);
+            camera.openCamera();
         } catch (Exception cae) {
             Log.e(TAG, "starting Camera failed", cae);
             Toast.makeText(this, "starting Camera failed", Toast.LENGTH_SHORT).show();
@@ -402,12 +403,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 CameraController camera = despat.getCamera();
                 if (camera == null || camera.isDead()) {
                     try {
-                        despat.initCamera(context, callback, null);
+                        camera = despat.initCamera(context, callback, null);
+                        camera.openCamera();
                     } catch (Exception e) {
                         Log.e(TAG, "starting camera failed", e);
                     }
                 } else {
-                    camera.captureImages();
+                    try {
+                        camera.captureImages();
+                    } catch (IllegalAccessException e) {
+                        Log.e(TAG, "capturing image failed");
+                    }
                 }
             }
         });

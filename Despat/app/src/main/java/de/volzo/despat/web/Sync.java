@@ -37,6 +37,7 @@ public class Sync {
             long diff = Calendar.getInstance().getTime().getTime() - lastSync.getTime();
 
             if (diff > Config.getMinSyncInterval(context)) {
+                Log.d(TAG, "sync aborted (min sync interval)");
                 return;
             }
         }

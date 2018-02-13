@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -191,7 +192,8 @@ public class ShutterService extends Service {
         try {
             if (camera == null || camera.isDead()) {
                 Log.d(TAG, "CamController created");
-                despat.initCamera(this, callback, null);
+                camera = despat.initCamera(this, callback, null);
+                camera.openCamera();
             } else {
                 Log.d(TAG, "CamController already up and running");
                 camera.captureImages();
@@ -204,8 +206,6 @@ public class ShutterService extends Service {
 
             // critical error
             if (Config.REBOOT_ON_CRITICAL_ERROR) despat.criticalErrorReboot();
-
-            Sync.run(context, ShutterService.class);
 
             shutterReleaseFinished();
         }

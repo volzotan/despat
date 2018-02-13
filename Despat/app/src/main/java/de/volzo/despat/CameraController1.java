@@ -72,6 +72,8 @@ public class CameraController1 extends CameraController implements Camera.Previe
     }
 
     private void openCameraInternal() throws Exception {
+        Log.d(TAG, "# openCameraInternal");
+
         camera = Camera.open();
 
         camera.setAutoFocusMoveCallback(this);
@@ -212,7 +214,13 @@ public class CameraController1 extends CameraController implements Camera.Previe
     }
 
     private void releaseShutter() {
-        camera.takePicture(controller, controller, controller);
+        try {
+            camera.takePicture(controller, controller, controller);
+        } catch (RuntimeException re) {
+            Log.e(TAG, "releasing shutter failed: ", re);
+            if (controllerCallback != null) controllerCallback.cameraFailed(re);
+            closeCamera();
+        }
     }
 
     @Override
