@@ -36,14 +36,16 @@ public class Sync {
         if (lastSync != null) {
             long diff = Calendar.getInstance().getTime().getTime() - lastSync.getTime();
 
-            if (diff > Config.getMinSyncInterval(context)) {
-                Log.d(TAG, "sync aborted (min sync interval)");
+            if (diff < Config.getMinSyncInterval(context)) {
+                Log.d(TAG, "sync triggered by [" +  trigger.getSimpleName() + "] aborted (min sync interval)");
                 return;
             }
         }
 
         Log.i(TAG, "sync started. triggered by: " + trigger.getSimpleName());
         Util.saveEvent(context, Event.EventType.SYNC, trigger.getSimpleName());
+
+        Config.setLastSync(context, Calendar.getInstance().getTime());
 
         final ServerConnector serverConnector = new ServerConnector(context);
         AppDatabase db = AppDatabase.getAppDatabase(context);
@@ -131,9 +133,6 @@ public class Sync {
             serverConnector.syncCheckSession(sessionDao.getAll(), sessionCallback, genericFailureCallback);
             serverConnector.syncCheckCapture(captureDao.getAll(), captureCallback, genericFailureCallback);
             serverConnector.syncCheckEvent(eventDao.getAll(), eventCallback, genericFailureCallback);
-
-            Config.setLastSync(context, Calendar.getInstance().getTime());
-
         } catch (Exception e) {
             e.printStackTrace();
         }

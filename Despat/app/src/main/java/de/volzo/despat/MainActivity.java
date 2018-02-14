@@ -43,6 +43,7 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
 import de.volzo.despat.support.Util;
+import de.volzo.despat.web.Sync;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -206,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         fabSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Util.startSyncManually(Util.createSyncAccount(activity));
+                Sync.run(activity, MainActivity.class);
             }
         });
 

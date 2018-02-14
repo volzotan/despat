@@ -43,6 +43,7 @@ public class Config {
 
     // release shutter even without full AF/AE fix | v2 only
     public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
+    // TODO: should be done via postDelayed or time counting variable as in v1
 
     // close the camera without cancelling the
     // AF requests | v2 only
@@ -340,7 +341,7 @@ public class Config {
     }
 
     public static void setResumeAfterReboot(Context context, boolean resumeAfterReboot) {
-        setProperty(context, KEY_UPLOAD_INTERVAL, resumeAfterReboot);
+        setProperty(context, KEY_RESUME_AFTER_REBOOT, resumeAfterReboot);
     }
 
     public static Date getLastSync(Context context) {
@@ -348,7 +349,7 @@ public class Config {
     }
 
     public static void setLastSync(Context context, Date lastSync) {
-        setPropertyDate(context, KEY_UPLOAD_INTERVAL, lastSync);
+        setPropertyDate(context, KEY_LAST_SYNC, lastSync);
     }
 
     public static long getMinSyncInterval(Context context) {
