@@ -30,7 +30,7 @@ public class Sync {
 
     public static final String TAG = Sync.class.getSimpleName();
 
-    public static void run(Context context, Class trigger) {
+    public static synchronized void run(Context context, Class trigger) {
 
         Date lastSync = Config.getLastSync(context);
         if (lastSync != null) {

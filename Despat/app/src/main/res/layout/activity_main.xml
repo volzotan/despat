@@ -33,9 +33,11 @@
         <TextView
             android:id="@+id/tv_status"
             android:padding="5dp"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:gravity="left"
+            android:background="@color/opaqueBlack"
             android:text="uninitialized"/>
 
     </de.volzo.despat.support.FixedAspectRatioFrameLayout>

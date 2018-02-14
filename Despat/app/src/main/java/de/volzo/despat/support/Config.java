@@ -108,7 +108,7 @@ public class Config {
     private static final File DEFAULT_IMAGE_FOLDER              = new File(Environment.getExternalStorageDirectory(), ("despat"));
     private static final String DEFAULT_SERVER_ADDRESS          = "http://zoltep.de"; // format protocol://example.com
     private static final boolean DEFAULT_RESUME_AFTER_REBOOT    = false;
-    private static final long DEFAULT_MIN_SYNC_INTERVAL         = 5 * 60 * 1000;
+    private static final long DEFAULT_MIN_SYNC_INTERVAL         = 5 * 60 * 1000; // at most every X ms
 
     private static final String SHAREDPREFNAME                  = "de.volzo.despat.DEFAULT_PREFERENCES";
 
