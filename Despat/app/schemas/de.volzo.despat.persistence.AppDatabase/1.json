@@ -2,22 +2,22 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3018e336b6ab3ab51363930bac44f5bc",
+    "identityHash": "2cf79e2afe2a7bcdcd8c2251ce25993b",
     "entities": [
       {
         "tableName": "Status",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature` REAL NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` TEXT, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature` REAL NOT NULL)",
         "fields": [
           {
-            "fieldPath": "mid",
-            "columnName": "mid",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "timestamp",
             "columnName": "timestamp",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": false
           },
           {
@@ -71,7 +71,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "mid"
+            "id"
           ],
           "autoGenerate": true
         },
@@ -80,11 +80,11 @@
       },
       {
         "tableName": "Session",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` INTEGER, `end` INTEGER, `latitude` TEXT, `longitude` TEXT, `exclusion_image` BLOB, `compressed_image` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `exclusion_image` BLOB, `compressed_image` TEXT, `resumed` INTEGER NOT NULL, `shutter_interval` INTEGER, `exposure_threshold` REAL, `exposure_compensation` REAL)",
         "fields": [
           {
-            "fieldPath": "sid",
-            "columnName": "sid",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -97,25 +97,25 @@
           {
             "fieldPath": "start",
             "columnName": "start",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": false
           },
           {
             "fieldPath": "end",
             "columnName": "end",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": false
           },
           {
             "fieldPath": "latitude",
             "columnName": "latitude",
-            "affinity": "TEXT",
+            "affinity": "REAL",
             "notNull": false
           },
           {
             "fieldPath": "longitude",
             "columnName": "longitude",
-            "affinity": "TEXT",
+            "affinity": "REAL",
             "notNull": false
           },
           {
@@ -129,11 +129,35 @@
             "columnName": "compressed_image",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "resumed",
+            "columnName": "resumed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shutterInterval",
+            "columnName": "shutter_interval",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "exposureThreshold",
+            "columnName": "exposure_threshold",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "exposureCompensation",
+            "columnName": "exposure_compensation",
+            "affinity": "REAL",
+            "notNull": false
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "sid"
+            "id"
           ],
           "autoGenerate": true
         },
@@ -142,11 +166,11 @@
       },
       {
         "tableName": "Capture",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `time` INTEGER, `image_path` TEXT, FOREIGN KEY(`session_id`) REFERENCES `Session`(`sid`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `recording_time` TEXT, `image_path` TEXT, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
-            "fieldPath": "cid",
-            "columnName": "cid",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -158,8 +182,8 @@
           },
           {
             "fieldPath": "recordingTime",
-            "columnName": "time",
-            "affinity": "INTEGER",
+            "columnName": "recording_time",
+            "affinity": "TEXT",
             "notNull": false
           },
           {
@@ -171,7 +195,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "cid"
+            "id"
           ],
           "autoGenerate": true
         },
@@ -185,18 +209,18 @@
               "session_id"
             ],
             "referencedColumns": [
-              "sid"
+              "id"
             ]
           }
         ]
       },
       {
         "tableName": "Position",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `capture_id` INTEGER NOT NULL, `x` INTEGER NOT NULL, `y` INTEGER NOT NULL, `latitude` TEXT, `longitude` TEXT, FOREIGN KEY(`capture_id`) REFERENCES `Capture`(`cid`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `capture_id` INTEGER NOT NULL, `x` INTEGER NOT NULL, `y` INTEGER NOT NULL, `latitude` TEXT, `longitude` TEXT, FOREIGN KEY(`capture_id`) REFERENCES `Capture`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
-            "fieldPath": "pid",
-            "columnName": "pid",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -233,7 +257,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "pid"
+            "id"
           ],
           "autoGenerate": true
         },
@@ -247,29 +271,29 @@
               "capture_id"
             ],
             "referencedColumns": [
-              "cid"
+              "id"
             ]
           }
         ]
       },
       {
         "tableName": "Event",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER, `type` INTEGER NOT NULL, `payload` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` TEXT, `type` INTEGER NOT NULL, `payload` TEXT)",
         "fields": [
           {
-            "fieldPath": "eid",
-            "columnName": "eid",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "timestamp",
             "columnName": "timestamp",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "eventType",
+            "fieldPath": "type",
             "columnName": "type",
             "affinity": "INTEGER",
             "notNull": true
@@ -283,7 +307,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "eid"
+            "id"
           ],
           "autoGenerate": true
         },
@@ -293,7 +317,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"3018e336b6ab3ab51363930bac44f5bc\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"2cf79e2afe2a7bcdcd8c2251ce25993b\")"
     ]
   }
 }
