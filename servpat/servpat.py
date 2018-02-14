@@ -12,6 +12,7 @@ DATEFORMAT_OUTPUT   = "%Y.%m.%d - %H:%M:%S.%f"
 DATEFORMAT_IMG      = "%Y-%m-%d--%H-%M-%S-%f"
 
 app = Flask(__name__)
+# login_manager = LoginManager()
 
 app.config.from_pyfile("default.config")
 app.config.from_pyfile("grinzold.config", silent=True)
@@ -43,7 +44,7 @@ def overview(option):
     data_status = query_db("SELECT * FROM status WHERE deviceId LIKE (?) ORDER BY datetime(timestamp) DESC", (filter_device,))
     data_session = query_db("SELECT * FROM session WHERE deviceId LIKE (?) ORDER BY datetime(start) DESC", (filter_device,))
     data_capture = query_db("SELECT * FROM capture WHERE deviceId LIKE (?) ORDER BY datetime(recordingTime) DESC", (filter_device,))
-    data_event 	= query_db("SELECT * FROM event WHERE deviceId LIKE (?) ORDER BY datetime(timestamp) DESC", (filter_device,))
+    data_event 	= query_db("SELECT * FROM event WHERE deviceId LIKE (?) AND type NOT IN (?, ?) ORDER BY datetime(timestamp) DESC", (filter_device, 90, 91))
     data_upload = query_db("SELECT * FROM upload WHERE deviceId LIKE (?) ORDER BY datetime(timestamp) DESC", (filter_device,))
 
     graph_status = None
@@ -79,6 +80,24 @@ def device(device_id):
     device_upload = cur.fetchall()
 
     return render_template("device.html", graph_status=graph_status, data_status=device_status, data_upload=device_upload, page_title=device_id)
+
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if valid_login(request.form['username'],
+                       request.form['password']):
+            #return log_the_user_in(request.form['username'])
+            return redirect(url_for('overview'))
+        else:
+            error = 'Invalid username/password'
+    else:
+        pass
+
+    # the code below is executed if the request method
+    # was GET or the credentials were invalid
+    return render_template('login.html', error=error)
 
 
 @app.route("/command")
@@ -438,6 +457,11 @@ def eventtype_filter(e):
         60: "SLEEP MODE CHANGE",
         61: "DISPLAY ON",
         62: "DISPLAY OFF",
+
+        70: "SYNC",
+
+        90: "WAKELOCK ACQUIRE",
+        91: "WAKELOCK RELEASE",
     }
 
     try:
@@ -604,6 +628,11 @@ def install_secret_key(app, filename="secret_key"):
         sys.exit(1)
 
 
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return User.get(user_id)
+
+
 # initialization tasks
 
 install_secret_key(app)
@@ -611,6 +640,8 @@ install_secret_key(app)
 image_dir = app.config["UPLOAD_FOLDER"]
 if not os.path.exists(image_dir):
     os.makedirs(image_dir)
+
+# login_manager.init_app(app)
 
 if __name__ == "__main__":
     app.run()

@@ -77,6 +77,7 @@
       <th class="text-right">captures</th>
       <th class="text-right">start</th>
       <th class="text-right">end</th>
+      <th class="text-right">duration</th>
       <th class="text-right">location</th>
       <th class="text-right">resumed</th>
     </tr>
@@ -87,14 +88,11 @@
       <td class="col-md-1">{{ entry.id }}</td>
       <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>
       <td class="col-md-1">{{ entry.sessionId }}</td>
-      <td class="col-md-1 text-right">{{ TODO }}</td>
+      <td class="col-md-1 text-right"> TODO </td>
       <td class="col-md-2 text-right">{{ entry.start | dateformat }}</td>
       <td class="col-md-2 text-right">{{ entry.end | dateformat }}</td>
-      <td class="col-md-2 text-right">
-        <a href="{{ [entry.latitude, entry.longitude] | location }}" target="_blank">
-          {{ entry.latitude}}, {{entry.longitude}}
-        </a>
-      </td>
+      <td class="col-md-1 text-right">{{ [entry.start, entry.end] | timediff }}</td>
+      <td class="col-md-1 text-right"><a href="{{ [entry.latitude, entry.longitude] | location }}" target="_blank">map</a></td>
       <td class="col-md-1 text-right">{{ entry.resumed }}</td>
     </tr>
     {% else %}
@@ -105,7 +103,8 @@
       <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
       <td class="col-md-2"> - </td>
-      <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-1"> - </td>
       <td class="col-md-1"> - </td>
     </tr>
     {% endfor %}
