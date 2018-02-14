@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.List;
 
+import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
 
@@ -129,10 +130,16 @@ public class CameraController1 extends CameraController implements Camera.Previe
             throw new IllegalAccessException("camera is dead");
         }
 
-        precapture(0);
+        try {
+            precapture(0);
+        } catch (Exception e) {
+            Log.e(TAG, "capturing image failed", e);
+            if (controllerCallback != null) controllerCallback.cameraFailed(e);
+            closeCamera();
+        }
     }
 
-    private void precapture(int sequenceNumber) {
+    private void precapture(int sequenceNumber) throws Exception {
         Log.d(TAG, "# precapture [" + (sequenceNumber+1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
 
         if (camera == null) {
@@ -143,12 +150,14 @@ public class CameraController1 extends CameraController implements Camera.Previe
         try {
             camera.startPreview();
         } catch (RuntimeException re) {
+            Log.w(TAG, "camera failed during preview. attempting restart.");
             try {
                 restartCamera();
                 camera.startPreview();
+                Util.saveEvent(context, Event.EventType.ERROR, "preview failed. camera restart");
             } catch (Exception e) {
                 Log.e(TAG, "preview failed. restarting camera failed", e);
-                return;
+                throw e;
             }
         }
 
@@ -321,13 +330,14 @@ public class CameraController1 extends CameraController implements Camera.Previe
                 controllerCallback.intermediateImageTaken();
             }
 
-//            Handler handler = new Handler();
-//            handler.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-                    precapture(shutterCount);
-//                }
-//            }, 500);
+            try {
+                precapture(shutterCount);
+            } catch (Exception e) {
+                Log.e(TAG, "capturing next image in sequence failed", e);
+                if (controllerCallback != null) controllerCallback.cameraFailed(e);
+                closeCamera();
+                return;
+            }
         } else {
             Log.d(TAG, "# captureComplete");
 
