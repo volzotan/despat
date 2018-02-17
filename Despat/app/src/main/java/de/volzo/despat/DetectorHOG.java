@@ -1,7 +1,6 @@
 package de.volzo.despat;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -20,11 +19,11 @@ import java.io.File;
  * Created by volzotan on 17.12.16.
  */
 
-public class Recognizer {
+public class DetectorHOG extends Detector {
 
     private long[] computationTime = new long[4];
 
-    public Recognizer() {
+    public DetectorHOG() {
         System.loadLibrary("opencv_java3");
     }
 
