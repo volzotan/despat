@@ -133,9 +133,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
         try {
             precapture(0);
         } catch (Exception e) {
-            Log.e(TAG, "capturing image failed", e);
-            if (controllerCallback != null) controllerCallback.cameraFailed(e);
-            closeCamera();
+            cameraFailed("capturing image failed", e);
         }
     }
 
@@ -144,8 +142,10 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         if (camera == null) {
             Log.e(TAG, "camera died unexpectedly");
-            return;
+            throw new IllegalAccessException("camera died unexpectedly");
         }
+
+        Util.sleep(200);
 
         try {
             camera.startPreview();
@@ -227,8 +227,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
             camera.takePicture(controller, controller, controller);
         } catch (RuntimeException re) {
             Log.e(TAG, "releasing shutter failed: ", re);
-            if (controllerCallback != null) controllerCallback.cameraFailed(re);
-            closeCamera();
+            cameraFailed("releasing shutter failed", re);
         }
     }
 
@@ -333,10 +332,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
             try {
                 precapture(shutterCount);
             } catch (Exception e) {
-                Log.e(TAG, "capturing next image in sequence failed", e);
-                if (controllerCallback != null) controllerCallback.cameraFailed(e);
-                closeCamera();
-                return;
+                cameraFailed("capturing next image in sequence failed", e);
             }
         } else {
             Log.d(TAG, "# captureComplete");
@@ -393,12 +389,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
     @Override
     public void onError(int error, Camera camera) {
         Log.d(TAG, "# onError");
-
-        if (controllerCallback != null) {
-            controllerCallback.cameraFailed(error);
-        }
-
-        closeCamera();
+        cameraFailed("onError called", error);
     }
 
     @Override

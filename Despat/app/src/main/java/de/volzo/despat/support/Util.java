@@ -323,10 +323,8 @@ public class Util {
     public static void printCameraParameters(Context context) {
         try {
             Despat despat = getDespat(context);
-            CameraController camera = despat.initCamera();
-            camera.openCamera();
-            CameraController cameraController = despat.getCamera();
-            HashMap<String, String> dict = cameraController.getCameraParameters();
+            CameraController camera = despat.initCamera(context);
+            HashMap<String, String> dict = camera.getCameraParameters();
 
             if (dict == null) throw new Exception("null parameters");
 

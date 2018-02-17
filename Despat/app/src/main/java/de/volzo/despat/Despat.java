@@ -102,8 +102,8 @@ public class Despat extends Application {
         systemController.reboot();
     }
 
-    public CameraController initCamera() throws Exception {
-        return initCamera(null, null, null);
+    public CameraController initCamera(Context context) throws Exception {
+        return initCamera(context, null, null);
     }
 
     public CameraController initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {

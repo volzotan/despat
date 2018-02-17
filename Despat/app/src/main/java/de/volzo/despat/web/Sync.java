@@ -166,7 +166,7 @@ public class Sync {
 
         if (camera != null) throw new Exception("camera in use");
 
-        despat.initCamera();
+        despat.initCamera(context);
         HashMap<String, String> parameters = camera.getCameraParameters();
 
         serverConnector.sendKnock(parameters, genericSuccessCallback, genericFailureCallback);

@@ -129,20 +129,6 @@ public class ShutterService extends Service {
 
     public void releaseShutter() {
 
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
-//                intent.putExtra(Broadcast.DATA_PICTURE_PATH, "");
-//                context.sendBroadcast(intent);
-//
-//                shutterReleaseFinished();
-//            }
-//        }, 4000);
-//
-//        if (true) return;
-
         final Despat despat = Util.getDespat(this);
         SystemController systemController = despat.getSystemController();
 
@@ -171,19 +157,31 @@ public class ShutterService extends Service {
             }
 
             @Override
-            public void cameraFailed(Object o) {
+            public void cameraFailed(String message, Object o) {
                 Log.e(TAG, "camera failed");
 
-                String msg = "";
+                String err = "";
                 if (o != null) {
                     try {
-                        msg = o.toString();
+                        err = o.toString();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
 
-                Util.saveEvent(despat, Event.EventType.ERROR, "camera failed: " + msg);
+                StringBuilder sb = new StringBuilder();
+                sb.append("camera failed");
+                if (message != null) {
+                    sb.append(": ");
+                    sb.append(message);
+                }
+                if (err != null && !err.isEmpty()) {
+                    sb.append(" [");
+                    sb.append(err);
+                    sb.append("]");
+                }
+
+                Util.saveEvent(despat, Event.EventType.ERROR, sb.toString());
 
                 // camera should close itself and call onClosed
             }

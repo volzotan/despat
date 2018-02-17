@@ -1,8 +1,6 @@
 package de.volzo.despat;
 
 import android.Manifest;
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -13,14 +11,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -55,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     MainActivity activity = this;
 
     PowerbrainConnector powerbrain;
-    Recognizer recognizer;
+    Detector detector;
 
     TextureView textureView;
 
@@ -231,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();
 
-//        Util.printCameraParameters(this);
+        Util.printCameraParameters(this);
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -421,35 +416,35 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     public void runRecognizer() {
-        // remove the textureView from the preview
-        FixedAspectRatioFrameLayout aspectRatioLayout = (FixedAspectRatioFrameLayout) findViewById(R.id.aspectratio_layout);
-        aspectRatioLayout.removeView(findViewById(R.id.textureView));
-        textureView = new TextureView(this);
-        textureView.setId(R.id.textureView);
-        aspectRatioLayout.addView(textureView);
-
-//        Intent mServiceIntent = new Intent(this, RecognitionService.class);
+//        // remove the textureView from the preview
+//        FixedAspectRatioFrameLayout aspectRatioLayout = (FixedAspectRatioFrameLayout) findViewById(R.id.aspectratio_layout);
+//        aspectRatioLayout.removeView(findViewById(R.id.textureView));
+//        textureView = new TextureView(this);
+//        textureView.setId(R.id.textureView);
+//        aspectRatioLayout.addView(textureView);
 //
-//        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(this), Config.IMAGE_FILEEXTENSION);
+////        Intent mServiceIntent = new Intent(this, RecognitionService.class);
+////
+////        ImageRollover imgroll = new ImageRollover(Config.getImageFolder(this), Config.IMAGE_FILEEXTENSION);
+////        File newestImage = imgroll.getNewestImage();
+////
+////        mServiceIntent.setData(Uri.parse(newestImage.getAbsolutePath()));
+////        this.startService(mServiceIntent);
+//
+//        detector = new DetectorHOG();
+//
+//        ImageRollover imgroll = new ImageRollover(this);
 //        File newestImage = imgroll.getNewestImage();
 //
-//        mServiceIntent.setData(Uri.parse(newestImage.getAbsolutePath()));
-//        this.startService(mServiceIntent);
-
-        recognizer = new Recognizer();
-
-        ImageRollover imgroll = new ImageRollover(this);
-        File newestImage = imgroll.getNewestImage();
-
-        Recognizer.RecognizerResultset res = recognizer.run(newestImage.getAbsoluteFile());
-
-        ImageView imageView = (ImageView) findViewById(R.id.imageView);
-        imageView.setImageBitmap(res.bitmap);
-
-        PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
-
-        TextView tvStatus = (TextView) findViewById(R.id.tv_status);
-        tvStatus.setText("n: " + res.coordinates.length);
+//        Detector.Resultset res = detector.run(newestImage.getAbsoluteFile());
+//
+//        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+//        imageView.setImageBitmap(res.bitmap);
+//
+//        PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+//
+//        TextView tvStatus = (TextView) findViewById(R.id.tv_status);
+//        tvStatus.setText("n: " + res.coordinates.length);
     }
 
     /* Request a confirmation from the user that the app should be put on the Doze whitelist.
