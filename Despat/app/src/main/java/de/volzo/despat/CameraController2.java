@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -15,14 +17,19 @@ import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.Range;
+import android.util.Rational;
 import android.util.Size;
+import android.util.SizeF;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Toast;
@@ -30,9 +37,17 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +55,8 @@ import java.util.concurrent.TimeUnit;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
+
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 
 
 /**
@@ -55,6 +72,7 @@ public class CameraController2 extends CameraController {
     private CameraController.ControllerCallback controllerCallback;
 
     private CameraManager cameraManager;
+    private CameraCharacteristics characteristics;
 
     private CameraDevice cameraDevice;
 
@@ -73,14 +91,15 @@ public class CameraController2 extends CameraController {
 
     private Semaphore cameraOpenCloseLock = new Semaphore(1);
 
-    private int state = STATE_IDLE;
+    private static final long PRECAPTURE_TIMEOUT_MS = 1000;
+    private int state = STATE_CLOSED;
+    private static final int STATE_CLOSED = 0;
+    private static final int STATE_OPENED = 1;
+    private static final int STATE_PREVIEW = 2;
+    private static final int STATE_WAITING_FOR_3A_CONVERGENCE = 3;
 
-    public static final int STATE_IDLE                      = 1;
-    public static final int STATE_PREVIEW                   = 2;
-    public static final int STATE_WAITING_LOCK              = 3;
-    public static final int STATE_WAITING_PRECAPTURE        = 4;
-    public static final int STATE_WAITING_NON_PRECAPTURE    = 5;
-    public static final int STATE_PICTURE_TAKEN             = 6;
+    private boolean noAF = false;
+    private long captureTimer;
 
     public CameraController2(Context context, ControllerCallback controllerCallback, TextureView textureView) {
         this.context = context;
@@ -99,6 +118,7 @@ public class CameraController2 extends CameraController {
             String[] cameraIdList = cameraManager.getCameraIdList();
             Log.d(TAG, "found " + cameraIdList.length + " cameras");
             String cameraId = cameraIdList[0];
+            characteristics = cameraManager.getCameraCharacteristics(cameraId);
 
             if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
@@ -131,6 +151,7 @@ public class CameraController2 extends CameraController {
         public void onOpened(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onOpened");
             cameraOpenCloseLock.release();
+            state = STATE_OPENED;
 
             cameraDevice = camera;
 
@@ -149,20 +170,15 @@ public class CameraController2 extends CameraController {
         public void onDisconnected(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onDisconnected");
             cameraOpenCloseLock.release();
+            state = STATE_CLOSED;
 
-            if (camera != null) {
-                camera.close();
-                cameraDevice = null;
-            }
-
-            if (controllerCallback != null) {
-                controllerCallback.cameraFailed(null);
-            }
+            cameraFailed("camera: onDisconnected", null);
         }
 
         @Override
         public void onClosed(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onClosed");
+            state = STATE_CLOSED;
 
             // cameraOpenCloseLock.release();
 
@@ -197,14 +213,7 @@ public class CameraController2 extends CameraController {
 
 //            Toast.makeText(context, "Opening Camera failed", Toast.LENGTH_SHORT).show();
 
-            if (camera != null) {
-                camera.close();
-                cameraDevice = null;
-            }
-
-            if (controllerCallback != null) {
-                controllerCallback.cameraFailed(error);
-            }
+            cameraFailed("camera: onError", error);
         }
     };
 
@@ -299,6 +308,7 @@ public class CameraController2 extends CameraController {
 
             stillRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             stillRequestBuilder.addTarget(imageReader.getSurface());
+            setup3AControls(stillRequestBuilder);
 
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
 
@@ -324,7 +334,8 @@ public class CameraController2 extends CameraController {
                             // Auto focus should be continuous for camera preview.
                             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                             previewRequest = previewRequestBuilder.build();
-                            captureSession.setRepeatingRequest(previewRequest, captureCallback, backgroundHandler);
+                            captureSession.setRepeatingRequest(previewRequest, preCaptureCallback, backgroundHandler);
+                            state = STATE_PREVIEW;
                         } catch (CameraAccessException e) {
                             e.printStackTrace();
                         }
@@ -388,7 +399,7 @@ public class CameraController2 extends CameraController {
             requestBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90);
 */
 
-    private CameraCaptureSession.CaptureCallback captureCallback
+    private CameraCaptureSession.CaptureCallback preCaptureCallback
             = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
@@ -406,55 +417,49 @@ public class CameraController2 extends CameraController {
 
             switch (state) {
                 case STATE_PREVIEW: {
-                    // We have nothing to do when the camera preview is working normally.
+                    // We have nothing to do when the camera preview is running normally.
                     break;
                 }
-                case STATE_WAITING_LOCK: {
-                    Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                    if (afState == null) {
-                        captureStillPicture();
-                    } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState || CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
+                case STATE_WAITING_FOR_3A_CONVERGENCE: {
+                    boolean readyToCapture = true;
+                    if (!noAF) {
+                        Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                        if (afState == null) break;
+
+                        // If auto-focus has reached locked state, we are ready to capture
+                        readyToCapture =
+                                (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
+                                        afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED);
+                    }
+
+                    // If we are running on an non-legacy device, we should also wait until
+                    // auto-exposure and auto-white-balance have converged as well before
+                    // taking a picture.
+                    if (!isLegacy()) {
                         Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-                            state = STATE_PICTURE_TAKEN;
-                            captureStillPicture();
-                        } else {
-                            runPrecaptureSequence();
+                        Integer awbState = result.get(CaptureResult.CONTROL_AWB_STATE);
+                        if (aeState == null || awbState == null) {
+                            break;
                         }
+
+                        readyToCapture = readyToCapture &&
+                                aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED &&
+                                awbState == CaptureResult.CONTROL_AWB_STATE_CONVERGED;
                     }
-                    break;
-                }
-                case STATE_WAITING_PRECAPTURE: {
-                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                    if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE || aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
-                        state = STATE_WAITING_NON_PRECAPTURE;
+
+                    // If we haven't finished the pre-capture sequence but have hit our maximum
+                    // wait timeout, too bad! Begin capture anyway.
+                    if (!readyToCapture && check3ATimer()) {
+                        Log.w(TAG, "Timed out waiting for pre-capture sequence to complete.");
+                        readyToCapture = true;
                     }
-                    break;
-                }
-                case STATE_WAITING_NON_PRECAPTURE: {
-                    if (Config.CAMERA_CONTROLLER_RELEASE_EARLY) {
-                        state = STATE_PICTURE_TAKEN;
+
+                    if (readyToCapture) {
                         captureStillPicture();
-                        break;
-                    }
 
-                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                    if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) { // TODO
-                        state = STATE_PICTURE_TAKEN;
-
-                        if (Config.SHUTTER_RELEASE_DELAY > 0) {
-                            Handler handler = new Handler();
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    captureStillPicture();
-                                }
-                            }, Config.SHUTTER_RELEASE_DELAY);
-                        } else {
-                            captureStillPicture();
-                        }
+                        // After this, the camera will go back to the normal state of preview.
+                        state = STATE_PREVIEW;
                     }
-                    break;
                 }
             }
         }
@@ -490,26 +495,21 @@ public class CameraController2 extends CameraController {
     }
 
     private void lockFocus() {
+        Log.d(TAG, "# lockFocus");
+
         try {
-            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+            if (!noAF) {
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+            }
 
-            state = STATE_WAITING_LOCK;
-            captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
-            Log.d(TAG, "# lockFocus");
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
+            if (!isLegacy()) {
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            }
 
-    private void runPrecaptureSequence() {
-        try {
+            state = STATE_WAITING_FOR_3A_CONVERGENCE;
+            start3ATimer();
 
-            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-
-            // Tell captureCallback to wait for the precapture sequence to be set.
-            state = STATE_WAITING_PRECAPTURE;
-            captureSession.capture(previewRequestBuilder.build(), captureCallback, backgroundHandler);
-            Log.d(TAG, "# precapture");
+            captureSession.setRepeatingRequest(previewRequestBuilder.build(), preCaptureCallback, backgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -553,9 +553,10 @@ public class CameraController2 extends CameraController {
                     // final image of burstSequence
 
                     // beware, the image may not be written to disk at this point
-                    ImageRollover imgroll = new ImageRollover(context);
-                    File image = imgroll.getNewestImage();
-                    sendBroadcast(context, image.getAbsolutePath());
+                    // TODO: in case a lot of images are saved, this takes several seconds...
+//                    ImageRollover imgroll = new ImageRollover(context);
+//                    File image = imgroll.getNewestImage();
+                    sendBroadcast(context, "foo"); //image.getAbsolutePath());
 
                     if (controllerCallback != null) controllerCallback.finalImageTaken();
 
@@ -581,9 +582,13 @@ public class CameraController2 extends CameraController {
 
                 List<CaptureRequest> captureList = new ArrayList<CaptureRequest>();
                 for (int i=0; i<burstLength; i++) {
+
                     // attach the number of the picture in the burst sequence to the request
                     stillRequestBuilder.setTag(i);
                     CaptureRequest req = stillRequestBuilder.build();
+
+                    // TODO: exposure compensation
+
                     captureList.add(req);
                 }
 
@@ -634,7 +639,7 @@ public class CameraController2 extends CameraController {
             // resume preview
             if (textureView != null) {
                 state = STATE_PREVIEW;
-                captureSession.setRepeatingRequest(previewRequest, captureCallback, backgroundHandler);
+                captureSession.setRepeatingRequest(previewRequest, preCaptureCallback, backgroundHandler);
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -685,7 +690,215 @@ public class CameraController2 extends CameraController {
 
     }
 
+    public HashMap<String, String> getCameraParameters() {
+
+        try {
+            CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+            CameraCharacteristics c = cameraManager.getCameraCharacteristics(cameraManager.getCameraIdList()[0]);
+
+            List<CameraCharacteristics.Key<?>> keys = c.getKeys();
+            List<CaptureRequest.Key<?>> reqKeys = c.getAvailableCaptureRequestKeys();
+            List<CaptureResult.Key<?>> resKeys = c.getAvailableCaptureResultKeys();
+
+            HashMap<String, String> dict = new HashMap<String, String>();
+            HashMap<Object, String> reverseKeyMap = new HashMap<Object, String>();
+
+            Class cl = CameraCharacteristics.class;
+            Field[] fields = cl.getDeclaredFields();
+            for (Field f : fields) {
+                if (f.getType() == CameraCharacteristics.Key.class) {
+                    try {
+                        reverseKeyMap.put(f.get(c), f.getName());
+                    } catch (IllegalAccessException iae) {
+                        System.out.println("ILLEGAL ACCESS");
+                    }
+                }
+            }
+
+            HashMap<String, HashMap<Integer, String>> interpretationMaps = new HashMap<>();
+            interpretationMaps.put("CONTROL_AVAILABLE_SCENE_MODES", buildInterpretationMap(c, "CONTROL_SCENE_MODE"));
+            interpretationMaps.put("CONTROL_AE_AVAILABLE_MODES", buildInterpretationMap(c, "AE_MODE"));
+            interpretationMaps.put("CONTROL_AE_AVAILABLE_ANTIBANDING_MODES", buildInterpretationMap(c, "AE_ANTIBANDING_MODE"));
+            interpretationMaps.put("CONTROL_AVAILABLE_EFFECTS", buildInterpretationMap(c, "CONTROL_EFFECT_MODE"));
+            interpretationMaps.put("CONTROL_AF_AVAILABLE_MODES", buildInterpretationMap(c, "CONTROL_AF_MODE"));
+            interpretationMaps.put("NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES", buildInterpretationMap(c, "NOISE_REDUCTION_MODE"));
+            interpretationMaps.put("CONTROL_AWB_AVAILABLE_MODES", buildInterpretationMap(c, "AWB_MODE"));
+            interpretationMaps.put("STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES", buildInterpretationMap(c, "STATISTICS_FACE_DETECT_MODE"));
+            interpretationMaps.put("COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES", buildInterpretationMap(c, "COLOR_CORRECTION_ABERATION_MODE"));
+
+
+//            for (Map.Entry<String, HashMap<Integer, String>> e : interpretationMaps.entrySet()) {
+//                System.out.println(e.getKey());
+//
+//                for(Map.Entry<Integer, String> e2 : e.getValue().entrySet()) {
+//                    System.out.println("  " + e2.getKey() + " : " + e2.getValue());
+//                }
+//            }
+
+            for (CameraCharacteristics.Key<?> k : keys) {
+                Object o = c.get(k);
+                String fieldName = reverseKeyMap.get(k);
+                HashMap<Integer, String> interpretationMap = interpretationMaps.get(fieldName);
+                dict.put(fieldName, stringify(o, interpretationMap));
+            }
+
+
+//            for (CaptureRequest.Key<?> k : reqKeys) {
+//                dict.put(k.getName(), k.toString());
+//            }
+
+//            for (CaptureResult.Key<?> k : resKeys) {
+//                dict.put(k.getName(), k.toString());
+//            }
+
+            return dict;
+
+        } catch (CameraAccessException cae) {
+            Log.e(TAG, "retrieving camera parameters failed", cae);
+            return null;
+        }
+    }
+
+    private HashMap<Integer, String> buildInterpretationMap(CameraCharacteristics c, String prefix) {
+        HashMap<Integer, String> map = new HashMap<>();
+
+        Class cl = CameraMetadata.class;
+        Field[] fields = cl.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getType() == Integer.TYPE) {
+                if (f.getName() != null && f.getName().contains(prefix)) {
+                    try {
+                        map.put(f.getInt(c), f.getName());
+                    } catch (IllegalAccessException iae) {}
+                }
+            }
+        }
+
+        return map;
+    }
+
+    private String stringify(Object o) {
+        return stringify(o, null);
+    }
+
+    private String stringify(Object o, HashMap<Integer, String> map) {
+        if (o == null) return "";
+
+        if (o.getClass().isArray()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i=0; i < Array.getLength(o); i++) {
+                sb.append(stringify(Array.get(o, i), map));
+                sb.append(" ");
+            }
+            return sb.toString();
+        }
+
+        if (o instanceof Integer) {
+            if (map != null) {
+                String str = map.get(o);
+                if (str != null) return str;
+            }
+
+            return o.toString();
+        }
+
+        if (o instanceof Byte) {
+            return o.toString();
+        }
+
+        if (o instanceof Float) {
+            return o.toString();
+        }
+
+        if (o instanceof Boolean) {
+            return o.toString();
+        }
+
+        if (o instanceof Rational) {
+            return o.toString();
+        }
+
+        if (o instanceof Rect) {
+            return o.toString();
+        }
+
+        if (o instanceof Size) {
+            Size val = (Size) o;
+            return Integer.toString(val.getWidth()) + "x" + Integer.toString(val.getHeight());
+        }
+
+        if (o instanceof SizeF) {
+            SizeF val = (SizeF) o;
+            return Float.toString(val.getWidth()) + "x" + Float.toString(val.getHeight());
+        }
+
+        if (o instanceof Range<?>) {
+            Range<?> val = (Range<?>) o;
+            return "[" + stringify(val.getLower()) + ", " + stringify(val.getUpper()) + "]";
+        }
+
+        return "class: " + o.getClass().getName() + " = " + o.toString();
+    }
+
     // additional functionality
+
+    private boolean isLegacy() {
+        return characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL) ==
+                CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY;
+    }
+
+    private void setup3AControls(CaptureRequest.Builder builder) {
+
+        // Enable auto-magical 3A run by camera device
+        builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+
+        Float minFocusDist = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+
+        // If MINIMUM_FOCUS_DISTANCE is 0, lens is fixed-focus and we need to skip the AF run.
+        noAF = (minFocusDist == null || minFocusDist == 0);
+
+        if (!noAF) {
+            // If there is a "continuous picture" mode available, use it, otherwise default to AUTO.
+            if (contains(characteristics.get(
+                    CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES),
+                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
+                builder.set(CaptureRequest.CONTROL_AF_MODE,
+                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            } else {
+                builder.set(CaptureRequest.CONTROL_AF_MODE,
+                        CaptureRequest.CONTROL_AF_MODE_AUTO);
+            }
+        }
+
+        // If there is an auto-magical white balance control mode available, use it.
+        if (contains(characteristics.get(
+                CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES),
+                CaptureRequest.CONTROL_AWB_MODE_AUTO)) {
+            // Allow AWB to run auto-magically if this device supports this
+            builder.set(CaptureRequest.CONTROL_AWB_MODE,
+                    CaptureRequest.CONTROL_AWB_MODE_AUTO);
+        }
+    }
+
+    private static boolean contains(int[] modes, int mode) {
+        if (modes == null) {
+            return false;
+        }
+        for (int i : modes) {
+            if (i == mode) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void start3ATimer() {
+        captureTimer = SystemClock.elapsedRealtime();
+    }
+
+    private boolean check3ATimer() {
+        return (SystemClock.elapsedRealtime() - captureTimer) > PRECAPTURE_TIMEOUT_MS;
+    }
 
     private void logCameraAutomaticModeState(int afState, int aeState) {
         switch (afState) {
