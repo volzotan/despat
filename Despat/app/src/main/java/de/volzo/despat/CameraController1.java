@@ -277,7 +277,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         Log.d( TAG, "imageCallback: picture retrieved ("+bytes.length+" bytes)" );
 
-        final ImageRollover imgroll = new ImageRollover(context);
+        final ImageRollover imgroll = new ImageRollover(context, ".jpg");
         File imageFullPath = imgroll.getTimestampAsFullFilename();
         if (imageFullPath == null) { // only duplicates
             Log.e(TAG, "saving image failed. no new filename could be acquired");

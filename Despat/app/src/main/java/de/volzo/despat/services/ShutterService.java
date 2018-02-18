@@ -140,7 +140,7 @@ public class ShutterService extends Service {
 
         // check if any images needs to be deleted to have enough free space
         // may be time-consuming. alternative place to run?
-        ImageRollover imgroll = new ImageRollover(despat);
+        ImageRollover imgroll = new ImageRollover(despat, null);
         imgroll.run();
 
         CameraController camera = despat.getCamera();

@@ -29,7 +29,7 @@ public class UploadService extends JobService {
 
         ServerConnector.UploadMessage uploadMessage = new ServerConnector.UploadMessage();
 
-        ImageRollover imgroll = new ImageRollover(this);
+        ImageRollover imgroll = new ImageRollover(this, ".jpg");
         File newestImage = imgroll.getNewestImage();
 
         if (newestImage == null) {

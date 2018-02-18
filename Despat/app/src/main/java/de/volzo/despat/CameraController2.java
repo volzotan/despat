@@ -16,6 +16,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.DngCreator;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
@@ -37,6 +38,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -48,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -85,13 +88,18 @@ public class CameraController2 extends CameraController {
     private Handler backgroundHandler = null;
     private HandlerThread backgroundThread;
 
-    private ImageReader imageReader;
+    private ImageReader imageReaderJpg;
+    private ImageReader imageReaderRaw;
+
+    private final TreeMap<Integer, CaptureMetadata> jpgResultQueue = new TreeMap<>();
+    private final TreeMap<Integer, CaptureMetadata> rawResultQueue = new TreeMap<>();
+
     private SurfaceTexture surfaceTexture; // no GC
     private Surface surface;
 
     private Semaphore cameraOpenCloseLock = new Semaphore(1);
 
-    private static final long PRECAPTURE_TIMEOUT_MS = 1000;
+    private static final long PRECAPTURE_TIMEOUT_MS = 2000;
     private int state = STATE_CLOSED;
     private static final int STATE_CLOSED = 0;
     private static final int STATE_OPENED = 1;
@@ -124,6 +132,11 @@ public class CameraController2 extends CameraController {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
 
+            if (useRaw() && !contains(characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES),
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
+                throw new Config.InvalidConfigurationException("invalid config: camera supports no RAW format");
+            }
+
             cameraManager.registerAvailabilityCallback(new CameraManager.AvailabilityCallback() {
                 @Override
                 public void onCameraAvailable(@NonNull String cameraId) {
@@ -150,15 +163,19 @@ public class CameraController2 extends CameraController {
         @Override
         public void onOpened(CameraDevice camera) {
             Log.d(TAG, "--> Camera: onOpened");
+
             cameraOpenCloseLock.release();
             state = STATE_OPENED;
-
             cameraDevice = camera;
 
             try {
                 createCaptureSession();
             } catch (CameraAccessException e) {
                 Log.e(TAG, e.getMessage());
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+
+                cameraFailed("creating capture session failed", e);
             }
 
             if (controllerCallback != null) {
@@ -184,9 +201,13 @@ public class CameraController2 extends CameraController {
 
             stopBackgroundThread();
 
-            if (imageReader != null) {
-                imageReader.close();
-                imageReader = null;
+            if (imageReaderJpg != null) {
+                imageReaderJpg.close();
+                imageReaderJpg = null;
+            }
+            if (imageReaderRaw != null) {
+                imageReaderRaw.close();
+                imageReaderRaw = null;
             }
 
             // if a textureView exists outside of the CameraController
@@ -217,74 +238,40 @@ public class CameraController2 extends CameraController {
         }
     };
 
-    private void createCaptureSession() throws CameraAccessException {
+    private void createCaptureSession() throws Exception {
         try {
 
             // output
             CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
-            Size[] jpegSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
+            Size[] jpgSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
+            Size[] rawSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.RAW_SENSOR);
 
-            if (jpegSizes == null) {
-                Log.e(TAG, "no image size could be determined");
+            if (jpgSizes == null) {
+                Log.e(TAG, "no JPEG image size could be determined");
                 return;
             }
 
-            imageReader = ImageReader.newInstance(jpegSizes[0].getWidth(), jpegSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES + 2);
-            ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
-                @Override
-                public void onImageAvailable(ImageReader reader) {
+            if (rawSizes == null) {
+                Log.e(TAG, "no RAW image size could be determined");
+                return;
+            }
 
-                    Log.d(TAG, "# onImageAvailable");
+            imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES + 1);
+            imageReaderJpg.setOnImageAvailableListener(readerListenerJpg, backgroundHandler);
 
-                    final ImageRollover imgroll = new ImageRollover(context);
-                    File imageFullPath = imgroll.getTimestampAsFullFilename();
-                    //File imageFullPath = imgroll.filenamify(Long.toString(image.getTimestamp())); // timestamp date is no unix epoch
-                    if (imageFullPath == null) { // only duplicates
-                        Log.e(TAG, "saving image failed. no new filename could be acquired");
-                        return;
-                    }
-
-                    // backgroundHandler.post(new ImageSaver(reader.acquireNextImage(), imageFullPath));
-                    // image saving in a background thread seems not be a good idea if
-                    // it's done by a service
-
-                    Image image = reader.acquireNextImage();
-                    File file = imageFullPath;
-
-                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                    byte[] bytes = new byte[buffer.remaining()];
-                    buffer.get(bytes);
-
-                    // BUG: on some devices (Moto Z) the buffer is empty
-                    boolean empty = true;
-                    for (byte b : bytes) {
-                        if (b > 0) {empty = false; break;}
-                    }
-                    if (empty) Log.e(TAG, "empty image buffer");
-
-                    FileOutputStream output = null;
-                    try {
-                        output = new FileOutputStream(file);
-                        output.write(bytes);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        image.close();
-                        if (null != output) {
-                            try {
-                                output.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-            };
-            imageReader.setOnImageAvailableListener(readerListener, backgroundHandler);
+            imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, Config.NUMBER_OF_BURST_IMAGES + 1);
+            imageReaderRaw.setOnImageAvailableListener(readerListenerRaw, backgroundHandler);
 
             // output surfaces
-            List<Surface> outputSurfaces = new ArrayList<Surface>(2);
-            outputSurfaces.add(imageReader.getSurface());
+            List<Surface> outputSurfaces = new ArrayList<Surface>(3);
+            if (contains(Config.IMAGE_FORMAT, ImageFormat.JPEG)) {
+                outputSurfaces.add(imageReaderJpg.getSurface());
+            } else if (contains(Config.IMAGE_FORMAT, ImageFormat.RAW_SENSOR)) {
+                outputSurfaces.add(imageReaderRaw.getSurface());
+            } else {
+                Log.e(TAG, "invalid configuration: valid image format missing");
+                throw new Config.InvalidConfigurationException("image format missing");
+            }
 
             // get empty dummy surface or surface with texture view
             surfaceTexture = getSurfaceTexture(textureView);
@@ -307,7 +294,11 @@ public class CameraController2 extends CameraController {
             previewRequestBuilder.addTarget(surface);
 
             stillRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-            stillRequestBuilder.addTarget(imageReader.getSurface());
+            if (contains(Config.IMAGE_FORMAT, ImageFormat.JPEG)) {
+                stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
+            } else if (contains(Config.IMAGE_FORMAT, ImageFormat.RAW_SENSOR)) {
+                stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
+            }
             setup3AControls(stillRequestBuilder);
 
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
@@ -325,7 +316,6 @@ public class CameraController2 extends CameraController {
                     captureSession = cameraCaptureSession;
 
                     // if a view was supplied, we want a preview
-
                     // if no view was supplied, no preview is needed and
                     // we just take a picture after the camera started
 
@@ -388,32 +378,21 @@ public class CameraController2 extends CameraController {
         }
     }
 
-/*
-            // AF
-            requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
-            float focusdistance = 0f; //characteristics.get(characteristics.LENS_INFO_HYPERFOCAL_DISTANCE);
-            requestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focusdistance);
-            requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-
-            // orientation
-            requestBuilder.set(CaptureRequest.JPEG_ORIENTATION, Surface.ROTATION_90);
-*/
-
     private CameraCaptureSession.CaptureCallback preCaptureCallback
             = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
 
-            if (state != STATE_PREVIEW){
-                Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-
-                if (afState == null || aeState == null) {
-                    Log.d(TAG, "control state null");
-                } else {
-                    logCameraAutomaticModeState(afState, aeState);
-                }
-            }
+//            if (state != STATE_PREVIEW){
+//                Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+//                Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+//
+//                if (afState == null || aeState == null) {
+//                    Log.d(TAG, "control state null");
+//                } else {
+//                    logCameraAutomaticModeState(afState, aeState);
+//                }
+//            }
 
             switch (state) {
                 case STATE_PREVIEW: {
@@ -450,12 +429,17 @@ public class CameraController2 extends CameraController {
                     // If we haven't finished the pre-capture sequence but have hit our maximum
                     // wait timeout, too bad! Begin capture anyway.
                     if (!readyToCapture && check3ATimer()) {
-                        Log.w(TAG, "Timed out waiting for pre-capture sequence to complete.");
+                        Log.d(TAG, "Timed out waiting for pre-capture sequence to complete.");
+
                         readyToCapture = true;
                     }
 
                     if (readyToCapture) {
-                        captureStillPicture();
+                        long meteringTime = SystemClock.elapsedRealtime() - captureTimer;
+                        boolean meteringSuccessful = meteringTime < PRECAPTURE_TIMEOUT_MS;
+                        Log.d(TAG, "metering time: " + meteringTime + "ms");
+
+                        captureStillPicture(meteringSuccessful);
 
                         // After this, the camera will go back to the normal state of preview.
                         state = STATE_PREVIEW;
@@ -515,14 +499,17 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    private void captureStillPicture() {
+    private void captureStillPicture(boolean meteringSuccessful) {
         try {
             if (null == cameraDevice) {
                 Log.e(TAG, "cameraDevice missing");
                 return;
             }
 
+            // TODO: find a way to include metering time in the persistence.Capture object
+
             // Use the same AE and AF modes as the preview.
+            // TODO: does this really make sense?
             stillRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
             // stop AF/AE measurements
@@ -532,6 +519,23 @@ public class CameraController2 extends CameraController {
             final int burstLength = Config.NUMBER_OF_BURST_IMAGES; // TODO: make burstLength a function parameter
 
             CameraCaptureSession.CaptureCallback localCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+
+                @Override
+                public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+                    super.onCaptureStarted(session, request, timestamp, frameNumber);
+
+                    int n = (int) request.getTag();
+
+                    ImageRollover jpgImgroll = new ImageRollover(context, ".jpg");
+                    ImageRollover rawImgroll = new ImageRollover(context, ".dng");
+
+                    CaptureMetadata jpgCaptureMetadata = jpgResultQueue.get(n);
+                    CaptureMetadata rawCaptureMetadata = rawResultQueue.get(n);
+
+                    if (jpgCaptureMetadata != null) jpgCaptureMetadata.filename = jpgImgroll.getTimestampAsFullFilename();
+                    if (rawCaptureMetadata != null) rawCaptureMetadata.filename = rawImgroll.getTimestampAsFullFilename();
+                }
+
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
@@ -540,27 +544,35 @@ public class CameraController2 extends CameraController {
 
                     // retrieve tag (number of image in burst sequence)
                     Object tag = request.getTag();
-                    if (tag != null) {
-                        int n = (int) request.getTag();
-                        Log.i(TAG, "captured image [" + Integer.toString(n+1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
-                        if (n < burstLength - 1) {
-                            if (controllerCallback != null) controllerCallback.intermediateImageTaken();
-
-                            // there are still remaining requests in the pipeline: no shutdown yet
-                            return;
-                        }
+                    if (tag == null) {
+                        Log.e(TAG, "capture tag missing");
+                        return;
                     }
-                    // final image of burstSequence
 
-                    // beware, the image may not be written to disk at this point
-                    // TODO: in case a lot of images are saved, this takes several seconds...
+                    int n = (int) request.getTag();
+                    Log.i(TAG, "captured image [" + Integer.toString(n + 1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
+
+                    CaptureMetadata jpgCaptureMetadata = jpgResultQueue.get(n);
+                    CaptureMetadata rawCaptureMetadata = rawResultQueue.get(n);
+
+                    if (jpgCaptureMetadata != null) jpgCaptureMetadata.captureResult = result;
+                    if (rawCaptureMetadata != null) rawCaptureMetadata.captureResult = result;
+
+
+                    if (n < burstLength - 1) {
+                        if (controllerCallback != null) controllerCallback.intermediateImageTaken();
+                    } else { // final image of burstSequence: no remaining images in the pipeline, shut it down.
+
+                        // beware, the image may not be written to disk at this point
+                        // TODO: in case a lot of images are saved, this takes several seconds...
 //                    ImageRollover imgroll = new ImageRollover(context);
 //                    File image = imgroll.getNewestImage();
-                    sendBroadcast(context, "foo"); //image.getAbsolutePath());
+                        sendBroadcast(context, "foo"); //image.getAbsolutePath());
 
-                    if (controllerCallback != null) controllerCallback.finalImageTaken();
+                        if (controllerCallback != null) controllerCallback.finalImageTaken();
 
-                    unlockFocus();
+                        unlockFocus();
+                    }
                 }
 
                 public void onCaptureFailed(@NonNull CameraCaptureSession session,
@@ -575,25 +587,26 @@ public class CameraController2 extends CameraController {
                 }
             };
 
-            if (burstLength == 1) {
-                stillRequestBuilder.setTag(null);
-                captureSession.capture(stillRequestBuilder.build(), localCaptureCallback, backgroundHandler);
-            } else {
+            List<CaptureRequest> captureList = new ArrayList<CaptureRequest>();
+            for (int i = 0; i < burstLength; i++) {
 
-                List<CaptureRequest> captureList = new ArrayList<CaptureRequest>();
-                for (int i=0; i<burstLength; i++) {
+                // attach the number of the picture in the burst sequence to the request
+                stillRequestBuilder.setTag(i);
 
-                    // attach the number of the picture in the burst sequence to the request
-                    stillRequestBuilder.setTag(i);
-                    CaptureRequest req = stillRequestBuilder.build();
+                CaptureMetadata jpgMetadata = new CaptureMetadata(context, characteristics);
+                CaptureMetadata rawMetadata = new CaptureMetadata(context, characteristics);
 
-                    // TODO: exposure compensation
+                jpgResultQueue.put(i, jpgMetadata);
+                rawResultQueue.put(i, rawMetadata);
 
-                    captureList.add(req);
-                }
+                CaptureRequest req = stillRequestBuilder.build();
 
-                captureSession.captureBurst(captureList, localCaptureCallback, backgroundHandler);
+                // TODO: exposure compensation
+
+                captureList.add(req);
             }
+
+            captureSession.captureBurst(captureList, localCaptureCallback, backgroundHandler);
 
             Log.d(TAG, "# captureStill");
         } catch (CameraAccessException e) {
@@ -710,7 +723,7 @@ public class CameraController2 extends CameraController {
                     try {
                         reverseKeyMap.put(f.get(c), f.getName());
                     } catch (IllegalAccessException iae) {
-                        System.out.println("ILLEGAL ACCESS");
+                        Log.e(TAG, "ILLEGAL ACCESS");
                     }
                 }
             }
@@ -811,7 +824,6 @@ public class CameraController2 extends CameraController {
                 String str = map.get(o);
                 if (str != null) return str;
             }
-
             return o.toString();
         }
 
@@ -857,7 +869,98 @@ public class CameraController2 extends CameraController {
         return "class: " + o.getClass().getName() + " = " + o.toString();
     }
 
+    private ImageReader.OnImageAvailableListener readerListenerJpg = new ImageReader.OnImageAvailableListener() {
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            Log.d(TAG, "# onImageAvailable JPEG");
+
+            // backgroundHandler.post(new ImageSaver(reader.acquireNextImage(), imageFullPath));
+            // image saving in a background thread seems not be a good idea if
+            // it's done by a service
+
+            Image image = reader.acquireNextImage();
+
+            Map.Entry<Integer, CaptureMetadata> entry = jpgResultQueue.firstEntry();
+            CaptureMetadata metadata = entry.getValue();
+            jpgResultQueue.remove(entry.getKey());
+
+            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+
+            FileOutputStream output = null;
+            try {
+                output = new FileOutputStream(metadata.filename);
+                output.write(bytes);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                image.close();
+                closeOutput(output);
+            }
+        }
+    };
+
+    private ImageReader.OnImageAvailableListener readerListenerRaw = new ImageReader.OnImageAvailableListener() {
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            Log.d(TAG, "# onImageAvailable RAW");
+
+            Image image = reader.acquireNextImage();
+
+            int format = image.getFormat();
+
+//            For best quality DNG files, it is strongly recommended that lens shading map output is
+//            enabled if supported. See {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE}.
+
+            Map.Entry<Integer, CaptureMetadata> entry = rawResultQueue.firstEntry();
+            CaptureMetadata metadata = entry.getValue();
+
+            DngCreator dngCreator = new DngCreator(metadata.characteristics, metadata.captureResult);
+            FileOutputStream output = null;
+            try {
+                output = new FileOutputStream(metadata.filename);
+                dngCreator.writeImage(output, image);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                image.close();
+                closeOutput(output);
+            }
+        }
+    };
+
+    private static class CaptureMetadata {
+        Context context;
+        CameraCharacteristics characteristics;
+        CaptureResult captureResult;
+        File filename;
+
+        public CaptureMetadata(Context context, CameraCharacteristics characteristics) {
+            this.context = context;
+            this.characteristics = characteristics;
+        }
+    }
+
     // additional functionality
+
+    private boolean useJpg() {
+        return contains(Config.IMAGE_FORMAT, ImageFormat.JPEG);
+    }
+
+    private boolean useRaw() {
+        return contains(Config.IMAGE_FORMAT, ImageFormat.RAW_SENSOR);
+    }
+
+    private static void closeOutput(OutputStream outputStream) {
+        if (null != outputStream) {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private boolean isLegacy() {
         return characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL) ==

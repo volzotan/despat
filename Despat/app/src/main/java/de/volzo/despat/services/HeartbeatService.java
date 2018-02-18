@@ -35,7 +35,7 @@ public class HeartbeatService extends JobService {
 
         Despat despat = ((Despat) getApplicationContext());
         SystemController systemController = despat.getSystemController();
-        ImageRollover imgroll = new ImageRollover(this);
+        ImageRollover imgroll = new ImageRollover(this, ".jpg");
 
         // TODO: check if the RecordingSession is valid
         // (i.e. if the alarmManager was triggered always correctly)
@@ -43,7 +43,7 @@ public class HeartbeatService extends JobService {
         Status status = new Status();
 
         status.setTimestamp(Calendar.getInstance().getTime());
-        status.setNumberImagesInMemory(imgroll.getNumberOfSavedImages());
+        status.setNumberImagesInMemory(imgroll.getNumberOfSavedImages()); // TODO: only JPEGs
         status.setFreeSpaceInternal(Util.getFreeSpaceOnDevice(Config.getImageFolder(this)));
         status.setFreeSpaceExternal(-1); // TODO
         status.setBatteryInternal(systemController.getBatteryLevel());

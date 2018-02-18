@@ -2,6 +2,7 @@ package de.volzo.despat.support;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.ImageFormat;
 import android.os.Environment;
 import android.util.Log;
 import android.provider.Settings.Secure;
@@ -36,7 +37,10 @@ public class Config {
     // ---------------------------------------------------------------------------------------------
 
     // use CameraController v1 (old) or v2
-    public static final int USE_CAMERA_CONTROLLER               = 1;
+    public static final int USE_CAMERA_CONTROLLER               = 2;
+
+    // jpegs and/or raw | v2 only
+    public static final int[] IMAGE_FORMAT                      = {ImageFormat.JPEG, ImageFormat.RAW_SENSOR};
 
     // display a preview on the main activity
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
@@ -87,7 +91,7 @@ public class Config {
     public static final boolean BACKUP_LOGCAT                   = false;
 
     // redirect logcat output via -f to file
-    public static final boolean REDIRECT_LOGCAT                 = true;
+    public static final boolean REDIRECT_LOGCAT                 = false;
 
     // logcat text file directory
     public static final File LOGCAT_DIR                         = new File(Environment.getExternalStorageDirectory(), ("despat"));
@@ -358,5 +362,11 @@ public class Config {
 
     public static void setMinSyncInterval(Context context, String minSyncInterval) {
         setProperty(context, KEY_MIN_SYNC_INTERVAL, minSyncInterval);
+    }
+
+    public static class InvalidConfigurationException extends Exception {
+        public InvalidConfigurationException(String msg) {
+            super(msg);
+        }
     }
 }

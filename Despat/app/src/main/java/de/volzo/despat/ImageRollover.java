@@ -23,9 +23,8 @@ public class ImageRollover {
     private File dir;
     private String fileextension;
 
-    public ImageRollover(Context context) {
+    public ImageRollover(Context context, String suffix) {
         this.dir = Config.getImageFolder(context);
-        String suffix = Config.IMAGE_FILEEXTENSION;
 
         if (suffix.charAt(0) != '.') {
             this.fileextension = "." + suffix;

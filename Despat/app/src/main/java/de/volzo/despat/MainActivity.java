@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();
 
-        Util.printCameraParameters(this);
+//        Util.printCameraParameters(this);
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         final Runnable displayPhotoRunnable = new Runnable() {
             @Override
             public void run() {
-                ImageRollover imgroll = new ImageRollover(context);
+                ImageRollover imgroll = new ImageRollover(context, ".jpg");
                 File newestImage = imgroll.getNewestImage();
 
                 if (newestImage == null) return;
