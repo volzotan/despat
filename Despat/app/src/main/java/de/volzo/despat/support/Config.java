@@ -40,21 +40,18 @@ public class Config {
     public static final int USE_CAMERA_CONTROLLER               = 2;
 
     // jpegs and/or raw | v2 only
-    public static final int[] IMAGE_FORMAT                      = {ImageFormat.JPEG, ImageFormat.RAW_SENSOR};
+    public static final boolean FORMAT_JPG                      = true;
+    public static final boolean FORMAT_RAW                      = true;
 
     // display a preview on the main activity
     public static final boolean START_CAMERA_ON_ACTIVITY_START  = false;
-
-    // release shutter even without full AF/AE fix | v2 only
-    public static final boolean CAMERA_CONTROLLER_RELEASE_EARLY = true;
-    // TODO: should be done via postDelayed or time counting variable as in v1
 
     // close the camera without cancelling the
     // AF requests | v2 only
     public static final boolean END_CAPTURE_WITHOUT_UNLOCKING_FOCUS = true;
 
-    // delay between having AF/AE fix and release | v2
-    // delay between starting AE measurement and release | v1
+    // delay between starting AE measurement
+    // and release | v1 only
     public static final int SHUTTER_RELEASE_DELAY               = 500;
 
     // number of images taken during every capture
@@ -68,9 +65,10 @@ public class Config {
     // if length==1 every image gets the value of [0]
     public static final int[] EXPOSURE_COMPENSATION             = {0, -12};
 
-    // maximal time the autofocus may try to find a fix
-    // before shutter is released anyway | v1 only
-    public static final int AUTOFOCUS_MAX_TIME                  = 2000;
+    // maximal time the AF/AE/AWB metering functions
+    // may try to find a fix before shutter is
+    // released anyway
+    public static final int METERING_MAX_TIME                  = 2000;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -364,9 +362,13 @@ public class Config {
         setProperty(context, KEY_MIN_SYNC_INTERVAL, minSyncInterval);
     }
 
-    public static class InvalidConfigurationException extends Exception {
-        public InvalidConfigurationException(String msg) {
-            super(msg);
-        }
+    public static void validate() throws Exception {
+
+        if (IMAGE_FILEEXTENSION == null) throw new Exception("image fileextension missing");
+
+        if (!Config.FORMAT_JPG && !Config.FORMAT_RAW) throw new Exception("no image format selected");
+        if (DEFAULT_SHUTTER_INTERVAL < 6000) throw new Exception("shutter interval shorter than 6s");
+
+
     }
 }

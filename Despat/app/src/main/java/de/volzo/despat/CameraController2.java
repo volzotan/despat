@@ -99,12 +99,11 @@ public class CameraController2 extends CameraController {
 
     private Semaphore cameraOpenCloseLock = new Semaphore(1);
 
-    private static final long PRECAPTURE_TIMEOUT_MS = 2000;
     private int state = STATE_CLOSED;
-    private static final int STATE_CLOSED = 0;
-    private static final int STATE_OPENED = 1;
-    private static final int STATE_PREVIEW = 2;
-    private static final int STATE_WAITING_FOR_3A_CONVERGENCE = 3;
+    private static final int STATE_CLOSED                       = 0;
+    private static final int STATE_OPENED                       = 1;
+    private static final int STATE_PREVIEW                      = 2;
+    private static final int STATE_WAITING_FOR_3A_CONVERGENCE   = 3;
 
     private boolean noAF = false;
     private long captureTimer;
@@ -132,9 +131,9 @@ public class CameraController2 extends CameraController {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
 
-            if (useRaw() && !contains(characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES),
+            if (Config.FORMAT_RAW && !contains(characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES),
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
-                throw new Config.InvalidConfigurationException("invalid config: camera supports no RAW format");
+                throw new Exception("invalid configuration: camera supports no RAW format");
             }
 
             cameraManager.registerAvailabilityCallback(new CameraManager.AvailabilityCallback() {
@@ -264,14 +263,8 @@ public class CameraController2 extends CameraController {
 
             // output surfaces
             List<Surface> outputSurfaces = new ArrayList<Surface>(3);
-            if (contains(Config.IMAGE_FORMAT, ImageFormat.JPEG)) {
-                outputSurfaces.add(imageReaderJpg.getSurface());
-            } else if (contains(Config.IMAGE_FORMAT, ImageFormat.RAW_SENSOR)) {
-                outputSurfaces.add(imageReaderRaw.getSurface());
-            } else {
-                Log.e(TAG, "invalid configuration: valid image format missing");
-                throw new Config.InvalidConfigurationException("image format missing");
-            }
+            if (Config.FORMAT_JPG) outputSurfaces.add(imageReaderJpg.getSurface());
+            if (Config.FORMAT_RAW) outputSurfaces.add(imageReaderRaw.getSurface());
 
             // get empty dummy surface or surface with texture view
             surfaceTexture = getSurfaceTexture(textureView);
@@ -294,11 +287,12 @@ public class CameraController2 extends CameraController {
             previewRequestBuilder.addTarget(surface);
 
             stillRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-            if (contains(Config.IMAGE_FORMAT, ImageFormat.JPEG)) {
-                stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
-            } else if (contains(Config.IMAGE_FORMAT, ImageFormat.RAW_SENSOR)) {
-                stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
-            }
+            if (Config.FORMAT_JPG) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
+            if (Config.FORMAT_RAW) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
+
+            // enable lens shading correction for the RAW output
+            stillRequestBuilder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_HIGH_QUALITY);
+
             setup3AControls(stillRequestBuilder);
 
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
@@ -307,7 +301,6 @@ public class CameraController2 extends CameraController {
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                     Log.d(TAG, "# onConfigured");
 
-                    // The camera is already closed
                     if (cameraDevice == null) {
                         Log.w(TAG, "camera device already closed");
                         return;
@@ -426,20 +419,21 @@ public class CameraController2 extends CameraController {
                                 awbState == CaptureResult.CONTROL_AWB_STATE_CONVERGED;
                     }
 
+                    long meteringTime = SystemClock.elapsedRealtime() - captureTimer;
+                    boolean meteringOvertime = meteringTime > Config.METERING_MAX_TIME;
+
                     // If we haven't finished the pre-capture sequence but have hit our maximum
                     // wait timeout, too bad! Begin capture anyway.
-                    if (!readyToCapture && check3ATimer()) {
+                    if (!readyToCapture && meteringOvertime) {
                         Log.d(TAG, "Timed out waiting for pre-capture sequence to complete.");
 
                         readyToCapture = true;
                     }
 
                     if (readyToCapture) {
-                        long meteringTime = SystemClock.elapsedRealtime() - captureTimer;
-                        boolean meteringSuccessful = meteringTime < PRECAPTURE_TIMEOUT_MS;
                         Log.d(TAG, "metering time: " + meteringTime + "ms");
 
-                        captureStillPicture(meteringSuccessful);
+                        captureStillPicture(!meteringOvertime);
 
                         // After this, the camera will go back to the normal state of preview.
                         state = STATE_PREVIEW;
@@ -491,7 +485,9 @@ public class CameraController2 extends CameraController {
             }
 
             state = STATE_WAITING_FOR_3A_CONVERGENCE;
-            start3ATimer();
+
+            // start 3A timer
+            captureTimer = SystemClock.elapsedRealtime();
 
             captureSession.setRepeatingRequest(previewRequestBuilder.build(), preCaptureCallback, backgroundHandler);
         } catch (CameraAccessException e) {
@@ -542,6 +538,12 @@ public class CameraController2 extends CameraController {
 
                     Log.d(TAG, "# captureComplete");
 
+                    Log.d(TAG, String.format("f: %f | t: %d | iso: %d",
+                            result.get(CaptureResult.LENS_APERTURE),
+                            result.get(CaptureResult.SENSOR_EXPOSURE_TIME),
+                            result.get(CaptureResult.SENSOR_SENSITIVITY)
+                    ));
+
                     // retrieve tag (number of image in burst sequence)
                     Object tag = request.getTag();
                     if (tag == null) {
@@ -558,16 +560,18 @@ public class CameraController2 extends CameraController {
                     if (jpgCaptureMetadata != null) jpgCaptureMetadata.captureResult = result;
                     if (rawCaptureMetadata != null) rawCaptureMetadata.captureResult = result;
 
-
                     if (n < burstLength - 1) {
-                        if (controllerCallback != null) controllerCallback.intermediateImageTaken();
+                        if (controllerCallback != null) {
+                            controllerCallback.intermediateImageTaken();
+                        }
                     } else { // final image of burstSequence: no remaining images in the pipeline, shut it down.
 
-                        // beware, the image may not be written to disk at this point
-                        // TODO: in case a lot of images are saved, this takes several seconds...
-//                    ImageRollover imgroll = new ImageRollover(context);
-//                    File image = imgroll.getNewestImage();
-                        sendBroadcast(context, "foo"); //image.getAbsolutePath());
+                        File filename = null;
+                        if (jpgCaptureMetadata != null) {
+                            filename = jpgCaptureMetadata.filename;
+                        }
+
+                        sendBroadcast(context, filename.getAbsolutePath());
 
                         if (controllerCallback != null) controllerCallback.finalImageTaken();
 
@@ -694,13 +698,7 @@ public class CameraController2 extends CameraController {
     }
 
     public boolean isDead() {
-
-        if (cameraDevice == null) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return cameraDevice == null;
     }
 
     public HashMap<String, String> getCameraParameters() {
@@ -767,7 +765,6 @@ public class CameraController2 extends CameraController {
                 HashMap<Integer, String> interpretationMap = interpretationMaps.get(fieldName);
                 dict.put(fieldName, stringify(o, interpretationMap));
             }
-
 
 //            for (CaptureRequest.Key<?> k : reqKeys) {
 //                dict.put(k.getName(), k.toString());
@@ -908,13 +905,9 @@ public class CameraController2 extends CameraController {
 
             Image image = reader.acquireNextImage();
 
-            int format = image.getFormat();
-
-//            For best quality DNG files, it is strongly recommended that lens shading map output is
-//            enabled if supported. See {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE}.
-
             Map.Entry<Integer, CaptureMetadata> entry = rawResultQueue.firstEntry();
             CaptureMetadata metadata = entry.getValue();
+            rawResultQueue.remove(entry.getKey());
 
             DngCreator dngCreator = new DngCreator(metadata.characteristics, metadata.captureResult);
             FileOutputStream output = null;
@@ -943,14 +936,6 @@ public class CameraController2 extends CameraController {
     }
 
     // additional functionality
-
-    private boolean useJpg() {
-        return contains(Config.IMAGE_FORMAT, ImageFormat.JPEG);
-    }
-
-    private boolean useRaw() {
-        return contains(Config.IMAGE_FORMAT, ImageFormat.RAW_SENSOR);
-    }
 
     private static void closeOutput(OutputStream outputStream) {
         if (null != outputStream) {
@@ -982,21 +967,18 @@ public class CameraController2 extends CameraController {
             if (contains(characteristics.get(
                     CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES),
                     CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
-                builder.set(CaptureRequest.CONTROL_AF_MODE,
-                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
             } else {
-                builder.set(CaptureRequest.CONTROL_AF_MODE,
-                        CaptureRequest.CONTROL_AF_MODE_AUTO);
+                builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
             }
         }
 
         // If there is an auto-magical white balance control mode available, use it.
-        if (contains(characteristics.get(
-                CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES),
-                CaptureRequest.CONTROL_AWB_MODE_AUTO)) {
+        if (contains(characteristics.get(   CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES),
+                                            CaptureRequest.CONTROL_AWB_MODE_AUTO)) {
+
             // Allow AWB to run auto-magically if this device supports this
-            builder.set(CaptureRequest.CONTROL_AWB_MODE,
-                    CaptureRequest.CONTROL_AWB_MODE_AUTO);
+            builder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
         }
     }
 
@@ -1010,14 +992,6 @@ public class CameraController2 extends CameraController {
             }
         }
         return false;
-    }
-
-    private void start3ATimer() {
-        captureTimer = SystemClock.elapsedRealtime();
-    }
-
-    private boolean check3ATimer() {
-        return (SystemClock.elapsedRealtime() - captureTimer) > PRECAPTURE_TIMEOUT_MS;
     }
 
     private void logCameraAutomaticModeState(int afState, int aeState) {
@@ -1097,40 +1071,6 @@ public class CameraController2 extends CameraController {
             }
         } catch (Exception e) {
             Log.e(TAG, "HardwareLevel Error", e);
-        }
-    }
-
-    private static class ImageSaver implements Runnable {
-
-        private final Image image;
-        private final File file;
-
-        ImageSaver(Image image, File file) {
-            this.image = image;
-            this.file = file;
-        }
-
-        @Override
-        public void run() {
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-            FileOutputStream output = null;
-            try {
-                output = new FileOutputStream(file);
-                output.write(bytes);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                image.close();
-                if (null != output) {
-                    try {
-                        output.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
         }
     }
 }

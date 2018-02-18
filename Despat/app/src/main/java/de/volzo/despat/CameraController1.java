@@ -197,12 +197,12 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
             switch (params.getFocusMode()) {
                 case Camera.Parameters.FLASH_MODE_AUTO:
-                    handler.postDelayed(releaseCall, Config.AUTOFOCUS_MAX_TIME);
+                    handler.postDelayed(releaseCall, Config.METERING_MAX_TIME);
                     camera.autoFocus(this);
                     break;
 
                 case Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE:
-                    handler.postDelayed(releaseCall, Config.AUTOFOCUS_MAX_TIME);
+                    handler.postDelayed(releaseCall, Config.METERING_MAX_TIME);
                     camera.autoFocus(this);
                     break;
 
