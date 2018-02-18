@@ -21,6 +21,8 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -91,8 +93,8 @@ public class CameraController2 extends CameraController {
     private ImageReader imageReaderJpg;
     private ImageReader imageReaderRaw;
 
-    private final TreeMap<Integer, CaptureMetadata> jpgResultQueue = new TreeMap<>();
-    private final TreeMap<Integer, CaptureMetadata> rawResultQueue = new TreeMap<>();
+    private final TreeMap<Integer, ImageSaver> jpgResultQueue = new TreeMap<>();
+    private final TreeMap<Integer, ImageSaver> rawResultQueue = new TreeMap<>();
 
     private SurfaceTexture surfaceTexture; // no GC
     private Surface surface;
@@ -525,11 +527,11 @@ public class CameraController2 extends CameraController {
                     ImageRollover jpgImgroll = new ImageRollover(context, ".jpg");
                     ImageRollover rawImgroll = new ImageRollover(context, ".dng");
 
-                    CaptureMetadata jpgCaptureMetadata = jpgResultQueue.get(n);
-                    CaptureMetadata rawCaptureMetadata = rawResultQueue.get(n);
+                    ImageSaver jpgImageSaver = jpgResultQueue.get(n);
+                    ImageSaver rawImageSaver = rawResultQueue.get(n);
 
-                    if (jpgCaptureMetadata != null) jpgCaptureMetadata.filename = jpgImgroll.getTimestampAsFullFilename();
-                    if (rawCaptureMetadata != null) rawCaptureMetadata.filename = rawImgroll.getTimestampAsFullFilename();
+                    if (jpgImageSaver != null) jpgImageSaver.filename = jpgImgroll.getTimestampAsFullFilename();
+                    if (rawImageSaver != null) rawImageSaver.filename = rawImgroll.getTimestampAsFullFilename();
                 }
 
                 @Override
@@ -538,11 +540,7 @@ public class CameraController2 extends CameraController {
 
                     Log.d(TAG, "# captureComplete");
 
-                    Log.d(TAG, String.format("f: %f | t: %d | iso: %d",
-                            result.get(CaptureResult.LENS_APERTURE),
-                            result.get(CaptureResult.SENSOR_EXPOSURE_TIME),
-                            result.get(CaptureResult.SENSOR_SENSITIVITY)
-                    ));
+                    printCaptureStats(result);
 
                     // retrieve tag (number of image in burst sequence)
                     Object tag = request.getTag();
@@ -554,11 +552,23 @@ public class CameraController2 extends CameraController {
                     int n = (int) request.getTag();
                     Log.i(TAG, "captured image [" + Integer.toString(n + 1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
 
-                    CaptureMetadata jpgCaptureMetadata = jpgResultQueue.get(n);
-                    CaptureMetadata rawCaptureMetadata = rawResultQueue.get(n);
+                    ImageSaver jpgImageSaver = jpgResultQueue.get(n);
+                    ImageSaver rawImageSaver = rawResultQueue.get(n);
 
-                    if (jpgCaptureMetadata != null) jpgCaptureMetadata.captureResult = result;
-                    if (rawCaptureMetadata != null) rawCaptureMetadata.captureResult = result;
+                    if (jpgImageSaver != null) jpgImageSaver.captureResult = result;
+                    if (rawImageSaver != null) rawImageSaver.captureResult = result;
+
+                    // if the imageReader has already saved its data in the imageSaver
+                    // then is now the time to actually run it
+
+                    if (jpgImageSaver.isComplete()) {
+                        rawResultQueue.remove(n);
+                        jpgImageSaver.run();
+                    }
+                    if (rawImageSaver.isComplete()) {
+                        rawResultQueue.remove(n);
+                        rawImageSaver.run();
+                    }
 
                     if (n < burstLength - 1) {
                         if (controllerCallback != null) {
@@ -567,8 +577,8 @@ public class CameraController2 extends CameraController {
                     } else { // final image of burstSequence: no remaining images in the pipeline, shut it down.
 
                         File filename = null;
-                        if (jpgCaptureMetadata != null) {
-                            filename = jpgCaptureMetadata.filename;
+                        if (jpgImageSaver != null) {
+                            filename = jpgImageSaver.filename;
                         }
 
                         sendBroadcast(context, filename.getAbsolutePath());
@@ -597,11 +607,11 @@ public class CameraController2 extends CameraController {
                 // attach the number of the picture in the burst sequence to the request
                 stillRequestBuilder.setTag(i);
 
-                CaptureMetadata jpgMetadata = new CaptureMetadata(context, characteristics);
-                CaptureMetadata rawMetadata = new CaptureMetadata(context, characteristics);
+                ImageSaver jpgImageSaver = new ImageSaver(context, characteristics);
+                ImageSaver rawImageSaver = new ImageSaver(context, characteristics);
 
-                jpgResultQueue.put(i, jpgMetadata);
-                rawResultQueue.put(i, rawMetadata);
+                jpgResultQueue.put(i, jpgImageSaver);
+                rawResultQueue.put(i, rawImageSaver);
 
                 CaptureRequest req = stillRequestBuilder.build();
 
@@ -875,25 +885,13 @@ public class CameraController2 extends CameraController {
             // image saving in a background thread seems not be a good idea if
             // it's done by a service
 
-            Image image = reader.acquireNextImage();
+            Map.Entry<Integer, ImageSaver> entry = jpgResultQueue.firstEntry();
+            ImageSaver imageSaver = entry.getValue();
+            imageSaver.image = reader.acquireNextImage();
 
-            Map.Entry<Integer, CaptureMetadata> entry = jpgResultQueue.firstEntry();
-            CaptureMetadata metadata = entry.getValue();
-            jpgResultQueue.remove(entry.getKey());
-
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-
-            FileOutputStream output = null;
-            try {
-                output = new FileOutputStream(metadata.filename);
-                output.write(bytes);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                image.close();
-                closeOutput(output);
+            if (imageSaver.isComplete()) {
+                jpgResultQueue.remove(entry.getKey());
+                imageSaver.run();
             }
         }
     };
@@ -903,37 +901,16 @@ public class CameraController2 extends CameraController {
         public void onImageAvailable(ImageReader reader) {
             Log.d(TAG, "# onImageAvailable RAW");
 
-            Image image = reader.acquireNextImage();
+            Map.Entry<Integer, ImageSaver> entry = rawResultQueue.firstEntry();
+            ImageSaver imageSaver = entry.getValue();
+            imageSaver.image = reader.acquireNextImage();
 
-            Map.Entry<Integer, CaptureMetadata> entry = rawResultQueue.firstEntry();
-            CaptureMetadata metadata = entry.getValue();
-            rawResultQueue.remove(entry.getKey());
-
-            DngCreator dngCreator = new DngCreator(metadata.characteristics, metadata.captureResult);
-            FileOutputStream output = null;
-            try {
-                output = new FileOutputStream(metadata.filename);
-                dngCreator.writeImage(output, image);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                image.close();
-                closeOutput(output);
+            if (imageSaver.isComplete()) {
+                rawResultQueue.remove(entry.getKey());
+                imageSaver.run();
             }
         }
     };
-
-    private static class CaptureMetadata {
-        Context context;
-        CameraCharacteristics characteristics;
-        CaptureResult captureResult;
-        File filename;
-
-        public CaptureMetadata(Context context, CameraCharacteristics characteristics) {
-            this.context = context;
-            this.characteristics = characteristics;
-        }
-    }
 
     // additional functionality
 
@@ -992,6 +969,21 @@ public class CameraController2 extends CameraController {
             }
         }
         return false;
+    }
+
+    private void printCaptureStats(CaptureResult r) {
+
+        Float lensAperture = r.get(CaptureResult.LENS_APERTURE);
+        Long exposureTime = r.get(CaptureResult.SENSOR_EXPOSURE_TIME); // in ns
+        Integer sensitivity = r.get(CaptureResult.SENSOR_SENSITIVITY);
+
+        if (exposureTime != null) exposureTime /= (1000 * 1000);
+
+        Log.d(TAG, String.format("f/: %.1f | t: %dms | iso: %d",
+                lensAperture,
+                exposureTime,
+                sensitivity
+        ));
     }
 
     private void logCameraAutomaticModeState(int afState, int aeState) {
@@ -1071,6 +1063,88 @@ public class CameraController2 extends CameraController {
             }
         } catch (Exception e) {
             Log.e(TAG, "HardwareLevel Error", e);
+        }
+    }
+
+    private static class ImageSaver {
+        Context context;
+        CameraCharacteristics characteristics;
+        CaptureResult captureResult;
+        File filename;
+        Image image;
+
+        public ImageSaver(Context context, CameraCharacteristics characteristics) {
+            this.context = context;
+            this.characteristics = characteristics;
+        }
+
+        public boolean isComplete() {
+            return (context != null &&
+                    characteristics != null &&
+                    captureResult != null &&
+                    filename != null &&
+                    image != null);
+        }
+
+        public void run() {
+            Log.d(TAG, "# imageSaver run");
+
+            FileOutputStream output = null;
+
+            switch (image.getFormat()) {
+                case ImageFormat.JPEG:
+
+                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                    byte[] bytes = new byte[buffer.remaining()];
+                    buffer.get(bytes);
+
+                    try {
+                        output = new FileOutputStream(filename);
+                        output.write(bytes);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        image.close();
+                        closeOutput(output);
+                    }
+
+                    break;
+
+                case ImageFormat.RAW_SENSOR:
+
+                    DngCreator dngCreator = new DngCreator(characteristics, captureResult);
+
+                    try {
+                        output = new FileOutputStream(filename);
+                        dngCreator.writeImage(output, image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        image.close();
+                        closeOutput(output);
+                    }
+
+                    break;
+
+                default:
+                    Log.e(TAG, "unknown image format to save");
+                    return;
+            }
+
+            if (Config.RUN_MEDIASCANNER_AFTER_CAPTURE) {
+                MediaScannerConnection.scanFile(context, new String[]{filename.getPath()}, null, new MediaScannerConnection.MediaScannerConnectionClient() {
+                    @Override
+                    public void onMediaScannerConnected() {
+                        // Do nothing
+                    }
+
+                    @Override
+                    public void onScanCompleted(String path, Uri uri) {
+                        Log.i(TAG, "Scanned " + path + ":");
+                        Log.i(TAG, "-> uri=" + uri);
+                    }
+                });
+            }
         }
     }
 }
