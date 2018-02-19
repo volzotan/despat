@@ -1,13 +1,44 @@
 include <hinge.scad>
 
-sizeBot    = [170, 86, 20];
-sizeTop    = [170, 86, 24];
-lensHole   = [sizeBot[0]-25, 25]; // Nexus 5
-//lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
+// --- standard
+//sizeBot    = [170, 86, 20];
+//sizeTop    = [170, 86, 24];
 
-crad       = 10;
-w          = 3.2+.1;
+// --- oversized
+sizeBot    = [190, 86+6, 20];
+sizeTop    = [190, 86+6, 24];
+
+crad       = 6;
+w          = 2.4+.1; //3.2+.1;
 wb         = 1.2;
+
+seal_thickness = 1;
+
+//lensHole   = [sizeBot[0]-25, 25]; // Nexus 5
+//lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
+lensHole   = [sizeBot[0]-29.5, 47.5]; // ZTE Axon 7
+
+
+
+//translate([30, 10])
+//translate([0, 0, 30]) zteaxon7();
+//color("grey") zteaxon7_cavity(20);
+
+
+//difference() {
+//    block2(50, 50, 10, crad=5);
+//        translate([0, 0, 1]) block2(50, 50, 10, crad=5, red=1.2);
+//}
+//
+//translate([51, 0]) difference() {
+//    block(50, 50, 10, crad=5);
+//        translate([0, 0, 1]) block(50, 50, 10, crad=5, red=1.2);
+//}
+
+
+
+
+
 
 //difference(){
 //    union() {
@@ -30,7 +61,7 @@ wb         = 1.2;
 //% translate([0, sizeBot[1]-2.3-0.025, 18.-0.2]) rotate([0, 90, 0]) color([1, 1, 1], 1) cylinder($fn=32, d=1.75, h=100);
 //
 //
-translate([0, 100, 0]) top();
+//translate([0, 100, 0]) top();
 
 //translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_flat();
 
@@ -41,11 +72,58 @@ translate([0, 100, 0]) top();
 
 //% translate([0, sizeBot[1]-2.6, 17.9]) rotate([0, 90, 0]) color([1, 1, 1], 0.6) cylinder($fn=32, d=1.75, h=100);
 
+
+// --------------------------- TEST ----------------------------
+
+//bottom();
+//translate([0, sizeTop[1], sizeBot[2] + sizeTop[2] + 0.2]) rotate([180, 0, 0]) top();
+//translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
+//
+//translate([30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+//    latch();
+//    translate([0, 14.5, 0]) latch_knob();
+//}
+//
+//translate([sizeBot[0]-30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+//    latch();
+//    translate([0, 14.5, 0]) latch_knob();
+//}
+//
+//translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
+
+// --------------------------- TEST2 ---------------------------
+
+bottom();
+translate([0, sizeTop[1]+20, 0]) top();
+translate([0, 0, 30]) color("grey") seal();
+
+translate([30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+    latch();
+    translate([0, 14.5, 0]) latch_knob();
+}
+
+translate([sizeBot[0]-30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+    latch();
+    translate([0, 14.5, 0]) latch_knob();
+}
+
+translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
+
 // --------------------------- PRINT ---------------------------
 
 //top();
-bottom();
+//bottom();
 //translate([sizeBot[0], 0, 1.3]) rotate([0, 180, 0]) seal();
+
+//translate([0, 0]) {
+//    latch(); translate([0, 14.5, 0]) latch_knob();
+//}
+//translate([13, 0]){
+//    latch(); translate([0, 14.5, 0]) latch_knob();
+//}
+//translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
+
+//translate([20+18.2, sizeBot[1]+5.5, 0]) rotate([90, 0, 0]) hinge_bottom(screwed=true);
 
 // ----------------------- add. elements -----------------------
 
@@ -91,7 +169,7 @@ module latch() {
             
             hull() {
                 translate([]) cylinder($fn=32, d=12, h=height);
-                translate([4-2, depth, 0]) cylinder($fn=32, d=8, h=height);
+                translate([4-2+2, depth+2, 0]) cylinder($fn=32, d=4, h=height);
                 translate([-4-0.5, depth+2.5, 0]) cylinder($fn=32, d=3, h=height);
             }
             
@@ -171,163 +249,123 @@ module socket_flat() {
 }
 
 module seal() {
-//    sealTol = 0.6;
+    height = 1;
     
-    height = 1.3;
-    height_top = 1.2;
-    height_cut = 0.9;
-    
-    dist_top = 1.4+0.35;
-    dist_cut = 1.2+0.1;
-    
-    width_top = 1.2;
-    width_cut = 2.0+0.1;
-   
-    color("grey") difference() {
-        union() {
-            difference() {
-                block(sizeBot[0], sizeBot[1], height, crad=crad);
-                translate([0, 0, -1]) block(sizeBot[0], sizeBot[1], 1.2+2, crad=crad, red=4.8);
-            }
-        }
-         
-        // cut
-        translate([0, 0, height-height_cut]) color("red") difference() {
-            block(sizeTop[0], sizeTop[1], height_cut+1, crad=crad, red=dist_cut);
-            translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height_cut+3, crad=crad, red=dist_cut+width_cut);
-        }
-    }
-    
-    // top
-    translate([0, 0, -height_top]) difference() {
-        block(sizeBot[0], sizeBot[1], height_top, crad=crad, red=dist_top);
-        translate([0, 0, -1]) color("purple") block(sizeBot[0], sizeBot[1], height_top+2, crad=crad, red=dist_top+width_top);
-    }
-    
-    intersection() {
-        union() {
-            translate([-0.2, -0.2, height_cut]) rotate([0, 0, 45]) color("red") cube([10, 0.4, 0.2]);
-            translate([sizeBot[0]-0.2-7, -0.2+7, height_cut]) rotate([0, 0, -45]) color("red") cube([10, 0.4, 0.2]);
-            translate([-0.2, sizeBot[1]-0.2, height_cut]) rotate([0, 0, -45]) color("red") cube([10, 0.4, 0.2]);
-            translate([sizeBot[0]-0.2-7, sizeBot[1]-0.2-7, height_cut]) rotate([0, 0, 45]) color("red") cube([10, 0.4, 0.2]);
-        }
-        
-        difference() {
-                block(sizeBot[0], sizeBot[1], height, crad=crad);
-                translate([0, 0, -1]) block(sizeBot[0], sizeBot[1], 1.2+2, crad=crad, red=4.8);
-            }
-    }
+    difference() {
+        block2(sizeBot[0], sizeBot[1], height, crad=crad);    
+        translate([0, 0, -1]) block2(sizeBot[0], sizeBot[1], height+2, crad=crad, red=4.5);  
+    }     
 }
 
 
 module top() {
+    
     a = 1;
     c = 2;
     d = 3;
     b = sizeTop[2] - a - c - d - wb + .2;
     
-    x = 1;
+    x = 2;
     y = 4.8;
     
     difference() {
         union() {
             difference() {
                 hull() {
-                    block(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=x);
+                    block2(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=x);
                     translate([0, 0, a]) 
-                        block(sizeTop[0], sizeTop[1], sizeTop[2]-a, crad=crad);
+                        block2(sizeTop[0], sizeTop[1], sizeTop[2]-a-seal_thickness/2, crad=crad);
                 }
                 
                 translate([0, 0, wb]) hull() {
-                    block(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=x+w);
+                    block2(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=x+w);
                     translate([0, 0, a]) 
-                        block(sizeTop[0], sizeTop[1], b, crad=crad, red=w);
+                        block2(sizeTop[0], sizeTop[1], b, crad=crad, red=w);
                 }
                 
                 translate([0, 0, wb+a+b-0.1]) hull() {
-                    block(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=w);
+                    block2(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=w);
                     translate([0, 0, c]) 
-                        block(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=y);
+                        block2(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=y);
                 }
                 
                 translate([0, 0, wb+a+b+c-0.1]) hull() {
-                    block(sizeTop[0], sizeTop[1], d, crad=crad, red=y);
+                    block2(sizeTop[0], sizeTop[1], d, crad=crad, red=y);
                 }
             }
             
-            // seal
-            translate([0, 0, sizeTop[2]-.1]) color("red") difference() {
-                dist = 2;
-                width = 1.2;
-                height = 1.5-0.3;
-                block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist);
-                translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width);
-            }
-            // seal2
-            translate([0, 0, sizeTop[2]-.1]) color("red") difference() {
-                dist = 2;
-                width = 1.2;
-                red = 0.2;
-                height = 1.5;
-                block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist+red);
-                translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width-red);
-            }
-            // seal3
-            translate([0, 0, sizeTop[2]-.1]) {
-                dist = 2;
-                width = 1.2;
-                red = 0.2;
-                height = 1.5+0.3;
-                color("purple") intersection() {
-                    difference() {
-                        block(sizeTop[0], sizeTop[1], height, crad=crad, red=dist+red);
-                        translate([0, 0, -1]) block(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width-red);
-                    }
-                    union() {
-                        translate([0, 0, 0]) cube([8, 8, 10]);
-                        translate([sizeTop[0]-8, 0, 0]) cube([8, 8, 10]);
-                        translate([0, sizeTop[1]-8, 0]) cube([8, 8, 10]);
-                        translate([sizeTop[0]-8, sizeTop[1]-8, 0]) cube([8, 8, 10]);
-                    }
-                }
-            }
+//            // seal
+//            translate([0, 0, sizeTop[2]-.1]) color("red") difference() {
+//                dist = 2;
+//                width = 1.2;
+//                height = 1.5-0.3;
+//                block2(sizeTop[0], sizeTop[1], height, crad=crad, red=dist);
+//                translate([0, 0, -1]) block2(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width);
+//            }
+//            // seal2
+//            translate([0, 0, sizeTop[2]-.1]) color("red") difference() {
+//                dist = 2;
+//                width = 1.2;
+//                red = 0.2;
+//                height = 1.5;
+//                block2(sizeTop[0], sizeTop[1], height, crad=crad, red=dist+red);
+//                translate([0, 0, -1]) block2(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width-red);
+//            }
+//            // seal3
+//            translate([0, 0, sizeTop[2]-.1]) {
+//                dist = 2;
+//                width = 1.2;
+//                red = 0.2;
+//                height = 1.5+0.3;
+//                color("purple") intersection() {
+//                    difference() {
+//                        block2(sizeTop[0], sizeTop[1], height, crad=crad, red=dist+red);
+//                        translate([0, 0, -1]) block2(sizeTop[0], sizeTop[1], height+2, crad=crad, red=dist+width-red);
+//                    }
+//                    union() {
+//                        translate([0, 0, 0]) cube([8, 8, 10]);
+//                        translate([sizeTop[0]-8, 0, 0]) cube([8, 8, 10]);
+//                        translate([0, sizeTop[1]-8, 0]) cube([8, 8, 10]);
+//                        translate([sizeTop[0]-8, sizeTop[1]-8, 0]) cube([8, 8, 10]);
+//                    }
+//                }
+//            }
             
             //inlay
             intersection() {
-                inlay = [154, 60, 23];
-                inlayTol = 0.5;
-                
-                union() {
-                    difference() {
-                        translate([sizeTop[0]-120, 0, 0]) {
-                            cube([120, sizeTop[1], sizeTop[2]]);
-                        } 
-               
-                        points = [[0, 0], [sizeTop[1], 0], [sizeTop[1], 20], [sizeTop[1]-10, 30], [10, 30], [0, 20]];
-                        translate([41, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
-                    
-                        translate([54, 1, wb]) color("purple") anker_cutout();
+                union() { 
+                    translate([sizeTop[0]-140, 0]) union() {
+                        difference() {
+                            translate([10, 0, 0]) {
+                                cube([200, sizeTop[1], sizeTop[2]-seal_thickness/2]);
+                                                                                            
+                                % translate([20.5, 1, wb+0.3]) anker();
+                            } 
+                   
+                            points = [[0, 0], [sizeTop[1], 0], [sizeTop[1], 20], [sizeTop[1]-10, 30], [10, 30], [0, 20]];
+                            translate([10-1, sizeTop[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
                         
-                        // button
-                        translate([74+06, 6, 5]) block(14, 20, 50);
-                        
-                        // wedge
-                        translate([100, 7, 1]) cube([40, 3, sizeTop[2]]);
-                        translate([100+5, 7+2, 1]) cube([30, 20, sizeTop[2]]);
+                            translate([21.75, 5, wb]) color("purple") anker_cutout();
+                            
+                            // button
+                            translate([41+09, 6, 5]) block(14, 20, 50);
+                            
+                            // wedge
+                            translate([80, 7, 1]) cube([40, 3, sizeTop[2]]);
+                            translate([80+5, 7+2, 1]) cube([30, 20, sizeTop[2]]);
+                        }
+                        translate([39, 0]) cube([2, sizeTop[1], 5]);
                     }
-                    
                     // hinge screw reinforcement
                     points_r = [[0, 0], [20, 0], [15, 4.8], [5, 4.8]];
-                    translate([40, sizeTop[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTop[2]) polygon(points_r);
-             
-                    translate([71, 0]) cube([2, sizeTop[1], 5]);
+                    translate([40, sizeTop[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTop[2]-seal_thickness/2) polygon(points_r);
                 }
                 
                 // outer hull
                 hull() {
-                    block(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=x);
+                    block2(sizeTop[0], sizeTop[1], 0.1, crad=crad, red=x);
                     translate([0, 0, a]) 
-                        block(sizeTop[0], sizeTop[1], sizeTop[2]-a, crad=crad);
+                        block2(sizeTop[0], sizeTop[1], sizeTop[2]-a-seal_thickness/2, crad=crad);
                 }
             }
         }
@@ -343,16 +381,14 @@ module top() {
     move = 0.1;
     translate([+20+18.2, -5.5, 24+move])            rotate([0, -90, 0]) hinge_top();
     translate([-20+sizeTop[0]-2, -5.5, 24+move])    rotate([0, -90, 0]) hinge_top();
-    
-    % translate([62, 1, wb+0.3]) anker();
 }
                     
 
-module bottom() {   
+module bottom() { 
     
-    a = 2;
+    a = 1;
     c = 2;
-    d = 4;
+    d = 3;
     b = sizeBot[2] - a - c - d - wb + .2;
     
     x = 2;
@@ -364,25 +400,25 @@ module bottom() {
                 
                 hull() { // outer rim reduction
                     red = 1;
-                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=red);
+                    block2(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=red);
                     translate([0, 0, red]) 
-                        block(sizeBot[0], sizeBot[1], sizeBot[2]-red, crad=crad);
+                        block2(sizeBot[0], sizeBot[1], sizeBot[2]-red-seal_thickness/2, crad=crad);
                 }
                 
                 translate([0, 0, wb]) hull() {
-                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=x+w);
+                    block2(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=x+w);
                     translate([0, 0, a]) 
-                        block(sizeBot[0], sizeBot[1], b, crad=crad, red=w);
+                        block2(sizeBot[0], sizeBot[1], b, crad=crad, red=w);
                 }
                 
                 translate([0, 0, wb+a+b-0.1]) hull() {
-                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=w);
+                    block2(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=w);
                     translate([0, 0, c]) 
-                        block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=y);
+                        block2(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=y);
                 }
                 
                 translate([0, 0, wb+a+b+c-0.1]) hull() {
-                    block(sizeBot[0], sizeBot[1], d, crad=crad, red=y);
+                    block2(sizeBot[0], sizeBot[1], d, crad=crad, red=y);
                 }
             }
             
@@ -396,7 +432,9 @@ module bottom() {
             translate([0, 0, 0]) intersection() {
                 difference() {
                     translate([20, w, 0]) cube([sizeBot[0]-20, sizeBot[1]-2*w, 20]); //20-1]);
-                    translate([30, 10, 7]) color("red") nexus5cavity(20); //motoEcavity(20);
+                    
+                    // CAVITY
+                    translate([30, 10, 7]) color("red") zteaxon7_cavity(20); 
                     
                     points = [[0, 0], [sizeBot[1], 0], [sizeBot[1], 20], [sizeBot[1]-20, 30], [20, 30], [0, 20]];
                     translate([0, sizeBot[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
@@ -406,10 +444,13 @@ module bottom() {
                         translate([30-1, w, 20-1]) cube([sizeBot[0]-19, sizeBot[1]-2*w, 1]);
                     }
                 }
+                
+                // outer hull
                 hull() {
-                    block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=x);
-                    translate([0, 0, a]) 
-                        block(sizeBot[0], sizeBot[1], sizeBot[2]-a, crad=crad);
+                    red = 1;
+                    block2(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=red);
+                    translate([0, 0, red]) 
+                        block2(sizeBot[0], sizeBot[1], sizeBot[2]-red-seal_thickness/2, crad=crad);
                 }
             }
             
@@ -440,8 +481,8 @@ module bottom() {
         // clamp holes
         translate([30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
         translate([sizeBot[0]-30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([30, 10+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
-        translate([sizeBot[0]-30, 10+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        translate([30, 50+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        translate([sizeBot[0]-30, 50+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
         
         // hinge holes
         hinge_hole_height = 11.5;
@@ -454,33 +495,34 @@ module bottom() {
         translate([sizeBot[0]-43, sizeBot[1]-3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=50);
         translate([sizeBot[0]-17, sizeBot[1]+1, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
         translate([sizeBot[0]-17, sizeBot[1]-3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=50);
-        // seal
-        translate([0, 0, sizeBot[2]-2.5]) color("red") difference() {
-            dist = 1.6 + 0.05; // distance outer wall / 1.65 + 1.9 + 1.25 = 4.8
-            height = 3;
-            width = 1.9;
-            union() {
-                hull() {
-                    block(sizeBot[0], sizeBot[1], height-.3, crad=crad, red=dist);
-                    translate([0, 0, -.5]) block(sizeBot[0], sizeBot[1], height, crad=crad, red=dist+0.5); // lower triange #1
-                }
-            }
-            
-            translate([0, 0, -.1]) block(sizeBot[0], sizeBot[1], height+2, crad=crad, red=dist+width);
-            translate([0, 0, -.6]) color("orange") hull() {
-                block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=dist+width-0.5);                          // lower triange #1
-                translate([0, 0, 0.5])block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=dist+width);
-            }
-        }
-        // seal 2
-        translate([0, 0, sizeBot[2]-0.3]) color("orange") difference() {
-            dist = 1.65; // distance outer wall
-            height = 3;
-            width = 1.85;
-            
-            block(sizeBot[0], sizeBot[1], 1, crad=crad, red=dist-0.3);
-            block(sizeBot[0], sizeBot[1], 1, crad=crad, red=dist+width+0.3);
-        }
+        
+//        // seal
+//        translate([0, 0, sizeBot[2]-2.5]) color("red") difference() {
+//            dist = 1.6 + 0.05; // distance outer wall / 1.65 + 1.9 + 1.25 = 4.8
+//            height = 3;
+//            width = 1.9;
+//            union() {
+//                hull() {
+//                    block(sizeBot[0], sizeBot[1], height-.3, crad=crad, red=dist);
+//                    translate([0, 0, -.5]) block(sizeBot[0], sizeBot[1], height, crad=crad, red=dist+0.5); // lower triange #1
+//                }
+//            }
+//            
+//            translate([0, 0, -.1]) block(sizeBot[0], sizeBot[1], height+2, crad=crad, red=dist+width);
+//            translate([0, 0, -.6]) color("orange") hull() {
+//                block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=dist+width-0.5);                          // lower triange #1
+//                translate([0, 0, 0.5])block(sizeBot[0], sizeBot[1], 0.1, crad=crad, red=dist+width);
+//            }
+//        }
+//        // seal 2
+//        translate([0, 0, sizeBot[2]-0.3]) color("orange") difference() {
+//            dist = 1.65; // distance outer wall
+//            height = 3;
+//            width = 1.85;
+//            
+//            block(sizeBot[0], sizeBot[1], 1, crad=crad, red=dist-0.3);
+//            block(sizeBot[0], sizeBot[1], 1, crad=crad, red=dist+width+0.3);
+//        }
         
         
         // stress relief / anti warping holes
@@ -501,12 +543,6 @@ module bottom() {
     % translate([20+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) color("purple") hinge_bottom(screwed=true);
     % translate([-20+sizeBot[0]-2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) color("purple") hinge_bottom(screwed=true);
     
-    // hinge support
-//    translate([17-.2, sizeBot[1], 2])                                   hinge_support();
-//    translate([sizeBot[0]-30-13.4, sizeBot[1], 2])                      hinge_support();
-//    translate([30+13.4, sizeBot[1], 14+2]) rotate([0, 180, 0])          hinge_support();
-//    translate([sizeBot[0]-17+.2, sizeBot[1], 14+2]) rotate([0, 180, 0]) hinge_support();
-    
     // nuts
     % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
         translate([-14, 0, 0]) M5nut();
@@ -518,7 +554,7 @@ module bottom() {
     
 }
 
-// *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+// ------------------------------------------ MODELS -------------------------------------------------
 
 module uvfilter() {
     color("grey") {
@@ -557,6 +593,52 @@ module DIN912screw(length) {
     }
 }
 
+module anker() {
+    translate([0, 11, 11]) rotate([0, 90, 0]) hull() {
+        translate([0, 11, 11]) cylinder($fn=32, d=22, h=91);
+        translate([0, 62.6-11, 11]) cylinder($fn=32, d=22, h=91);
+    }
+}
+
+// ------------------------------------------- MISC --------------------------------------------------
+
+module anker_cutout() {
+    tol = 0.3;
+    dist = 9;
+    
+    translate([0, 11, 11]) rotate([0, 90, 0]) hull() {
+        translate([0, 11, 11]) cylinder($fn=32, d=22+tol, h=100);
+        translate([0, 62.6-11, 11]) cylinder($fn=32, d=22+tol, h=100);
+        
+        translate([-30, 11, 11]) cylinder($fn=32, d=22+tol, h=100);
+        translate([-30, 62.6-11-dist, 11]) cylinder($fn=32, d=22+tol, h=100);
+    }
+}
+
+module block(width, depth, height, crad=3, red=0) {
+    hull() {    
+        translate([crad, crad]) cylinder($fn=32, h=height, r=crad-red);
+        translate([width-crad, crad]) cylinder($fn=32, h=height, r=crad-red);
+        translate([crad, depth-crad]) cylinder($fn=32, h=height, r=crad-red);
+        translate([width-crad, depth-crad]) cylinder($fn=32, h=height, r=crad-red);
+    }
+}
+
+module block2(width, depth, height, crad=3, red=0) {
+    
+    // pythagorean theorem
+    redp = sqrt((red*red)/2);
+    
+    points = [  [0+red, crad+redp], [crad+redp, 0+red],
+                [width-crad-redp, 0+red], [width-red, crad+redp],
+                [width-red, depth-crad-redp], [width-crad-redp, depth-red],
+                [crad+redp, depth-red], [0+red, depth-crad-redp]];
+    
+    linear_extrude(height=height) polygon(points);
+}
+
+// ---------------------------------------- SMARTPHONES ----------------------------------------------
+
 module motoE() {
     //cube([154, 75, 10]); // Moto Z
     block(130, 67, 12.3, crad=10);
@@ -571,7 +653,7 @@ module nexus5() {
     translate([-5, 68, -26]) rotate([0, 0, -90]) import("nexus5.stl");
 }
 
-module motoEcavity(height) {
+module motoE_cavity(height) {
     difference() {
         translate([-10, 0]) block(143, 67, height, crad=5);
 //        points_cav = [[0, 0], [-2, height+0.2], [2, height+0.2], [2, 0]];
@@ -587,7 +669,7 @@ module motoEcavity(height) {
     translate([40+2, 61+5.5, 0]) cube([36, 5, height]);
 }
 
-module nexus5cavity(height) {
+module nexus5_cavity(height) {
     difference() {
         union() {
             color("red") {
@@ -616,52 +698,40 @@ module nexus5cavity(height) {
     translate([40+2, -5.5, 0]) cube([36, 5, height]);
 }
 
-module anker() {
-    translate([0, 11, 11]) rotate([0, 90, 0]) hull() {
-        translate([0, 11, 11]) cylinder($fn=32, d=22, h=91);
-        translate([0, 62.6-11, 11]) cylinder($fn=32, d=22, h=91);
+module zteaxon7() {
+    block(151.6, 74.8, 9, crad=12-5);
+    color("grey") {
+        translate([151.6-31.5-24, -0.5, 4.5]) cube([24, 2, 1.5]);
+        translate([151.6-74, -0.5, 4.5]) cube([11, 2, 1.5]);
+//        translate([65+17+10, -1, 7]) cube([9, 2, 1.5]);
+        translate([151.6-21, 74.8/2, -1]) cylinder($fn=32, h=3, d=13);
     }
 }
 
-module anker_cutout() {
-    tol = 0.3;
-    dist = 9;
+module zteaxon7_cavity(height) {
     
-    translate([0, 11, 11]) rotate([0, 90, 0]) hull() {
-        translate([0, 11, 11]) cylinder($fn=32, d=22+tol, h=100);
-        translate([0, 62.6-11, 11]) cylinder($fn=32, d=22+tol, h=100);
-        
-        translate([-30, 11, 11]) cylinder($fn=32, d=22+tol, h=100);
-        translate([-30, 62.6-11-dist, 11]) cylinder($fn=32, d=22+tol, h=100);
-    }
-}
-
-module hinge_support() {
-    points_hinges = [[0, 0], [3, 0], [3, 1], [1, 1]];
-    points_hinges2 = [[0, 0], [14, 0], [12, 1], [2, 1]];
+    size = [151.6+1, 74.8+1+2];
     
-    intersection() {
-        linear_extrude(height=14) polygon(points_hinges);
-        translate([0, 0, 14]) rotate([0, 90, 0]) linear_extrude(height=5) polygon(points_hinges2);
-    }
-}
-
-module block(width, depth, height, crad=3, red=0) {
-    hull() {    
-        translate([crad, crad]) cylinder($fn=32, h=height, r=crad-red);
-        translate([width-crad, crad]) cylinder($fn=32, h=height, r=crad-red);
-        translate([crad, depth-crad]) cylinder($fn=32, h=height, r=crad-red);
-        translate([width-crad, depth-crad]) cylinder($fn=32, h=height, r=crad-red);
-    }
-}
-
-module block2(width, depth, height, crad=3) {
-    points = [  [0, crad], [crad, 0],
-                [width-crad, 0], [width, crad],
-                [width, depth-crad], [width-crad, depth],
-                [crad, depth], [0, depth-crad]];
+    difference() {
+        union() {
+            translate([-0.5, -0.5, 0]) block(size[0], size[1], height, crad=4);
+        }
     
-    linear_extrude(height=height) polygon(points);
+        points_cav = [[0, 0], [-2, height+0.2], [2, height+0.2], [2, 0]];
+        translate([-1, size[1]-2, -.1]) rotate([90, 0, 90]) linear_extrude(height=200) polygon(points_cav);
+    }
+    
+    translate([-10, 2.5]) cube([50, size[1]-5, height]);
+    
+    // text
+    translate([15, size[1]/2-5, -0.3]) linear_extrude(height=10) color("DarkRed") text("ZTE AXON 7");
+    
+    // buttons
+    translate([75, -4, 0])cube([48, 5, height]);
+    
+    // wedge
+    translate([30, -5.5, 0]) cube([40, 2, height]);
+    translate([30+2, -5.5, 0]) cube([36, 5, height]);
 }
 
 // Phone Moto E Measurement
