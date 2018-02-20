@@ -228,6 +228,9 @@ public class Orchestrator extends BroadcastReceiver {
 
         long nextExecution = ((now + Config.getShutterInterval(context)) / 1000) * 1000;
 
+        // save the time of the next invocation for the progressBar in the UI
+        Config.setNextShutterServiceInvocation(context, nextExecution);
+
         /*
          * A note on alarms:
          *
@@ -328,7 +331,7 @@ public class Orchestrator extends BroadcastReceiver {
             builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                builder.setPeriodic(Config.getUploadInterval(context), 30000);
+                builder.setPeriodic(Config.getUploadInterval(context), 30*1000);
             } else{
                 builder.setPeriodic(Config.getUploadInterval(context));
             }
