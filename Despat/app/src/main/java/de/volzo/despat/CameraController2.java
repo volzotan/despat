@@ -26,13 +26,16 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.MessageQueue;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.LogPrinter;
 import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
 import android.util.SizeF;
+import android.util.StringBuilderPrinter;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Toast;
@@ -115,9 +118,7 @@ public class CameraController2 extends CameraController {
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
 
-        // startBackgroundThread();
-        // stopping the background thread kills the whole application when its
-        // done by the ShutterService
+//        startBackgroundThread();
     }
 
     public void openCamera() throws Exception {
@@ -137,18 +138,6 @@ public class CameraController2 extends CameraController {
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
                 throw new Exception("invalid configuration: camera supports no RAW format");
             }
-
-            cameraManager.registerAvailabilityCallback(new CameraManager.AvailabilityCallback() {
-                @Override
-                public void onCameraAvailable(@NonNull String cameraId) {
-                    // Log.d(TAG, "*** cameraAvailable");
-                }
-
-                @Override
-                public void onCameraUnavailable(@NonNull String cameraId) {
-                    // Log.d(TAG, "*** cameraUnavailable");
-                }
-            }, backgroundHandler);
 
             cameraManager.openCamera(cameraId, cameraStateCallback, backgroundHandler);
         } catch (CameraAccessException e) {
@@ -200,8 +189,6 @@ public class CameraController2 extends CameraController {
 
             // cameraOpenCloseLock.release();
 
-            stopBackgroundThread();
-
             if (imageReaderJpg != null) {
                 imageReaderJpg.close();
                 imageReaderJpg = null;
@@ -210,6 +197,8 @@ public class CameraController2 extends CameraController {
                 imageReaderRaw.close();
                 imageReaderRaw = null;
             }
+
+            stopBackgroundThread();
 
             // if a textureView exists outside of the CameraController
             // closing the surfaces would cause problems
@@ -222,6 +211,8 @@ public class CameraController2 extends CameraController {
                     surfaceTexture.release();
                 }
             }
+
+            Log.d(TAG, "camera closing complete");
 
             if (controllerCallback != null) {
                 controllerCallback.cameraClosed();
@@ -244,24 +235,32 @@ public class CameraController2 extends CameraController {
 
             // output
             CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
-            Size[] jpgSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
-            Size[] rawSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.RAW_SENSOR);
 
-            if (jpgSizes == null) {
-                Log.e(TAG, "no JPEG image size could be determined");
-                return;
+            if (Config.FORMAT_JPG) {
+
+                Size[] jpgSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
+
+                if (jpgSizes == null) {
+                    Log.e(TAG, "no JPEG image size could be determined");
+                    return;
+                }
+
+                imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES + 1);
+                imageReaderJpg.setOnImageAvailableListener(readerListenerJpg, backgroundHandler);
             }
 
-            if (rawSizes == null) {
-                Log.e(TAG, "no RAW image size could be determined");
-                return;
+            if (Config.FORMAT_RAW) {
+
+                Size[] rawSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.RAW_SENSOR);
+
+                if (rawSizes == null) {
+                    Log.e(TAG, "no RAW image size could be determined");
+                    return;
+                }
+
+                imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, Config.NUMBER_OF_BURST_IMAGES + 1);
+                imageReaderRaw.setOnImageAvailableListener(readerListenerRaw, backgroundHandler);
             }
-
-            imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES + 1);
-            imageReaderJpg.setOnImageAvailableListener(readerListenerJpg, backgroundHandler);
-
-            imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, Config.NUMBER_OF_BURST_IMAGES + 1);
-            imageReaderRaw.setOnImageAvailableListener(readerListenerRaw, backgroundHandler);
 
             // output surfaces
             List<Surface> outputSurfaces = new ArrayList<Surface>(3);
@@ -350,7 +349,7 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    protected void startBackgroundThread(Looper looper) {
+    protected void startBackgroundThread() {
         Log.d(TAG, "# startBackgroundThread");
 
         backgroundThread = new HandlerThread("Camera Background");
@@ -362,6 +361,16 @@ public class CameraController2 extends CameraController {
         Log.d(TAG, "# stopBackgroundThread");
 
         if (backgroundThread == null) return;
+
+        MessageQueue mq = backgroundHandler.getLooper().getQueue();
+        Log.d(TAG, "mq idle: " + mq.isIdle());
+        Log.d(TAG, "mq: " + mq.toString());
+
+        StringBuilder sb = new StringBuilder();
+        StringBuilderPrinter pw = new StringBuilderPrinter(sb);
+        backgroundHandler.dump(pw, "");
+
+        System.out.println(sb.toString());
 
         backgroundThread.quitSafely();
         try {
@@ -580,6 +589,9 @@ public class CameraController2 extends CameraController {
                         if (jpgImageSaver != null) {
                             filename = jpgImageSaver.filename;
                         }
+
+                        // Caveat: image may not yet be written to disk at this point
+                        // just because the broadcast is send, the image may not yet be available
 
                         sendBroadcast(context, filename.getAbsolutePath());
 
@@ -886,6 +898,7 @@ public class CameraController2 extends CameraController {
             // it's done by a service
 
             Map.Entry<Integer, ImageSaver> entry = jpgResultQueue.firstEntry();
+
             ImageSaver imageSaver = entry.getValue();
             imageSaver.image = reader.acquireNextImage();
 

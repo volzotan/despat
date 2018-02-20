@@ -147,6 +147,9 @@ public class ShutterService extends Service {
 
         CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
             @Override
+            public void cameraOpened() {}
+
+            @Override
             public void captureComplete() {
                 despat.closeCamera();
             }

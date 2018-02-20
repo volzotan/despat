@@ -26,6 +26,8 @@ public class ImageRollover {
     public ImageRollover(Context context, String suffix) {
         this.dir = Config.getImageFolder(context);
 
+        if (suffix == null) suffix = ".jpg";
+
         if (suffix.charAt(0) != '.') {
             this.fileextension = "." + suffix;
         } else {

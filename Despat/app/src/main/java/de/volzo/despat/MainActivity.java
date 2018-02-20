@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
@@ -25,6 +26,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     Detector detector;
 
     TextureView textureView;
+
+    Handler periodicUpdateHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                             session.startRecordingSession(null);
                         }
                     }, 1000);
-
+                    startProgressBarUpdate();
                     startStopCapturing.setChecked(true);
                 } else {
                     Log.d(TAG, "stopCapturing");
@@ -123,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     } catch (RecordingSession.NotRecordingException e) {
                         Log.e(TAG, "stopping Recording Session failed", e);
                     }
+                    stopProgressBarUpdate();
                     startStopCapturing.setChecked(false);
                 }
             }
@@ -222,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1*60);
 
+        startProgressBarUpdate();
 
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();
@@ -256,6 +262,18 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
             TextView tvStatus = (TextView) findViewById(R.id.tv_status);
             tvStatus.setText(sb.toString());
+
+            ImageRollover imgroll = new ImageRollover(context, ".jpg");
+            File newestImage = imgroll.getNewestImage();
+
+            if (newestImage == null) return;
+
+            Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
+            ImageView imageView = findViewById(R.id.imageView);
+            imageView.setImageBitmap(imgBitmap);
+
+            PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+            photoViewAttacher.update();
         }
     };
 
@@ -264,6 +282,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         super.onPause();
 
         cleanup();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        startProgressBarUpdate();
     }
 
     @Override
@@ -314,6 +339,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void cleanup() {
 
         Log.d(TAG, "cleanup. unregistering all receivers");
+
+        stopProgressBarUpdate();
 
         if (powerbrain != null) {
             powerbrain.disconnect();
@@ -403,6 +430,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         camera.openCamera();
                     } catch (Exception e) {
                         Log.e(TAG, "starting camera failed", e);
+                        Toast.makeText(activity, "starting camera failed: " + e.getMessage(), Toast.LENGTH_SHORT );
                     }
                 } else {
                     try {
@@ -413,6 +441,49 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 }
             }
         });
+    }
+
+    private void startProgressBarUpdate() {
+        if (periodicUpdateHandler == null) periodicUpdateHandler = new Handler(Looper.getMainLooper());
+
+        Runnable updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+                ProgressBar captureProgressBar = findViewById(R.id.captureProgressBar);
+                long nextInvocation = Config.getNextShutterServiceInvocation(activity);
+                long diff = nextInvocation - System.currentTimeMillis();
+
+                periodicUpdateHandler.postDelayed(this, 500);
+
+                if (diff < 0) {
+                    captureProgressBar.setProgress(0);
+                    captureProgressBar.setEnabled(false);
+                    return;
+                }
+
+                long shutterInterval = Config.getShutterInterval(activity);
+                int progress = (int) (((float) diff/(float) shutterInterval)*100f);
+
+                captureProgressBar.setEnabled(true);
+                captureProgressBar.setProgress(progress);
+            }
+        };
+        periodicUpdateHandler.post(updateRunnable);
+
+        Log.d(TAG, "periodicUpdateHandler start");
+    }
+
+    private void stopProgressBarUpdate() {
+        if (periodicUpdateHandler != null) {
+            periodicUpdateHandler.removeCallbacksAndMessages(null);
+        }
+
+        ProgressBar captureProgressBar = findViewById(R.id.captureProgressBar);
+        captureProgressBar.setProgress(0);
+        captureProgressBar.setEnabled(false);
+
+        Log.d(TAG, "periodicUpdateHandler start");
     }
 
     public void runRecognizer() {

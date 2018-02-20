@@ -15,6 +15,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +121,11 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
                         Config.setDeviceName(activity, value);
                         break;
                     case Config.KEY_SHUTTER_INTERVAL:
-                        Config.setShutterInterval(activity, value);
+                        try {
+                            Config.setShutterInterval(activity, Long.parseLong(value));
+                        } catch (NumberFormatException e) {
+                            Toast.makeText(activity, "not a number", Toast.LENGTH_SHORT);
+                        }
                         break;
                     case Config.KEY_IMAGE_FOLDER:
                         Config.setImageFolder(activity, value);
