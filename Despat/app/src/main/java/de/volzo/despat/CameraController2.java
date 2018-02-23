@@ -404,7 +404,8 @@ public class CameraController2 extends CameraController {
                     break;
                 }
                 case STATE_WAITING_FOR_3A_CONVERGENCE: {
-                    boolean readyToCapture = true;
+                    boolean readyToCapture = false;
+
                     if (!noAF) {
                         Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
                         if (afState == null) break;
@@ -495,9 +496,8 @@ public class CameraController2 extends CameraController {
                 previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
             }
 
+            setup3AControls(previewRequestBuilder);
             state = STATE_WAITING_FOR_3A_CONVERGENCE;
-
-            // start 3A timer
             captureTimer = SystemClock.elapsedRealtime();
 
             captureSession.setRepeatingRequest(previewRequestBuilder.build(), preCaptureCallback, backgroundHandler);
@@ -944,23 +944,16 @@ public class CameraController2 extends CameraController {
 
     private void setup3AControls(CaptureRequest.Builder builder) {
 
-        // Enable auto-magical 3A run by camera device
         builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
 
         Float minFocusDist = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
-
         // If MINIMUM_FOCUS_DISTANCE is 0, lens is fixed-focus and we need to skip the AF run.
         noAF = (minFocusDist == null || minFocusDist == 0);
 
         if (!noAF) {
-            // If there is a "continuous picture" mode available, use it, otherwise default to AUTO.
-            if (contains(characteristics.get(
-                    CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES),
-                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
-                builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-            } else {
-                builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
-            }
+            // CONTINUOUS mode produces blurry pictures and seems to be
+            // generally unreliable, default to AUTO
+            builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
         }
 
         // If there is an auto-magical white balance control mode available, use it.
