@@ -68,6 +68,8 @@ public class Config {
     // maximal time the AF/AE/AWB metering functions
     // may try to find a fix before shutter is
     // released anyway
+    // if v2 is used on a legacy device, this time is
+    // always used fully for metering
     public static final int METERING_MAX_TIME                       = 2000;
 
     // make captured images immediately available to

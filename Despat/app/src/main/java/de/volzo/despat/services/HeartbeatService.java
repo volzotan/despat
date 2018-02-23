@@ -68,7 +68,7 @@ public class HeartbeatService extends JobService {
         statusDao.insert(status);
 
 //        Util.startSyncManually(Util.createSyncAccount(this));
-        Sync.run(this, HeartbeatService.class);
+        Sync.run(this, HeartbeatService.class, false);
 
         jobFinished(jobParameters, false);
         return false;

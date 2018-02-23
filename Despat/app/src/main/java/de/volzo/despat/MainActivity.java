@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         despat = ((Despat) getApplicationContext());
 
 //        Util.disableDoze();
-//        whitelistAppForDoze();
+        whitelistAppForDoze();
 
         if (!checkPermissionsAreGiven()) {
             requestPermissions();
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         fabSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Sync.run(activity, MainActivity.class);
+                Sync.run(activity, MainActivity.class, true);
             }
         });
 

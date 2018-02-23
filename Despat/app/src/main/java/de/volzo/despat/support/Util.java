@@ -460,6 +460,14 @@ public class Util {
 
         return sb.toString();
     }
+    public static void cutList(List list, int maxSize) {
+        int size = list.size();
+        if (size > maxSize) {
+            for (int i=0; i < (size-maxSize); i++) {
+                list.remove(list.size()-1);
+            }
+        }
+    }
 
     // ---
 

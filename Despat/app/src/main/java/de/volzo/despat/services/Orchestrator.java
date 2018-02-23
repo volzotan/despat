@@ -212,7 +212,7 @@ public class Orchestrator extends BroadcastReceiver {
         }
 
         // check if sync should be run
-        Sync.run(context, ShutterService.class);
+        Sync.run(context, ShutterService.class, false);
         // TODO: this should be done in its own thread with its own wakelock
 
         // trigger the next invocation

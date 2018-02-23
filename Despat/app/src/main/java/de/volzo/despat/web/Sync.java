@@ -30,10 +30,10 @@ public class Sync {
 
     public static final String TAG = Sync.class.getSimpleName();
 
-    public static synchronized void run(Context context, Class trigger) {
+    public static synchronized void run(Context context, Class trigger, boolean ignoreMinSyncTime) {
 
         Date lastSync = Config.getLastSync(context);
-        if (lastSync != null) {
+        if (ignoreMinSyncTime == false && lastSync != null) {
             long diff = Calendar.getInstance().getTime().getTime() - lastSync.getTime();
 
             if (diff < Config.getMinSyncInterval(context)) {
@@ -82,6 +82,7 @@ public class Sync {
                 public void success(JSONArray response) {
                     try {
                         List<Integer> missingIds = serverConnector.parseJsonResponse(response);
+                        Util.cutList(missingIds, 900);
                         serverConnector.sendStatus(statusDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
                         Log.i(TAG, "sync elements for STATUS: " + missingIds.size());
                     } catch (JSONException e) {
@@ -95,6 +96,7 @@ public class Sync {
                 public void success(JSONArray response) {
                     try {
                         List<Integer> missingIds = serverConnector.parseJsonResponse(response);
+                        Util.cutList(missingIds, 900);
                         serverConnector.sendSession(sessionDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
                         Log.i(TAG, "sync elements for SESSION: " + missingIds.size());
                     } catch (JSONException e) {
@@ -108,6 +110,7 @@ public class Sync {
                 public void success(JSONArray response) {
                     try {
                         List<Integer> missingIds = serverConnector.parseJsonResponse(response);
+                        Util.cutList(missingIds, 900);
                         serverConnector.sendCapture(captureDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
                         Log.i(TAG, "sync elements for CAPTURE: " + missingIds.size());
                     } catch (JSONException e) {
@@ -121,6 +124,7 @@ public class Sync {
                 public void success(JSONArray response) {
                     try {
                         List<Integer> missingIds = serverConnector.parseJsonResponse(response);
+                        Util.cutList(missingIds, 900);
                         serverConnector.sendEvent(eventDao.getAllById(missingIds), genericSuccessCallback, genericFailureCallback);
                         Log.i(TAG, "sync elements for EVENT: " + missingIds.size());
                     } catch (JSONException e) {

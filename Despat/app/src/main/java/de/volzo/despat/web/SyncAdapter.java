@@ -75,7 +75,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             ContentProviderClient provider,
             SyncResult syncResult) {
 
-        Sync.run(context, SyncAdapter.class);
+        Sync.run(context, SyncAdapter.class, false);
 
     }
 }
