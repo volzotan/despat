@@ -226,7 +226,8 @@ public class Orchestrator extends BroadcastReceiver {
                 ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        long nextExecution = ((now + Config.getShutterInterval(context)) / 1000) * 1000;
+        long nextExecution = now + Config.getShutterInterval(context);
+        nextExecution -= nextExecution % 1000;
 
         // save the time of the next invocation for the progressBar in the UI
         Config.setNextShutterServiceInvocation(context, nextExecution);

@@ -82,7 +82,7 @@ public class Config {
     public static final long SHUTTER_CAMERA_MAX_LIFETIME            = 8000;
 
     // ShutterService itself is closed after X seconds
-    public static final long SHUTTER_SERVICE_MAX_LIFETIME           = 8000;
+    // public static final long SHUTTER_SERVICE_MAX_LIFETIME           = 8000;
 
     // the maximum time the wakelock is guaranteed to be active
     public static final long WAKELOCK_MAX_LIFETIME                  = 9000;
@@ -131,7 +131,7 @@ public class Config {
     public static final String KEY_RESUME_AFTER_REBOOT              = "de.volzo.despat.resumeAfterReboot";
     public static final String KEY_LAST_SYNC                        = "de.volzo.despat.lastSync";
     public static final String KEY_MIN_SYNC_INTERVAL                = "de.volzo.despat.minSyncInterval";
-    public static final String KEY_NEXT_SHUTTER_SERVICE_INVOCATION  = "de.volzo.despat.minSyncInterval";
+    public static final String KEY_NEXT_SHUTTER_SERVICE_INVOCATION  = "de.volzo.despat.nextShutterServiceInvocation";
 
     /*
     image folder

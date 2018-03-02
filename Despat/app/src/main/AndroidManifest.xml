@@ -60,11 +60,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
-                <action android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
-                <action android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
-                <action android:name="android.intent.action.SCREEN_OFF" />
-                <action android:name="android.intent.action.SCREEN_ON" />
-
                 <action android:name="de.volzo.despat.ALL_SERVICES" />
                 <action android:name="de.volzo.despat.SHUTTER_SERVICE" />
                 <action android:name="de.volzo.despat.RECOGNITION_SERVICE" />

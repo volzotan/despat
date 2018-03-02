@@ -104,6 +104,8 @@ public class ShutterService extends Service {
 
         filter = new IntentFilter();
         filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        filter.addAction("android.intent.action.SCREEN_OFF");
+        filter.addAction("android.intent.action.SCREEN_ON");
         registerReceiver(powerReceiver, filter);
 
         // start and release shutter
@@ -114,9 +116,26 @@ public class ShutterService extends Service {
 
     private final BroadcastReceiver powerReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            Util.saveEvent(context, Event.EventType.SLEEP_MODE_CHANGE, "in idle mode: " + pm.isDeviceIdleMode());
-            Log.d(TAG, "+++ in idle mode: " + pm.isDeviceIdleMode());
+            switch (intent.getAction()) {
+                case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
+                    PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+                    Util.saveEvent(context, Event.EventType.SLEEP_MODE_CHANGE, "in idle mode: " + pm.isDeviceIdleMode());
+                    Log.d(TAG, "+++ in idle mode: " + pm.isDeviceIdleMode());
+                    break;
+
+                case "android.intent.action.SCREEN_OFF":
+                    Util.saveEvent(context, Event.EventType.DISPLAY_OFF, null);
+                    Log.d(TAG, "+++ screen off");
+                    break;
+
+                case "android.intent.action.SCREEN_ON":
+                    Util.saveEvent(context, Event.EventType.DISPLAY_ON, null);
+                    Log.d(TAG, "+++ screen on");
+                    break;
+
+                default:
+                    Log.e(TAG, "unknown intent: " + intent);
+            }
         }
     };
 

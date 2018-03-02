@@ -237,9 +237,7 @@ public class CameraController2 extends CameraController {
             CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
 
             if (Config.FORMAT_JPG) {
-
                 Size[] jpgSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
-
                 if (jpgSizes == null) {
                     Log.e(TAG, "no JPEG image size could be determined");
                     return;
@@ -250,9 +248,7 @@ public class CameraController2 extends CameraController {
             }
 
             if (Config.FORMAT_RAW) {
-
                 Size[] rawSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.RAW_SENSOR);
-
                 if (rawSizes == null) {
                     Log.e(TAG, "no RAW image size could be determined");
                     return;
@@ -362,15 +358,15 @@ public class CameraController2 extends CameraController {
 
         if (backgroundThread == null) return;
 
-        MessageQueue mq = backgroundHandler.getLooper().getQueue();
-        Log.d(TAG, "mq idle: " + mq.isIdle());
-        Log.d(TAG, "mq: " + mq.toString());
-
-        StringBuilder sb = new StringBuilder();
-        StringBuilderPrinter pw = new StringBuilderPrinter(sb);
-        backgroundHandler.dump(pw, "");
-
-        System.out.println(sb.toString());
+//        MessageQueue mq = backgroundHandler.getLooper().getQueue();
+//        Log.d(TAG, "mq idle: " + mq.isIdle());
+//        Log.d(TAG, "mq: " + mq.toString());
+//
+//        StringBuilder sb = new StringBuilder();
+//        StringBuilderPrinter pw = new StringBuilderPrinter(sb);
+//        backgroundHandler.dump(pw, "");
+//
+//        System.out.println(sb.toString());
 
         backgroundThread.quitSafely();
         try {
@@ -382,8 +378,7 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    private CameraCaptureSession.CaptureCallback preCaptureCallback
-            = new CameraCaptureSession.CaptureCallback() {
+    private CameraCaptureSession.CaptureCallback preCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
 
@@ -499,6 +494,11 @@ public class CameraController2 extends CameraController {
             setup3AControls(previewRequestBuilder);
             state = STATE_WAITING_FOR_3A_CONVERGENCE;
             captureTimer = SystemClock.elapsedRealtime();
+
+            if (captureSession == null) {
+                // TODO: try to recover instead of killing the camera
+                cameraFailed("capture session missing", null);
+            }
 
             captureSession.setRepeatingRequest(previewRequestBuilder.build(), preCaptureCallback, backgroundHandler);
         } catch (CameraAccessException e) {
