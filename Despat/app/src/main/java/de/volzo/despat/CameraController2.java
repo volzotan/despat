@@ -103,6 +103,7 @@ public class CameraController2 extends CameraController {
     private Surface surface;
 
     private Semaphore cameraOpenCloseLock = new Semaphore(1);
+    private final Object queueRemoveLock = new Object();
 
     private int state = STATE_CLOSED;
     private static final int STATE_CLOSED                       = 0;
@@ -539,8 +540,8 @@ public class CameraController2 extends CameraController {
                     ImageSaver jpgImageSaver = jpgResultQueue.get(n);
                     ImageSaver rawImageSaver = rawResultQueue.get(n);
 
-                    if (jpgImageSaver != null) jpgImageSaver.filename = jpgImgroll.getTimestampAsFullFilename();
-                    if (rawImageSaver != null) rawImageSaver.filename = rawImgroll.getTimestampAsFullFilename();
+                    if (jpgImageSaver != null) jpgImageSaver.filename = jpgImgroll.getTimestampAsFullFilename(n);
+                    if (rawImageSaver != null) rawImageSaver.filename = rawImgroll.getTimestampAsFullFilename(n);
                 }
 
                 @Override
@@ -564,19 +565,21 @@ public class CameraController2 extends CameraController {
                     ImageSaver jpgImageSaver = jpgResultQueue.get(n);
                     ImageSaver rawImageSaver = rawResultQueue.get(n);
 
-                    if (jpgImageSaver != null) jpgImageSaver.captureResult = result;
-                    if (rawImageSaver != null) rawImageSaver.captureResult = result;
+                    synchronized (queueRemoveLock) {
+                        if (jpgImageSaver != null) jpgImageSaver.captureResult = result;
+                        if (rawImageSaver != null) rawImageSaver.captureResult = result;
 
-                    // if the imageReader has already saved its data in the imageSaver
-                    // then is now the time to actually run it
+                        // if the imageReader has already saved its data in the imageSaver
+                        // then is now the time to actually run it
 
-                    if (jpgImageSaver.isComplete()) {
-                        rawResultQueue.remove(n);
-                        jpgImageSaver.run();
-                    }
-                    if (rawImageSaver.isComplete()) {
-                        rawResultQueue.remove(n);
-                        rawImageSaver.run();
+                        if (jpgImageSaver.isComplete()) {
+                            rawResultQueue.remove(n);
+                            jpgImageSaver.run();
+                        }
+                        if (rawImageSaver.isComplete()) {
+                            rawResultQueue.remove(n);
+                            rawImageSaver.run();
+                        }
                     }
 
                     if (n < burstLength - 1) {
@@ -897,14 +900,16 @@ public class CameraController2 extends CameraController {
             // image saving in a background thread seems not be a good idea if
             // it's done by a service
 
-            Map.Entry<Integer, ImageSaver> entry = jpgResultQueue.firstEntry();
+            synchronized (queueRemoveLock) {
+                Map.Entry<Integer, ImageSaver> entry = jpgResultQueue.firstEntry();
 
-            ImageSaver imageSaver = entry.getValue();
-            imageSaver.image = reader.acquireNextImage();
+                ImageSaver imageSaver = entry.getValue();
+                imageSaver.image = reader.acquireNextImage();
 
-            if (imageSaver.isComplete()) {
-                jpgResultQueue.remove(entry.getKey());
-                imageSaver.run();
+                if (imageSaver.isComplete()) {
+                    jpgResultQueue.remove(entry.getKey());
+                    imageSaver.run();
+                }
             }
         }
     };
@@ -914,13 +919,15 @@ public class CameraController2 extends CameraController {
         public void onImageAvailable(ImageReader reader) {
             Log.d(TAG, "# onImageAvailable RAW");
 
-            Map.Entry<Integer, ImageSaver> entry = rawResultQueue.firstEntry();
-            ImageSaver imageSaver = entry.getValue();
-            imageSaver.image = reader.acquireNextImage();
+            synchronized (queueRemoveLock) {
+                Map.Entry<Integer, ImageSaver> entry = rawResultQueue.firstEntry();
+                ImageSaver imageSaver = entry.getValue();
+                imageSaver.image = reader.acquireNextImage();
 
-            if (imageSaver.isComplete()) {
-                rawResultQueue.remove(entry.getKey());
-                imageSaver.run();
+                if (imageSaver.isComplete()) {
+                    rawResultQueue.remove(entry.getKey());
+                    imageSaver.run();
+                }
             }
         }
     };
@@ -1093,7 +1100,7 @@ public class CameraController2 extends CameraController {
         }
 
         public void run() {
-            Log.d(TAG, "# imageSaver run");
+            Log.d(TAG, "# imageSaver run [ " + filename + " ]");
 
             FileOutputStream output = null;
 

@@ -117,6 +117,11 @@ public class ImageRollover {
         return new File(this.dir, str);
     }
 
+    public File getTimestampAsFullFilename(int sequenceNumber) {
+        String str = Long.toString(System.currentTimeMillis()) + "_" + sequenceNumber + fileextension;
+        return new File(this.dir, str);
+    }
+
     public void run() {
         if (!Config.IMGROLL_DELETE_IF_FULL) {
             Log.d(TAG, "imageRollover is disabled.");
