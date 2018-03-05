@@ -540,8 +540,8 @@ public class CameraController2 extends CameraController {
                     ImageSaver jpgImageSaver = jpgResultQueue.get(n);
                     ImageSaver rawImageSaver = rawResultQueue.get(n);
 
-                    if (jpgImageSaver != null) jpgImageSaver.filename = jpgImgroll.getTimestampAsFullFilename(n);
-                    if (rawImageSaver != null) rawImageSaver.filename = rawImgroll.getTimestampAsFullFilename(n);
+                    if (jpgImageSaver != null) jpgImageSaver.setFilename(jpgImgroll.getTimestampAsFullFilename(n));
+                    if (rawImageSaver != null) rawImageSaver.setFilename(rawImgroll.getTimestampAsFullFilename(n));
                 }
 
                 @Override
@@ -573,7 +573,7 @@ public class CameraController2 extends CameraController {
                         // then is now the time to actually run it
 
                         if (jpgImageSaver.isComplete()) {
-                            rawResultQueue.remove(n);
+                            jpgResultQueue.remove(n);
                             jpgImageSaver.run();
                         }
                         if (rawImageSaver.isComplete()) {
@@ -1080,15 +1080,17 @@ public class CameraController2 extends CameraController {
     }
 
     private static class ImageSaver {
-        Context context;
-        CameraCharacteristics characteristics;
+        private Context context;
+        private CameraCharacteristics characteristics;
         CaptureResult captureResult;
-        File filename;
+        private File filename;
         Image image;
 
         public ImageSaver(Context context, CameraCharacteristics characteristics) {
             this.context = context;
             this.characteristics = characteristics;
+
+            // Log.d(TAG, "# imageSaver created");
         }
 
         public boolean isComplete() {
@@ -1097,6 +1099,12 @@ public class CameraController2 extends CameraController {
                     captureResult != null &&
                     filename != null &&
                     image != null);
+        }
+
+        public void setFilename(File filename) {
+            this.filename = filename;
+
+            // Log.d(TAG, "# imageSaver filename set: " + filename);
         }
 
         public void run() {
@@ -1158,6 +1166,8 @@ public class CameraController2 extends CameraController {
                     }
                 });
             }
+
+            Log.d(TAG, "# imageSaver done");
         }
     }
 }
