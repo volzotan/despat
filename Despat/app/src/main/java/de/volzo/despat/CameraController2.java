@@ -588,15 +588,15 @@ public class CameraController2 extends CameraController {
                         }
                     } else { // final image of burstSequence: no remaining images in the pipeline, shut it down.
 
-                        File filename = null;
+                        String filename = null;
                         if (jpgImageSaver != null) {
-                            filename = jpgImageSaver.filename;
+                            filename = jpgImageSaver.filename.getAbsolutePath();
                         }
 
                         // Caveat: image may not yet be written to disk at this point
                         // just because the broadcast is send, the image may not yet be available
 
-                        sendBroadcast(context, filename.getAbsolutePath());
+                        sendBroadcast(context, filename);
 
                         if (controllerCallback != null) controllerCallback.finalImageTaken();
 

@@ -226,7 +226,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         sendBroadcast(uploadIntent);
 
         ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1*60);
-
+        
+        registerAllReceivers();
         startProgressBarUpdate();
 
 //        startCapturing.callOnClick();
@@ -288,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     protected void onResume() {
         super.onResume();
 
+        registerAllReceivers();
         startProgressBarUpdate();
     }
 
@@ -336,6 +338,21 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     }
 
+    public void registerAllReceivers() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Broadcast.PICTURE_TAKEN);
+        registerReceiver(broadcastReceiver, filter);
+    }
+
+    public void unregisterAllReceivers() {
+        try {
+            unregisterReceiver(broadcastReceiver);
+        } catch (IllegalArgumentException iae) {
+            // ignore. cleanup is called multiple times, unregisterReceiver
+            // succeeds only on first call
+        }
+    }
+
     public void cleanup() {
 
         Log.d(TAG, "cleanup. unregistering all receivers");
@@ -349,13 +366,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
 
-        // Broadcast Receiver
-        try {
-            unregisterReceiver(broadcastReceiver);
-        } catch (IllegalArgumentException iae) {
-            // ignore. cleanup is called multiple times, unregisterReceiver
-            // succeeds only on first call
-        }
+        unregisterAllReceivers();
     }
 
     public void startCamera() {
@@ -561,7 +572,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     init();
                 } else {
-
                     Log.w(TAG, "permissions denied by user");
                 }
             }
