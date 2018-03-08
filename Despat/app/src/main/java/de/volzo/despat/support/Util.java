@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -29,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -47,12 +45,9 @@ import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
 import de.volzo.despat.R;
-import de.volzo.despat.SystemController;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
-import de.volzo.despat.persistence.StatusDao;
-import de.volzo.despat.services.ShutterService;
 
 import static android.content.Context.ACCOUNT_SERVICE;
 
@@ -64,7 +59,7 @@ public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
 
-    public static Notification getNotification(Context context, int numberOfCaptures) {
+    public static Notification getShutterNotification(Context context, int numberOfCaptures) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
@@ -80,14 +75,14 @@ public class Util {
         return notification;
     }
 
-    public static void updateNotification(Context context, int notificationIdentifier, int numberOfCaptures) {
+    public static void updateShutterNotification(Context context, int notificationIdentifier, int numberOfCaptures) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         StatusBarNotification[] notifications = notificationManager.getActiveNotifications();
         for (StatusBarNotification not : notifications) {
             if (not.getId() == notificationIdentifier) {
                 // only update if already existing
-                notificationManager.notify(notificationIdentifier, getNotification(context, numberOfCaptures));
+                notificationManager.notify(notificationIdentifier, getShutterNotification(context, numberOfCaptures));
                 return;
             }
         }
@@ -95,9 +90,26 @@ public class Util {
         Log.w(TAG, "no notification to update");
     }
 
-    public static void stopNotification(Context context, int notificationIdentifier) {
+    public static void stopShutterNotification(Context context, int notificationIdentifier) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationIdentifier);
+    }
+
+    public static void addStandardNotification(Context context, String message) {
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+
+        Notification notification = new Notification.Builder(context.getApplicationContext())
+                .setContentTitle("despat")
+                .setContentText(message)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setContentIntent(pendingIntent)
+                .setPriority(Notification.PRIORITY_DEFAULT)
+                .build();
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(0x100, notification);
     }
 
     public static boolean isServiceRunning(Context context, Class<?> serviceClass) {

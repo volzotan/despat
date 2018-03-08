@@ -112,11 +112,18 @@ public class Config {
     // DEFAULT_SHUTTER_INTERVAL should not be shorter than 6s (5s is android minimum
     // and a few extra ms are needed for compensation of scheduling irregularities)
     private static final long DEFAULT_SHUTTER_INTERVAL              = 10 * 1000; // in ms
+
     private static final long DEFAULT_HEARTBEAT_INTERVAL            = 15 * 60 * 1000L; // Minimum interval is 15m
+
     private static final long DEFAULT_UPLOAD_INTERVAL               = 15 * 60 * 1000L;
+
     private static final File DEFAULT_IMAGE_FOLDER                  = new File(Environment.getExternalStorageDirectory(), ("despat"));
+
     private static final String DEFAULT_SERVER_ADDRESS              = "http://zoltep.de"; // format protocol://example.com
-    private static final boolean DEFAULT_RESUME_AFTER_REBOOT        = false;
+
+    // resume if a capture session is open on device boot
+    private static final boolean DEFAULT_RESUME_AFTER_REBOOT        = true;
+
     private static final long DEFAULT_MIN_SYNC_INTERVAL             = 5 * 60 * 1000; // at most every X ms
 
     private static final String SHAREDPREFNAME                      = "de.volzo.despat.DEFAULT_PREFERENCES";
@@ -154,6 +161,10 @@ public class Config {
         // context.getSharedPreferences(SHAREDPREFNAME, 0).edit().clear().commit();
 
         // ...
+    }
+
+    public static void reset(Context context) {
+        context.getSharedPreferences(SHAREDPREFNAME, 0).edit().clear().commit();
     }
 
     public static String getUniqueDeviceId(Context context) {

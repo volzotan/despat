@@ -58,25 +58,33 @@ public class Event {
     }
 
     public class EventType {
+
+        // device
         public static final int INIT                = 10;
         public static final int BOOT                = 20;
         public static final int SHUTDOWN            = 30;
 
-        public static final int START               = 40;
-        public static final int STOP                = 41;
-        public static final int RESTART             = 42;
+        // session
+        public static final int SESSION_START       = 40;
+        public static final int SESSION_STOP        = 41;
+        public static final int SESSION_RESTART     = 42;
 
+        // general info
         public static final int INFO                = 45;
 
+        // general error
         public static final int ERROR               = 50;
         public static final int SCHEDULE_GLITCH     = 51;
 
+        // power
         public static final int SLEEP_MODE_CHANGE   = 60;
         public static final int DISPLAY_ON          = 61;
         public static final int DISPLAY_OFF         = 62;
 
+        // sync
         public static final int SYNC                = 70;
 
+        // wakelock
         public static final int WAKELOCK_ACQUIRE    = 90;
         public static final int WAKELOCK_RELEASE    = 91;
     }

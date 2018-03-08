@@ -35,6 +35,8 @@ public class RecordingSession {
     private Context context;
     private Session session;
 
+    private static final int RESUME_MAX_AGE_LAST_CAPTURE = 5 * 60 * 1000;
+
     //private constructor.
     private RecordingSession(Context context){
 
@@ -126,7 +128,7 @@ public class RecordingSession {
             }
         });
 
-        Util.saveEvent(context, Event.EventType.START, null);
+        Util.saveEvent(context, Event.EventType.SESSION_START, session.getSessionName());
     }
 
     public void resumeRecordingSession() throws Exception {
@@ -134,32 +136,53 @@ public class RecordingSession {
             throw new Exception("Session still recording");
         }
 
+        // Conditions for a resume on boot
+        // - config option "ResumeAfterReboot" must be set
+        // - newest RecordingSession has no end date / has end date in future
+        // - newest Capture is younger than 5min
+
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
+        CaptureDao captureDao = db.captureDao();
 
-        session = sessionDao.getLast();
+        Session lastSession = sessionDao.getLast();
 
-        if (session == null) {
-            Log.w(TAG, "no session to resume");
-            return;
+        if (lastSession == null) {
+            Log.w(TAG, "no sessions found for resuming");
+            throw new Exception("no sessions found");
         }
 
-        if (session.getEnd() != null) {
-            Log.d(TAG, "session resume, end date reset");
-            session.setEnd(null);
+        if (lastSession.getEnd() != null) {
+//            Log.d(TAG, "session resume, end date reset");
+//            session.setEnd(null);
+            Log.w(TAG, "newest session has ended (end date set)");
+            throw new Exception("last session has already ended");
         }
+
+        Capture lastCapture = captureDao.getLastFromSession(lastSession.getId());
+        if (lastCapture == null || lastCapture.getRecordingTime() == null) {
+            Log.w(TAG, "newest session has no captures");
+            throw new Exception("newest session has no captures");
+        }
+
+        long diff = Calendar.getInstance().getTime().getTime() - lastCapture.getRecordingTime().getTime();
+        if (diff > RESUME_MAX_AGE_LAST_CAPTURE) {
+            Log.w(TAG, "last capture too old");
+            throw new Exception("last capture too old");
+        }
+
+        session = lastSession;
         session.setResumed(true);
-
         sessionDao.update(session);
 
-        Log.d(TAG, "resume RecordingSession [" + session.getSessionName() + "]");
+        Log.i(TAG, "resume RecordingSession [" + session.getSessionName() + "]");
 
         Intent shutterIntent = new Intent(context, Orchestrator.class);
         shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
         shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
         context.sendBroadcast(shutterIntent);
 
-        Util.saveEvent(context, Event.EventType.RESTART, null);
+        Util.saveEvent(context, Event.EventType.SESSION_RESTART, session.getSessionName());
     }
 
     public void stopRecordingSession() throws NotRecordingException {
@@ -178,9 +201,9 @@ public class RecordingSession {
         SessionDao sessionDao = db.sessionDao();
         sessionDao.update(session);
 
-        session = null;
+        Util.saveEvent(context, Event.EventType.SESSION_STOP, session.getSessionName());
 
-        Util.saveEvent(context, Event.EventType.STOP, null);
+        session = null;
     }
 
     public boolean isActive() {

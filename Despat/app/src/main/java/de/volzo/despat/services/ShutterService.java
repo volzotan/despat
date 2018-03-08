@@ -96,7 +96,7 @@ public class ShutterService extends Service {
         this.context = this;
         this.handler = new Handler();
 
-        startForeground(FOREGROUND_NOTIFICATION_ID, Util.getNotification(context, 0));
+        startForeground(FOREGROUND_NOTIFICATION_ID, Util.getShutterNotification(context, 0));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);

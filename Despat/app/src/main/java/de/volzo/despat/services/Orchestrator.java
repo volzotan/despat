@@ -74,19 +74,14 @@ public class Orchestrator extends BroadcastReceiver {
                 case "android.intent.action.BOOT_COMPLETED":
                     Util.saveEvent(context, Event.EventType.BOOT, null);
 
-                    boolean resume = Config.getResumeAfterReboot(context);
-
-                    if (resume) {
+                    if (Config.getResumeAfterReboot(context)) {
                         RecordingSession session = RecordingSession.getInstance(context);
-
                         try {
                             session.resumeRecordingSession();
+                            Util.addStandardNotification(context, "resumed session: " + session.getSessionName());
                         } catch (Exception e) {
-                            Log.e(TAG, "resuming failed", e);
-                            // TODO: simply start a new one? in which cases could resuming fail? (empty db)
+                            Log.i(TAG, "session not resumed: " + e.getMessage());
                         }
-
-                        Config.setResumeAfterReboot(context, false); // TODO
                     }
 
                     break;
@@ -108,7 +103,7 @@ public class Orchestrator extends BroadcastReceiver {
                         }
                         String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
                         if (path != null) session.addCapture(new File(path));
-                        Util.updateNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken());
+                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken());
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }

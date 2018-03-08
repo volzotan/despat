@@ -31,12 +31,12 @@ public interface SessionDao {
     @Insert
     long[] insert(Session... sessions);
 
-    @Update(onConflict = REPLACE)
+    @Update
     void update(Session session);
 
     @Delete
     void delete(Session session);
 
     @Query("DELETE FROM session")
-    public void dropTable();
+    void dropTable();
 }

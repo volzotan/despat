@@ -34,7 +34,7 @@ public class RoomConverter {
     @TypeConverter
     public static String toTimeString(Date date) {
         DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
-        return date == null ? null : dateFormat.format(Calendar.getInstance().getTime());
+        return date == null ? null : dateFormat.format(date);
     }
 
     @TypeConverter
