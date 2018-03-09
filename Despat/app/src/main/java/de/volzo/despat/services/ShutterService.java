@@ -22,6 +22,8 @@ import android.provider.Settings;
 import android.util.Log;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -96,7 +98,7 @@ public class ShutterService extends Service {
         this.context = this;
         this.handler = new Handler();
 
-        startForeground(FOREGROUND_NOTIFICATION_ID, Util.getShutterNotification(context, 0));
+        startForeground(FOREGROUND_NOTIFICATION_ID, Util.getShutterNotification(context, 0, null));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
@@ -158,7 +160,7 @@ public class ShutterService extends Service {
         Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + session.getImagesTaken());
 
         // check if any images needs to be deleted to have enough free space
-        // may be time-consuming. alternative place to run?
+        // TODO: may be time-consuming. alternative place to run?
         ImageRollover imgroll = new ImageRollover(despat, null);
         imgroll.run();
 
@@ -222,7 +224,18 @@ public class ShutterService extends Service {
             // opening camera failed
 
             Log.e(TAG, "taking photo failed (error during opening camera)", e);
-            Util.saveEvent(this, Event.EventType.ERROR, "shutter failed: " + e.getMessage());
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("shutter failed: ");
+            sb.append(e.getMessage());
+            sb.append("\n --- \n");
+
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            sb.append(sw.toString());
+
+            Util.saveEvent(this, Event.EventType.ERROR, sb.toString());
 
             // critical error
             if (Config.REBOOT_ON_CRITICAL_ERROR) despat.criticalErrorReboot();

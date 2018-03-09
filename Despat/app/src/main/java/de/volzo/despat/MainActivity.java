@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     sb.append(session.getSessionName());
                     sb.append("\n"); //sb.append(" | ");
                     sb.append("running for: ");
-                    sb.append(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime()));
+                    sb.append(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), true));
                     sb.append(" | ");
                     sb.append("images: ");
                     sb.append(session.getImagesTaken());

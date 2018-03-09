@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.StatFs;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -59,30 +60,39 @@ public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
 
-    public static Notification getShutterNotification(Context context, int numberOfCaptures) {
+    public static Notification getShutterNotification(Context context, int numberOfCaptures, String[] additionalInfo) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
-        Notification notification = new Notification.Builder(context.getApplicationContext())
+        Notification.Builder builder =  new Notification.Builder(context.getApplicationContext())
                 .setContentTitle("despat active")
                 .setContentText(numberOfCaptures + " captures")
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentIntent(pendingIntent)
-                .setPriority(Notification.PRIORITY_MAX)
-                .build();
+                .setPriority(Notification.PRIORITY_MAX);
+
+        if (additionalInfo != null) {
+            Notification.InboxStyle style = new Notification.InboxStyle();
+
+            for (String info : additionalInfo) {
+                style.addLine(info);
+            }
+        }
+
+        Notification notification = builder.build();
 
         return notification;
     }
 
-    public static void updateShutterNotification(Context context, int notificationIdentifier, int numberOfCaptures) {
+    public static void updateShutterNotification(Context context, int notificationIdentifier, int numberOfCaptures, String[] additionalInfo) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         StatusBarNotification[] notifications = notificationManager.getActiveNotifications();
         for (StatusBarNotification not : notifications) {
             if (not.getId() == notificationIdentifier) {
                 // only update if already existing
-                notificationManager.notify(notificationIdentifier, getShutterNotification(context, numberOfCaptures));
+                notificationManager.notify(notificationIdentifier, getShutterNotification(context, numberOfCaptures, additionalInfo));
                 return;
             }
         }
@@ -348,7 +358,7 @@ public class Util {
         }
     }
 
-    public static String getHumanReadableTimediff(Date d1, Date d2) {
+    public static String getHumanReadableTimediff(Date d1, Date d2, boolean verbose) {
         long diff = d2.getTime() - d1.getTime();
 
         long diffSeconds = diff / 1000 % 60;
@@ -358,42 +368,47 @@ public class Util {
 
         StringBuilder sb = new StringBuilder();
 
-        if (diffDays > 0) {
-            sb.append((int) diffDays);
-            if (diffDays >= 2) {
-                sb.append(" days ");
-            } else {
-                sb.append(" day ");
+        if (verbose) {
+            if (diffDays > 0) {
+                sb.append((int) diffDays);
+                if (diffDays >= 2) {
+                    sb.append(" days ");
+                } else {
+                    sb.append(" day ");
+                }
             }
-        }
 
-        if (diffHours > 0) {
+            if (diffHours > 0) {
+                sb.append((int) diffHours);
+                if (diffHours >= 2) {
+                    sb.append(" hours ");
+                } else {
+                    sb.append(" hour ");
+                }
+            }
+
+            if (diffMinutes > 0) {
+                sb.append((int) diffMinutes);
+                sb.append("min ");
+            }
+
+            if (diffSeconds > 0) {
+                sb.append((int) diffSeconds);
+                sb.append("s");
+            }
+        } else {
+            if (diffDays > 0) {
+                sb.append((int) diffDays);
+                sb.append("d ");
+            }
+
             sb.append((int) diffHours);
-            if (diffHours >= 2) {
-                sb.append(" hours ");
-            } else {
-                sb.append(" hour ");
-            }
-        }
+            sb.append(":");
 
-        if (diffMinutes > 0) {
             sb.append((int) diffMinutes);
-            sb.append("min ");
-//            if (diffMinutes >= 2) {
-//                sb.append(" minutes ");
-//            } else {
-//                sb.append(" minute ");
-//            }
-        }
+            sb.append(":");
 
-        if (diffSeconds > 0) {
             sb.append((int) diffSeconds);
-            sb.append("s");
-//            if (diffSeconds >= 2) {
-//                sb.append(" seconds");
-//            } else {
-//                sb.append(" second");
-//            }
         }
 
         return sb.toString();

@@ -14,6 +14,7 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.List;
 
 import de.volzo.despat.RecordingSession;
@@ -103,7 +104,9 @@ public class Orchestrator extends BroadcastReceiver {
                         }
                         String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
                         if (path != null) session.addCapture(new File(path));
-                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken());
+
+                        String[] addInfo = new String[] {Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), false)};
+                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), addInfo);
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }

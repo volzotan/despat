@@ -207,8 +207,10 @@ class ConfigListAdapter extends BaseAdapter {
         if (!c.isValueIsBool()) {
             value.setText(c.getValue());
 
+            value.setVisibility(View.VISIBLE);
             checkbox.setVisibility(View.INVISIBLE);
         } else {
+            value.setVisibility(View.INVISIBLE);
             checkbox.setVisibility(View.VISIBLE);
             try {
                 int val = Integer.parseInt(c.getValue());
