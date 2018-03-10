@@ -1,9 +1,9 @@
  include <hinge.scad>
 
 // --- standard
-sizeBot    = [170, 86, 20];
-sizeTop    = [170, 86, 24];
-sizeTopF   = [170, 86, 10];
+//sizeBot    = [170, 86, 20];
+//sizeTop    = [170, 86, 24];
+//sizeTopF   = [170, 86, 10];
 
 // --- oversized
 //sizeBot    = [190, 86+7, 20];
@@ -11,9 +11,9 @@ sizeTopF   = [170, 86, 10];
 //sizeTopF   = [190, 86+7, 10];
 
 // --- oversized - short
-sizeBot    = [167, 86+7, 20];
-sizeTop    = [167, 86+7, 24];
-sizeTopF   = [167, 86+7, 10];
+//sizeBot    = [167, 86+7, 20];
+//sizeTop    = [167, 86+7, 24];
+//sizeTopF   = [167, 86+7, 10];
 
 // --- standard - short
 sizeBot    = [150, 86, 20];
@@ -86,22 +86,22 @@ lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
 
 // --------------------------- TEST2 ---------------------------
 
-bottom();
-//translate([0, sizeTop[1]+20, 0]) top();
-translate([0, sizeTop[1]+20, 0]) top_flat();
-translate([0, 0, 30]) color("grey") seal();
-
-//translate([30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
-//    latch();
-//    translate([0, 14.5, 0]) latch_knob();
-//}
+//bottom();
+////translate([0, sizeTop[1]+20, 0]) top();
+//translate([0, sizeTop[1]+20, 0]) top_flat();
+//translate([0, 0, 30]) color("grey") seal();
 //
-//translate([sizeBot[0]-30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
-//    latch();
-//    translate([0, 14.5, 0]) latch_knob();
-//}
-
-translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
+////translate([30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+////    latch();
+////    translate([0, 14.5, 0]) latch_knob();
+////}
+////
+////translate([sizeBot[0]-30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+////    latch();
+////    translate([0, 14.5, 0]) latch_knob();
+////}
+//
+//translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
 
 // --------------------------- TEST3 ---------------------------
 
@@ -125,7 +125,7 @@ translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) soc
 
 //top();
 //top_flat();
-//bottom();
+bottom();
 //translate([sizeBot[0], 0, 1.3]) rotate([0, 180, 0]) seal();
 //
 //translate([0, 0]) {
@@ -554,23 +554,21 @@ module bottom() {
                 }
             }
             
-            // hinge nut support
+            // hinge nut reinforcement
             intersection() {
                 union() {
-                    // hinge screw reinforcement
                     points_r = [[0, 0], [20, 0], [15, 4.8], [5, 4.8]];
-                    translate([30, sizeBot[1], 1.2]) rotate([0, 0, 180]) linear_extrude(height=sizeBot[2]-seal_thickness/2) polygon(points_r);
-                    translate([0, 0, 0]) rotate([0, 0, 1.2]) linear_extrude(height=sizeBot[2]-seal_thickness/2) polygon(points_r); 
+                    translate([30, sizeBot[1], 1.2]) rotate([0, 0, 180]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r);
+                    translate([0, 0, 1.2]) rotate([0, 0, 0]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r); 
                 }
-            
                 block2(sizeBot[0], sizeBot[1], sizeBot[2], crad=crad);
             }
         }
         
         // camera lens
         translate([lensHole[0], lensHole[1], -1]) {
-            down = 39.4+0.7;
-            up   = 36.9+0.5;
+            down = 39.4+0.5;
+            up   = 36.9+0.3;
             cylinder($fn=64, h=1+3.60+0.3, d=down);
             translate([0, 0, 1+3.60+0.3-0.1]) cylinder($fn=64, h=2, d1=down, d=up);
             translate([0, 0, 6-.3]) cylinder($fn=64, h=2, d=up);
