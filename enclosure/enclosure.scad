@@ -1,55 +1,46 @@
-include <hinge.scad>
+ include <hinge.scad>
 
 // --- standard
-//sizeBot    = [170, 86, 20];
-//sizeTop    = [170, 86, 24];
+sizeBot    = [170, 86, 20];
+sizeTop    = [170, 86, 24];
+sizeTopF   = [170, 86, 10];
 
 // --- oversized
-sizeBot    = [190, 86+7, 20];
-sizeTop    = [190, 86+7, 24];
-sizeTopF   = [190, 86+7, 10];
+//sizeBot    = [190, 86+7, 20];
+//sizeTop    = [190, 86+7, 24];
+//sizeTopF   = [190, 86+7, 10];
+
+// --- oversized - short
+sizeBot    = [167, 86+7, 20];
+sizeTop    = [167, 86+7, 24];
+sizeTopF   = [167, 86+7, 10];
+
+// --- standard - short
+sizeBot    = [150, 86, 20];
+sizeTop    = [150, 86, 24];
+sizeTopF   = [150, 86, 10];
 
 crad       = 6;
 w          = 2.4+.1; //3.2+.1;
 wb         = 1.2;
 
-seal_thickness = 1;
+seal_thickness = 1; // private
+
+seal_hard       = false; 
+seal_rubber     = true;
+seal_flex       = false;
+
+cavity_nexus5   = false;
+cavity_motoE    = true;
+cavity_ZTEAxon  = false;
 
 //lensHole   = [sizeBot[0]-25, 25]; // Nexus 5
-//lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
-lensHole   = [sizeBot[0]-29.5, 47.5]; // ZTE Axon 7
+lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
+//lensHole   = [sizeBot[0]-29.5, 47.5]; // ZTE Axon 7
 
 
-
-//translate([30, 10])
-//translate([0, 0, 30]) zteaxon7();
-//color("grey") zteaxon7_cavity(20);
-
-
-//difference() {
-//    block2(50, 50, 10, crad=5);
-//        translate([0, 0, 1]) block2(50, 50, 10, crad=5, red=1.2);
-//}
-//
-//translate([51, 0]) difference() {
-//    block(50, 50, 10, crad=5);
-//        translate([0, 0, 1]) block(50, 50, 10, crad=5, red=1.2);
-//}
-
-
-
-//
-//translate([0, 10, 08]) zteaxon7();
-//
-//
-//difference(){
-//    union() {
-//        bottom();
-//        translate([0, sizeTop[1], 44+0.1]) rotate([180, 0, 0]) top();
-////        translate([0, 0, 20.1]) seal();
-//    }
-//    translate([-1, -1, -1]) cube([35, 100, 100]);
-//}
+//translate([11, 11, 8]) motoE();
+//translate([07, 9.5, 8]) color("blue") zteaxon7();
 
 //translate([50, 220+80, 0]) rotate([0, -90, 180]) scale([0.5, 0.5, 0.5]) {
 //    translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket();
@@ -96,33 +87,34 @@ lensHole   = [sizeBot[0]-29.5, 47.5]; // ZTE Axon 7
 // --------------------------- TEST2 ---------------------------
 
 bottom();
-translate([0, sizeTop[1]+20, 0]) top();
+//translate([0, sizeTop[1]+20, 0]) top();
+translate([0, sizeTop[1]+20, 0]) top_flat();
 translate([0, 0, 30]) color("grey") seal();
 
-translate([30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
-    latch();
-    translate([0, 14.5, 0]) latch_knob();
-}
-
-translate([sizeBot[0]-30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
-    latch();
-    translate([0, 14.5, 0]) latch_knob();
-}
+//translate([30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+//    latch();
+//    translate([0, 14.5, 0]) latch_knob();
+//}
+//
+//translate([sizeBot[0]-30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+//    latch();
+//    translate([0, 14.5, 0]) latch_knob();
+//}
 
 translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
 
 // --------------------------- TEST3 ---------------------------
 
 //bottom();
-//translate([0, sizeTop[1], sizeBot[2] + sizeTopF[2] + 0.2]) rotate([180, 0, 0]) top_flat();
+//translate([sizeTop[0], 0, sizeBot[2] + sizeTopF[2] + 0.2]) rotate([180, 0, 180]) top_flat();
 //translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
 //
-//translate([30, 0.1, 12+13.2]) rotate([90, 180, 0]) color("purple") {
+//translate([20, sizeBot[1]+0.1, 12+13.2]) rotate([90, 180, 180]) color("purple") {
 //    latch(distance=-1.3);
 //    translate([0, 14.5-1.3, 0]) latch_knob();
 //}
 //
-//translate([sizeBot[0]-30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
+//translate([sizeBot[0]-20, sizeBot[1]+0.1, 12+13.2]) rotate([90, 180, 180]) color("purple") {
 //    latch(distance=-1.3);
 //    translate([0, 14.5-1.3, 0]) latch_knob();
 //}
@@ -132,9 +124,10 @@ translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) soc
 // --------------------------- PRINT ---------------------------
 
 //top();
+//top_flat();
 //bottom();
 //translate([sizeBot[0], 0, 1.3]) rotate([0, 180, 0]) seal();
-
+//
 //translate([0, 0]) {
 //    latch(); translate([0, 14.5, 0]) latch_knob();
 //}
@@ -142,7 +135,7 @@ translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) soc
 //    latch(); translate([0, 14.5, 0]) latch_knob();
 //}
 //translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
-
+//
 //translate([20+18.2, sizeBot[1]+5.5, 0]) rotate([90, 0, 0]) hinge_bottom(screwed=true);
 
 // ----------------------- add. elements -----------------------
@@ -321,8 +314,8 @@ module top_flat() {
                 union() { 
                     // hinge screw reinforcement
                     points_r = [[0, 0], [20, 0], [15, 4.8], [5, 4.8]];
-                    translate([40, sizeTopF[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTopF[2]-seal_thickness/2) polygon(points_r);
-                    translate([sizeTopF[0]+20-40, sizeTopF[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTopF[2]-seal_thickness/2) polygon(points_r);
+                    translate([30, sizeTopF[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTopF[2]-seal_thickness/2) polygon(points_r);
+                    translate([sizeTopF[0]+20-30, sizeTopF[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTopF[2]-seal_thickness/2) polygon(points_r);
                 }
                 
                 // outer hull
@@ -334,23 +327,32 @@ module top_flat() {
             }
         }
         
-        // clamp holes
-        translate([30, sizeTopF[1]+5, 5])             rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([sizeTopF[0]-30, sizeTopF[1]+5, 5])  rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([30, sizeTopF[1]-2, 5])             rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
-        translate([sizeTopF[0]-30, sizeTopF[1]-2, 5])  rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        // rotation clamp holes
+        translate([20, sizeTopF[1]+5, 5])               rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
+        translate([sizeTopF[0]-20, sizeTopF[1]+5, 5])   rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
+        translate([20, sizeTopF[1]-2, 5])               rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        translate([sizeTopF[0]-20, sizeTopF[1]-2, 5])   rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
     }
     
     // hinges
     intersection() {
         union() {
             move = 0.1;
-            translate([+20+18.2, -5.5, sizeTopF[2]+move])            rotate([0, -90, 0]) hinge_top();
-            translate([-20+sizeTopF[0]-2, -5.5, sizeTopF[2]+move])   rotate([0, -90, 0]) hinge_top();
-            translate([23.3, 0]) cube([13.6, 2, 2]);
-            translate([sizeTopF[0]-23.3-13.6, 0]) cube([13.6, 2, 2]);
+            translate([31, -5.5, sizeTopF[2]+move])             rotate([0, -90, 0]) hinge_top();
+            translate([sizeTopF[0]-15, -5.5, sizeTopF[2]+move]) rotate([0, -90, 0]) hinge_top();
+            translate([16, 0]) cube([13.6, 2, 2]);
+            translate([sizeTopF[0]-30, 0]) cube([13.6, 2, 2]);
         }
         translate([-100, -100]) cube([500, 500, 100]);
+    }
+    
+    translate([18-5, sizeTopF[1]-2, 0]) hull() {
+        translate([2, 0, 0]) cube([14-4, 2, 1]);
+        translate([0, 0, 2]) cube([14, 2, 1]);
+    }    
+    translate([sizeTopF[0]-14-18+5, sizeTopF[1]-2, 0]) hull() {
+        translate([2, 0, 0]) cube([14-4, 2, 1]);
+        translate([0, 0, 2]) cube([14, 2, 1]);
     }
 }
 
@@ -530,7 +532,9 @@ module bottom() {
                     translate([20, w, 0]) cube([sizeBot[0]-20, sizeBot[1]-2*w, 20]); //20-1]);
                     
                     // CAVITY
-                    translate([30, 10, 7]) color("red") zteaxon7_cavity(20); 
+                    if (cavity_nexus5)  translate([30, 10, 7]) color("red") nexus5_cavity(20); 
+                    if (cavity_motoE)   translate([sizeBot[0]-141, 10, 7]) color("red") motoE_cavity(20); 
+                    if (cavity_ZTEAxon) translate([sizeBot[0]-160.25, 10, 7]) color("red") zteaxon7_cavity(20); 
                     
                     points = [[0, 0], [sizeBot[1], 0], [sizeBot[1], 20], [sizeBot[1]-20, 30], [20, 30], [0, 20]];
                     translate([0, sizeBot[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
@@ -551,7 +555,16 @@ module bottom() {
             }
             
             // hinge nut support
-            translate([12, sizeBot[1]-4.8, 1.2]) cube([12, 4.8, 16]);
+            intersection() {
+                union() {
+                    // hinge screw reinforcement
+                    points_r = [[0, 0], [20, 0], [15, 4.8], [5, 4.8]];
+                    translate([30, sizeBot[1], 1.2]) rotate([0, 0, 180]) linear_extrude(height=sizeBot[2]-seal_thickness/2) polygon(points_r);
+                    translate([0, 0, 0]) rotate([0, 0, 1.2]) linear_extrude(height=sizeBot[2]-seal_thickness/2) polygon(points_r); 
+                }
+            
+                block2(sizeBot[0], sizeBot[1], sizeBot[2], crad=crad);
+            }
         }
         
         // camera lens
@@ -574,23 +587,23 @@ module bottom() {
             translate([+14, 0, 0]) cylinder($fn=6, h=50, d=9.6);
         }
         
-        // clamp holes
-        translate([30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([sizeBot[0]-30, 5, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([30, 50+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
-        translate([sizeBot[0]-30, 50+2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        // rotation clamp holes
+        translate([20, sizeBot[1]+10, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
+        translate([sizeBot[0]-20, sizeBot[1]+10, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
+        translate([20, sizeBot[1]-2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        translate([sizeBot[0]-20, sizeBot[1]-2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
         
         // hinge holes
         hinge_hole_height = 11.5;
-        translate([17.2, sizeBot[1]+1, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
-        translate([17.2, sizeBot[1]-3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=50);
-        translate([43.2, sizeBot[1]+1, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
-        translate([43.2, sizeBot[1]-3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=50);
+        translate([10, 20, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
+        translate([10, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
+        translate([10+26, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
+        translate([10+26, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
         
-        translate([sizeBot[0]-43, sizeBot[1]+1, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
-        translate([sizeBot[0]-43, sizeBot[1]-3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=50);
-        translate([sizeBot[0]-17, sizeBot[1]+1, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
-        translate([sizeBot[0]-17, sizeBot[1]-3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=50);
+        translate([sizeBot[0]-10, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
+        translate([sizeBot[0]-10, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
+        translate([sizeBot[0]-10-26, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
+        translate([sizeBot[0]-10-26, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
         
 //        // seal
 //        translate([0, 0, sizeBot[2]-2.5]) color("red") difference() {
@@ -636,8 +649,8 @@ module bottom() {
     }
     
     // hinges
-    % translate([20+18.2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) color("purple") hinge_bottom(screwed=true);
-    % translate([-20+sizeBot[0]-2, sizeBot[1]+5.5, 20]) rotate([0, 90, 180]) color("purple") hinge_bottom(screwed=true);
+    % translate([9+06, -5.5-0.1, 20]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=true);
+    % translate([sizeBot[0]-25-06, -5.5-0.1, 20]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=true);
     
     // nuts
     % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
@@ -723,7 +736,7 @@ module block(width, depth, height, crad=3, red=0) {
 module block2(width, depth, height, crad=3, red=0) {
     
     // pythagorean theorem
-    redp = sqrt((red*red)/2);
+    redp = sqrt(red*red + red*red) - red;
     
     points = [  [0+red, crad+redp], [crad+redp, 0+red],
                 [width-crad-redp, 0+red], [width-red, crad+redp],
@@ -737,7 +750,7 @@ module block2(width, depth, height, crad=3, red=0) {
 
 module motoE() {
     //cube([154, 75, 10]); // Moto Z
-    block(130, 67, 12.3, crad=10);
+    block(130, 67, 12.5, crad=10);
     color("grey") {
         translate([65, -0.5, 7]) cube([17, 2, 1.5]);
         translate([65+17+10, -1, 7]) cube([9, 2, 1.5]);
@@ -751,18 +764,21 @@ module nexus5() {
 
 module motoE_cavity(height) {
     difference() {
-        translate([-10, 0]) block(143, 67, height, crad=5);
+        translate([-10, 0]) block(143, 67.75, height, crad=8);
 //        points_cav = [[0, 0], [-2, height+0.2], [2, height+0.2], [2, 0]];
 //        translate([-12, 68-.1, -.1]) rotate([90, 0, 90]) linear_extrude(height=200) polygon(points_cav);
+        
+        translate([-10, 67.75-1.5, 12.5]) rotate([0, 90, 0]) linear_extrude(height=130+15) polygon([[0, 0], [4, 1.5], [0, 1.5]]);
     }
     
-    
-    translate([64, -4.9, 0])cube([42, 5, height]);
-//    translate([82, 65, 0])cube([26, 5, height]);
+    // buttons
+    translate([65, -3.9, 0]) linear_extrude(height=height) polygon([[3, 1], [41-12, 1], [41-11, 0], [41, 0], [41, 4], [0, 4]]);//cube([41, 5, height]);
     
     // wedge
-    translate([40, 61+5.5+3, 0]) cube([40, 2, height]);
-    translate([40+2, 61+5.5, 0]) cube([36, 5, height]);
+    translate([32, -5, 0]) cube([30.5, 2.3, height]);
+    translate([32+2, -5, 0]) cube([26.5, 6, height]);   
+    
+    translate([84, 37, -0.3]) rotate([0, 0, 180]) linear_extrude(height=10) color("DarkRed" ) text("MOTO E");
 }
 
 module nexus5_cavity(height) {
@@ -826,8 +842,8 @@ module zteaxon7_cavity(height) {
     translate([75, -4, 0])cube([48, 5, height]);
     
     // wedge
-    translate([30, -5, 0]) cube([40, 2, height]);
-    translate([30+2, -5, 0]) cube([36, 5, height]);
+    translate([35, -5, 0]) cube([30.5, 2.3, height]);
+    translate([35+2, -5, 0]) cube([26.5, 6, height]);   
 }
 
 // Phone Moto E Measurement
