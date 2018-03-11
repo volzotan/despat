@@ -102,12 +102,14 @@ lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
 ////}
 //
 //translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
+//
+//translate([41, 05, 30]) wedge();
 
 // --------------------------- TEST3 ---------------------------
 
 //bottom();
 //translate([sizeTop[0], 0, sizeBot[2] + sizeTopF[2] + 0.2]) rotate([180, 0, 180]) top_flat();
-//translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
+////translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
 //
 //translate([20, sizeBot[1]+0.1, 12+13.2]) rotate([90, 180, 180]) color("purple") {
 //    latch(distance=-1.3);
@@ -125,18 +127,22 @@ lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
 
 //top();
 //top_flat();
-bottom();
-//translate([sizeBot[0], 0, 1.3]) rotate([0, 180, 0]) seal();
+//bottom();
+translate([0, 0, 1.3]) rotate([0, 0, 0]) seal_cutout();
 //
 //translate([0, 0]) {
-//    latch(); translate([0, 14.5, 0]) latch_knob();
+//    latch(distance=-1); 
+////    translate([0, 14.5, 0]) latch_knob();
 //}
 //translate([13, 0]){
-//    latch(); translate([0, 14.5, 0]) latch_knob();
+//    latch(distance=-1); 
+////    translate([0, 14.5, 0]) latch_knob();
 //}
 //translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
 //
 //translate([20+18.2, sizeBot[1]+5.5, 0]) rotate([90, 0, 0]) hinge_bottom(screwed=true);
+
+//translate([20, 0, 0.3+12.5]) rotate([180, 0]) wedge();
 
 // ----------------------- add. elements -----------------------
 
@@ -209,14 +215,21 @@ module latch(distance=0) {
 }
 
 module wedge() {
-    tol = 0.3;
+    tol = 0.25;
     height = 12.5;
     
-    translate([tol, 0.1+tol, tol]) cube([40-tol*2, 1.7-tol*2, height]);
-    translate([2+tol, 2-tol*2-0.2, tol]) cube([36-tol*2, 2-tol*2+0.1, height]);
-    
-    points = [[0, 0], [1, 0], [1, height], [-1.3, height]];
-    translate([38-tol, 2.9, tol]) rotate([90, 0, -90]) linear_extrude(height=36-tol*2) polygon(points); 
+    difference() {
+        union() {
+        translate([tol, 0.1+tol, tol]) cube([30.5-tol*2, 2.2-tol*2, height]);
+        translate([2+tol, 2-tol*2-0.2, tol]) cube([26.5-tol*2, 2-tol*2+0.1, height]);
+        
+        points = [[-2, 0], [1, 0], [1, height], [-1.3-2.5, height]];
+        translate([28.5-tol, 2.9, tol]) rotate([90, 0, -90]) linear_extrude(height=26.5-tol*2) polygon(points); 
+        }
+        
+        translate([(30.5-10)/2, 4.5, .75-0.8]) cube([10, 10, 12]);
+        translate([0, 0, height+tol]) rotate([-90, 0, -90]) linear_extrude(height=30.5) polygon([[-1-tol, 0], [0, 0], [0, 1+tol]]);
+    }
 }
 
 module socket_normal() {
@@ -269,6 +282,39 @@ module seal() {
         block2(sizeBot[0], sizeBot[1], height, crad=crad);    
         translate([0, 0, -1]) block2(sizeBot[0], sizeBot[1], height+2, crad=crad, red=4.5);  
     }     
+}
+
+module seal_cutout() {
+    height = 1;
+    offset1 = 7.9;
+    offset2 = 4.6;
+    
+    difference() { 
+        union() {
+            color("red") translate([0, 0]) linear_extrude(height=1) polygon([
+                [offset1, offset2], [sizeBot[0]-offset1, offset2], 
+                [sizeBot[0]-offset2, offset1], [sizeBot[0]-offset2, sizeBot[1]-offset1],
+                [sizeBot[0]-offset1, sizeBot[1]-offset2], [offset1, sizeBot[1]-offset2], 
+                [offset2, sizeBot[1]-offset1], [offset2, offset1]
+            ]);
+             
+            translate([0, 0, 0]) block2(sizeBot[0], sizeBot[1], 3, crad=crad, red=6.5);  
+        }
+    
+        translate([0, 0, -1]) block2(sizeBot[0], sizeBot[1], 10, crad=crad, red=9);  
+    }
+    
+    translate([sizeBot[0]/5*1, 6.5]) cube([2, sizeBot[1]-6.5*2, 3]);
+    translate([sizeBot[0]/5*2, 6.5]) cube([2, sizeBot[1]-6.5*2, 3]);
+    translate([sizeBot[0]/5*3, 6.5]) cube([2, sizeBot[1]-6.5*2, 3]);
+    translate([sizeBot[0]/5*4, 6.5]) cube([2, sizeBot[1]-6.5*2, 3]);
+    
+    translate([6.5, sizeBot[1]/2-2/2]) cube([sizeBot[0]-6.5*2, 2, 3]);
+    
+//    difference() {
+//        block2(sizeBot[0], sizeBot[1], height, crad=crad);    
+//        translate([0, 0, -1]) block2(sizeBot[0], sizeBot[1], height+2, crad=crad, red=4.5);  
+//    }     
 }
 
 
