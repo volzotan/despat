@@ -132,8 +132,11 @@ public class ImageRollover {
 
         float freeSpace = Util.getFreeSpaceOnDevice(dir);
         if (freeSpace > Config.IMGROLL_FREE_SPACE_THRESHOLD) {
-            Log.d(TAG, "rollover: no deletions necessary. free space: "+ freeSpace);
+            Log.d(TAG, "rollover: no deletions necessary. free space: " + freeSpace);
             return;
+        } else {
+            float diff = Config.IMGROLL_FREE_SPACE_THRESHOLD - freeSpace;
+            Log.d(TAG, "deletion needed. difference: " + diff);
         }
 
         File[] filesInDir = dir.listFiles();
@@ -182,7 +185,10 @@ public class ImageRollover {
 
             deleteCounter++;
 
-            f.delete();
+            boolean success = f.delete();
+            if (!success) {
+                Log.d(TAG, "unknown problem deleting file");
+            }
         }
 
         Log.i(TAG, "deleted " + deleteCounter + " images");
