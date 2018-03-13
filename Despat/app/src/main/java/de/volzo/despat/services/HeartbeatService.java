@@ -44,7 +44,7 @@ public class HeartbeatService extends JobService {
 
         status.setTimestamp(Calendar.getInstance().getTime());
         status.setNumberImagesInMemory(imgroll.getNumberOfSavedImages()); // TODO: only JPEGs
-        status.setFreeSpaceInternal(Util.getFreeSpaceOnDevice(Config.getImageFolder(this)));
+        status.setFreeSpaceInternal(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(this)));
         status.setFreeSpaceExternal(-1); // TODO
         status.setBatteryInternal(systemController.getBatteryLevel());
         status.setBatteryExternal(-1); // TODO

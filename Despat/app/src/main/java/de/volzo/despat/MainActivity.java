@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 sendBroadcast(killIntent);
 
                 Util.purgeDatabase(activity);
+                Config.reset(activity);
 
                 Log.i(TAG, "KILL: db purged. now attempting reboot!");
 

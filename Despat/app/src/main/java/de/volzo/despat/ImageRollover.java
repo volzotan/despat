@@ -5,10 +5,12 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 
+import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Config;
 import de.volzo.despat.support.Util;
 
@@ -20,10 +22,13 @@ public class ImageRollover {
 
     public static String TAG = ImageRollover.class.getSimpleName();
 
+    private Context context;
+
     private File dir;
     private String fileextension;
 
     public ImageRollover(Context context, String suffix) {
+        this.context = context;
         this.dir = Config.getImageFolder(context);
 
         if (suffix == null) suffix = ".jpg";
@@ -130,13 +135,17 @@ public class ImageRollover {
 
         Log.d(TAG, "imageRollover running");
 
-        float freeSpace = Util.getFreeSpaceOnDevice(dir);
-        if (freeSpace > Config.IMGROLL_FREE_SPACE_THRESHOLD) {
-            Log.d(TAG, "rollover: no deletions necessary. free space: " + freeSpace);
+        long freeSpace = Util.getFreeSpaceOnDevice(dir);
+        long diff = ((long) Config.IMGROLL_FREE_SPACE_THRESHOLD) * 1024 * 1024 - freeSpace;
+
+        float freeSpaceMB = freeSpace / (1024.f * 1024.f);
+        float diffMB = diff / (1024.f * 1024.f);
+
+        if (diff < 0) {
+            Log.d(TAG, String.format("rollover: no deletions necessary. free space: %.2f MB | difference: %.2f MB", freeSpaceMB, diffMB));
             return;
         } else {
-            float diff = Config.IMGROLL_FREE_SPACE_THRESHOLD - freeSpace;
-            Log.d(TAG, "deletion needed. difference: " + diff);
+            Log.d(TAG, String.format("deletion needed. free space: %.2f | difference: %.2f MB", freeSpaceMB, diffMB));
         }
 
         File[] filesInDir = dir.listFiles();
@@ -175,8 +184,10 @@ public class ImageRollover {
         }
 
         int deleteCounter = 0;
+        long deletedBytes = 0;
         for (File f : imageFiles) {
-            if (Util.getFreeSpaceOnDevice(dir) > Config.IMGROLL_FREE_SPACE_THRESHOLD) {
+            if (deletedBytes >= diff) {
+            //if (Util.getFreeSpaceOnDevice(dir) > Config.IMGROLL_FREE_SPACE_THRESHOLD) {
                 Log.d(TAG, "rollover: deletions finished");
                 break;
             }
@@ -184,14 +195,23 @@ public class ImageRollover {
             Log.d(TAG, "delete: " + f.getName());
 
             deleteCounter++;
+            deletedBytes += f.length();
 
-            boolean success = f.delete();
-            if (!success) {
-                Log.d(TAG, "unknown problem deleting file");
+            try {
+                boolean success = f.getCanonicalFile().delete();
+                if (!success) {
+                    Log.d(TAG, "unknown problem deleting file");
+                }
+            } catch (IOException e) {
+                Log.d(TAG, "problem deleting file", e);
             }
         }
 
-        Log.i(TAG, "deleted " + deleteCounter + " images");
+        Log.i(TAG, String.format("deleted %d images (%d bytes)", deleteCounter, deletedBytes));
+
+        if (deleteCounter > 3) {
+            Util.saveEvent(context, Event.EventType.INFO, "deleted images: " + deleteCounter);
+        }
     }
 
     public int getNumberOfSavedImages() {

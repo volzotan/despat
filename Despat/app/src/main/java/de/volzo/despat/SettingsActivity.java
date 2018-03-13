@@ -78,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
         configItems.add(ci3);
 
         configItems.add(new ConfigItem(null, "unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
-        configItems.add(new ConfigItem(null, "free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDevice(Config.getImageFolder(activity)))) + " MB", false));
+        configItems.add(new ConfigItem(null, "free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity)))) + " MB", false));
         configItems.add(new ConfigItem(null, "free space SD-card", "free space available on the SD-card", "unavailable", false));
         configItems.add(new ConfigItem(null, "battery internal", "", Integer.toString(Math.round(systemController.getBatteryLevel())) + "%", false));
         configItems.add(new ConfigItem(null, "battery external", "", "unavailable", false));

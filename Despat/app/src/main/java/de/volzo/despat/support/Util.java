@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -132,12 +133,13 @@ public class Util {
         return false;
     }
 
-    public static float getFreeSpaceOnDevice(File dir) {
-        StatFs stat = new StatFs(dir.getPath());
-        long bytesAvailable = 0;
-        bytesAvailable = (long) stat.getBlockSizeLong() * (long) stat.getAvailableBlocksLong();
+    public static long getFreeSpaceOnDevice(File dir) {
+        return (new StatFs(dir.getPath())).getAvailableBytes();
+    }
 
-        return bytesAvailable / (1024.f * 1024.f);
+
+    public static float getFreeSpaceOnDeviceInMb(File dir) {
+        return getFreeSpaceOnDevice(dir) / (1024f * 1024f);
     }
 
     public static void saveEvent(Context context, int type, String payload) {
