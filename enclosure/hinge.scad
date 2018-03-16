@@ -17,7 +17,7 @@ module hinge_bottom(screwed=false) {
     
     red         = 0.0;
     
-    z_offset    = 0.75;
+    z_offset    = 0.5;
     
     difference() { 
         union() {
