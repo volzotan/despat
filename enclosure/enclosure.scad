@@ -26,19 +26,28 @@ wb         = 1.2;
 
 seal_thickness = 1; // private
 
+screw_inset     = false;
+heat_inset      = true;
+
 seal_hard       = false; 
 seal_rubber     = true;
 seal_flex       = false;
 
 cavity_nexus5   = false;
-cavity_motoE    = false;
 cavity_ZTEAxon  = false;
+cavity_motoE    = false;
 cavity_motoZ    = true;
 
 //lensHole   = [sizeBot[0]-25, 25]; // Nexus 5
-//lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
 //lensHole   = [sizeBot[0]-29.5, 47.5]; // ZTE Axon 7
+//lensHole   = [sizeBot[0]-30, sizeBot[1]/2]; // Moto E
 lensHole   = [sizeBot[0]-29, sizeBot[1]/2]; // MotoZ
+
+// LG Nexus 5   ->
+// ZTE Axon 7   ->
+// Moto E       -> 
+// Moto Z       -> oversized-short
+
 
 
 //translate([11, 11, 8]) motoE();
@@ -132,7 +141,7 @@ lensHole   = [sizeBot[0]-29, sizeBot[1]/2]; // MotoZ
 ////}
 //
 //translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
-
+//
 //translate([41, 05, 30]) wedge();
 
 // --------------------------- TEST3 ---------------------------
@@ -156,8 +165,8 @@ lensHole   = [sizeBot[0]-29, sizeBot[1]/2]; // MotoZ
 // --------------------------- PRINT ---------------------------
 
 //top();
-top_flat();
-//bottom();
+//top_flat();
+bottom();
 //
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal();
 //seal2D();
@@ -173,8 +182,8 @@ top_flat();
 //}
 //translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
 //
-//translate([33, 20, 5.5]) rotate([90, 180, 0]) hinge_bottom(screwed=true);
-//translate([33, 55, 5.5]) rotate([90, 180, 0]) hinge_bottom(screwed=true);
+//translate([33, 20, 5.5]) rotate([90, 180, 0]) mirror([0, 0]) hinge_bottom(screwed=true);
+//translate([33, 55, 5.5]) rotate([90, 180, 0]) mirror([1, 0]) hinge_bottom(screwed=true);
 //
 //translate([20, 0, 0.3+12.5]) rotate([180, 0]) wedge();
 
@@ -195,8 +204,6 @@ top_flat();
 //}
 
 // ------------------------------------------------------------
-
-//hex();
 
 module hex(size) {
     d=50;
@@ -425,7 +432,7 @@ module top_flat() {
             block2(sizeTopF[0], sizeTopF[1], 1.1, crad=crad);
         }
         
-        translate([-0, sizeTopF[1]/2]) hex();
+        translate([6, sizeTopF[1]/2]) hex();
     }
     
     difference() {
@@ -708,13 +715,22 @@ module bottom() {
             }
             
             // hinge nut reinforcement
-            intersection() {
-                union() {
-                    points_r = [[0, 0], [20, 0], [15, 4.8], [5, 4.8]];
-                    translate([30, sizeBot[1], 1.2]) rotate([0, 0, 180]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r);
-                    translate([0, 0, 1.2]) rotate([0, 0, 0]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r); 
-                }
-                block2(sizeBot[0], sizeBot[1], sizeBot[2], crad=crad);
+//            intersection() {
+//                union() {
+//                    points_r = [[0, 0], [20, 0], [15, 6.6], [5, 6.6]];
+//                    translate([30, sizeBot[1], 1.2]) rotate([0, 0, 180]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r);
+//                    translate([0, 0, 1.2]) rotate([0, 0, 0]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r); 
+//                }
+//                block2(sizeBot[0], sizeBot[1], sizeBot[2], crad=crad);
+//            }
+            
+            // tripod screw holder
+            translate([sizeBot[0]/2-34/2, sizeBot[1]-1]) hull() {
+                points_h = [[0, 0], [2+1, 3+1], [34-(2+1), 3+1], [34, 0]];
+                rotate([]) linear_extrude(height=18) polygon(points_h);
+                
+                a=1.5;
+                translate([a/2, 1, 18+2-seal_thickness/2-.1]) cube([34-a, 0.1, 0.1]);
             }
         }
         
@@ -729,32 +745,46 @@ module bottom() {
         }
         
         // socket screw holes
-        translate([sizeBot[0]/2, sizeBot[1]+5, 11.5]) rotate([90, 0, 0]) {
-            translate([-14, 0, 0]) cylinder($fn=32, h=50, d=5.3);
-            translate([+14, 0, 0]) cylinder($fn=32, h=50, d=5.3);
+//        translate([sizeBot[0]/2, sizeBot[1]+5, 11.5]) rotate([90, 0, 0]) {
+//            translate([-14, 0, 0]) cylinder($fn=32, h=50, d=5.3);
+//            translate([+14, 0, 0]) cylinder($fn=32, h=50, d=5.3);
+//        }
+//        translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
+//            translate([-14, 0, 0]) cylinder($fn=6, h=50, d=9.6);
+//            translate([+14, 0, 0]) cylinder($fn=6, h=50, d=9.6);
+//        }
+        
+        // tripod socket holes
+        translate([sizeBot[0]/2, sizeBot[1]-2-1.3, -1]) rotate([0, 90, 90]) hull() {
+            depth = 4.7+0.3;
+            cylinder($fn=6, h=depth, d=13.2); 
+            translate([-9, 0]) cylinder($fn=6, h=depth, d=13.2); 
         }
-        translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
-            translate([-14, 0, 0]) cylinder($fn=6, h=50, d=9.6);
-            translate([+14, 0, 0]) cylinder($fn=6, h=50, d=9.6);
-        }
+        translate([sizeBot[0]/2, sizeBot[1]-3.3-1, 9]) rotate([0, 90, 90]) cylinder($fn=32, h=10, d=7);
         
         // rotation clamp holes
-        translate([20, sizeBot[1]+10, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([sizeBot[0]-20, sizeBot[1]+10, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([20, sizeBot[1]-2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
-        translate([sizeBot[0]-20, sizeBot[1]-2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        if (screw_inset) {
+            translate([20, sizeBot[1]+10, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
+            translate([20, sizeBot[1]-2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+            translate([sizeBot[0]-20, sizeBot[1]+10, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
+            translate([sizeBot[0]-20, sizeBot[1]-2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        }
+        if (heat_inset) {
+            translate([20, sizeBot[1]+.1, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=5.5, d=5.5); // ?       
+            translate([sizeBot[0]-20, sizeBot[1]+.1, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=5.5, d=5.5); // ?
+        }
         
         // hinge holes
-        hinge_hole_height = 11.5;
-        translate([10, 20, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
-        translate([10, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
-        translate([10+26, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
-        translate([10+26, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
-        
-        translate([sizeBot[0]-10, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
-        translate([sizeBot[0]-10, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
-        translate([sizeBot[0]-10-26, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
-        translate([sizeBot[0]-10-26, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
+//        hinge_hole_height = 11.5;
+//        translate([10, 20, 11.5]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
+//        translate([10, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
+//        translate([10+26, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
+//        translate([10+26, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
+//        
+//        translate([sizeBot[0]-10, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
+//        translate([sizeBot[0]-10, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
+//        translate([sizeBot[0]-10-26, 20, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=32, d=3.3, h=50);
+//        translate([sizeBot[0]-10-26, 15+3.5, hinge_hole_height]) rotate([90, 0, 0]) cylinder($fn=6, d=6.6, h=15);
         
 //        // seal
 //        translate([0, 0, sizeBot[2]-2.5]) color("red") difference() {
@@ -800,8 +830,8 @@ module bottom() {
     }
     
     // hinges
-    % translate([9+06, -5.5-0.1, 20]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=true);
-    % translate([sizeBot[0]-25-06, -5.5-0.1, 20]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=true);
+    % translate([9+06, -5.5-0.1, 20]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=false);
+    % translate([sizeBot[0]-25-06, -5.5-0.1, 20]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=false);
     
     // nuts
     % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
