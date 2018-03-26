@@ -23,8 +23,11 @@ public abstract class CameraController {
     public CameraController.ControllerCallback callback;
 
     public abstract void openCamera() throws Exception;
-    public abstract void captureImages() throws IllegalAccessException;
     public abstract void closeCamera();
+
+    public abstract void startMetering() throws IllegalAccessException;
+    public abstract void captureImages() throws IllegalAccessException;
+
     public abstract boolean isDead();
 
     protected void cameraFailed(String message, Object o) {
@@ -61,6 +64,8 @@ public abstract class CameraController {
     public abstract static class ControllerCallback {
 
         public void cameraOpened() {}
+        public void cameraReady(CameraController camera) {}
+        public void cameraFocused(CameraController camera, boolean afSuccessful) {}
         public void cameraClosed() {}
         public void cameraFailed(String message, Object error) {}
 

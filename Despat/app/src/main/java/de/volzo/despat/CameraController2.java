@@ -79,6 +79,8 @@ public class CameraController2 extends CameraController {
     private TextureView textureView;
     private CameraController.ControllerCallback controllerCallback;
 
+    private final CameraController controller = this;
+
     private CameraManager cameraManager;
     private CameraCharacteristics characteristics;
 
@@ -320,13 +322,9 @@ public class CameraController2 extends CameraController {
                         } catch (CameraAccessException e) {
                             e.printStackTrace();
                         }
-                    } else {
-                        try {
-                            captureImages();
-                        } catch (IllegalAccessException e) {
-                            Log.e(TAG, "capture failed: ", e);
-                        }
                     }
+
+                    if (controllerCallback != null) controllerCallback.cameraReady(controller);
                 }
 
                 @Override
@@ -441,7 +439,7 @@ public class CameraController2 extends CameraController {
                     if (readyToCapture) {
                         Log.d(TAG, "metering time: " + meteringTime + "ms");
 
-                        captureStillPicture(!meteringOvertime);
+                        if (controllerCallback != null) controllerCallback.cameraFocused(controller, !meteringOvertime);
 
                         // After this, the camera will go back to the normal state of preview.
                         state = STATE_PREVIEW;
@@ -466,22 +464,13 @@ public class CameraController2 extends CameraController {
 
     };
 
-    public void captureImages() throws IllegalAccessException {
+    public void startMetering() throws IllegalAccessException {
+        Log.d(TAG, "# startMetering");
+
         if (cameraDevice == null) {
-            Log.e(TAG, "camera device missing. trying to reopen");
-            try {
-                openCamera();
-            } catch (Exception e) {
-                Log.e(TAG, "reopening failed", e);
-                throw new IllegalAccessException("camera was closed and reopening failed");
-            }
+            Log.e(TAG, "camera device missing");
+            throw new IllegalAccessException("camera was closed and reopening failed");
         }
-
-        lockFocus();
-    }
-
-    private void lockFocus() {
-        Log.d(TAG, "# lockFocus");
 
         try {
             if (!noAF) {
@@ -507,6 +496,15 @@ public class CameraController2 extends CameraController {
         }
     }
 
+    public void captureImages() throws IllegalAccessException {
+        if (cameraDevice == null) {
+            Log.e(TAG, "camera device missing");
+            throw new IllegalAccessException("camera was closed and reopening failed");
+        }
+
+        captureStillPicture(false);
+    }
+
     private void captureStillPicture(boolean meteringSuccessful) {
         try {
             if (null == cameraDevice) {
@@ -518,9 +516,10 @@ public class CameraController2 extends CameraController {
 
             // Use the same AE and AF modes as the preview.
             // TODO: does this really make sense?
-            stillRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            // stillRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
             // stop AF/AE measurements
+            // TODO: check if that needs to be done/makes a difference if no lockFocus call happened
             captureSession.stopRepeating();
             captureSession.abortCaptures();
 
@@ -596,11 +595,10 @@ public class CameraController2 extends CameraController {
                         // Caveat: image may not yet be written to disk at this point
                         // just because the broadcast is send, the image may not yet be available
 
+                        // TODO: move broadcast code to controllerCallback
                         sendBroadcast(context, filename);
 
                         if (controllerCallback != null) controllerCallback.finalImageTaken();
-
-                        unlockFocus();
                     }
                 }
 

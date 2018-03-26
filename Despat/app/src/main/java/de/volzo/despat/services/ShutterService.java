@@ -53,6 +53,8 @@ public class ShutterService extends Service {
     Context context;
     Handler handler;
 
+    CameraController camera;
+
     public ShutterService() {}
 
     @Override
@@ -90,6 +92,17 @@ public class ShutterService extends Service {
         }
     };
 
+    Runnable cameraReleaseRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (camera != null) {
+                releaseShutter();
+            } else {
+                Log.e(TAG, "camera object missing for releasing shutter");
+            }
+        }
+    };
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -104,14 +117,22 @@ public class ShutterService extends Service {
         filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
         registerReceiver(shutterReceiver, filter);
 
-        filter = new IntentFilter();
-        filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
-        filter.addAction("android.intent.action.SCREEN_OFF");
-        filter.addAction("android.intent.action.SCREEN_ON");
-        registerReceiver(powerReceiver, filter);
+        // TODO: somehow receiving these broadcasts as the shutterService
+        // can lead to critical app crashes
+
+//        filter = new IntentFilter();
+//        filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+//        filter.addAction("android.intent.action.SCREEN_OFF");
+//        filter.addAction("android.intent.action.SCREEN_ON");
+//        registerReceiver(powerReceiver, filter);
+
+        if (Config.PERSISTENT_CAMERA) {
+            final Despat despat = Util.getDespat(this);
+            despat.acquireWakeLock(false);
+        }
 
         // start and release shutter
-        releaseShutter();
+        initCamera();
 
         return START_STICKY;
     }
@@ -148,13 +169,10 @@ public class ShutterService extends Service {
         }
     };
 
-    public void releaseShutter() {
+    private void initCamera() {
 
         final Despat despat = Util.getDespat(this);
         SystemController systemController = despat.getSystemController();
-
-        despat.acquireWakeLock();
-        handler.postDelayed(cameraKillRunnable, Config.SHUTTER_CAMERA_MAX_LIFETIME);
 
         RecordingSession session = RecordingSession.getInstance(this);
         Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + session.getImagesTaken());
@@ -164,11 +182,35 @@ public class ShutterService extends Service {
         ImageRollover imgroll = new ImageRollover(despat, null);
         imgroll.run();
 
-        CameraController camera = despat.getCamera();
+        camera = despat.getCamera();
 
         CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
             @Override
-            public void cameraOpened() {}
+            public void cameraOpened() {
+                Log.d(TAG, ":: cameraOpened");
+            }
+
+            @Override
+            public void cameraReady(CameraController camera) {
+                Log.d(TAG, ":: cameraReady");
+
+                try {
+                    camera.startMetering();
+                } catch (IllegalAccessException e) {
+                    // TODO
+                }
+            }
+
+            @Override
+            public void cameraFocused(CameraController camera, boolean afSuccessful) {
+                Log.d(TAG, ":: cameraFocused (" + afSuccessful + ")");
+
+                try {
+                    camera.captureImages();
+                } catch (IllegalAccessException e) {
+                    // TODO
+                }
+            }
 
             @Override
             public void captureComplete() {
@@ -244,11 +286,35 @@ public class ShutterService extends Service {
         }
     }
 
-    private void shutterReleaseFinished() {
-        handler.removeCallbacks(cameraKillRunnable);
+    public void releaseShutter() {
+        final Despat despat = Util.getDespat(this);
 
-        Despat despat = Util.getDespat(this);
-        despat.releaseWakeLock();
+        if (!Config.PERSISTENT_CAMERA) {
+            despat.acquireWakeLock(true);
+            handler.postDelayed(cameraKillRunnable, Config.SHUTTER_CAMERA_MAX_LIFETIME);
+            initCamera();
+
+        } else {
+
+            try {
+                camera.captureImages();
+            } catch (IllegalAccessException e) {
+                Log.e(TAG, "releasing shutter failed", e);
+            }
+
+            long now = System.currentTimeMillis();
+            long nextExecution = now + Config.getShutterInterval(context);
+            nextExecution -= nextExecution % 1000;
+            handler.postDelayed(cameraReleaseRunnable, nextExecution);
+        }
+    }
+
+    private void shutterReleaseFinished() {
+        if (!Config.PERSISTENT_CAMERA) {
+            handler.removeCallbacks(cameraKillRunnable);
+            Despat despat = Util.getDespat(this);
+            despat.releaseWakeLock();
+        }
     }
 
     @Override
@@ -261,8 +327,18 @@ public class ShutterService extends Service {
             Util.saveEvent(despat, Event.EventType.ERROR, "camera still alive on ShutterService destroy");
         }
 
-        unregisterReceiver(shutterReceiver);
-        unregisterReceiver(powerReceiver);
+        try {
+            unregisterReceiver(shutterReceiver);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "unable to unregister receiver");
+        }
+
+        try {
+            unregisterReceiver(powerReceiver);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "unable to unregister receiver");
+        }
+
         handler.removeCallbacksAndMessages(null);
         despat.releaseWakeLock();
         stopForeground(true);

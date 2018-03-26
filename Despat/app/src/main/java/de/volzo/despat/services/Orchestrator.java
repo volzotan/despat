@@ -213,6 +213,8 @@ public class Orchestrator extends BroadcastReceiver {
         Sync.run(context, ShutterService.class, false);
         // TODO: this should be done in its own thread with its own wakelock
 
+        if (Config.PERSISTENT_CAMERA) return;
+        
         // trigger the next invocation
         long now = System.currentTimeMillis(); // alarm is set right away
 

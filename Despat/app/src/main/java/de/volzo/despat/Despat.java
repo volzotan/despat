@@ -36,7 +36,7 @@ public class Despat extends Application {
         super.onCreate();
 
         // Stetho Debug Library
-        // Stetho.initializeWithDefaults(this);
+        Stetho.initializeWithDefaults(this);
 
         if (Config.REDIRECT_LOGCAT) Util.redirectLogcat();
 
@@ -54,7 +54,7 @@ public class Despat extends Application {
         Util.saveEvent(this, Event.EventType.SHUTDOWN, null);
     }
 
-    public void acquireWakeLock() {
+    public void acquireWakeLock(boolean temporary) {
         Log.d(TAG, "acquiring wake lock");
 
         if (wakeLock != null) {
@@ -73,7 +73,12 @@ public class Despat extends Application {
         }
 
         Util.saveEvent(this, Event.EventType.WAKELOCK_ACQUIRE, null);
-        wakeLock.acquire(Config.WAKELOCK_MAX_LIFETIME);
+
+        if (temporary) {
+            wakeLock.acquire(Config.WAKELOCK_MAX_LIFETIME);
+        } else {
+            wakeLock.acquire();
+        }
     }
 
     public void releaseWakeLock() {
@@ -114,9 +119,9 @@ public class Despat extends Application {
             case 2:
                 this.camera = new CameraController2(context, controllerCallback, textureView);
                 break;
-            case 3:
-                this.camera = new CameraController3(context, controllerCallback, textureView);
-                break;
+//            case 3:
+//                this.camera = new CameraController3(context, controllerCallback, textureView);
+//                break;
             default:
                 throw new Exception("unknown camera controller");
         }

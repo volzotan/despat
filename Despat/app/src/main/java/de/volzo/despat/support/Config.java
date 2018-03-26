@@ -22,11 +22,13 @@ public class Config {
 
     public static final String TAG = Config.class.getSimpleName();
 
+    public static final boolean PERSISTENT_CAMERA                   = true;
+
     public static final String DATEFORMAT                           = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
 
     public static final float IMGROLL_FREE_SPACE_THRESHOLD          = 300; // in MB
-    public static final boolean IMGROLL_DELETE_IF_FULL              = true;
+    public static final boolean IMGROLL_DELETE_IF_FULL              = false;
 
     public static final boolean PHONE_HOME                          = true;
 
