@@ -1,6 +1,7 @@
 package de.volzo.despat;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -164,6 +165,16 @@ public class SystemController {
         }
 
         return (int) (((float) level / (float) scale) * 100.0f);
+    }
+
+    public double getFreeRAM() {
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        activityManager.getMemoryInfo(mi);
+        double availableMB = mi.availMem / 1048576L;
+        double percentAvail = (double) mi.availMem / (double) mi.totalMem;
+
+        return availableMB;
     }
 
     public boolean getBatteryChargingState() {

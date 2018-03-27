@@ -420,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         final CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
             @Override
-            public void finalImageTaken() {
+            public void captureComplete() {
                 MainActivity.this.runOnUiThread(new Runnable() {
                     public void run() {
                         Handler handler = new Handler();

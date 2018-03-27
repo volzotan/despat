@@ -30,7 +30,7 @@ public abstract class CameraController {
 
     public abstract boolean isDead();
 
-    protected void cameraFailed(String message, Object o) {
+    protected void reportFailAndClose(String message, Object o) {
         if (o instanceof Exception) {
             Log.e(TAG, "camera failed: " + message, (Exception) o);
         } else if (o != null) {
@@ -69,8 +69,11 @@ public abstract class CameraController {
         public void cameraClosed() {}
         public void cameraFailed(String message, Object error) {}
 
+        // called in burst mode after pictures 0 : n-1
         public void intermediateImageTaken() {}
-        public void finalImageTaken() {}
+
+        // called after completing the capture (in burst mode after the last image)
+        // the image is not guaranteed to be written to disk at calling time
         public void captureComplete() {}
     }
 

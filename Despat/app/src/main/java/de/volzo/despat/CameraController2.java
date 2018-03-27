@@ -23,6 +23,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -121,7 +122,9 @@ public class CameraController2 extends CameraController {
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
 
-//        startBackgroundThread();
+        startBackgroundThread();
+
+//        backgroundHandler = new Handler(Looper.myLooper());
     }
 
     public void openCamera() throws Exception {
@@ -137,7 +140,8 @@ public class CameraController2 extends CameraController {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
 
-            if (Config.FORMAT_RAW && !contains(characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES),
+            if (Config.FORMAT_RAW && !contains(
+                    characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES),
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
                 throw new Exception("invalid configuration: camera supports no RAW format");
             }
@@ -168,11 +172,15 @@ public class CameraController2 extends CameraController {
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
 
-                cameraFailed("creating capture session failed", e);
+                reportFailAndClose("creating capture session failed", e);
             }
 
             if (controllerCallback != null) {
                 controllerCallback.cameraOpened();
+            }
+
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                Log.wtf(TAG, "camera is running on UI thread");
             }
         }
 
@@ -182,7 +190,7 @@ public class CameraController2 extends CameraController {
             cameraOpenCloseLock.release();
             state = STATE_CLOSED;
 
-            cameraFailed("camera: onDisconnected", null);
+            reportFailAndClose("camera: onDisconnected", null);
         }
 
         @Override
@@ -227,16 +235,17 @@ public class CameraController2 extends CameraController {
             Log.e(TAG, "--> Camera: onError: " + error);
             cameraOpenCloseLock.release();
 
+            // TODO
 //            Toast.makeText(context, "Opening Camera failed", Toast.LENGTH_SHORT).show();
 
-            cameraFailed("camera: onError", error);
+            reportFailAndClose("camera: onError", error);
         }
     };
 
     private void createCaptureSession() throws Exception {
         try {
+            Log.d(TAG, "# createCaptureSession");
 
-            // output
             CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
 
             if (Config.FORMAT_JPG) {
@@ -293,6 +302,8 @@ public class CameraController2 extends CameraController {
             // enable lens shading correction for the RAW output
             stillRequestBuilder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_HIGH_QUALITY);
 
+            // TODO: does the stillRequestBuilder really need the 3A controls? metering and focusing should
+            // be done by the previewRequest
             setup3AControls(stillRequestBuilder);
 
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
@@ -375,6 +386,8 @@ public class CameraController2 extends CameraController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        Log.d(TAG, "# stopBackgroundThread finished");
     }
 
     private CameraCaptureSession.CaptureCallback preCaptureCallback = new CameraCaptureSession.CaptureCallback() {
@@ -487,7 +500,7 @@ public class CameraController2 extends CameraController {
 
             if (captureSession == null) {
                 // TODO: try to recover instead of killing the camera
-                cameraFailed("capture session missing", null);
+                reportFailAndClose("capture session missing", null);
             }
 
             captureSession.setRepeatingRequest(previewRequestBuilder.build(), preCaptureCallback, backgroundHandler);
@@ -499,18 +512,26 @@ public class CameraController2 extends CameraController {
     public void captureImages() throws IllegalAccessException {
         if (cameraDevice == null) {
             Log.e(TAG, "camera device missing");
-            throw new IllegalAccessException("camera was closed and reopening failed");
+            throw new IllegalAccessException("camera device missing");
         }
 
-        captureStillPicture(false);
+        Log.d(TAG, "imageReader: " + imageReaderJpg);
+
+        captureStillPicture(false); // TODO: metering successful
     }
 
     private void captureStillPicture(boolean meteringSuccessful) {
         try {
-            if (null == cameraDevice) {
+            if (cameraDevice == null) {
                 Log.e(TAG, "cameraDevice missing");
                 return;
             }
+
+            if (captureSession == null) {
+                Log.e(TAG, "captureSession missing");
+                return;
+            }
+
 
             // TODO: find a way to include metering time in the persistence.Capture object
 
@@ -521,7 +542,26 @@ public class CameraController2 extends CameraController {
             // stop AF/AE measurements
             // TODO: check if that needs to be done/makes a difference if no lockFocus call happened
             captureSession.stopRepeating();
-            captureSession.abortCaptures();
+//            captureSession.abortCaptures();
+
+            synchronized (queueRemoveLock) {
+                if (jpgResultQueue != null) {
+                    for (Integer i : jpgResultQueue.keySet()) {
+                        ImageSaver saver = jpgResultQueue.get(i);
+                        saver.close();
+                    }
+                    jpgResultQueue.clear();
+                }
+
+                if (rawResultQueue != null) {
+                    for (Integer i : rawResultQueue.keySet()) {
+                        ImageSaver saver = rawResultQueue.get(i);
+                        saver.close();
+                    }
+                    rawResultQueue.clear();
+                }
+            }
+
 
             final int burstLength = Config.NUMBER_OF_BURST_IMAGES; // TODO: make burstLength a function parameter
 
@@ -561,10 +601,13 @@ public class CameraController2 extends CameraController {
                     int n = (int) request.getTag();
                     Log.i(TAG, "captured image [" + Integer.toString(n + 1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
 
-                    ImageSaver jpgImageSaver = jpgResultQueue.get(n);
-                    ImageSaver rawImageSaver = rawResultQueue.get(n);
+                    String filename = null;
 
                     synchronized (queueRemoveLock) {
+
+                        ImageSaver jpgImageSaver = jpgResultQueue.get(n);
+                        ImageSaver rawImageSaver = rawResultQueue.get(n);
+
                         if (jpgImageSaver != null) jpgImageSaver.captureResult = result;
                         if (rawImageSaver != null) rawImageSaver.captureResult = result;
 
@@ -573,11 +616,17 @@ public class CameraController2 extends CameraController {
 
                         if (jpgImageSaver.isComplete()) {
                             jpgResultQueue.remove(n);
-                            jpgImageSaver.run();
+                            jpgImageSaver.save();
+                            Log.d(TAG, "+++ jpgResultQueue size: " + jpgResultQueue.size());
                         }
                         if (rawImageSaver.isComplete()) {
                             rawResultQueue.remove(n);
-                            rawImageSaver.run();
+                            rawImageSaver.save();
+                            Log.d(TAG, "+++ rawResultQueue size: " + rawResultQueue.size());
+                        }
+
+                        if (jpgImageSaver != null) {
+                            filename = jpgImageSaver.filename.getAbsolutePath();
                         }
                     }
 
@@ -587,24 +636,21 @@ public class CameraController2 extends CameraController {
                         }
                     } else { // final image of burstSequence: no remaining images in the pipeline, shut it down.
 
-                        String filename = null;
-                        if (jpgImageSaver != null) {
-                            filename = jpgImageSaver.filename.getAbsolutePath();
-                        }
-
                         // Caveat: image may not yet be written to disk at this point
                         // just because the broadcast is send, the image may not yet be available
 
                         // TODO: move broadcast code to controllerCallback
                         sendBroadcast(context, filename);
 
-                        if (controllerCallback != null) controllerCallback.finalImageTaken();
+                        if (controllerCallback != null) controllerCallback.captureComplete();
                     }
                 }
 
                 public void onCaptureFailed(@NonNull CameraCaptureSession session,
                                             @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
                     Log.d(TAG, "# onCaptureFailed");
+
+                    // TODO: remove corresponding ImageSaver from queue
                 }
 
 
@@ -719,6 +765,18 @@ public class CameraController2 extends CameraController {
             cameraOpenCloseLock.release();
         }
     }
+
+//    private void closeAndReopenImageReader() {
+//        try {
+//            imageReaderJpg.close();
+//            CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
+//            Size[] jpgSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
+//            imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES + 1);
+//            imageReaderJpg.setOnImageAvailableListener(readerListenerJpg, backgroundHandler);
+//        } catch (CameraAccessException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public boolean isDead() {
         return cameraDevice == null;
@@ -895,8 +953,6 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "# onImageAvailable JPEG");
 
             // backgroundHandler.post(new ImageSaver(reader.acquireNextImage(), imageFullPath));
-            // image saving in a background thread seems not be a good idea if
-            // it's done by a service
 
             synchronized (queueRemoveLock) {
                 Map.Entry<Integer, ImageSaver> entry = jpgResultQueue.firstEntry();
@@ -906,7 +962,8 @@ public class CameraController2 extends CameraController {
 
                 if (imageSaver.isComplete()) {
                     jpgResultQueue.remove(entry.getKey());
-                    imageSaver.run();
+                    imageSaver.save();
+                    Log.d(TAG, "+++ jpgResultQueue size: " + jpgResultQueue.size());
                 }
             }
         }
@@ -924,7 +981,8 @@ public class CameraController2 extends CameraController {
 
                 if (imageSaver.isComplete()) {
                     rawResultQueue.remove(entry.getKey());
-                    imageSaver.run();
+                    imageSaver.save();
+                    Log.d(TAG, "+++ rawResultQueue size: " + rawResultQueue.size());
                 }
             }
         }
@@ -1077,21 +1135,21 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    private static class ImageSaver {
+    private static class ImageSaver implements Runnable {
         private Context context;
         private CameraCharacteristics characteristics;
         CaptureResult captureResult;
         private File filename;
         Image image;
 
-        public ImageSaver(Context context, CameraCharacteristics characteristics) {
+        ImageSaver(Context context, CameraCharacteristics characteristics) {
             this.context = context;
             this.characteristics = characteristics;
 
-            // Log.d(TAG, "# imageSaver created");
+            Log.d(TAG, "# imageSaver created");
         }
 
-        public boolean isComplete() {
+        boolean isComplete() {
             return (context != null &&
                     characteristics != null &&
                     captureResult != null &&
@@ -1099,12 +1157,22 @@ public class CameraController2 extends CameraController {
                     image != null);
         }
 
-        public void setFilename(File filename) {
+        // in case ImageSaver needs to be discarded before it's finished
+        public void close() {
+            if (image != null) image.close();
+        }
+
+        void setFilename(File filename) {
             this.filename = filename;
 
             // Log.d(TAG, "# imageSaver filename set: " + filename);
         }
 
+        void save() {
+            AsyncTask.THREAD_POOL_EXECUTOR.execute(this);
+        }
+
+        @Override
         public void run() {
             Log.d(TAG, "# imageSaver run [ " + filename + " ]");
 
@@ -1166,6 +1234,63 @@ public class CameraController2 extends CameraController {
             }
 
             Log.d(TAG, "# imageSaver done");
+        }
+    }
+
+    public static class RefCountedAutoCloseable<T extends AutoCloseable> implements AutoCloseable {
+        private T mObject;
+        private long mRefCount = 0;
+
+        /**
+         * Wrap the given object.
+         *
+         * @param object an object to wrap.
+         */
+        public RefCountedAutoCloseable(T object) {
+            if (object == null) throw new NullPointerException();
+            mObject = object;
+        }
+
+        /**
+         * Increment the reference count and return the wrapped object.
+         *
+         * @return the wrapped object, or null if the object has been released.
+         */
+        public synchronized T getAndRetain() {
+            if (mRefCount < 0) {
+                return null;
+            }
+            mRefCount++;
+            return mObject;
+        }
+
+        /**
+         * Return the wrapped object.
+         *
+         * @return the wrapped object, or null if the object has been released.
+         */
+        public synchronized T get() {
+            return mObject;
+        }
+
+        /**
+         * Decrement the reference count and release the wrapped object if there are no other
+         * users retaining this object.
+         */
+        @Override
+        public synchronized void close() {
+            if (mRefCount >= 0) {
+                mRefCount--;
+                if (mRefCount < 0) {
+                    try {
+                        mObject.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        mObject = null;
+                    }
+                }
+            }
         }
     }
 }

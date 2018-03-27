@@ -39,6 +39,8 @@ public class Orchestrator extends BroadcastReceiver {
 
     private Context context;
 
+    Thread t;
+
     @Override
     public void onReceive(final Context context, Intent intent) {
 
@@ -213,41 +215,42 @@ public class Orchestrator extends BroadcastReceiver {
         Sync.run(context, ShutterService.class, false);
         // TODO: this should be done in its own thread with its own wakelock
 
-        if (Config.PERSISTENT_CAMERA) return;
-        
-        // trigger the next invocation
-        long now = System.currentTimeMillis(); // alarm is set right away
+        if (!Config.PERSISTENT_CAMERA) {
 
-        Intent shutterIntent = new Intent(context, Orchestrator.class);
-        shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
-        shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
+            // trigger the next invocation
+            long now = System.currentTimeMillis(); // alarm is set right away
 
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
-                ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Intent shutterIntent = new Intent(context, Orchestrator.class);
+            shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
+            shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
 
-        long nextExecution = now + Config.getShutterInterval(context);
-        nextExecution -= nextExecution % 1000;
+            PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
+                    ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        // save the time of the next invocation for the progressBar in the UI
-        Config.setNextShutterServiceInvocation(context, nextExecution);
+            long nextExecution = now + Config.getShutterInterval(context);
+            nextExecution -= nextExecution % 1000;
 
-        /*
-         * A note on alarms:
-         *
-         * as of API lvl 19, all repeating alarms are inexact,
-         * so a single alarm needs to schedule the next one.
-         * If that's the strategy of choice, this works for about
-         * 60 to 70 minutes till Doze mode kicks in.
-         * Upside: .andAllowWhileIdle(...) fires in Doze mode too
-         * Downside: at most once every 9 minutes.
-         *
-         * So despat needs to be whitelisted on
-         * settings > battery optimization
-         *
-         * */
+            // save the time of the next invocation for the progressBar in the UI
+            Config.setNextShutterServiceInvocation(context, nextExecution);
 
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
+            /*
+             * A note on alarms:
+             *
+             * as of API lvl 19, all repeating alarms are inexact,
+             * so a single alarm needs to schedule the next one.
+             * If that's the strategy of choice, this works for about
+             * 60 to 70 minutes till Doze mode kicks in.
+             * Upside: .andAllowWhileIdle(...) fires in Doze mode too
+             * Downside: at most once every 9 minutes.
+             *
+             * So despat needs to be whitelisted on
+             * settings > battery optimization
+             *
+             * */
+
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
+        }
     }
 
     private void shutterServiceStop() {

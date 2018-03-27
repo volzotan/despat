@@ -55,6 +55,8 @@ public class ShutterService extends Service {
 
     CameraController camera;
 
+    private boolean shutdownMode = false;
+
     public ShutterService() {}
 
     @Override
@@ -105,6 +107,12 @@ public class ShutterService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            Log.wtf(TAG, "ShutterService is running on UI thread");
+        } else {
+            Log.d(TAG, "ShutterService is running on thread: " + Thread.currentThread().getName());
+        }
 
         Log.d(TAG, "SHUTTER SERVICE invoked");
 
@@ -197,57 +205,33 @@ public class ShutterService extends Service {
                 try {
                     camera.startMetering();
                 } catch (IllegalAccessException e) {
-                    // TODO
+                    errorOccured("startMetering failed", e);
                 }
             }
 
             @Override
             public void cameraFocused(CameraController camera, boolean afSuccessful) {
                 Log.d(TAG, ":: cameraFocused (" + afSuccessful + ")");
-
-                try {
-                    camera.captureImages();
-                } catch (IllegalAccessException e) {
-                    // TODO
-                }
+                releaseShutter();
             }
 
             @Override
             public void captureComplete() {
-                despat.closeCamera();
+                Log.d(TAG, ":: captureComplete");
+                if (!Config.PERSISTENT_CAMERA) {
+                    despat.closeCamera();
+                }
             }
 
             @Override
             public void cameraClosed() {
-                shutterReleaseFinished();
+                Log.d(TAG, ":: cameraClosed");
+                shutterReleaseFinishedAndCameraClosed();
             }
 
             @Override
             public void cameraFailed(String message, Object o) {
-                Log.e(TAG, "camera failed");
-
-                String err = "";
-                if (o != null) {
-                    try {
-                        err = o.toString();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                StringBuilder sb = new StringBuilder();
-                sb.append("camera failed");
-                if (message != null) {
-                    sb.append(": ");
-                    sb.append(message);
-                }
-                if (err != null && !err.isEmpty()) {
-                    sb.append(" [");
-                    sb.append(err);
-                    sb.append("]");
-                }
-
-                Util.saveEvent(despat, Event.EventType.ERROR, sb.toString());
+                errorOccured("camera failed: + " + message, o);
 
                 // camera should close itself and call onClosed
             }
@@ -262,69 +246,126 @@ public class ShutterService extends Service {
                 Log.d(TAG, "CamController already up and running");
                 camera.captureImages();
             }
-        } catch (Exception e) {
-            // opening camera failed
-
-            Log.e(TAG, "taking photo failed (error during opening camera)", e);
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("shutter failed: ");
-            sb.append(e.getMessage());
-            sb.append("\n --- \n");
-
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            sb.append(sw.toString());
-
-            Util.saveEvent(this, Event.EventType.ERROR, sb.toString());
+        } catch (Exception e) { // opening camera failed
+            errorOccured("taking photo failed (error during opening camera)", e);
 
             // critical error
             if (Config.REBOOT_ON_CRITICAL_ERROR) despat.criticalErrorReboot();
 
-            shutterReleaseFinished();
+            shutterReleaseFinishedAndCameraClosed();
         }
     }
 
     public void releaseShutter() {
+        Log.i(TAG, "--> RELEASE SHUTTER");
+
         final Despat despat = Util.getDespat(this);
 
-        if (!Config.PERSISTENT_CAMERA) {
-            despat.acquireWakeLock(true);
-            handler.postDelayed(cameraKillRunnable, Config.SHUTTER_CAMERA_MAX_LIFETIME);
-            initCamera();
+        SystemController systemController = new SystemController(context);
+        Log.i(TAG, "free RAM: " + systemController.getFreeRAM());
+
+        if (Config.PERSISTENT_CAMERA) {
+
+            try {
+                camera.captureImages();
+            } catch (IllegalAccessException e) {
+                Log.e(TAG, "releasing shutter failed. trying to reopen the camera", e);
+            }
+
+            long now = System.currentTimeMillis();
+            long nextExecution = now + Config.getShutterInterval(context);
+            nextExecution -= nextExecution % 1000;
+            long delay = nextExecution - now;
+            Log.d(TAG, "delay: " + delay);
+            handler.postDelayed(cameraReleaseRunnable, delay);
 
         } else {
+
+            despat.acquireWakeLock(true);
+            handler.postDelayed(cameraKillRunnable, Config.SHUTTER_CAMERA_MAX_LIFETIME);
 
             try {
                 camera.captureImages();
             } catch (IllegalAccessException e) {
                 Log.e(TAG, "releasing shutter failed", e);
             }
-
-            long now = System.currentTimeMillis();
-            long nextExecution = now + Config.getShutterInterval(context);
-            nextExecution -= nextExecution % 1000;
-            handler.postDelayed(cameraReleaseRunnable, nextExecution);
         }
     }
 
-    private void shutterReleaseFinished() {
-        if (!Config.PERSISTENT_CAMERA) {
+    private void shutterReleaseFinishedAndCameraClosed() {
+        if (Config.PERSISTENT_CAMERA) {
+            if (shutdownMode) {
+
+            } else {
+                Log.e(TAG, "something went wrong, camera was closed unexpectedly");
+
+                // TODO: if camera restart is attempted, loop must be avoided
+                // initCamera();
+            }
+        } else {
             handler.removeCallbacks(cameraKillRunnable);
             Despat despat = Util.getDespat(this);
             despat.releaseWakeLock();
         }
     }
 
+    private void errorOccured(String message, Object o) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ShutterService failed: ");
+        sb.append(message);
+        sb.append(" | ");
+
+        String err = "";
+        if (o != null) {
+            try {
+                err = o.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        sb.append(o.toString());
+
+        Log.e(TAG, sb.toString());
+
+        Util.saveEvent(this, Event.EventType.ERROR, sb.toString());
+    }
+
+    private void errorOccured(String message, Throwable e) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ShutterService failed: ");
+        sb.append(message);
+        sb.append(" | ");
+        sb.append(e.getMessage());
+        sb.append("\n --- \n");
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        sb.append(sw.toString());
+
+        errorOccured(message, sb);
+    }
+
     @Override
     public void onDestroy() {
         Despat despat = ((Despat) getApplicationContext());
 
-        // is the camera still alive?
-        if (despat.getCamera() != null && !despat.getCamera().isDead()) {
-            Log.e(TAG, "camera still alive on ShutterService destroy");
-            Util.saveEvent(despat, Event.EventType.ERROR, "camera still alive on ShutterService destroy");
+        if (Config.PERSISTENT_CAMERA) {
+            if (despat.getCamera() != null && !despat.getCamera().isDead()) {
+                this.shutdownMode = true;
+                camera.closeCamera();
+            } else {
+                // camera already dead. something went wrong
+            }
+        } else {
+            // is the camera still alive?
+            if (despat.getCamera() != null && !despat.getCamera().isDead()) {
+                Log.e(TAG, "camera still alive on ShutterService destroy");
+                Util.saveEvent(despat, Event.EventType.ERROR, "camera still alive on ShutterService destroy");
+
+                camera.closeCamera();
+            }
         }
 
         try {

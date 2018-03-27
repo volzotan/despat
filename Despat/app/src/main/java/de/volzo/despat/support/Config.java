@@ -22,7 +22,7 @@ public class Config {
 
     public static final String TAG = Config.class.getSimpleName();
 
-    public static final boolean PERSISTENT_CAMERA                   = true;
+    public static final boolean PERSISTENT_CAMERA                   = false;
 
     public static final String DATEFORMAT                           = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
@@ -78,15 +78,14 @@ public class Config {
     // the android gallery app | v2 only
     public static final boolean RUN_MEDIASCANNER_AFTER_CAPTURE      = false;
 
-    // ---------------------------------------------------------------------------------------------
+    // ---!CAMERA_PERSISTENT------------------------------------------------------------------------
 
     // ShutterService closes the camera after X seconds
+    // recommended: SHUTTER_INTERVAL - 1500
     public static final long SHUTTER_CAMERA_MAX_LIFETIME            = 8000;
 
-    // ShutterService itself is closed after X seconds
-    // public static final long SHUTTER_SERVICE_MAX_LIFETIME           = 8000;
-
     // the maximum time the wakelock is guaranteed to be active
+    // recommended: SHUTTER_INTERVAL - 1000
     public static final long WAKELOCK_MAX_LIFETIME                  = 9000;
 
     // ---------------------------------------------------------------------------------------------
@@ -111,8 +110,10 @@ public class Config {
 
     // ---------------------------------------------------------------------------------------------
 
-    // DEFAULT_SHUTTER_INTERVAL should not be shorter than 6s (5s is android minimum
-    // and a few extra ms are needed for compensation of scheduling irregularities)
+    // if PERSISTENT_CAMERA is _disabled_ DEFAULT_SHUTTER_INTERVAL should not be
+    // shorter than 6s (5s is android minimum and a few extra ms are needed for
+    // compensation of scheduling irregularities)
+    // if PERSISTENT_CAMERA is _enabled_ DEFAULT_SHUTTER_INTERVAL can be shorter than 6s.
     private static final long DEFAULT_SHUTTER_INTERVAL              = 10 * 1000; // in ms
 
     private static final long DEFAULT_HEARTBEAT_INTERVAL            = 15 * 60 * 1000L; // Minimum interval is 15m

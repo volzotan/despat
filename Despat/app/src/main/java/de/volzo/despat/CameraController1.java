@@ -123,6 +123,11 @@ public class CameraController1 extends CameraController implements Camera.Previe
     }
 
     @Override
+    public void startMetering() {
+        // TODO
+    }
+
+    @Override
     public void captureImages() throws IllegalAccessException {
         Log.d(TAG, "# captureImages");
 
@@ -133,7 +138,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
         try {
             precapture(0);
         } catch (Exception e) {
-            cameraFailed("capturing image failed", e);
+            reportFailAndClose("capturing image failed", e);
         }
     }
 
@@ -227,7 +232,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
             camera.takePicture(controller, controller, controller);
         } catch (RuntimeException re) {
             Log.e(TAG, "releasing shutter failed: ", re);
-            cameraFailed("releasing shutter failed", re);
+            reportFailAndClose("releasing shutter failed", re);
         }
     }
 
@@ -332,16 +337,13 @@ public class CameraController1 extends CameraController implements Camera.Previe
             try {
                 precapture(shutterCount);
             } catch (Exception e) {
-                cameraFailed("capturing next image in sequence failed", e);
+                reportFailAndClose("capturing next image in sequence failed", e);
             }
         } else {
             Log.d(TAG, "# captureComplete");
 
             sendBroadcast(context, imageFullPath.getAbsolutePath());
 
-            if (controllerCallback != null) {
-                controllerCallback.finalImageTaken();
-            }
             if (controllerCallback != null) {
                 controllerCallback.captureComplete();
             }
@@ -389,7 +391,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
     @Override
     public void onError(int error, Camera camera) {
         Log.d(TAG, "# onError");
-        cameraFailed("onError called", error);
+        reportFailAndClose("onError called", error);
     }
 
     @Override

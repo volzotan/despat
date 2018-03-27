@@ -12,12 +12,10 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -63,7 +61,7 @@ public class Util {
 
     public static Notification getShutterNotification(Context context, int numberOfCaptures, String[] additionalInfo) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification.Builder builder =  new Notification.Builder(context.getApplicationContext())
                 .setContentTitle("despat active")
@@ -134,7 +132,13 @@ public class Util {
     }
 
     public static long getFreeSpaceOnDevice(File dir) {
-        return (new StatFs(dir.getPath())).getAvailableBytes();
+        try {
+            return (new StatFs(dir.getPath())).getAvailableBytes();
+        } catch (IllegalArgumentException e) {
+            // either the path is invalid or there is absolutely no space left
+            Log.e(TAG, "free space could not be determined. path: " + dir.getAbsolutePath());
+            return -1;
+        }
     }
 
 
