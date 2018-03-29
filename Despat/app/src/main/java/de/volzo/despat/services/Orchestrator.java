@@ -12,11 +12,14 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import de.volzo.despat.Despat;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
@@ -38,8 +41,6 @@ public class Orchestrator extends BroadcastReceiver {
     public static final int OPERATION_ONCE      = 3;
 
     private Context context;
-
-    Thread t;
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -107,8 +108,9 @@ public class Orchestrator extends BroadcastReceiver {
                         String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
                         if (path != null) session.addCapture(new File(path));
 
-                        String[] addInfo = new String[] {Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), false)};
-                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), addInfo);
+                        ArrayList<String> addInfo = new ArrayList<>();
+                        addInfo.add(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), false));
+                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), 0, addInfo);
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
@@ -254,12 +256,17 @@ public class Orchestrator extends BroadcastReceiver {
     }
 
     private void shutterServiceStop() {
-        // alarm Manager
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
-                ShutterService.REQUEST_CODE, new Intent(context, Orchestrator.class), PendingIntent.FLAG_CANCEL_CURRENT);
-        alarmManager.cancel(alarmIntent);
-        alarmIntent.cancel();
+        if (Config.PERSISTENT_CAMERA) {
+
+        } else {
+
+            // alarm Manager
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
+                    ShutterService.REQUEST_CODE, new Intent(context, Orchestrator.class), PendingIntent.FLAG_CANCEL_CURRENT);
+            alarmManager.cancel(alarmIntent);
+            alarmIntent.cancel();
+        }
 
         // shutter Service
         Intent shutterServiceIntent = new Intent(context, ShutterService.class);

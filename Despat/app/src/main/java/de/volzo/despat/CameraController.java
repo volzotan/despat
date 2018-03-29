@@ -25,8 +25,8 @@ public abstract class CameraController {
     public abstract void openCamera() throws Exception;
     public abstract void closeCamera();
 
-    public abstract void startMetering() throws IllegalAccessException;
-    public abstract void captureImages() throws IllegalAccessException;
+    public abstract void startMetering() throws Exception;
+    public abstract void captureImages() throws Exception;
 
     public abstract boolean isDead();
 
@@ -63,10 +63,20 @@ public abstract class CameraController {
 
     public abstract static class ControllerCallback {
 
+        // camera opened and present
         public void cameraOpened() {}
+
+        // additional preparation after opening has finished
         public void cameraReady(CameraController camera) {}
+
+        // preview is present (visible or invisible) and autofocus (and probably metering) runs
+        // have finished
         public void cameraFocused(CameraController camera, boolean afSuccessful) {}
+
+        // camera has finished closing and all resources have been closed
         public void cameraClosed() {}
+
+        // error happened, camera will close itself and call cameraClosed() next
         public void cameraFailed(String message, Object error) {}
 
         // called in burst mode after pictures 0 : n-1

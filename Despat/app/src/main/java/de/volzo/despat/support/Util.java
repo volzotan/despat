@@ -59,39 +59,44 @@ public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
 
-    public static Notification getShutterNotification(Context context, int numberOfCaptures, String[] additionalInfo) {
+    public static Notification getShutterNotification(Context context, int numberOfCaptures, int numberOfErrors, List<String> additionalInfo) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        String contentText = numberOfCaptures + " captures";
+        if (numberOfErrors > 0) {
+            contentText = contentText + " | " + numberOfErrors + " errors";
+        }
+
         Notification.Builder builder =  new Notification.Builder(context.getApplicationContext())
                 .setContentTitle("despat active")
-                .setContentText(numberOfCaptures + " captures")
+                .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_MAX);
 
-        if (additionalInfo != null) {
-            Notification.InboxStyle style = new Notification.InboxStyle();
+        Notification.InboxStyle inboxNotification = new Notification.InboxStyle(builder);
 
+        inboxNotification.addLine(numberOfCaptures + " captures");
+        if (additionalInfo != null) {
             for (String info : additionalInfo) {
-                style.addLine(info);
+                inboxNotification.addLine(info);
             }
         }
 
-        Notification notification = builder.build();
-
+        Notification notification = inboxNotification.build();
         return notification;
     }
 
-    public static void updateShutterNotification(Context context, int notificationIdentifier, int numberOfCaptures, String[] additionalInfo) {
+    public static void updateShutterNotification(Context context, int notificationIdentifier, int numberOfCaptures, int numberOfErrors, List<String> additionalInfo) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         StatusBarNotification[] notifications = notificationManager.getActiveNotifications();
         for (StatusBarNotification not : notifications) {
             if (not.getId() == notificationIdentifier) {
                 // only update if already existing
-                notificationManager.notify(notificationIdentifier, getShutterNotification(context, numberOfCaptures, additionalInfo));
+                notificationManager.notify(notificationIdentifier, getShutterNotification(context, numberOfCaptures, numberOfErrors, additionalInfo));
                 return;
             }
         }
@@ -150,6 +155,8 @@ public class Util {
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
         EventDao eventDao = db.eventDao();
+
+        // TODO: check if RecordingSession is active and associate it with the event/error
 
         Event event = new Event();
         event.setTimestamp(Calendar.getInstance().getTime());

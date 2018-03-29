@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -230,11 +231,20 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         
         registerAllReceivers();
         startProgressBarUpdate();
+        updatePreviewImage();
 
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();
 
 //        Util.printCameraParameters(this);
+
+//        ImageRollover imgroll = new ImageRollover(activity, ".jpg");
+//        Compressor compressor = new Compressor();
+//        File img = imgroll.getNewestImage();
+//        Bitmap bitmap = BitmapFactory.decodeFile(img.getAbsolutePath());
+//        compressor.init(bitmap.getWidth(), bitmap.getHeight());
+//        compressor.add(imgroll.getNewestImage());
+//        compressor.toJpeg(new File(Environment.getExternalStorageDirectory(), ("despat/foo.jpg")));
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -244,38 +254,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
             Log.d("image taken", "path: " + path);
 
-//            Toast.makeText(activity, "image taken", Toast.LENGTH_SHORT).show();
-
-            StringBuilder sb = new StringBuilder();
-            RecordingSession session = RecordingSession.getInstance(context);
-
-            try {
-                if (session.isActive()) {
-                    sb.append("Session: ");
-                    sb.append(session.getSessionName());
-                    sb.append("\n"); //sb.append(" | ");
-                    sb.append("running for: ");
-                    sb.append(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), true));
-                    sb.append(" | ");
-                    sb.append("images: ");
-                    sb.append(session.getImagesTaken());
-                }
-            } catch (RecordingSession.NotRecordingException e) {}
-
-            TextView tvStatus = (TextView) findViewById(R.id.tv_status);
-            tvStatus.setText(sb.toString());
-
-            ImageRollover imgroll = new ImageRollover(context, ".jpg");
-            File newestImage = imgroll.getNewestImage();
-
-            if (newestImage == null) return;
-
-            Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
-            ImageView imageView = findViewById(R.id.imageView);
-            imageView.setImageBitmap(imgBitmap);
-
-            PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
-            photoViewAttacher.update();
+            updatePreviewImage();
         }
     };
 
@@ -290,8 +269,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     protected void onResume() {
         super.onResume();
 
+        Log.d(TAG, "MainActivity Resume");
+
         registerAllReceivers();
         startProgressBarUpdate();
+        updatePreviewImage();
     }
 
     @Override
@@ -304,13 +286,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         cleanup();
-
-        if (Util.isServiceRunning(activity, ShutterService.class)) {
-            Toast.makeText(activity, "running in background", Toast.LENGTH_SHORT).show();
-        }
-
         Log.i(TAG, "application exit");
     }
 
@@ -447,12 +423,58 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 } else {
                     try {
                         camera.captureImages();
-                    } catch (IllegalAccessException e) {
+                    } catch (Exception e) {
                         Log.e(TAG, "capturing image failed");
                     }
                 }
             }
         });
+    }
+
+    private void updatePreviewImage() {
+        Context context = activity;
+
+        StringBuilder sb = new StringBuilder();
+        RecordingSession session = RecordingSession.getInstance(context);
+
+        boolean activeSession = false;
+        try {
+            if (session.isActive()) {
+                activeSession = true;
+
+                sb.append("Session: ");
+                sb.append(session.getSessionName());
+                sb.append("\n"); //sb.append(" | ");
+                sb.append("running for: ");
+                sb.append(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), true));
+                sb.append(" | ");
+                sb.append("images: ");
+                sb.append(session.getImagesTaken());
+            } else {
+                activeSession = false;
+            }
+        } catch (RecordingSession.NotRecordingException e) {
+            activeSession = false;
+        }
+
+        if (!activeSession) sb.append("no active session");
+
+        TextView tvStatus = (TextView) findViewById(R.id.tv_status);
+        tvStatus.setText(sb.toString());
+
+        if (activeSession) {
+            ImageRollover imgroll = new ImageRollover(context, ".jpg");
+            File newestImage = imgroll.getNewestImage();
+
+            if (newestImage == null) return;
+
+            Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
+            ImageView imageView = findViewById(R.id.imageView);
+            imageView.setImageBitmap(imgBitmap);
+
+            PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+            photoViewAttacher.update();
+        }
     }
 
     private void startProgressBarUpdate() {

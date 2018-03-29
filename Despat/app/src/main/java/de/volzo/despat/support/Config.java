@@ -63,9 +63,7 @@ public class Config {
     public static final Integer FIXED_ISO_VALUE                     = 200;
 
     // over- or underexposure compensation | v1 only
-    // array position is image number in burst sequence
-    // if length==1 every image gets the value of [0]
-    public static final int[] EXPOSURE_COMPENSATION                 = {0, -12};
+    public static final int EXPOSURE_COMPENSATION                   = 0;
 
     // maximal time the AF/AE/AWB metering functions
     // may try to find a fix before shutter is
@@ -78,7 +76,12 @@ public class Config {
     // the android gallery app | v2 only
     public static final boolean RUN_MEDIASCANNER_AFTER_CAPTURE      = false;
 
-    // ---!CAMERA_PERSISTENT------------------------------------------------------------------------
+    // maximal time the shutter service may need to report
+    // back a successful start before an error is displayed
+    // to the user
+    public static final int SHUTTER_SERVICE_MAX_START_TIME          = 3000;
+
+    // ---!PERSISTENT_CAMERA------------------------------------------------------------------------
 
     // ShutterService closes the camera after X seconds
     // recommended: SHUTTER_INTERVAL - 1500

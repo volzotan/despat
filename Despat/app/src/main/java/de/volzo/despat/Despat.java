@@ -55,7 +55,11 @@ public class Despat extends Application {
     }
 
     public void acquireWakeLock(boolean temporary) {
-        Log.d(TAG, "acquiring wake lock");
+        if (temporary) {
+            Log.d(TAG, "acquiring temporary wake lock");
+        } else {
+            Log.d(TAG, "acquiring permanent wake lock");
+        }
 
         if (wakeLock != null) {
             if (wakeLock.isHeld()) {

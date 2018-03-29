@@ -63,13 +63,13 @@ import de.volzo.despat.support.Util;
  * Created by volzotan on 04.02.18.
  */
 
-public class CameraController3 extends CameraController {
+public class CameraController3 {
 
     public static final String TAG = CameraController.class.getSimpleName();
 
     private Context context;
     private TextureView mTextureView;
-    private ControllerCallback controllerCallback;
+    private CameraController.ControllerCallback controllerCallback;
 
     private CameraController3 controller;
 
@@ -103,7 +103,7 @@ public class CameraController3 extends CameraController {
     private int mState = STATE_CLOSED;
     private long mCaptureTimer;
 
-    public CameraController3(Context context, ControllerCallback controllerCallback, TextureView textureView) throws Exception {
+    public CameraController3(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {
         this.context = context;
         this.controllerCallback = controllerCallback;
         this.mTextureView = textureView;
@@ -114,7 +114,6 @@ public class CameraController3 extends CameraController {
     }
 
     @SuppressLint("MissingPermission")
-    @Override
     public void openCamera() throws Exception {
         if (!setUpCameraOutputs()) {
             return;
@@ -144,7 +143,6 @@ public class CameraController3 extends CameraController {
         }
     }
 
-    @Override
     public void captureImages() throws IllegalAccessException {
         synchronized (mCameraStateLock) {
             mPendingUserCaptures++;
@@ -187,7 +185,6 @@ public class CameraController3 extends CameraController {
         }
     }
 
-    @Override
     public void closeCamera() {
         try {
             mCameraOpenCloseLock.acquire();
@@ -222,7 +219,6 @@ public class CameraController3 extends CameraController {
         }
     }
 
-    @Override
     public boolean isDead() {
         return false;
     }

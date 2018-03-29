@@ -165,6 +165,10 @@ public class CameraController2 extends CameraController {
             state = STATE_OPENED;
             cameraDevice = camera;
 
+            if (controllerCallback != null) {
+                controllerCallback.cameraOpened();
+            }
+
             try {
                 createCaptureSession();
             } catch (CameraAccessException e) {
@@ -173,10 +177,6 @@ public class CameraController2 extends CameraController {
                 Log.e(TAG, e.getMessage());
 
                 reportFailAndClose("creating capture session failed", e);
-            }
-
-            if (controllerCallback != null) {
-                controllerCallback.cameraOpened();
             }
 
             if (Looper.myLooper() == Looper.getMainLooper()) {

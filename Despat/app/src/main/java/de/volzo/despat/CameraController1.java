@@ -6,6 +6,8 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.TextureView;
 
@@ -37,14 +39,42 @@ public class CameraController1 extends CameraController implements Camera.Previe
     private int[] pictureSize;
 
     private int shutterCount = 0;
+    private long captureTimer;
 
-    Handler handler;
-    Runnable releaseCall = new Runnable() {
+    private Boolean autoFocusResult = null;
+    private Boolean autoExposureResult = null;
+
+    private Handler handler;
+
+    private Runnable autoFocusStopCall = new Runnable() {
         @Override
         public void run() {
-            Log.d(TAG, "shutter release by timeout");
+
+            if (autoFocusResult != null) {
+                // autofocus callback was successful but AE metering hasn't ended yet
+                return;
+            }
+
+            Log.d(TAG, "AF end by timeout");
             camera.cancelAutoFocus();
-            controller.releaseShutter();
+            autoFocusResult = false;
+
+            if (autoFocusResult != null && autoExposureResult != null) {
+                meteringFinished(autoFocusResult);
+            }
+        }
+    };
+
+    private Runnable autoExposureStopCall = new Runnable() {
+        @Override
+        public void run() {
+
+            Log.d(TAG, "AE finished");
+            autoExposureResult = true;
+
+            if (autoFocusResult != null && autoExposureResult != null) {
+                meteringFinished(autoFocusResult);
+            }
         }
     };
 
@@ -61,14 +91,17 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         openCameraInternal();
 
-        if (textureView == null) {
-            captureImages();
-        } else {
+        if (controllerCallback != null) {
+            controllerCallback.cameraOpened();
+            controllerCallback.cameraReady(controller);
+        }
+
+        if (textureView != null) {
             camera.startPreview();
         }
 
-        if (controllerCallback != null) {
-            controllerCallback.cameraOpened();
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            Log.wtf(TAG, "camera is running on UI thread");
         }
     }
 
@@ -124,33 +157,71 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
     @Override
     public void startMetering() {
-        // TODO
+        try {
+            precapture(true, true);
+        } catch (Exception e) {
+            reportFailAndClose("metering failed", e);
+        }
     }
 
     @Override
-    public void captureImages() throws IllegalAccessException {
+    public void captureImages() throws Exception {
         Log.d(TAG, "# captureImages");
 
         if (camera == null) {
             throw new IllegalAccessException("camera is dead");
         }
 
+        shutterCount = 0;
+
+        releaseShutter();
+
+//        try {
+//            for (int i=0; i<Config.NUMBER_OF_BURST_IMAGES; i++) {
+//                if (i == 0) {
+//
+//                    // for the first image AF and AE are required
+//
+//                    precapture(true, true, Config.EXPOSURE_COMPENSATION[0]);
+//                    releaseShutter();
+//                } else {
+//
+//                    // for every subsequent image, AF should be fine and AE is only required
+//                    // if different exposure compensation values are used
+//
+//                    if (Config.EXPOSURE_COMPENSATION[i-1] != Config.EXPOSURE_COMPENSATION[i]) {
+//                        precapture(false, true, Config.EXPOSURE_COMPENSATION[i]);
+//                    }
+//
+//                    releaseShutter();
+//                }
+//            }
+//        } catch (Exception e) {
+//            reportFailAndClose("capturing image failed", e);
+//        }
+    }
+
+    private void releaseShutter() throws Exception {
         try {
-            precapture(0);
-        } catch (Exception e) {
-            reportFailAndClose("capturing image failed", e);
+            camera.takePicture(controller, controller, controller);
+        } catch (RuntimeException re) {
+            Log.e(TAG, "releasing shutter failed: ", re);
+            reportFailAndClose("releasing shutter failed", re);
         }
     }
 
-    private void precapture(int sequenceNumber) throws Exception {
-        Log.d(TAG, "# precapture [" + (sequenceNumber+1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
+    private void precapture(boolean runAF, boolean runAE) throws Exception {
+        Log.d(TAG, "# precapture");
+
+        autoFocusResult = null;
+        autoExposureResult = null;
 
         if (camera == null) {
             Log.e(TAG, "camera died unexpectedly");
             throw new IllegalAccessException("camera died unexpectedly");
         }
 
-        Util.sleep(200);
+        Util.sleep(200); // TODO: ?
 
         try {
             camera.startPreview();
@@ -167,19 +238,11 @@ public class CameraController1 extends CameraController implements Camera.Previe
         }
 
         // AE - exposure compensation
-        boolean ae_measurement_required = false;
         try {
-            if (Config.EXPOSURE_COMPENSATION.length > 1) {
-                params.setExposureCompensation(Config.EXPOSURE_COMPENSATION[sequenceNumber]);
-                if (sequenceNumber > 0 && Config.EXPOSURE_COMPENSATION[sequenceNumber-1] != Config.EXPOSURE_COMPENSATION[sequenceNumber]) {
-                    ae_measurement_required = true;
-                }
-            } else {
-                params.setExposureCompensation(Config.EXPOSURE_COMPENSATION[0]);
-            }
+            params.setExposureCompensation(Config.EXPOSURE_COMPENSATION);
             camera.setParameters(params);
         } catch (RuntimeException re) {
-            Log.w(TAG, "setting exposure compensation params failed. value too higher/lower than maxExposureCompensation?", re);
+            Log.w(TAG, "setting exposure compensation params failed. value higher/lower than maxExposureCompensation?", re);
         }
 
         // AE - iso
@@ -192,48 +255,50 @@ public class CameraController1 extends CameraController implements Camera.Previe
             Log.w(TAG, "setting iso params failed. probably not supported", re);
         }
 
-        // auto focus only on first image
-        if (sequenceNumber == 0) {
+        handler = new Handler();
 
-            handler = new Handler();
+        if (runAF) {
+
             if (params.getFocusMode().equals(Camera.Parameters.FLASH_MODE_AUTO)) {
                 camera.autoFocus(this);
             }
 
             switch (params.getFocusMode()) {
                 case Camera.Parameters.FLASH_MODE_AUTO:
-                    handler.postDelayed(releaseCall, Config.METERING_MAX_TIME);
+                    handler.postDelayed(autoFocusStopCall, Config.METERING_MAX_TIME);
                     camera.autoFocus(this);
                     break;
 
                 case Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE:
-                    handler.postDelayed(releaseCall, Config.METERING_MAX_TIME);
+                    handler.postDelayed(autoFocusStopCall, Config.METERING_MAX_TIME);
                     camera.autoFocus(this);
                     break;
 
                 case Camera.Parameters.FOCUS_MODE_INFINITY:
-                    Util.sleep(Config.SHUTTER_RELEASE_DELAY);
-                    controller.releaseShutter();
+                    autoFocusResult = false;
                     break;
 
                 default:
-                    Log.w(TAG, "unknown auto focus mode! [" + params.getFocusMode() + "] releasing shutter anyway.");
-                    controller.releaseShutter();
+                    Log.w(TAG, "unknown auto focus mode! [" + params.getFocusMode() + "] AF unsuccessful.");
+                    autoFocusResult = false;
                     break;
             }
         } else {
-            if (ae_measurement_required) Util.sleep(Config.SHUTTER_RELEASE_DELAY);
-            controller.releaseShutter();
+            autoFocusResult = false;
         }
-    }
 
-    private void releaseShutter() {
-        try {
-            camera.takePicture(controller, controller, controller);
-        } catch (RuntimeException re) {
-            Log.e(TAG, "releasing shutter failed: ", re);
-            reportFailAndClose("releasing shutter failed", re);
+        if (runAE) {
+            handler.postDelayed(autoExposureStopCall, Config.SHUTTER_RELEASE_DELAY);
+        } else {
+            autoExposureResult = false;
         }
+
+        if (autoFocusResult != null && autoExposureResult != null) {
+            if (controllerCallback != null) controllerCallback.cameraFocused(controller, autoFocusResult);
+        } else {
+            captureTimer = SystemClock.elapsedRealtime();
+        }
+
     }
 
     @Override
@@ -273,14 +338,16 @@ public class CameraController1 extends CameraController implements Camera.Previe
     public void onPictureTaken(byte[] bytes, Camera camera) {
         Log.d(TAG, "# onPictureTaken");
 
+        // this callback may be called once with raw image data and once with processed jpeg data
+        // if the current phone doesn't support raw data, bytes will be empty or only
+        // one call will happen
+
         if (bytes == null) {
-            // this callback is called once with raw image data and once with processed jpeg data
-            // if the current phone doesn't support raw data, bytes will be empty
             Log.d(TAG, "image data empty");
             return;
         }
 
-        Log.d( TAG, "imageCallback: picture retrieved ("+bytes.length+" bytes)" );
+        Log.d( TAG, "imageCallback: picture retrieved (" + bytes.length/1024 + "kb)" );
 
         final ImageRollover imgroll = new ImageRollover(context, ".jpg");
         File imageFullPath = imgroll.getTimestampAsFullFilename();
@@ -308,6 +375,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
                     p.getPictureFormat() == ImageFormat.YV12) {
 
             Log.i(TAG, "image in YUV format");
+
             // try to store YUV data
             try {
                 FileOutputStream fos = new FileOutputStream(imageFullPath);
@@ -335,10 +403,11 @@ public class CameraController1 extends CameraController implements Camera.Previe
             }
 
             try {
-                precapture(shutterCount);
+                releaseShutter();
             } catch (Exception e) {
                 reportFailAndClose("capturing next image in sequence failed", e);
             }
+
         } else {
             Log.d(TAG, "# captureComplete");
 
@@ -371,21 +440,36 @@ public class CameraController1 extends CameraController implements Camera.Previe
     @Override
     public void onAutoFocus(boolean success, Camera camera) {
         Log.d(TAG, "# onAutoFocus");
-        handler.removeCallbacksAndMessages(null);
-        camera.cancelAutoFocus();
 
-        if (success) {
-            Log.d(TAG, "shutter release by autofocus success");
-        } else {
-            Log.d(TAG, "shutter release by autofocus failure");
+        if (autoFocusResult != null) {
+            Log.w(TAG, "autofocus callback returned after timeout");
+            return;
         }
 
-        releaseShutter();
+        autoFocusResult = success;
+
+        if (autoFocusResult != null && autoExposureResult != null) {
+            meteringFinished(autoFocusResult);
+        }
     }
 
     @Override
     public void onAutoFocusMoving(boolean start, Camera camera) {
         Log.d(TAG, "# onAutoFocusMoving");
+    }
+
+    private void meteringFinished(boolean afSuccessful) {
+        handler.removeCallbacksAndMessages(null);
+
+        long meteringTime = SystemClock.elapsedRealtime() - captureTimer;
+
+        if (afSuccessful) {
+            Log.d(TAG, "shutter release by autofocus success. metering time: " + meteringTime + "ms");
+        } else {
+            Log.d(TAG, "shutter release by autofocus timeout. metering time: " + meteringTime + "ms");
+        }
+
+        if (controllerCallback != null) {controllerCallback.cameraFocused(controller, afSuccessful);}
     }
 
     @Override
