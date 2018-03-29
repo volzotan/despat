@@ -25,6 +25,7 @@ w          = 2.4+.1; //3.2+.1;
 wb         = 1.2;
 
 seal_thickness = 1; // private
+heat_inset_diam = 4.2;
 
 screw_inset     = false;
 heat_inset      = true;
@@ -140,9 +141,7 @@ lensHole   = [sizeBot[0]-29, sizeBot[1]/2]; // MotoZ
 ////    translate([0, 14.5, 0]) latch_knob();
 ////}
 //
-//translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
-//
-//translate([41, 05, 30]) wedge();
+////translate([41, 05, 30]) wedge();
 
 // --------------------------- TEST3 ---------------------------
 
@@ -165,8 +164,8 @@ lensHole   = [sizeBot[0]-29, sizeBot[1]/2]; // MotoZ
 // --------------------------- PRINT ---------------------------
 
 //top();
-//top_flat();
-bottom();
+top_flat();
+//bottom();
 //
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal();
 //seal2D();
@@ -416,22 +415,20 @@ module seal_cutout() {
 
 module top_flat() {
     
-    a = 2;
+    a = 1;
     c = 2;
     d = 3;
     b = sizeTopF[2] - a - c - d - wb + .2;
     
-    x = 2;
+    x = 1;
     y = 4.8;
     
     
     difference() {
         hull() {
-            block2(sizeTopF[0], sizeTopF[1], 0.1, crad=crad, red=x);
-            translate([0, 0, a]) 
-            block2(sizeTopF[0], sizeTopF[1], 1.1, crad=crad);
+            translate([0, 0, 0]) block2(sizeTopF[0], sizeTopF[1], 0.1, crad=crad, red=x);
+            translate([0, 0, a]) block2(sizeTopF[0], sizeTopF[1], 1.1, crad=crad);
         }
-        
         translate([6, sizeTopF[1]/2]) hex();
     }
     
@@ -465,32 +462,37 @@ module top_flat() {
             intersection() {
                 union() { 
                     // hinge screw reinforcement
-                    points_r = [[0, 0], [20, 0], [15, 4.8], [5, 4.8]];
+                    points_r = [[0, 0], [20, 0], [15, 5.5+1.3], [5, 5.5+1.3]];
                     translate([30, sizeTopF[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTopF[2]-seal_thickness/2) polygon(points_r);
                     translate([sizeTopF[0]+20-30, sizeTopF[1], 0]) rotate([0, 0, 180]) linear_extrude(height=sizeTopF[2]-seal_thickness/2) polygon(points_r);
                 }
                 
                 // outer hull
                 hull() {
-                    block2(sizeTopF[0], sizeTopF[1], 0.1, crad=crad, red=x);
-                    translate([0, 0, a]) 
-                        block2(sizeTopF[0], sizeTopF[1], sizeTopF[2]-a-seal_thickness/2, crad=crad);
+                    translate([0, 0, 0]) block2(sizeTopF[0], sizeTopF[1], 0.1, crad=crad, red=x);
+                    translate([0, 0, a]) block2(sizeTopF[0], sizeTopF[1], sizeTopF[2]-a-seal_thickness/2, crad=crad);
                 }
             }
             
             // seal nudge
             nudge_height = 0.6;
             translate([0, 0, sizeTopF[2]-seal_thickness/2]) difference() {
-                block2(sizeTopF[0], sizeTopF[1], nudge_height, crad=crad, red=y-0.8-.1);
-                translate([0, 0, -1]) block2(sizeTopF[0], sizeTopF[1], nudge_height+2, crad=crad, red=y);
+                block2(sizeTopF[0], sizeTopF[1], nudge_height, crad=crad, red=y-1.5-0.8-.1);
+                translate([0, 0, -1]) block2(sizeTopF[0], sizeTopF[1], nudge_height+2, crad=crad, red=y-1.5);
             }
         }
         
         // rotation clamp holes
-        translate([20, sizeTopF[1]+5, 5])               rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([sizeTopF[0]-20, sizeTopF[1]+5, 5])   rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-        translate([20, sizeTopF[1]-2, 5])               rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
-        translate([sizeTopF[0]-20, sizeTopF[1]-2, 5])   rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        if (screw_inset) {           
+            translate([20, sizeTopF[1]+5, 5])               rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
+            translate([sizeTopF[0]-20, sizeTopF[1]+5, 5])   rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
+            translate([20, sizeTopF[1]-2, 5])               rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+            translate([sizeTopF[0]-20, sizeTopF[1]-2, 5])   rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+        } 
+        if (heat_inset) {
+          translate([20, sizeTopF[1]+1, 5])                 rotate([90, 0, 0]) cylinder($fn=32, h=5.5+1, d=heat_inset_diam);
+          translate([sizeTopF[0]-20, sizeTopF[1]+1, 5])     rotate([90, 0, 0]) cylinder($fn=32, h=5.5+1, d=heat_inset_diam);
+        }
     }
     
     // hinges
@@ -714,15 +716,15 @@ module bottom() {
                 }
             }
             
-            // hinge nut reinforcement
-//            intersection() {
-//                union() {
-//                    points_r = [[0, 0], [20, 0], [15, 6.6], [5, 6.6]];
-//                    translate([30, sizeBot[1], 1.2]) rotate([0, 0, 180]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r);
-//                    translate([0, 0, 1.2]) rotate([0, 0, 0]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r); 
-//                }
-//                block2(sizeBot[0], sizeBot[1], sizeBot[2], crad=crad);
-//            }
+            // rotation knob reinforcement
+            intersection() {
+                union() {
+                    points_r = [[0, 0], [20, 0], [15, 5.5+1.2], [5, 5.5+1.2]];
+                    translate([30, sizeBot[1], 1.2]) rotate([0, 0, 180]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r);
+                    translate([0, 0, 1.2]) rotate([0, 0, 0]) linear_extrude(height=sizeBot[2]-1.2-seal_thickness/2) polygon(points_r); 
+                }
+                block2(sizeBot[0], sizeBot[1], sizeBot[2], crad=crad);
+            }
             
             // tripod screw holder
             translate([sizeBot[0]/2-34/2, sizeBot[1]-1]) hull() {
@@ -770,8 +772,8 @@ module bottom() {
             translate([sizeBot[0]-20, sizeBot[1]-2.6, 12]) rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
         }
         if (heat_inset) {
-            translate([20, sizeBot[1]+.1, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=5.5, d=5.5); // ?       
-            translate([sizeBot[0]-20, sizeBot[1]+.1, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=5.5, d=5.5); // ?
+            translate([20, sizeBot[1]+.1, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=5.5, d=heat_inset_diam);     
+            translate([sizeBot[0]-20, sizeBot[1]+.1, 12]) rotate([90, 0, 0]) cylinder($fn=32, h=5.5, d=heat_inset_diam); 
         }
         
         // hinge holes
@@ -1047,7 +1049,7 @@ module motoZ_cavity(height) {
             block(size[0], size[1], height, crad=08);
             
             // buttons
-            translate([size[0]-53, -3]) block(34.5, 5, height, crad=1);
+            translate([size[0]-53, -3, 1]) block(34.5, 5, height, crad=1);
         }
                 
         points_ridge = [[0, 0], [0, 10], [1, 10+2], [1, height], [0, height]];
