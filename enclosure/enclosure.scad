@@ -145,26 +145,26 @@ lensHole   = [sizeBot[0]-29, sizeBot[1]/2]; // MotoZ
 
 // --------------------------- TEST3 ---------------------------
 
-//bottom();
-////translate([sizeTop[0], 0, sizeBot[2] + sizeTopF[2] + 0.2]) rotate([180, 0, 180]) top_flat();
-//translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
-//
-//translate([20, sizeBot[1]+0.1, 12+13.2]) rotate([90, 180, 180]) color("purple") {
-//    latch(distance=-1.3);
-//    translate([0, 14.5-1.3, 0]) latch_knob();
-//}
-//
-//translate([sizeBot[0]-20, sizeBot[1]+0.1, 12+13.2]) rotate([90, 180, 180]) color("purple") {
-//    latch(distance=-1.3);
-//    translate([0, 14.5-1.3, 0]) latch_knob();
-//}
-//
+bottom();
+translate([sizeTop[0], 0, sizeBot[2] + sizeTopF[2] + 0.2]) rotate([180, 0, 180]) top_flat();
+translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
+
+translate([20, sizeBot[1]+0.1, 12+13.2]) rotate([90, 180, 180]) color("purple") {
+    latch(distance=-1.3);
+    translate([0, 14.5-1.3, 0]) latch_knob();
+}
+
+translate([sizeBot[0]-20, sizeBot[1]+0.1, 12+13.2]) rotate([90, 180, 180]) color("purple") {
+    latch(distance=-1.3);
+    translate([0, 14.5-1.3, 0]) latch_knob();
+}
+
 //translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
 
 // --------------------------- PRINT ---------------------------
 
 //top();
-top_flat();
+//top_flat();
 //bottom();
 //
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal();
@@ -186,7 +186,7 @@ top_flat();
 //
 //translate([20, 0, 0.3+12.5]) rotate([180, 0]) wedge();
 
-//translate() rotate([0, 90, 0]) wedge_semiflex_motoZ(height=20);
+//translate() rotate([0, 90, 0]) wedge_semiflex_motoZ();
 
 // ----------------------- add. elements -----------------------
 
@@ -311,12 +311,13 @@ module wedge_semiflex(height=20, hollow=true) {
     }
 }
 
-module wedge_semiflex_motoZ(height=20) {
+module wedge_semiflex_motoZ() {
     
+    height=30;
     w = 0.9;
     
     points = [[4.9, 0], [10, 0], [10, 7.9], [10-2.3, 8.7+1.2], 
-    [10-2.3, 12.5], [2.8, 13.3], [3.9, 10], [3.7, 6], [3, 0.9], [4.9, 1]];
+    [10-2.3, 12.5], [3, 15], [1.0, 14], [3.4, 10], [3.2, 6], [1.5, 0.9], [4.9, 1]];
     
 //    points2 = [[3+w, w], [10-w, w], [10-w, 8.7-w], [10-1.3-w, 8.7+1.2-w], [10-1.3-0.9, 12-w], [3+w, 10-w/2], [4+w, 7]];
     
@@ -325,7 +326,7 @@ module wedge_semiflex_motoZ(height=20) {
 //        translate([+1, 0, 0]) rotate([90, 0, -90]) linear_extrude(height=height+2) polygon(points2);
     }
     
-    translate([-height, -4.5, 12]) rotate([10, 0, 0]) cube([height, 0.9, 4]);
+//    translate([-height, -4.5, 12]) rotate([10, 0, 0]) cube([height, 0.9, 4]);
 }
 
 module socket_normal() {
