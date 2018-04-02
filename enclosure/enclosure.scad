@@ -500,10 +500,10 @@ module top_flat() {
     intersection() {
         union() {
             move = 0.1;
-            translate([31, -5.5, sizeTopF[2]+move])             rotate([0, -90, 0]) hinge_top();
+            translate([31.2, -5.5, sizeTopF[2]+move])             rotate([0, -90, 0]) hinge_top();
             translate([sizeTopF[0]-15, -5.5, sizeTopF[2]+move]) rotate([0, -90, 0]) hinge_top();
-            translate([16, 0]) cube([13.6, 2, 2]);
-            translate([sizeTopF[0]-30, 0]) cube([13.6, 2, 2]);
+            translate([16.3, 0]) cube([13.6, 2, 2]);
+            translate([sizeTopF[0]-30+.1, 0]) cube([13.6, 2, 2]);
         }
         translate([-100, -100]) cube([500, 500, 100]);
     }
@@ -833,8 +833,8 @@ module bottom() {
     }
     
     // hinges
-    % translate([9+06, -5.5-0.1, 20]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=false);
-    % translate([sizeBot[0]-25-06, -5.5-0.1, 20]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=false);
+    % translate([9+06, -5.5-0.1, 20])                                    rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=true);
+    % translate([sizeBot[0]-25-06+16, -5.5-0.1, 20])   mirror([1, 0]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=true);
     
     // nuts
     % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
