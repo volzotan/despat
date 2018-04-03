@@ -5,6 +5,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -139,12 +140,12 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         // AF
         List<String> modes = params.getSupportedFocusModes();
-        if (modes.contains(Camera.Parameters.FOCUS_MODE_INFINITY)) {
-            Log.d(TAG, "focus mode: infinity");
-            params.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
-        } else if (modes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+        if (modes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
             Log.d(TAG, "focus mode: auto");
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        } else if (modes.contains(Camera.Parameters.FOCUS_MODE_INFINITY)) {
+            Log.d(TAG, "focus mode: infinity");
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
         } else {
             Log.w(TAG, "focus mode: none (neither infinity focus mode nor auto focus mode available)");
         }
@@ -173,8 +174,15 @@ public class CameraController1 extends CameraController implements Camera.Previe
         }
 
         shutterCount = 0;
-
         releaseShutter();
+
+//        for (int i=0; i<Config.NUMBER_OF_BURST_IMAGES; i++) { // TODO
+//            try {
+//                camera.takePicture(controller, controller, controller);
+//            } catch (RuntimeException re) {
+//                reportFailAndClose("releasing shutter failed [" + (i+1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]", re);
+//            }
+//        }
 
 //        try {
 //            for (int i=0; i<Config.NUMBER_OF_BURST_IMAGES; i++) {
@@ -199,15 +207,6 @@ public class CameraController1 extends CameraController implements Camera.Previe
 //        } catch (Exception e) {
 //            reportFailAndClose("capturing image failed", e);
 //        }
-    }
-
-    private void releaseShutter() throws Exception {
-        try {
-            camera.takePicture(controller, controller, controller);
-        } catch (RuntimeException re) {
-            Log.e(TAG, "releasing shutter failed: ", re);
-            reportFailAndClose("releasing shutter failed", re);
-        }
     }
 
     private void precapture(boolean runAF, boolean runAE) throws Exception {
@@ -258,11 +257,6 @@ public class CameraController1 extends CameraController implements Camera.Previe
         handler = new Handler();
 
         if (runAF) {
-
-            if (params.getFocusMode().equals(Camera.Parameters.FLASH_MODE_AUTO)) {
-                camera.autoFocus(this);
-            }
-
             switch (params.getFocusMode()) {
                 case Camera.Parameters.FLASH_MODE_AUTO:
                     handler.postDelayed(autoFocusStopCall, Config.METERING_MAX_TIME);
@@ -301,9 +295,19 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
     }
 
+    private void releaseShutter() {
+        try {
+            camera.takePicture(controller, controller, controller);
+        } catch (RuntimeException re) {
+            reportFailAndClose("releasing shutter failed", re);
+        }
+    }
+
     @Override
     public void closeCamera() {
         Log.d(TAG, "# closeCamera");
+
+        handler.removeCallbacks(null);
 
         if (camera != null) {
             camera.stopPreview();
@@ -349,49 +353,57 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         Log.d( TAG, "imageCallback: picture retrieved (" + bytes.length/1024 + "kb)" );
 
-        final ImageRollover imgroll = new ImageRollover(context, ".jpg");
-        File imageFullPath = imgroll.getTimestampAsFullFilename();
+        ImageRollover imgroll = new ImageRollover(context, ".jpg");
+        final File imageFullPath = imgroll.getTimestampAsFullFilename();
         if (imageFullPath == null) { // only duplicates
             Log.e(TAG, "saving image failed. no new filename could be acquired");
             return;
         }
 
         Camera.Parameters p = camera.getParameters();
+        final int pictureFormat = p.getPictureFormat();
+        final byte[] imagedata = bytes;
 
-        if (p.getPictureFormat() == ImageFormat.JPEG) {
-            // it's already JPEG
-            try {
-                FileOutputStream fos = new FileOutputStream(imageFullPath);
-                fos.write(bytes);
-                fos.close();
-            } catch (Exception e) {
-                Log.e(TAG, "saving JPEG failed ", e);
-                return;
+        Runnable saver = new Runnable() {
+            @Override
+            public void run() {
+                if (pictureFormat == ImageFormat.JPEG) {
+                    // it's already JPEG
+                    try {
+                        FileOutputStream fos = new FileOutputStream(imageFullPath);
+                        fos.write(imagedata);
+                        fos.close();
+                    } catch (Exception e) {
+                        Log.e(TAG, "saving JPEG failed ", e);
+                        return;
+                    }
+                } else if ( pictureFormat == ImageFormat.YUV_420_888 ||
+                            pictureFormat == ImageFormat.YUV_422_888 ||
+                            pictureFormat == ImageFormat.YUV_444_888 ||
+                            pictureFormat == ImageFormat.YUY2 ||
+                            pictureFormat == ImageFormat.YV12) {
+
+                    Log.i(TAG, "image in YUV format");
+
+                    // try to store YUV data
+                    try {
+                        FileOutputStream fos = new FileOutputStream(imageFullPath);
+                        Log.d(TAG, "image format: " + params.getPictureFormat());
+                        YuvImage image = new YuvImage(imagedata, params.getPictureFormat(), pictureSize[0], pictureSize[1], null);
+                        image.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 90, fos);
+
+                        // fos.close();
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "saving YUV failed ", e);
+                        return;
+                    }
+                } else {
+                    Log.wtf(TAG, "RAW");
+                }
             }
-        } else if ( p.getPictureFormat() == ImageFormat.YUV_420_888 ||
-                    p.getPictureFormat() == ImageFormat.YUV_422_888 ||
-                    p.getPictureFormat() == ImageFormat.YUV_444_888 ||
-                    p.getPictureFormat() == ImageFormat.YUY2 ||
-                    p.getPictureFormat() == ImageFormat.YV12) {
-
-            Log.i(TAG, "image in YUV format");
-
-            // try to store YUV data
-            try {
-                FileOutputStream fos = new FileOutputStream(imageFullPath);
-                Log.d(TAG, "image format: " + params.getPictureFormat());
-                YuvImage image = new YuvImage(bytes, params.getPictureFormat(), pictureSize[0], pictureSize[1], null);
-                image.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 90, fos);
-
-                // fos.close();
-
-            } catch (Exception e) {
-                Log.e(TAG, "saving YUV failed ", e);
-                return;
-            }
-        } else {
-            Log.wtf(TAG, "RAW");
-        }
+        };
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(saver);
 
         shutterCount++;
 
@@ -402,12 +414,10 @@ public class CameraController1 extends CameraController implements Camera.Previe
                 controllerCallback.intermediateImageTaken();
             }
 
-            try {
-                releaseShutter();
-            } catch (Exception e) {
-                reportFailAndClose("capturing next image in sequence failed", e);
-            }
-
+            // preview needs to be restarted before another picture can be taken
+            camera.startPreview();
+            Util.sleep(500);
+            releaseShutter();
         } else {
             Log.d(TAG, "# captureComplete");
 
@@ -421,7 +431,6 @@ public class CameraController1 extends CameraController implements Camera.Previe
         }
 
         if (textureView != null) {
-            // TODO: restart auto focus? / disable autofocus? should be done if continuous
             camera.startPreview();
         }
 

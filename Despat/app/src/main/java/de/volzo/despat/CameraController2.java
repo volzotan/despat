@@ -209,8 +209,6 @@ public class CameraController2 extends CameraController {
                 imageReaderRaw = null;
             }
 
-            stopBackgroundThread();
-
             // if a textureView exists outside of the CameraController
             // closing the surfaces would cause problems
             if (textureView == null) {
@@ -223,11 +221,21 @@ public class CameraController2 extends CameraController {
                 }
             }
 
-            Log.d(TAG, "camera closing complete");
+            Handler mainHandler = new Handler(context.getMainLooper());
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    // background thread must be stopped from the main thread
+                    stopBackgroundThread();
 
-            if (controllerCallback != null) {
-                controllerCallback.cameraClosed();
-            }
+                    Log.d(TAG, "camera closing complete");
+
+                    if (controllerCallback != null) {
+                        controllerCallback.cameraClosed();
+                    }
+                }
+            };
+            mainHandler.post(runnable);
         }
 
         @Override
@@ -367,16 +375,6 @@ public class CameraController2 extends CameraController {
         Log.d(TAG, "# stopBackgroundThread");
 
         if (backgroundThread == null) return;
-
-//        MessageQueue mq = backgroundHandler.getLooper().getQueue();
-//        Log.d(TAG, "mq idle: " + mq.isIdle());
-//        Log.d(TAG, "mq: " + mq.toString());
-//
-//        StringBuilder sb = new StringBuilder();
-//        StringBuilderPrinter pw = new StringBuilderPrinter(sb);
-//        backgroundHandler.dump(pw, "");
-//
-//        System.out.println(sb.toString());
 
         backgroundThread.quitSafely();
         try {
@@ -643,6 +641,8 @@ public class CameraController2 extends CameraController {
                         sendBroadcast(context, filename);
 
                         if (controllerCallback != null) controllerCallback.captureComplete();
+
+                        unlockFocus();
                     }
                 }
 
@@ -1146,7 +1146,7 @@ public class CameraController2 extends CameraController {
             this.context = context;
             this.characteristics = characteristics;
 
-            Log.d(TAG, "# imageSaver created");
+//            Log.d(TAG, "# imageSaver created");
         }
 
         boolean isComplete() {
