@@ -22,13 +22,11 @@ public class Config {
 
     public static final String TAG = Config.class.getSimpleName();
 
-    public static final boolean PERSISTENT_CAMERA                   = false;
-
     public static final String DATEFORMAT                           = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
 
     public static final float IMGROLL_FREE_SPACE_THRESHOLD          = 300; // in MB
-    public static final boolean IMGROLL_DELETE_IF_FULL              = false;
+    public static final boolean IMGROLL_DELETE_IF_FULL              = true;
 
     public static final boolean PHONE_HOME                          = true;
 
@@ -39,7 +37,7 @@ public class Config {
     // ---------------------------------------------------------------------------------------------
 
     // use CameraController v1 (old) or v2
-    public static final int USE_CAMERA_CONTROLLER                   = 2;
+    public static final int USE_CAMERA_CONTROLLER                   = 1;
 
     // jpegs and/or raw | v2 only
     public static final boolean FORMAT_JPG                          = true;
@@ -70,16 +68,22 @@ public class Config {
     // released anyway
     // if v2 is used on a legacy device, this time is
     // always used fully for metering
-    public static final int METERING_MAX_TIME                       = 2000;
+    public static final int METERING_MAX_TIME                       = 1500;
 
     // make captured images immediately available to
     // the android gallery app | v2 only
     public static final boolean RUN_MEDIASCANNER_AFTER_CAPTURE      = false;
 
-    // maximal time the shutter service may need to report
-    // back a successful start before an error is displayed
-    // to the user
-    public static final int SHUTTER_SERVICE_MAX_START_TIME          = 3000;
+    // ---PERSISTENT_CAMERA-------------------------------------------------------------------------
+
+    // keep the camer alive permanently and do not close and reinit
+    // for every capture.
+    // Does not allow the device to sleep in between captures
+    public static final boolean PERSISTENT_CAMERA                   = false;
+
+    // starts a metering run before every capture.
+    // May take up to METERING_MAX_TIME
+    public static final boolean RERUN_METERING_BEFORE_CAPTURE       = true;
 
     // ---!PERSISTENT_CAMERA------------------------------------------------------------------------
 
@@ -163,10 +167,6 @@ public class Config {
 
     public static void init(Context context) {
 
-        // delete everything
-        // context.getSharedPreferences(SHAREDPREFNAME, 0).edit().clear().commit();
-
-        // ...
     }
 
     public static void reset(Context context) {

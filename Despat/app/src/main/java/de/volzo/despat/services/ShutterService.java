@@ -141,25 +141,26 @@ public class ShutterService extends Service {
 
         if (Config.PERSISTENT_CAMERA) {
             despat.acquireWakeLock(false);
-        }
+            handler.postDelayed(shutterReleaseRunnable, 5000);
 
-        // start and release shutter
-        try {
-            initCamera();
+            // start and release shutter
+            try {
+                initCamera();
 
-        } catch (Exception e) {
-            errorOccured("error during opening camera", e);
+            } catch (Exception e) {
+                logError("error during opening camera", e);
 
-            shutterReleaseFinishedAndCameraClosed(); // TODO: is it really clever to use this here?
+                shutterReleaseFinishedAndCameraClosed(); // TODO: is it really clever to use this here?
 
-            // critical error
-            if (Config.REBOOT_ON_CRITICAL_ERROR) {
-                despat.criticalErrorReboot();
-            } else {
-                // if the service fails to start correctly
-                // it should not be restarted automatically
+                // critical error
+                if (Config.REBOOT_ON_CRITICAL_ERROR) {
+                    despat.criticalErrorReboot();
+                } else {
+                    // if the service fails to start correctly
+                    // it should not be restarted automatically
 
-                return START_NOT_STICKY;
+                    return START_NOT_STICKY;
+                }
             }
         }
 
@@ -211,7 +212,19 @@ public class ShutterService extends Service {
 
                 Config.setNextShutterServiceInvocation(context, nextExecution);
 
-                releaseShutter();
+                if (Config.RERUN_METERING_BEFORE_CAPTURE) {
+                    try {
+                        camera.startMetering();
+                    } catch (Exception e) {
+                        logError("starting metering failed", e);
+                    }
+                } else {
+                    try {
+                        camera.captureImages();
+                    } catch (Exception e) {
+                        logError("capturing image failed", e);
+                    }
+                }
 
             } else {
 
@@ -221,7 +234,7 @@ public class ShutterService extends Service {
                 try {
                     initCamera();
                 } catch (Exception e) {
-                    errorOccured("error during opening camera", e);
+                    logError("error during opening camera", e);
 
                     shutterReleaseFinishedAndCameraClosed();
 
@@ -247,7 +260,7 @@ public class ShutterService extends Service {
             try {
                 camera.startMetering();
             } catch (Exception e) {
-                Log.e(TAG, "metering failed");
+                logError("metering failed: + ", e);
             }
         }
 
@@ -255,15 +268,16 @@ public class ShutterService extends Service {
         public void cameraFocused(CameraController camera, boolean afSuccessful) {
             Log.d(TAG, ":: cameraFocused (" + afSuccessful + ")");
 
-            if (Config.PERSISTENT_CAMERA) {
-                handler.post(shutterReleaseRunnable);
-            } else {
-                releaseShutter();
+            try {
+                camera.captureImages();
+            } catch (Exception e) {
+                logError("capturing images failed", e);
             }
+        }
 
-//            if (Config.PERSISTENT_CAMERA) {
-//                scheduleShutterRelease();
-//            }
+        @Override
+        public void intermediateImageTaken() {
+            Log.d(TAG, ":: intermediateImageTaken");
         }
 
         @Override
@@ -284,7 +298,7 @@ public class ShutterService extends Service {
 
         @Override
         public void cameraFailed(String message, Object o) {
-            errorOccured("camera failed: + " + message, o);
+            logError("camera failed: + " + message, o);
 
             // camera should close itself and call onClosed
         }
@@ -328,18 +342,6 @@ public class ShutterService extends Service {
 //        handler.postDelayed(cameraWatchdogRunnable, delay + 1000);
 //    }
 
-    public void releaseShutter() {
-        Log.i(TAG, "--> RELEASE SHUTTER");
-
-        SystemController systemController = new SystemController(context);
-        Log.i(TAG, "free RAM: " + systemController.getFreeRAM());
-
-        try {
-            camera.captureImages();
-        } catch (Exception e) {
-            errorOccured("releasing shutter failed", e);
-        }
-    }
 
     private void shutterReleaseFinishedAndCameraClosed() {
         if (Config.PERSISTENT_CAMERA) {
@@ -362,7 +364,7 @@ public class ShutterService extends Service {
         }
     }
 
-    private void errorOccured(String message, Object o) {
+    private void logError(String message, Object o) {
         StringBuilder sb = new StringBuilder();
         sb.append("ShutterService failed: ");
         sb.append(message);
@@ -376,7 +378,7 @@ public class ShutterService extends Service {
         Toast.makeText(context, "ShutterService failed: " + message, Toast.LENGTH_SHORT).show();
     }
 
-    private void errorOccured(String message, Throwable e) {
+    private void logError(String message, Throwable e) {
         StringBuilder sb = new StringBuilder();
         sb.append("ShutterService failed: ");
         sb.append(message);
@@ -389,7 +391,7 @@ public class ShutterService extends Service {
         e.printStackTrace(pw);
         sb.append(sw.toString());
 
-        errorOccured(message, sb);
+        logError(message, sb);
     }
 
     @Override

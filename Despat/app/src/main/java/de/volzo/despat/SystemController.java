@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
-import eu.chainfire.libsuperuser.Shell;
 
 import static android.content.Context.BATTERY_SERVICE;
 
@@ -203,7 +202,7 @@ public class SystemController {
 //        PowerManager powerManger = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 //        powerManger.reboot(null);
 
-        Shell.SU.run("reboot");
+//        Shell.SU.run("reboot");
     }
 
     // TEMP SENSOR

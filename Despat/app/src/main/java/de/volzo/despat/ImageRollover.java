@@ -128,6 +128,10 @@ public class ImageRollover {
     }
 
     public void run() {
+
+        // Caveat: file.delete() doesn't free up the space immediately
+        // so the ImageRollover may delete more than necessary across multiple runs
+
         if (!Config.IMGROLL_DELETE_IF_FULL) {
             Log.d(TAG, "imageRollover is disabled.");
             return;

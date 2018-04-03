@@ -42,6 +42,7 @@ import de.volzo.despat.support.Config;
 import de.volzo.despat.support.FixedAspectRatioFrameLayout;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.Sync;
+import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     Detector detector;
 
     TextureView textureView;
+    PhotoViewAttacher photoViewAttacher;
 
     Handler periodicUpdateHandler;
 
@@ -336,6 +338,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         stopProgressBarUpdate();
 
+        if (photoViewAttacher != null) {
+            photoViewAttacher.cleanup();
+        }
+
         if (powerbrain != null) {
             powerbrain.disconnect();
             powerbrain = null;
@@ -472,8 +478,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             ImageView imageView = findViewById(R.id.imageView);
             imageView.setImageBitmap(imgBitmap);
 
-            PhotoViewAttacher photoViewAttacher = new PhotoViewAttacher(imageView);
+            if (photoViewAttacher != null) {
+                photoViewAttacher.cleanup();
+            }
+            photoViewAttacher = new PhotoViewAttacher(imageView);
             photoViewAttacher.update();
+
         }
     }
 
