@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -35,14 +34,13 @@ import android.widget.ToggleButton;
 import java.io.File;
 import java.util.Calendar;
 
+import de.volzo.despat.detector.Detector;
+import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.services.Orchestrator;
-import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Config;
-import de.volzo.despat.support.FixedAspectRatioFrameLayout;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.Sync;
-import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -234,6 +232,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         registerAllReceivers();
         startProgressBarUpdate();
         updatePreviewImage();
+
+
+        try {
+            detector = new DetectorSSD(activity);
+            detector.init();
+            detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
+            detector.run();
+        } catch (Exception e) {
+            Log.wtf(TAG, "detector failed", e);
+        }
+
 
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();

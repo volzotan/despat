@@ -1,4 +1,4 @@
-package de.volzo.despat;
+package de.volzo.despat.detector;
 
 import android.graphics.Bitmap;
 
@@ -15,11 +15,24 @@ import org.opencv.objdetect.HOGDescriptor;
 
 import java.io.File;
 
-/**
- * Created by volzotan on 17.12.16.
- */
-
 public class DetectorHOG extends Detector {
+
+
+    @Override
+    public void init() throws Exception {
+
+    }
+
+    @Override
+    public void load(File fullFilename) {
+
+    }
+
+    @Override
+    public void run() throws Exception {
+
+    }
+
 
     private long[] computationTime = new long[4];
 
