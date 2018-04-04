@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Generic interface for interacting with different recognition engines.
  */
-public interface TFLiteDetector {
+public interface TensorFlowDetector {
     /**
      * An immutable result returned by a Classifier describing what was recognized.
      */

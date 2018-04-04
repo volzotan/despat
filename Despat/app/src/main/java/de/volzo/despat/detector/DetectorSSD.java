@@ -18,11 +18,11 @@ public class DetectorSSD extends Detector {
 
     private Context context;
 
-    private TFLiteDetector tfLiteDetector;
+    private TensorFlowDetector tfDetector;
 
     // Configuration values for the prepackaged SSD model.
     private static final int TF_OD_API_INPUT_SIZE = 300;
-    private static final String TF_OD_API_MODEL_FILE = "mobilenet_ssd.tflite";
+    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_android_export.pb";
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco_labels_list.txt";
 
     // Minimum detection confidence to track a detection.
@@ -46,10 +46,18 @@ public class DetectorSSD extends Detector {
     @Override
     public void init() throws Exception {
 
+        try {
+            System.loadLibrary("tensorflow_demo");
+            Log.d(TAG, "libtensorflow_demo.so found");
+        } catch (UnsatisfiedLinkError e) {
+            Log.e(TAG, "libtensorflow_demo.so not found");
+            throw new Exception("libtensorflow_demo.so missing");
+        }
+
         int cropSize = TF_OD_API_INPUT_SIZE;
 
         try {
-            tfLiteDetector = TFLiteObjectDetectionAPIModel.create(
+            tfDetector = TensorFlowObjectDetectionAPIModel.create(
                     context.getAssets(),
                     TF_OD_API_MODEL_FILE,
                     TF_OD_API_LABELS_FILE,
@@ -84,13 +92,13 @@ public class DetectorSSD extends Detector {
 
 
         final long startTime = SystemClock.uptimeMillis();
-        final List<TFLiteDetector.Recognition> results = tfLiteDetector.recognizeImage(croppedBitmap);
+        final List<TensorFlowDetector.Recognition> results = tfDetector.recognizeImage(croppedBitmap);
         lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
         float minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-        final List<TFLiteDetector.Recognition> mappedRecognitions = new LinkedList<TFLiteDetector.Recognition>();
+        final List<TensorFlowDetector.Recognition> mappedRecognitions = new LinkedList<TensorFlowDetector.Recognition>();
 
-        for (final TFLiteDetector.Recognition result : results) {
+        for (final TensorFlowDetector.Recognition result : results) {
 
             Log.d(TAG, "detection: " + result.getLocation());
 
