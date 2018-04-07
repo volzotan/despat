@@ -33,6 +33,7 @@ import android.widget.ToggleButton;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
@@ -151,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
                 CameraController camera = despat.getCamera();
 
-                if (camera == null || camera.isDead()){
+                if (camera == null || camera.isDead()) {
                     activity.startCamera();
                 } else {
                     despat.closeCamera();
@@ -200,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         btSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(activity, SettingsActivity.class);
+                Intent intent = new Intent(activity, SettingsActivity2.class);
                 startActivity(intent);
             }
         });
@@ -227,21 +228,23 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
         sendBroadcast(uploadIntent);
 
-        ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1*60);
-        
+        ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1 * 60);
+
         registerAllReceivers();
         startProgressBarUpdate();
         updatePreviewImage();
 
 
-        try {
-            detector = new DetectorSSD(activity);
-            detector.init();
-            detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
-            detector.run();
-        } catch (Exception e) {
-            Log.wtf(TAG, "detector failed", e);
-        }
+//        btSettings.callOnClick();
+
+//        try {
+//            detector = new DetectorSSD(activity);
+//            detector.init();
+//            detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
+//            detector.run();
+//        } catch (Exception e) {
+//            Log.wtf(TAG, "detector failed", e);
+//        }
 
 
 //        startCapturing.callOnClick();
@@ -433,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         camera.openCamera();
                     } catch (Exception e) {
                         Log.e(TAG, "starting camera failed", e);
-                        Toast.makeText(activity, "starting camera failed: " + e.getMessage(), Toast.LENGTH_SHORT );
+                        Toast.makeText(activity, "starting camera failed: " + e.getMessage(), Toast.LENGTH_SHORT);
                     }
                 } else {
                     try {
@@ -472,7 +475,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             activeSession = false;
         }
 
-        if (!activeSession) sb.append("no active session");
+        if (!activeSession) {
+            sb.append("free: ");
+            sb.append(String.format(Locale.ENGLISH, "%.0fmb", Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity))));
+            sb.append(" | ");
+            sb.append("no active session");
+        }
 
         TextView tvStatus = (TextView) findViewById(R.id.tv_status);
         tvStatus.setText(sb.toString());
@@ -497,7 +505,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     private void startProgressBarUpdate() {
-        if (periodicUpdateHandler == null) periodicUpdateHandler = new Handler(Looper.getMainLooper());
+        if (periodicUpdateHandler == null)
+            periodicUpdateHandler = new Handler(Looper.getMainLooper());
 
         Runnable updateRunnable = new Runnable() {
             @Override
@@ -516,7 +525,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 }
 
                 long shutterInterval = Config.getShutterInterval(activity);
-                int progress = (int) (((float) diff/(float) shutterInterval)*100f);
+                int progress = (int) (((float) diff / (float) shutterInterval) * 100f);
 
                 captureProgressBar.setEnabled(true);
                 captureProgressBar.setProgress(progress);
@@ -588,11 +597,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     private boolean checkPermissionsAreGiven() {
         Activity activity = this;
 
-        if (    ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 ) {
-                return false;
+            return false;
         } else {
             return true;
         }
@@ -617,6 +626,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     Log.w(TAG, "permissions denied by user");
                 }
             }
+        }
+    }
+
+    public static class SettingsFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            // Load the preferences from an XML resource
+            addPreferencesFromResource(R.xml.preferences);
         }
     }
 }

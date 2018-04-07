@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="General">
+
+        <EditTextPreference
+            android:key="pref_deviceName"
+            android:title="@string/pref_deviceName_title"
+            android:summary="@string/pref_deviceName_summary" />
+        <EditTextPreference
+            android:key="pref_serverAddress"
+            android:title="@string/pref_serverAddress_title"
+            android:summary="@string/pref_serverAddress_summary"
+            android:defaultValue="http://www.zoltep.de" />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Camera">
+
+        <SwitchPreference
+            android:key="pref_persistentCamera"
+            android:title="@string/pref_persistentCamera_title"
+            android:summary="@string/pref_persistentCamera_summary"
+            android:defaultValue="true" />
+        <EditTextPreference
+            android:key="pref_shutterInterval"
+            android:title="@string/pref_shutterInterval_title"
+            android:summary="@string/pref_shutterInterval_summary"
+            android:defaultValue="3000" />
+
+    </PreferenceCategory>
+
+
+
+</PreferenceScreen>

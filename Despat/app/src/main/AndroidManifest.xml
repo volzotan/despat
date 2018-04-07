@@ -43,12 +43,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PreviewActivity" />
+        <activity
+            android:name=".PreviewActivity"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".ConfigureActivity"
             android:screenOrientation="landscape" />
         <activity
             android:name=".SettingsActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".SettingsActivity2"
             android:screenOrientation="landscape" />
 
         <receiver
@@ -122,9 +127,6 @@
             android:exported="false"
             android:syncable="true" />
 
-        <activity
-            android:name=".SettingsActivity2"
-            android:label="@string/title_activity_settings2"></activity>
     </application>
 
 </manifest>

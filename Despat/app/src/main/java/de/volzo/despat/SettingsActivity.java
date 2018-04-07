@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,7 +30,8 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
 
     Activity activity;
 
-    ConfigListAdapter configListAdapter;
+    ConfigListAdapter configListAdapterEditable;
+    ConfigListAdapter configListAdapterFixed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,41 +58,54 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
 
         // TODO: do sanity checks on Config variables
 
-        final ListView lv = (ListView) findViewById(R.id.listView);
-        lv.setOnItemClickListener(this);
+        final ListView lve = (ListView) findViewById(R.id.listViewEditable);
+        final ListView lvf = (ListView) findViewById(R.id.listViewFixed);
 
-        List<ConfigItem> configItems = new ArrayList<ConfigItem>();
+        lve.setOnItemClickListener(this);
+        // lvf will not need an OnClickListener
 
-        configListAdapter = new ConfigListAdapter(this, configItems);
-        lv.setAdapter(configListAdapter);
+        List<ConfigItem> configItemsEditable = new ArrayList<ConfigItem>();
+        List<ConfigItem> configItemsFixed = new ArrayList<ConfigItem>();
+
+        configListAdapterEditable = new ConfigListAdapter(this, configItemsEditable);
+        configListAdapterFixed = new ConfigListAdapter(this, configItemsFixed);
+        lve.setAdapter(configListAdapterEditable);
+        lvf.setAdapter(configListAdapterFixed);
 
         Despat despat = ((Despat) getApplicationContext());
         SystemController systemController = despat.getSystemController();
 
-        configItems.add(new ConfigItem(Config.KEY_DEVICENAME, "device name", "human readable name, e.g. \"Red House\"", Config.getDeviceName(this), false));
+        // Editable
+
+        configItemsEditable.add(new ConfigItem(Config.KEY_DEVICENAME, "device name", "human readable name, e.g. \"Red House\"", Config.getDeviceName(this), false));
 
         ConfigItem ci2 = new ConfigItem(Config.KEY_SHUTTER_INTERVAL, "shutter interval", "take image every X milliseconds", Config.getShutterInterval(activity), false);
         ci2.setValidationText(Config.sanityCheckShutterInterval(activity));
-        configItems.add(ci2);
+        configItemsEditable.add(ci2);
 
         ConfigItem ci3 = new ConfigItem(Config.KEY_SERVER_ADDRESS, "server address", "servpat URL", Config.getServerAddress(activity), false);
         ci3.setValidationText(Config.sanityCheckServerAddress(activity));
-        configItems.add(ci3);
+        configItemsEditable.add(ci3);
 
-        configItems.add(new ConfigItem(null, "unique device identifier", "usually the MAC address", Config.getUniqueDeviceId(this), false));
-        configItems.add(new ConfigItem(null, "free space", "free space available on the internal memory", Integer.toString(Math.round(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity)))) + " MB", false));
-        configItems.add(new ConfigItem(null, "free space SD-card", "free space available on the SD-card", "unavailable", false));
-        configItems.add(new ConfigItem(null, "battery internal", "", Integer.toString(Math.round(systemController.getBatteryLevel())) + "%", false));
-        configItems.add(new ConfigItem(null, "battery external", "", "unavailable", false));
+        configItemsEditable.add(new ConfigItem(null, "upload data", "send gathered data directly to the server", "1", true));
 
-        configItems.add(new ConfigItem(null, "upload data", "send gathered data directly to the server", "1", true));
+        // Fixed
+
+        configItemsFixed.add(new ConfigItem(null, "unique device identifier",    "usually the MAC address",                                Config.getUniqueDeviceId(this), false));
+        configItemsFixed.add(new ConfigItem(null, "free space",                  "free space available on the internal memory",      Integer.toString(Math.round(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity)))) + " MB", false));
+        configItemsFixed.add(new ConfigItem(null, "free space SD-card",          "free space available on the SD-card",              "unavailable", false));
+        configItemsFixed.add(new ConfigItem(null, "battery internal",            "",                                                 Integer.toString(Math.round(systemController.getBatteryLevel())) + "%", false));
+        configItemsFixed.add(new ConfigItem(null, "battery external",            "",                                                 "unavailable", false));
+
+        ListUtils.setDynamicHeight(lve);
+        ListUtils.setDynamicHeight(lvf);
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d(TAG, ((ConfigItem) configListAdapter.getItem(position)).getTitle());
+        Log.d(TAG, ((ConfigItem) configListAdapterEditable.getItem(position)).getTitle());
 
-        ConfigItem ci = (ConfigItem) configListAdapter.getItem(position);
+        ConfigItem ci = (ConfigItem) configListAdapterEditable.getItem(position);
         if (ci.getKey() != null) {
             createDialog(ci);
         }
@@ -251,7 +266,8 @@ class ConfigItem {
 
     private String validationText;
 
-    public ConfigItem() {}
+    public ConfigItem() {
+    }
 
     public ConfigItem(String key, String title, String description, String value, boolean valueIsBoolean) {
         this.key = key;
@@ -323,5 +339,27 @@ class ConfigItem {
 
     public void setValidationText(String validationText) {
         this.validationText = validationText;
+    }
+
+}
+
+class ListUtils {
+    public static void setDynamicHeight(ListView mListView) {
+        ListAdapter mListAdapter = mListView.getAdapter();
+        if (mListAdapter == null) {
+            // when adapter is null
+            return;
+        }
+        int height = 0;
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(mListView.getWidth(), View.MeasureSpec.UNSPECIFIED);
+        for (int i = 0; i < mListAdapter.getCount(); i++) {
+            View listItem = mListAdapter.getView(i, null, mListView);
+            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            height += listItem.getMeasuredHeight();
+        }
+        ViewGroup.LayoutParams params = mListView.getLayoutParams();
+        params.height = height + (mListView.getDividerHeight() * (mListAdapter.getCount() - 1));
+        mListView.setLayoutParams(params);
+        mListView.requestLayout();
     }
 }
