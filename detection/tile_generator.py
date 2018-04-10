@@ -12,6 +12,7 @@ parser.add_argument("-i", "--input", default=".", nargs='+')
 parser.add_argument("-o", "--output", default="tiles", nargs='?')
 parser.add_argument("-e", "--extension", default=".jpg", nargs='?')
 parser.add_argument("-t", "--tilesize", default=300, type=int, nargs='?')
+parser.add_argument("-c", "--centered", default=True, type=bool, nargs='?')
 parser.add_argument("-r", "--outputsize", type=int, nargs='?')
 parser.add_argument("-m", "--mode", default=MODE_TILE, choices=[MODE_TILE, MODE_UNTILE])
 args = parser.parse_args()
@@ -95,7 +96,6 @@ if args.mode == MODE_UNTILE:
     new_full_path = os.path.join(OUTPUT_FOLDER, new_filename)
 
     img.save(new_full_path)
-    
 
 elif args.mode == MODE_TILE:
 
@@ -110,15 +110,30 @@ elif args.mode == MODE_TILE:
         border_length = args.tilesize
         tiles = (int(img.size[0] / border_length), int(img.size[1] / border_length))
 
+        offsetx = 0
+        offsety = 0
+
+        if args.centered:
+            offsetx = int(((img.size[0] / border_length) % border_length) / 2)
+            offsety = int(((img.size[1] / border_length) % border_length) / 2)
+
         for x in range(0, tiles[0]):
             for y in range(0, tiles[1]):
-                img_crop = img.crop((x*border_length, y*border_length, x*border_length+border_length, y*border_length+border_length))
+
+                crop_dim = (
+                    x * border_length + offsetx, 
+                    y * border_length + offsety, 
+                    x * border_length + border_length + offsetx, 
+                    y * border_length + border_length + offsety
+                )
+
+                img_crop = img.crop(crop_dim)
                 crop_number = y*tiles[0]+x
 
                 border_length_resize = args.tilesize
                 if not args.outputsize is None: 
                     border_length_resize = args.outputsize
-                    img_crop = img_crop.resize((border_length_resize, border_length_resize))
+                    img_crop = img_crop.resize((border_length_resize, border_length_resize), PIL.Image.BICUBIC)
 
                 filename = image[1]
                 if (filename.find("/") >= 0):
@@ -130,28 +145,6 @@ elif args.mode == MODE_TILE:
                 img_crop.save(new_full_path)
 
                 print("saved: {}".format(new_full_path))
-
-        # if args.mode == "resize":
-        #     for border_length in args.sizes:
-        #         scaled_size = (0, 0)
-
-        #         if img.size[0] > img.size[1]:
-        #             scaled_size = ( border_length, img.size[1] / (img.size[0] / border_length) )
-        #         else: 
-        #             scaled_size = ( img.size[0] / (img.size[1] / border_length), border_length )
-        #         scaled_size = (int(scaled_size[0]), int(scaled_size[1]))
-
-        #         try:
-        #             img = img.resize(scaled_size, PIL.Image.BICUBIC)
-        #         except Exception as e:
-        #             print("converting {} failed: {}".format(input_path, e))
-        #             break;
-
-        #         new_filename = image[1][:-len(extension)] + "_" + str(border_length) + extension
-        #         new_full_path = os.path.join(OUTPUT_FOLDER, relative_path, new_filename)
-        #         img.save(new_full_path)
-
-        #         print("saved: {}".format(new_full_path))
 
 else:
     print("unknown mode. exit.")
