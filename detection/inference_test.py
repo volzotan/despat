@@ -31,6 +31,9 @@ PATH_TO_CKPT = os.path.join("models", MODEL_NAME, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
+TILESIZE = 1500
+OUTPUTSIZE = 1000 #300 # whats fed into the network
+
 
 def load_image_into_numpy_array(image):
     (im_width, im_height) = image.size
@@ -94,7 +97,7 @@ label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
-tm = TileManager("pedestriancrossing.jpg")
+tm = TileManager("pedestriancrossing.jpg", tilesize=TILESIZE, outputsize=OUTPUTSIZE)
 
 #INPUT_IMG_PATH = "/Users/volzotan/GIT/despat/detection"
 #INPUT_IMG_FOLDER = "tiles_500"
@@ -118,8 +121,6 @@ if not os.path.exists(OUTPUT_IMG_FOLDER):
 #            continue
 #        TEST_IMAGE_PATHS.append(os.path.join(root, f))                    
 
-# Size, in inches, of the output images.
-IMAGE_SIZE = (12, 8)
 
 import time
 timings_avg = []
@@ -191,8 +192,6 @@ output_dict = tm.get_full_results()
 
 time7 = time.time()
 
-print(output_dict["detection_boxes"])
-
 vis_util.visualize_boxes_and_labels_on_image_array(
     image_np,
     output_dict['detection_boxes'],
@@ -203,7 +202,7 @@ vis_util.visualize_boxes_and_labels_on_image_array(
     instance_boundaries=None,
     keypoints=None,
     use_normalized_coordinates=False,
-    max_boxes_to_draw=500,
+    max_boxes_to_draw=None,
     min_score_thresh=.5,
     agnostic_mode=False,
     line_thickness=8,

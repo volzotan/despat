@@ -1,6 +1,7 @@
-from PIL import Image
+from PIL import Image, ImageDraw
 import PIL
 import numpy as np
+import os
 
 class TileManager(object):
 
@@ -13,7 +14,7 @@ class TileManager(object):
     # if the network does further scaling as preprocessing
     # _convert_coordinate() will yield wrong results
 
-    def __init__(self, filename, tilesize=1000, outputsize=300, centered=False):
+    def __init__(self, filename, tilesize=1000, outputsize=300, centered=True):
 
         self.filename = filename
 
@@ -54,8 +55,8 @@ class TileManager(object):
         dim = (
             x * self.tilesize + self.xoffset, 
             y * self.tilesize + self.yoffset, 
-            x * self.tilesize + self.tilesize + self.xoffset, 
-            y * self.tilesize + self.tilesize + self.yoffset
+            x * self.tilesize + self.xoffset + self.tilesize,
+            y * self.tilesize + self.yoffset + self.tilesize
         )
         return dim
 
@@ -69,13 +70,16 @@ class TileManager(object):
             scale = float(self.tilesize) / float(self.outputsize)
             data = np.multiply(data, scale)
 
-        # add to the first and third row the x offset
+        # bboxes are encoded as [y_min, x_min, y_max, x_max]
+
+        # add to the second and fourth row the x offset
         # and vice versa for the y offset
 
-        data[:, 0] = np.add(data[:, 0], self.xoffset + x * self.tilesize)
-        data[:, 2] = np.add(data[:, 2], self.xoffset + x * self.tilesize)
-        data[:, 1] = np.add(data[:, 1], self.yoffset + y * self.tilesize)
-        data[:, 3] = np.add(data[:, 3], self.yoffset + y * self.tilesize)
+        data[:, 0] = np.add(data[:, 0], self.yoffset + y * self.tilesize)
+        data[:, 1] = np.add(data[:, 1], self.xoffset + x * self.tilesize)
+
+        data[:, 2] = np.add(data[:, 2], self.yoffset + y * self.tilesize)
+        data[:, 3] = np.add(data[:, 3], self.xoffset + x * self.tilesize)
             
         return data
 
@@ -123,6 +127,27 @@ class TileManager(object):
         #print(result)
 
 
+    def _draw_bounding_boxes(self, bboxes, scores):
+        draw = ImageDraw.Draw(self.image)
+
+        b = bboxes
+        s = scores
+
+        for i in range(0, len(b)):
+            if s[i] < 0.5:
+                continue
+            color = (0, 255, 0)
+            draw.rectangle([b[i][1]+0, b[i][0]+0, b[i][3]-0, b[i][2]-0], outline=color)
+            draw.rectangle([b[i][1]+1, b[i][0]+1, b[i][3]-1, b[i][2]-1], outline=color)
+            draw.rectangle([b[i][1]+2, b[i][0]+2, b[i][3]-2, b[i][2]-2], outline=color)
+
+        for _, tile in self.tiles.items():
+            draw.rectangle(self._get_dim_for_tile(tile["x"], tile["y"]), outline=0)
+
+        del draw
+        self.image.save(os.path.join(".", "output_pillow.jpg"))
+
+
     def get_full_results(self):
         full_results = {
             "num_detections": 0
@@ -147,6 +172,8 @@ class TileManager(object):
         full_results["detection_boxes"] = np.concatenate(boxes, axis=0)
         full_results["detection_scores"] = np.hstack(scores)
         full_results["detection_classes"] = np.hstack(classes)
+
+        self._draw_bounding_boxes(full_results["detection_boxes"], full_results["detection_scores"])
 
         return full_results
 
