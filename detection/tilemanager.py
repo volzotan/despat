@@ -127,7 +127,7 @@ class TileManager(object):
         #print(result)
 
 
-    def _draw_bounding_boxes(self, bboxes, scores):
+    def _draw_bounding_boxes(self, filename, bboxes, scores):
         draw = ImageDraw.Draw(self.image)
 
         b = bboxes
@@ -145,7 +145,7 @@ class TileManager(object):
             draw.rectangle(self._get_dim_for_tile(tile["x"], tile["y"]), outline=0)
 
         del draw
-        self.image.save(os.path.join(".", "output_pillow.jpg"))
+        self.image.save(filename)
 
 
     def get_full_results(self):
@@ -172,8 +172,6 @@ class TileManager(object):
         full_results["detection_boxes"] = np.concatenate(boxes, axis=0)
         full_results["detection_scores"] = np.hstack(scores)
         full_results["detection_classes"] = np.hstack(classes)
-
-        self._draw_bounding_boxes(full_results["detection_boxes"], full_results["detection_scores"])
 
         return full_results
 

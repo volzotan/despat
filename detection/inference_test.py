@@ -21,18 +21,18 @@ from object_detection.utils import visualization_utils as vis_util
 OD_FRAMEWORK_PATH = "/Users/volzotan/Downloads/tensorflow/models/research/object_detection"
 
 
-MODEL_NAME = "ssd_mobilenet_v1_coco_2017_11_17"
+#MODEL_NAME = "ssd_mobilenet_v1_coco_2017_11_17"
 #MODEL_NAME = "ssd_mobilenet_v2_coco_2018_03_29" 
 #MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28" 
 #MODEL_NAME = "faster_rcnn_resnet101_coco_2018_01_28" 
-#MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28" 
+MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28" 
 
 PATH_TO_CKPT = os.path.join("models", MODEL_NAME, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
-TILESIZE = 1500
-OUTPUTSIZE = 1000 #300 # whats fed into the network
+TILESIZE = 2000
+OUTPUTSIZE = 300 #300 # whats fed into the network
 
 
 def load_image_into_numpy_array(image):
@@ -97,7 +97,6 @@ label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
-tm = TileManager("pedestriancrossing.jpg", tilesize=TILESIZE, outputsize=OUTPUTSIZE)
 
 #INPUT_IMG_PATH = "/Users/volzotan/GIT/despat/detection"
 #INPUT_IMG_FOLDER = "tiles_500"
@@ -122,96 +121,108 @@ if not os.path.exists(OUTPUT_IMG_FOLDER):
 #        TEST_IMAGE_PATHS.append(os.path.join(root, f))                    
 
 
+def run(sess, filename, tilesize, outputsize):
+
+    print("{}: {}_{}".format(filename, tilesize, outputsize))
+
+    tm = TileManager(filename, tilesize=tilesize, outputsize=outputsize)
+
+    for tile_id in tm.get_all_tile_ids():
+        time0 = time.time()
+        image = tm.get_tile_image(tile_id)
+        # image = cv2.imread(image_path)
+        # image = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)    
+        time1 = time.time()
+        # the array based representation of the image will be used later in order to prepare the
+        # result image with boxes and labels on it.
+        image_np = load_image_into_numpy_array(image)
+        # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+        image_np_expanded = np.expand_dims(image_np, axis=0)
+        # Actual detection.
+        time2 = time.time()
+        output_dict = run_inference_for_single_image(sess, image_np)
+        # Visualization of the results of a detection.
+        time3 = time.time()
+        # vis_util.visualize_boxes_and_labels_on_image_array(
+        #     image_np,
+        #     output_dict['detection_boxes'],
+        #     output_dict['detection_classes'],
+        #     output_dict['detection_scores'],
+        #     category_index,
+        #     instance_masks=output_dict.get('detection_masks'),
+        #     use_normalized_coordinates=True,
+        #     line_thickness=8)
+        #plt.figure(figsize=IMAGE_SIZE)
+        #plt.imshow(image_np)
+        
+        tm.pass_result(tile_id, output_dict)
+
+        time4 = time.time()    
+        #filename=image_path[image_path.rfind("/")+1:]
+        # Image.fromarray(image_np).save(os.path.join(OUTPUT_IMG_FOLDER, filename))
+        time5 = time.time()
+
+        time_stop = time.time()
+        timings = [
+            time1 - time0,
+            time2 - time1,
+            time3 - time2,
+            time4 - time3,
+            time5 - time4,
+            time_stop - time0
+        ]
+        #timings_avg.append(timings)
+            
+        print("{0} | open: {1:.2f} prepr: {2:.2f} inference: {3:.2f} viz: {4:.2f} save: {5:.2f} total: {6:.2f}".format(
+            tile_id,
+            timings[0],
+            timings[1],
+            timings[2],
+            timings[3],
+            timings[4],
+            timings[5]
+        )) 
+
+    time6 = time.time()
+
+    #image = tm.get_full_image()
+    #image_np = load_image_into_numpy_array(image)
+    output_dict = tm.get_full_results()
+
+    time7 = time.time()
+
+    # vis_util.visualize_boxes_and_labels_on_image_array(
+    #     image_np,
+    #     output_dict['detection_boxes'],
+    #     output_dict['detection_classes'],
+    #     output_dict['detection_scores'],
+    #     category_index,
+    #     instance_masks=output_dict.get('detection_masks'),
+    #     instance_boundaries=None,
+    #     keypoints=None,
+    #     use_normalized_coordinates=False,
+    #     max_boxes_to_draw=None,
+    #     min_score_thresh=.5,
+    #     agnostic_mode=False,
+    #     line_thickness=8,
+    #     groundtruth_box_visualization_color='black',
+    #     skip_scores=False,
+    #     skip_labels=False
+    # )
+    # Image.fromarray(image_np).save(os.path.join(OUTPUT_IMG_FOLDER, "result.jpg"))
+
+    tm._draw_bounding_boxes("output_{}_{}-{}.jpg".format(MODEL_NAME, tilesize, outputsize), output_dict["detection_boxes"], output_dict["detection_scores"])
+    print("get results: {0:.2f} viz: {1:.2f}".format(time7-time6, time.time()-time7))    
+
+
 import time
-timings_avg = []
 
 with detection_graph.as_default():                                
     with tf.Session() as sess:
 
-        for tile_id in tm.get_all_tile_ids():
-            time0 = time.time()
-            image = tm.get_tile_image(tile_id)
-            # image = cv2.imread(image_path)
-            # image = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)    
-            time1 = time.time()
-            # the array based representation of the image will be used later in order to prepare the
-            # result image with boxes and labels on it.
-            image_np = load_image_into_numpy_array(image)
-            # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-            image_np_expanded = np.expand_dims(image_np, axis=0)
-            # Actual detection.
-            time2 = time.time()
-            output_dict = run_inference_for_single_image(sess, image_np)
-            # Visualization of the results of a detection.
-            time3 = time.time()
-            # vis_util.visualize_boxes_and_labels_on_image_array(
-            #     image_np,
-            #     output_dict['detection_boxes'],
-            #     output_dict['detection_classes'],
-            #     output_dict['detection_scores'],
-            #     category_index,
-            #     instance_masks=output_dict.get('detection_masks'),
-            #     use_normalized_coordinates=True,
-            #     line_thickness=8)
-            #plt.figure(figsize=IMAGE_SIZE)
-            #plt.imshow(image_np)
-            
-            tm.pass_result(tile_id, output_dict)
+        for tilesize in [3000, 2000, 1500, 1000, 500]:
+            for outputsize in [3000, 2000, 1500, 1000, 500]:
+                run(sess, "pedestriancrossing.jpg", tilesize, outputsize)
 
-            time4 = time.time()    
-            #filename=image_path[image_path.rfind("/")+1:]
-            # Image.fromarray(image_np).save(os.path.join(OUTPUT_IMG_FOLDER, filename))
-            time5 = time.time()
 
-            time_stop = time.time()
-            timings = [
-                time1 - time0,
-                time2 - time1,
-                time3 - time2,
-                time4 - time3,
-                time5 - time4,
-                time_stop - time0
-            ]
-            timings_avg.append(timings)
-                
-            print("{0} | open: {1:.2f} prepr: {2:.2f} inference: {3:.2f} viz: {4:.2f} save: {5:.2f} total: {6:.2f}".format(
-                tile_id,
-                timings[0],
-                timings[1],
-                timings[2],
-                timings[3],
-                timings[4],
-                timings[5]
-            )) 
-
-time6 = time.time()
-
-image = tm.get_full_image()
-image_np = load_image_into_numpy_array(image)
-output_dict = tm.get_full_results()
-
-time7 = time.time()
-
-vis_util.visualize_boxes_and_labels_on_image_array(
-    image_np,
-    output_dict['detection_boxes'],
-    output_dict['detection_classes'],
-    output_dict['detection_scores'],
-    category_index,
-    instance_masks=output_dict.get('detection_masks'),
-    instance_boundaries=None,
-    keypoints=None,
-    use_normalized_coordinates=False,
-    max_boxes_to_draw=None,
-    min_score_thresh=.5,
-    agnostic_mode=False,
-    line_thickness=8,
-    groundtruth_box_visualization_color='black',
-    skip_scores=False,
-    skip_labels=False
-)
-
-Image.fromarray(image_np).save(os.path.join(OUTPUT_IMG_FOLDER, "result.jpg"))
-
-print("get results: {0:.2f} viz: {1:.2f}".format(time7-time6, time.time()-time7))
-     
+         
