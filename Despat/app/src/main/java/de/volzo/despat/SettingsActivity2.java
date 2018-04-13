@@ -2,8 +2,14 @@ package de.volzo.despat;
 
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
+
+import de.volzo.despat.preferences.Config;
+import de.volzo.despat.preferences.SettingsFragment;
 
 public class SettingsActivity2 extends Activity {
 
@@ -19,14 +25,4 @@ public class SettingsActivity2 extends Activity {
                 .commit();
     }
 
-
-    public static class SettingsFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            // Load the preferences from an XML resource
-            addPreferencesFromResource(R.xml.preferences);
-        }
-    }
 }

@@ -12,9 +12,8 @@ import de.volzo.despat.RecordingSession;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
-import de.volzo.despat.web.ServerConnector;
 import de.volzo.despat.SystemController;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.Sync;
 

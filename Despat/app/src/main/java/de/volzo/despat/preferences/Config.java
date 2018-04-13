@@ -1,9 +1,9 @@
-package de.volzo.despat.support;
+package de.volzo.despat.preferences;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.ImageFormat;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.provider.Settings.Secure;
 
@@ -13,6 +13,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import de.volzo.despat.R;
 
 /**
  * Created by volzotan on 20.12.16.
@@ -26,9 +28,7 @@ public class Config {
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
 
     public static final float IMGROLL_FREE_SPACE_THRESHOLD          = 300; // in MB
-    public static final boolean IMGROLL_DELETE_IF_FULL              = true;
-
-    public static final boolean PHONE_HOME                          = true;
+    public static final boolean IMGROLL_DELETE_IF_FULL              = false;
 
     public static final String SYNC_AUTHORITY                       = "de.volzo.despat.web.provider";
     public static final String SYNC_ACCOUNT_TYPE                    = "de.volzo.despat.servpat";
@@ -37,7 +37,7 @@ public class Config {
     // ---------------------------------------------------------------------------------------------
 
     // use CameraController v1 (old) or v2
-    public static final int USE_CAMERA_CONTROLLER                   = 1;
+    public static final int USE_CAMERA_CONTROLLER                   = 2;
 
     // jpegs and/or raw | v2 only
     public static final boolean FORMAT_JPG                          = true;
@@ -76,11 +76,6 @@ public class Config {
 
     // ---PERSISTENT_CAMERA-------------------------------------------------------------------------
 
-    // keep the camer alive permanently and do not close and reinit
-    // for every capture.
-    // Does not allow the device to sleep in between captures
-    public static final boolean PERSISTENT_CAMERA                   = false;
-
     // starts a metering run before every capture.
     // May take up to METERING_MAX_TIME
     public static final boolean RERUN_METERING_BEFORE_CAPTURE       = true;
@@ -117,38 +112,50 @@ public class Config {
 
     // ---------------------------------------------------------------------------------------------
 
+    public static final String DEFAULT_DEVICE_NAME                  = android.os.Build.MODEL;
+    public static final boolean DEFAULT_RESUME_AFTER_REBOOT         = true;
+    public static final File DEFAULT_WORKING_DIRECTORY              = new File(Environment.getExternalStorageDirectory(), ("despat"));
+
+    // keep the camera alive permanently and do not close and reinit
+    // for every capture.
+    // Does not allow the device to sleep in between captures
+    public static final boolean DEFAULT_PERSISTENT_CAMERA           = true;
+    public static final boolean DEFAULT_LEGACY_CAMERA_CONTROLLER    = false;
     // if PERSISTENT_CAMERA is _disabled_ DEFAULT_SHUTTER_INTERVAL should not be
     // shorter than 6s (5s is android minimum and a few extra ms are needed for
     // compensation of scheduling irregularities)
     // if PERSISTENT_CAMERA is _enabled_ DEFAULT_SHUTTER_INTERVAL can be shorter than 6s.
-    private static final long DEFAULT_SHUTTER_INTERVAL              = 10 * 1000; // in ms
+    public static final int DEFAULT_SHUTTER_INTERVAL                = 10 * 1000; // in ms
 
-    private static final long DEFAULT_HEARTBEAT_INTERVAL            = 15 * 60 * 1000L; // Minimum interval is 15m
+    public static final boolean DEFAULT_PHONE_HOME                  = false;
+    public static final String DEFAULT_SERVER_ADDRESS               = "http://zoltep.de";   // format protocol://example.com
+    public static final long DEFAULT_MIN_SYNC_INTERVAL              = 5 * 60 * 1000;        // at most every X ms
+    public static final long DEFAULT_HEARTBEAT_INTERVAL             = 15 * 60 * 1000L;      // Minimum interval is 15m
+    public static final long DEFAULT_UPLOAD_INTERVAL                = 15 * 60 * 1000L;
 
-    private static final long DEFAULT_UPLOAD_INTERVAL               = 15 * 60 * 1000L;
 
-    private static final File DEFAULT_IMAGE_FOLDER                  = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final String KEY_DEVICE_NAME                      = "de.volzo.despat.deviceName";
+    public static final String KEY_RESUME_AFTER_REBOOT              = "de.volzo.despat.resumeAfterReboot";
+    public static final String KEY_WORKING_DIRECTORY                = "de.volzo.despat.workingDirectory";
 
-    private static final String DEFAULT_SERVER_ADDRESS              = "http://zoltep.de"; // format protocol://example.com
-
-    // resume if a capture session is open on device boot
-    private static final boolean DEFAULT_RESUME_AFTER_REBOOT        = true;
-
-    private static final long DEFAULT_MIN_SYNC_INTERVAL             = 5 * 60 * 1000; // at most every X ms
-
-    private static final String SHAREDPREFNAME                      = "de.volzo.despat.DEFAULT_PREFERENCES";
-
-    public static final String KEY_DEVICENAME                       = "de.volzo.despat.deviceName";
+    public static final String KEY_PERSISTENT_CAMERA                = "de.volzo.despat.persistentCamera";
+    public static final String KEY_LEGACY_CAMERA_CONTROLLER         = "de.volzo.despat.legacyCameraController";
     public static final String KEY_SHUTTER_INTERVAL                 = "de.volzo.despat.shutterInterval";
-    public static final String KEY_IMAGE_FOLDER                     = "de.volzo.despat.imageFolder";
+
     public static final String KEY_PHONE_HOME                       = "de.volzo.despat.phoneHome";
     public static final String KEY_SERVER_ADDRESS                   = "de.volzo.despat.serverAddress";
+    public static final String KEY_MIN_SYNC_INTERVAL                = "de.volzo.despat.minSyncInterval";
     public static final String KEY_HEARTBEAT_INTERVAL               = "de.volzo.despat.heartbeatInterval";
     public static final String KEY_UPLOAD_INTERVAL                  = "de.volzo.despat.uploadInterval";
-    public static final String KEY_RESUME_AFTER_REBOOT              = "de.volzo.despat.resumeAfterReboot";
+
     public static final String KEY_LAST_SYNC                        = "de.volzo.despat.lastSync";
-    public static final String KEY_MIN_SYNC_INTERVAL                = "de.volzo.despat.minSyncInterval";
+    public static final String KEY_IMAGE_FOLDER                     = "de.volzo.despat.imageFolder";
     public static final String KEY_NEXT_SHUTTER_SERVICE_INVOCATION  = "de.volzo.despat.nextShutterServiceInvocation";
+
+
+
+
+
 
     /*
     image folder
@@ -170,7 +177,10 @@ public class Config {
     }
 
     public static void reset(Context context) {
-        context.getSharedPreferences(SHAREDPREFNAME, 0).edit().clear().commit();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.commit();
     }
 
     public static String getUniqueDeviceId(Context context) {
@@ -259,48 +269,48 @@ public class Config {
     // ----
 
     private static void setProperty(Context context, String key, String value) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(key, value);
         editor.apply();
     }
 
     private static void setProperty(Context context, String key, boolean value) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean(key, value);
         editor.apply();
     }
 
     private static void setProperty(Context context, String key, long value) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(key, value);
         editor.apply();
     }
 
     private static String getProperty(Context context, String key, String defaultValue) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getString(key, defaultValue);
     }
 
     private static int getPropertyInt(Context context, String key, int defaultValue) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getInt(key, defaultValue);
     }
 
     private static long getPropertyLong(Context context, String key, long defaultValue) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getLong(key, defaultValue);
     }
 
     private static boolean getPropertyBoolean(Context context, String key, boolean defaultValue) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(key, defaultValue);
     }
 
     private static Date getPropertyDate(Context context, String key, Date defaultValue) {
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String retrievedValue = settings.getString(key, null);
         DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
 
@@ -318,18 +328,24 @@ public class Config {
 
     private static void setPropertyDate(Context context, String key, Date value) {
         DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
-        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(key, dateFormat.format(value));
         editor.apply();
     }
 
+    // ---
+
     public static String getDeviceName(Context context) {
-        return getProperty(context, KEY_DEVICENAME, android.os.Build.MODEL);
+        return getProperty(context, KEY_DEVICE_NAME, android.os.Build.MODEL);
     }
 
     public static void setDeviceName(Context context, String deviceName) {
-        setProperty(context, KEY_DEVICENAME, deviceName);
+        setProperty(context, KEY_DEVICE_NAME, deviceName);
+    }
+
+    public static final boolean getPersistentCamera(Context context) {
+        return getPropertyBoolean(context, KEY_PERSISTENT_CAMERA, DEFAULT_PERSISTENT_CAMERA);
     }
 
     public static long getShutterInterval(Context context) {
@@ -341,7 +357,7 @@ public class Config {
     }
 
     public static File getImageFolder(Context context) {
-        return new File(getProperty(context, KEY_IMAGE_FOLDER, DEFAULT_IMAGE_FOLDER.getAbsolutePath()));
+        return new File(getProperty(context, KEY_IMAGE_FOLDER, DEFAULT_WORKING_DIRECTORY.getAbsolutePath()));
     }
 
     public static void setImageFolder(Context context, String imageFolder) {

@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 import de.volzo.despat.persistence.Event;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
 /**

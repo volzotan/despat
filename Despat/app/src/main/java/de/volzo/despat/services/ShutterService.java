@@ -1,46 +1,30 @@
 package de.volzo.despat.services;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
-import android.graphics.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.SoundPool;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
 import de.volzo.despat.ImageRollover;
-import de.volzo.despat.MainActivity;
-import de.volzo.despat.R;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
-import de.volzo.despat.web.Sync;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -91,7 +75,7 @@ public class ShutterService extends Service {
             Log.wtf(TAG, "CAMERA WATCHDOG KILL");
             Util.saveEvent(context, Event.EventType.ERROR, "camera: watchdog kill");
 
-            if (Config.PERSISTENT_CAMERA) {
+            if (Config.getPersistentCamera(context)) {
                 // TODO: reschedule new shutterRelease? restart camera?
             } else {
                 Despat despat = Util.getDespat(context);
@@ -139,7 +123,7 @@ public class ShutterService extends Service {
 
         Despat despat = Util.getDespat(this);
 
-        if (Config.PERSISTENT_CAMERA) {
+        if (Config.getPersistentCamera(context)) {
             despat.acquireWakeLock(false);
             handler.postDelayed(shutterReleaseRunnable, 5000);
 
@@ -201,7 +185,7 @@ public class ShutterService extends Service {
             RecordingSession session = RecordingSession.getInstance(context);
             Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + session.getImagesTaken());
 
-            if (Config.PERSISTENT_CAMERA) {
+            if (Config.getPersistentCamera(context)) {
 
                 long now = System.currentTimeMillis();
                 long nextExecution = now + Config.getShutterInterval(context);
@@ -284,7 +268,7 @@ public class ShutterService extends Service {
         public void captureComplete() {
             Log.d(TAG, ":: captureComplete");
 
-            if (!Config.PERSISTENT_CAMERA) {
+            if (!Config.getPersistentCamera(context)) {
                 Despat despat = Util.getDespat(context);
                 despat.closeCamera();
             }
@@ -344,7 +328,7 @@ public class ShutterService extends Service {
 
 
     private void shutterReleaseFinishedAndCameraClosed() {
-        if (Config.PERSISTENT_CAMERA) {
+        if (Config.getPersistentCamera(context)) {
             if (shutdownMode) {
                 // pass
             } else {
@@ -398,7 +382,7 @@ public class ShutterService extends Service {
     public void onDestroy() {
         Despat despat = ((Despat) getApplicationContext());
 
-        if (Config.PERSISTENT_CAMERA) {
+        if (Config.getPersistentCamera(context)) {
 
             if (despat.getCamera() != null && !despat.getCamera().isDead()) {
                 this.shutdownMode = true;

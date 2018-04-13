@@ -9,7 +9,6 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
@@ -20,7 +19,7 @@ import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
 /**

@@ -21,7 +21,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
 public class SettingsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -77,7 +77,7 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
 
         // Editable
 
-        configItemsEditable.add(new ConfigItem(Config.KEY_DEVICENAME, "device name", "human readable name, e.g. \"Red House\"", Config.getDeviceName(this), false));
+        configItemsEditable.add(new ConfigItem(Config.KEY_DEVICE_NAME, "device name", "human readable name, e.g. \"Red House\"", Config.getDeviceName(this), false));
 
         ConfigItem ci2 = new ConfigItem(Config.KEY_SHUTTER_INTERVAL, "shutter interval", "take image every X milliseconds", Config.getShutterInterval(activity), false);
         ci2.setValidationText(Config.sanityCheckShutterInterval(activity));
@@ -132,7 +132,7 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
                 String value = tv.getText().toString();
 
                 switch(key) {
-                    case Config.KEY_DEVICENAME:
+                    case Config.KEY_DEVICE_NAME:
                         Config.setDeviceName(activity, value);
                         break;
                     case Config.KEY_SHUTTER_INTERVAL:

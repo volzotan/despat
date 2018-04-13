@@ -10,7 +10,6 @@ import de.volzo.despat.Despat;
 import de.volzo.despat.ImageRollover;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.web.ServerConnector;
-import de.volzo.despat.support.Config;
 
 /**
  * Created by volzotan on 10.08.17.

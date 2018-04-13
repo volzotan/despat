@@ -8,11 +8,10 @@ import android.view.TextureView;
 
 import com.facebook.stetho.Stetho;
 
-import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
 
 import de.volzo.despat.persistence.Event;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
 @AcraCore(buildConfigClass = BuildConfig.class)

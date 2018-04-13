@@ -19,7 +19,7 @@ import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.StatusDao;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
 /**

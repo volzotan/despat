@@ -10,22 +10,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import de.volzo.despat.Despat;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
-import de.volzo.despat.web.ServerConnector;
 import de.volzo.despat.web.Sync;
 
 /**
@@ -217,7 +213,7 @@ public class Orchestrator extends BroadcastReceiver {
         Sync.run(context, ShutterService.class, false);
         // TODO: this should be done in its own thread with its own wakelock
 
-        if (!Config.PERSISTENT_CAMERA) {
+        if (!Config.getPersistentCamera(context)) {
 
             // trigger the next invocation
             long now = System.currentTimeMillis(); // alarm is set right away
@@ -256,7 +252,7 @@ public class Orchestrator extends BroadcastReceiver {
     }
 
     private void shutterServiceStop() {
-        if (Config.PERSISTENT_CAMERA) {
+        if (Config.getPersistentCamera(context)) {
 
         } else {
 

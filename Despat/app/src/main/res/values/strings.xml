@@ -5,21 +5,29 @@
 
     <!-- Strings related to Settings -->
 
-    <string name="pref_deviceName_title">device name</string>
-    <string name="pref_deviceName_summary">human readable name to identify this phone</string>
+    <string name="pref_title_deviceName">device name</string>
+    <string name="pref_summary_deviceName">human readable name to identify this phone</string>
+    <string name="pref_title_resumeAfterReboot">Resume After Reboot</string>
+    <string name="pref_summary_resumeAfterReboot">...</string>
+    <string name="pref_title_workingDirectory">Working Directory</string>
+    <string name="pref_summary_workingDirectory">...</string>
 
-    <string name="pref_serverAddress_title">server address</string>
-    <string name="pref_serverAddress_summary">servpat URL</string>
-
-    <string name="pref_persistentCamera_title">persistent camera</string>
-    <string name="pref_persistentCamera_summary">
-        Keep the camera active in between captures. Allows shutter intervals faster than 6s
+    <string name="pref_title_persistentCamera">persistent camera</string>
+    <string name="pref_summary_persistentCamera">
+        Keep the camera active in between captures. Allows shutter intervals shorter than 6s
         but prevents the device from powering down. Will increase power consumption considerably.
     </string>
+    <string name="pref_title_legacyCameraController">legacy camera controller</string>
+    <string name="pref_summary_legacyCameraController">
+        Use the alternative camera controller.
+        This may solve compatibility issues on some older phones.
+    </string>
+    <string name="pref_title_shutterInterval">shutter interval</string>
+    <string name="pref_summary_shutterInterval">capture image every X milliseconds (1000ms = 1s)</string>
 
-    <string name="pref_shutterInterval_title">shutter interval</string>
-    <string name="pref_shutterInterval_summary">capture image every X milliseconds (1000ms = 1s)</string>
-
-
+    <string name="pref_title_phoneHome">data upload</string>
+    <string name="pref_summary_phoneHome">upload data to the server</string>
+    <string name="pref_title_serverAddress">server address</string>
+    <string name="pref_summary_serverAddress">servpat URL</string>
 
 </resources>

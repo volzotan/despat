@@ -2,7 +2,6 @@ package de.volzo.despat.web;
 
 import android.content.Context;
 import android.os.Build;
-import android.util.JsonWriter;
 import android.util.Log;
 
 import com.android.volley.NetworkResponse;
@@ -23,9 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,7 +37,7 @@ import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.Status;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
 /**

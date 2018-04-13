@@ -1,12 +1,10 @@
 package de.volzo.despat;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -18,7 +16,6 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.DngCreator;
 import android.hardware.camera2.TotalCaptureResult;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaScannerConnection;
@@ -27,19 +24,15 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.os.MessageQueue;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
 import android.util.SizeF;
-import android.util.StringBuilderPrinter;
 import android.view.Surface;
 import android.view.TextureView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,25 +40,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.Config;
-import de.volzo.despat.support.Util;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
+import de.volzo.despat.preferences.Config;
 
 
 /**
@@ -263,7 +247,7 @@ public class CameraController2 extends CameraController {
                     return;
                 }
 
-                imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES + 1);
+                imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES*2);
                 imageReaderJpg.setOnImageAvailableListener(readerListenerJpg, backgroundHandler);
             }
 
@@ -274,7 +258,7 @@ public class CameraController2 extends CameraController {
                     return;
                 }
 
-                imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, Config.NUMBER_OF_BURST_IMAGES + 1);
+                imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, Config.NUMBER_OF_BURST_IMAGES*2);
                 imageReaderRaw.setOnImageAvailableListener(readerListenerRaw, backgroundHandler);
             }
 
@@ -285,19 +269,25 @@ public class CameraController2 extends CameraController {
 
             // get empty dummy surface or surface with texture view
             surfaceTexture = getSurfaceTexture(textureView);
-            int width = 640; //imageDimension.getWidth();   // TODO: drop hardcoded resolution
-            int height = 480; //imageDimension.getHeight();
+            final int width = 640; //imageDimension.getWidth();   // TODO: drop hardcoded resolution
+            final int height = 480; //imageDimension.getHeight();
             surfaceTexture.setDefaultBufferSize(width, height);
             surface = new Surface(surfaceTexture);
             outputSurfaces.add(surface);
 
             if (textureView != null) {
                 // Lowly camera API developers haven't deemed it necessary to integrate automatic screen rotation and aspect ratio
-                Matrix mat = new Matrix();
-                mat.postScale(height / (float) width, width / (float) height);
-                mat.postRotate(-90);
-                mat.postTranslate(0, textureView.getHeight());
-                textureView.setTransform(mat);
+
+                // TODO: move to a non-callback/run-on-main-thread section of code
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    public void run() {
+                        Matrix mat = new Matrix();
+                        mat.postScale(height / (float) width, width / (float) height);
+                        mat.postRotate(-90);
+                        mat.postTranslate(0, textureView.getHeight());
+                        textureView.setTransform(mat);
+                    }
+                });
             }
 
             previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
@@ -959,6 +949,9 @@ public class CameraController2 extends CameraController {
 
                 ImageSaver imageSaver = entry.getValue();
                 imageSaver.image = reader.acquireNextImage();
+
+                // TODO: W/ImageReader_JNI: Unable to acquire a buffer item, very likely client tried to acquire more than maxImages buffers
+                // old images haven't been discarded in time?
 
                 if (imageSaver.isComplete()) {
                     jpgResultQueue.remove(entry.getKey());

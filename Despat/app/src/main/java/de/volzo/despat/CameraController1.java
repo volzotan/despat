@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import de.volzo.despat.persistence.Event;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
 /**

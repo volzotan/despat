@@ -7,12 +7,10 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import de.volzo.despat.support.Config;
-import de.volzo.despat.web.ServerConnector;
+import de.volzo.despat.preferences.Config;
 
 /**
  * Created by christophergetschmann on 18.01.18.

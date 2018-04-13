@@ -36,10 +36,9 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.Config;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.Sync;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -235,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         updatePreviewImage();
 
 
-//        btSettings.callOnClick();
+        btSettings.callOnClick();
 
 //        try {
 //            detector = new DetectorSSD(activity);
@@ -626,16 +625,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     Log.w(TAG, "permissions denied by user");
                 }
             }
-        }
-    }
-
-    public static class SettingsFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            // Load the preferences from an XML resource
-            addPreferencesFromResource(R.xml.preferences);
         }
     }
 }
