@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.NumberPicker;
 
+import java.util.List;
+
 public class NumberPickerPreference extends DialogPreference {
 
     // enable or disable the 'circular behavior'
@@ -19,8 +21,8 @@ public class NumberPickerPreference extends DialogPreference {
 
     private int minValue = 0;
     private int maxValue = 100;
-    private int stepSize = 1;
-    private int defaultValue = minValue;
+    private float factor = 1;
+    private int defaultValue;
     private int currentValue;
 
     public NumberPickerPreference(Context context) {
@@ -43,20 +45,16 @@ public class NumberPickerPreference extends DialogPreference {
         picker = new NumberPicker(getContext());
         picker.setLayoutParams(layoutParams);
 
-        NumberPicker.Formatter formatter = new NumberPicker.Formatter() {
-            @Override
-            public String format(int value) {
-                return Integer.toString(value);
-            }
-        };
-        picker.setFormatter(formatter);
+//        NumberPicker.Formatter formatter = new NumberPicker.Formatter() {
+//            @Override
+//            public String format(int value) {
+//                return Integer.toString(value / stepSize);
+//            }
+//        };
+//        picker.setFormatter(formatter);
 
-        int totalValues = maxValue-minValue/stepSize;
-        String availableValues[] = new String[totalValues];
-        for (int i=0; i<totalValues; i++) {
-            availableValues[i] = Integer.toString(minValue + i * stepSize);
-        }
-        picker.setDisplayedValues(availableValues);
+        picker.setMinValue(minValue);
+        picker.setMaxValue(maxValue);
 
         FrameLayout dialogView = new FrameLayout(getContext());
         dialogView.addView(picker);
@@ -67,12 +65,25 @@ public class NumberPickerPreference extends DialogPreference {
     @Override
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
         if (restorePersistedValue) { // Restore existing state
-            currentValue = this.getPersistedInt((int) defaultValue);
+            if (defaultValue != null) {
+                currentValue = convertToDisplay(this.getPersistedInt((int) (defaultValue)));
+            } else {
+                currentValue = convertToDisplay(this.getPersistedInt(this.defaultValue));
+            }
+
+            if (currentValue < this.minValue) {
+                setValue(this.minValue);
+            }
+
+            if (currentValue > this.maxValue) {
+                setValue(this.maxValue);
+            }
+
         } else { // Set default state
-            currentValue = (Integer) defaultValue;
+
+            currentValue = (int) defaultValue;
             persistInt(currentValue);
         }
-
     }
 
     @Override
@@ -95,7 +106,15 @@ public class NumberPickerPreference extends DialogPreference {
 
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
-        return a.getInteger(index, defaultValue);
+        return a.getInteger(index, convertToSave(defaultValue));
+    }
+
+    public int convertToDisplay(int value) {
+        return (int) (value / factor);
+    }
+
+    public int convertToSave(int value) {
+        return (int) (value * factor);
     }
 
     public void setMinValue(int value) {
@@ -106,8 +125,8 @@ public class NumberPickerPreference extends DialogPreference {
         this.maxValue = value;
     }
 
-    public void setStepSize(int value) {
-        this.stepSize = value;
+    public void setFactor(float value) {
+        this.factor = value;
     }
 
     public void setDefaultValue(int value) {
@@ -116,7 +135,7 @@ public class NumberPickerPreference extends DialogPreference {
 
     public void setValue(int value) {
         this.currentValue = value;
-        persistInt(this.currentValue);
+        persistInt(convertToSave(this.currentValue));
     }
 
     public int getValue() {

@@ -13,6 +13,9 @@ import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.preference.TwoStatePreference;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.volzo.despat.R;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -81,12 +84,13 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         NumberPickerPreference prefShutterInterval = new NumberPickerPreference(context);
         prefShutterInterval.setTitle(context.getString(R.string.pref_title_shutterInterval));
         prefShutterInterval.setSummary(context.getString(R.string.pref_summary_shutterInterval));
-        prefShutterInterval.setMinValue(2000);
-        prefShutterInterval.setMaxValue(120000);
-        prefShutterInterval.setStepSize(1000);
+        prefShutterInterval.setMinValue(2);
+        prefShutterInterval.setMaxValue(120);
+        prefShutterInterval.setFactor(1000);
         prefShutterInterval.setDefaultValue(Config.DEFAULT_SHUTTER_INTERVAL);
         prefShutterInterval.setKey(Config.KEY_SHUTTER_INTERVAL);
         category.addPreference(prefShutterInterval);
+
 
         // SERVER ----------------------------------------------------------------------------------
 
@@ -137,8 +141,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         if (preference == null) return;
 
         SharedPreferences sharedPrefs = getPreferenceManager().getSharedPreferences();
-        StringBuilder sb = new StringBuilder(preference.getSummary());
-        sb.append("\n");
+        String s = (String) preference.getSummary();
 
         if (preference instanceof ListPreference) {
             ListPreference listPreference = (ListPreference) preference;
@@ -147,8 +150,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference instanceof NumberPickerPreference) {
-            sb.append(sharedPrefs.getInt(key, 0));
-            preference.setSummary(sb.toString());
+            s = String.format(s, sharedPrefs.getInt(key, 0));
+            preference.setSummary(s);
             return;
         }
 
@@ -156,7 +159,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             return;
         }
 
-        sb.append(sharedPrefs.getString(key, "Default"));
-        preference.setSummary(sb.toString());
+        s = String.format(s, sharedPrefs.getString(key, "Default"));
+        preference.setSummary(s);
     }
 }

@@ -36,9 +36,6 @@ public class Config {
 
     // ---------------------------------------------------------------------------------------------
 
-    // use CameraController v1 (old) or v2
-    public static final int USE_CAMERA_CONTROLLER                   = 2;
-
     // jpegs and/or raw | v2 only
     public static final boolean FORMAT_JPG                          = true;
     public static final boolean FORMAT_RAW                          = false;
@@ -112,65 +109,197 @@ public class Config {
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * DEVICE NAME
+     */
     public static final String DEFAULT_DEVICE_NAME                  = android.os.Build.MODEL;
-    public static final boolean DEFAULT_RESUME_AFTER_REBOOT         = true;
-    public static final File DEFAULT_WORKING_DIRECTORY              = new File(Environment.getExternalStorageDirectory(), ("despat"));
-
-    // keep the camera alive permanently and do not close and reinit
-    // for every capture.
-    // Does not allow the device to sleep in between captures
-    public static final boolean DEFAULT_PERSISTENT_CAMERA           = true;
-    public static final boolean DEFAULT_LEGACY_CAMERA_CONTROLLER    = false;
-    // if PERSISTENT_CAMERA is _disabled_ DEFAULT_SHUTTER_INTERVAL should not be
-    // shorter than 6s (5s is android minimum and a few extra ms are needed for
-    // compensation of scheduling irregularities)
-    // if PERSISTENT_CAMERA is _enabled_ DEFAULT_SHUTTER_INTERVAL can be shorter than 6s.
-    public static final int DEFAULT_SHUTTER_INTERVAL                = 10 * 1000; // in ms
-
-    public static final boolean DEFAULT_PHONE_HOME                  = false;
-    public static final String DEFAULT_SERVER_ADDRESS               = "http://zoltep.de";   // format protocol://example.com
-    public static final long DEFAULT_MIN_SYNC_INTERVAL              = 5 * 60 * 1000;        // at most every X ms
-    public static final long DEFAULT_HEARTBEAT_INTERVAL             = 15 * 60 * 1000L;      // Minimum interval is 15m
-    public static final long DEFAULT_UPLOAD_INTERVAL                = 15 * 60 * 1000L;
-
-
     public static final String KEY_DEVICE_NAME                      = "de.volzo.despat.deviceName";
+
+    public static String getDeviceName(Context context) {
+        return getProperty(context, KEY_DEVICE_NAME, DEFAULT_DEVICE_NAME);
+    }
+    public static void setDeviceName(Context context, String deviceName) {
+        setProperty(context, KEY_DEVICE_NAME, deviceName);
+    }
+
+    /**
+     * RESUME AFTER REBOOT
+     */
+    public static final boolean DEFAULT_RESUME_AFTER_REBOOT         = true;
     public static final String KEY_RESUME_AFTER_REBOOT              = "de.volzo.despat.resumeAfterReboot";
+
+    public static boolean getResumeAfterReboot(Context context) {
+        return getPropertyBoolean(context, KEY_RESUME_AFTER_REBOOT, DEFAULT_RESUME_AFTER_REBOOT);
+    }
+    public static void setResumeAfterReboot(Context context, boolean resumeAfterReboot) {
+        setProperty(context, KEY_RESUME_AFTER_REBOOT, resumeAfterReboot);
+    }
+
+    /**
+     * WORKING DIRECTORY
+     */
+    public static final File DEFAULT_WORKING_DIRECTORY              = new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final String KEY_WORKING_DIRECTORY                = "de.volzo.despat.workingDirectory";
 
+    /**
+     * PERSISTENT CAMERA
+     *
+     * keep the camera alive permanently and do not close and reinit
+     * for every capture.
+     * Does not allow the device to sleep in between captures
+     */
+    public static final boolean DEFAULT_PERSISTENT_CAMERA           = true;
     public static final String KEY_PERSISTENT_CAMERA                = "de.volzo.despat.persistentCamera";
+
+    public static final boolean getPersistentCamera(Context context) {
+        return getPropertyBoolean(context, KEY_PERSISTENT_CAMERA, DEFAULT_PERSISTENT_CAMERA);
+    }
+
+    /**
+     * LEGACY CAMERA CONTROLLER
+     */
+    public static final boolean DEFAULT_LEGACY_CAMERA_CONTROLLER    = false;
     public static final String KEY_LEGACY_CAMERA_CONTROLLER         = "de.volzo.despat.legacyCameraController";
+
+    public static final boolean getLegacyCameraController(Context context) {
+        return getPropertyBoolean(context, KEY_LEGACY_CAMERA_CONTROLLER, DEFAULT_LEGACY_CAMERA_CONTROLLER);
+    }
+
+    /**
+     * SHUTTER INTERVAL
+     *
+     * if PERSISTENT_CAMERA is _disabled_ DEFAULT_SHUTTER_INTERVAL should not be
+     * shorter than 6s (5s is android minimum and a few extra ms are needed for
+     * compensation of scheduling irregularities)
+     * if PERSISTENT_CAMERA is _enabled_ DEFAULT_SHUTTER_INTERVAL can be shorter than 6s.
+     */
+    public static final int DEFAULT_SHUTTER_INTERVAL                = 10 * 1000; // in ms
     public static final String KEY_SHUTTER_INTERVAL                 = "de.volzo.despat.shutterInterval";
 
+    public static int getShutterInterval(Context context) {
+        return getPropertyInt(context, KEY_SHUTTER_INTERVAL, DEFAULT_SHUTTER_INTERVAL);
+    }
+
+    public static void setShutterInterval(Context context, int shutterInterval) {
+        setProperty(context, KEY_SHUTTER_INTERVAL, shutterInterval);
+    }
+
+    /**
+     * PHONE HOME
+     */
+    public static final boolean DEFAULT_PHONE_HOME                  = false;
     public static final String KEY_PHONE_HOME                       = "de.volzo.despat.phoneHome";
+
+    public static final boolean getPhoneHome(Context context) {
+        return getPropertyBoolean(context, KEY_PHONE_HOME, DEFAULT_PHONE_HOME);
+    }
+
+    /**
+     * SERVER ADDRESS
+     */
+    public static final String DEFAULT_SERVER_ADDRESS               = "http://zoltep.de";   // format protocol://example.com
     public static final String KEY_SERVER_ADDRESS                   = "de.volzo.despat.serverAddress";
+
+    public static String getServerAddress(Context context) {
+        return getProperty(context, KEY_SERVER_ADDRESS, DEFAULT_SERVER_ADDRESS);
+    }
+
+    public static void setServerAddress(Context context, String serverAddress) {
+        setProperty(context, KEY_SERVER_ADDRESS, serverAddress);
+    }
+
+    /**
+     * MIN SYNC INTERVAL
+     */
+    public static final long DEFAULT_MIN_SYNC_INTERVAL              = 5 * 60 * 1000;        // at most every X ms
     public static final String KEY_MIN_SYNC_INTERVAL                = "de.volzo.despat.minSyncInterval";
+
+    public static long getMinSyncInterval(Context context) {
+        return getPropertyLong(context, KEY_MIN_SYNC_INTERVAL, DEFAULT_MIN_SYNC_INTERVAL);
+    }
+
+    public static void setMinSyncInterval(Context context, long minSyncInterval) {
+        setProperty(context, KEY_MIN_SYNC_INTERVAL, minSyncInterval);
+    }
+
+    /**
+     * HEARTBEAT INTERVAL
+     */
+    public static final long DEFAULT_HEARTBEAT_INTERVAL             = 15 * 60 * 1000L;      // Minimum interval is 15m
     public static final String KEY_HEARTBEAT_INTERVAL               = "de.volzo.despat.heartbeatInterval";
+
+    public static long getHeartbeatInterval(Context context) {
+        return getPropertyLong(context, KEY_HEARTBEAT_INTERVAL, DEFAULT_HEARTBEAT_INTERVAL);
+    }
+
+    public static void setHeartbeatInterval(Context context, String heartbeatInterval) {
+        setProperty(context, KEY_HEARTBEAT_INTERVAL, heartbeatInterval);
+    }
+
+    /**
+     * UPLOAD INTERVAL
+     */
+    public static final long DEFAULT_UPLOAD_INTERVAL                = 15 * 60 * 1000L;
     public static final String KEY_UPLOAD_INTERVAL                  = "de.volzo.despat.uploadInterval";
 
+    public static long getUploadInterval(Context context) {
+        return getPropertyLong(context, KEY_UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL);
+    }
+
+    public static void setUploadInterval(Context context, String uploadInterval) {
+        setProperty(context, KEY_UPLOAD_INTERVAL, uploadInterval);
+    }
+
+    public static String sanityCheckUploadInterval(Context context) {
+        long value = getUploadInterval(context);
+
+        if (value < 15 * 60 * 1000) {
+            return "Image upload interval is shorter than 15 minutes";
+        }
+
+        return null;
+    }
+
+    /**
+     * KEY LAST SYNC
+     */
     public static final String KEY_LAST_SYNC                        = "de.volzo.despat.lastSync";
+
+    public static Date getLastSync(Context context) {
+        return getPropertyDate(context, KEY_LAST_SYNC, null);
+    }
+
+    public static void setLastSync(Context context, Date lastSync) {
+        setPropertyDate(context, KEY_LAST_SYNC, lastSync);
+    }
+
+    /**
+     * IMAGE FOLDER
+     */
     public static final String KEY_IMAGE_FOLDER                     = "de.volzo.despat.imageFolder";
+
+    public static File getImageFolder(Context context) {
+        return new File(getProperty(context, KEY_IMAGE_FOLDER, DEFAULT_WORKING_DIRECTORY.getAbsolutePath()));
+    }
+
+    public static void setImageFolder(Context context, String imageFolder) {
+        setProperty(context, KEY_IMAGE_FOLDER, imageFolder);
+    }
+
+    /**
+     * NEXT SHUTTER INVOCATION
+     */
     public static final String KEY_NEXT_SHUTTER_SERVICE_INVOCATION  = "de.volzo.despat.nextShutterServiceInvocation";
 
+    public static long getNextShutterServiceInvocation(Context context) {
+        return getPropertyLong(context, KEY_NEXT_SHUTTER_SERVICE_INVOCATION, -1);
+    }
 
+    public static void setNextShutterServiceInvocation(Context context, long timestamp) {
+        setProperty(context, KEY_NEXT_SHUTTER_SERVICE_INVOCATION, timestamp);
+    }
 
-
-
-
-    /*
-    image folder
-    store images?
-    image rollover number
-
-    powerbrain
-        usb device id
-        baud rate
-
-    intervals
-        image taking interval
-        server reporting interval
-
-    */
+    // ---------------------------------------------------------------------------------------------
 
     public static void init(Context context) {
 
@@ -256,16 +385,6 @@ public class Config {
         return null;
     }
 
-    public static String sanityCheckUploadInterval(Context context) {
-        long value = getUploadInterval(context);
-
-        if (value < 15 * 60 * 1000) {
-            return "Image upload interval is shorter than 15 minutes";
-        }
-
-        return null;
-    }
-
     // ----
 
     private static void setProperty(Context context, String key, String value) {
@@ -335,90 +454,6 @@ public class Config {
     }
 
     // ---
-
-    public static String getDeviceName(Context context) {
-        return getProperty(context, KEY_DEVICE_NAME, android.os.Build.MODEL);
-    }
-
-    public static void setDeviceName(Context context, String deviceName) {
-        setProperty(context, KEY_DEVICE_NAME, deviceName);
-    }
-
-    public static final boolean getPersistentCamera(Context context) {
-        return getPropertyBoolean(context, KEY_PERSISTENT_CAMERA, DEFAULT_PERSISTENT_CAMERA);
-    }
-
-    public static long getShutterInterval(Context context) {
-        return getPropertyLong(context, KEY_SHUTTER_INTERVAL, DEFAULT_SHUTTER_INTERVAL);
-    }
-
-    public static void setShutterInterval(Context context, long shutterInterval) {
-        setProperty(context, KEY_SHUTTER_INTERVAL, shutterInterval);
-    }
-
-    public static File getImageFolder(Context context) {
-        return new File(getProperty(context, KEY_IMAGE_FOLDER, DEFAULT_WORKING_DIRECTORY.getAbsolutePath()));
-    }
-
-    public static void setImageFolder(Context context, String imageFolder) {
-        setProperty(context, KEY_IMAGE_FOLDER, imageFolder);
-    }
-
-    public static String getServerAddress(Context context) {
-        return getProperty(context, KEY_SERVER_ADDRESS, DEFAULT_SERVER_ADDRESS);
-    }
-
-    public static void setServerAddress(Context context, String serverAddress) {
-        setProperty(context, KEY_SERVER_ADDRESS, serverAddress);
-    }
-
-    public static long getHeartbeatInterval(Context context) {
-        return getPropertyLong(context, KEY_HEARTBEAT_INTERVAL, DEFAULT_HEARTBEAT_INTERVAL);
-    }
-
-    public static void setHeartbeatInterval(Context context, String heartbeatInterval) {
-        setProperty(context, KEY_HEARTBEAT_INTERVAL, heartbeatInterval);
-    }
-
-    public static long getUploadInterval(Context context) {
-        return getPropertyLong(context, KEY_UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL);
-    }
-
-    public static void setUploadInterval(Context context, String uploadInterval) {
-        setProperty(context, KEY_UPLOAD_INTERVAL, uploadInterval);
-    }
-
-    public static boolean getResumeAfterReboot(Context context) {
-        return getPropertyBoolean(context, KEY_RESUME_AFTER_REBOOT, DEFAULT_RESUME_AFTER_REBOOT);
-    }
-
-    public static void setResumeAfterReboot(Context context, boolean resumeAfterReboot) {
-        setProperty(context, KEY_RESUME_AFTER_REBOOT, resumeAfterReboot);
-    }
-
-    public static Date getLastSync(Context context) {
-        return getPropertyDate(context, KEY_LAST_SYNC, null);
-    }
-
-    public static void setLastSync(Context context, Date lastSync) {
-        setPropertyDate(context, KEY_LAST_SYNC, lastSync);
-    }
-
-    public static long getMinSyncInterval(Context context) {
-        return getPropertyLong(context, KEY_MIN_SYNC_INTERVAL, DEFAULT_MIN_SYNC_INTERVAL);
-    }
-
-    public static void setMinSyncInterval(Context context, long minSyncInterval) {
-        setProperty(context, KEY_MIN_SYNC_INTERVAL, minSyncInterval);
-    }
-
-    public static long getNextShutterServiceInvocation(Context context) {
-        return getPropertyLong(context, KEY_NEXT_SHUTTER_SERVICE_INVOCATION, -1);
-    }
-
-    public static void setNextShutterServiceInvocation(Context context, long timestamp) {
-        setProperty(context, KEY_NEXT_SHUTTER_SERVICE_INVOCATION, timestamp);
-    }
 
     public static void validate() throws Exception {
 

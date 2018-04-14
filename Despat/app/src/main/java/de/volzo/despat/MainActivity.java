@@ -222,10 +222,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
         sendBroadcast(heartbeatIntent);
 
-        Intent uploadIntent = new Intent(activity, Orchestrator.class);
-        uploadIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
-        uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
-        sendBroadcast(uploadIntent);
+        if (Config.getPhoneHome(this)) {
+            Intent uploadIntent = new Intent(activity, Orchestrator.class);
+            uploadIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
+            uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
+            sendBroadcast(uploadIntent);
+        }
 
         ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1 * 60);
 
@@ -234,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         updatePreviewImage();
 
 
-        btSettings.callOnClick();
+//        btSettings.callOnClick();
 
 //        try {
 //            detector = new DetectorSSD(activity);

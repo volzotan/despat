@@ -18,6 +18,7 @@ public class SettingsActivity2 extends Activity {
         super.onCreate(savedInstanceState);
 
         // TODO: lock access to settings if a RecordingSession is active
+//        Config.reset(this);
 
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()

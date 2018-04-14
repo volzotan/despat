@@ -137,7 +137,7 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
                         break;
                     case Config.KEY_SHUTTER_INTERVAL:
                         try {
-                            Config.setShutterInterval(activity, Long.parseLong(value));
+                            Config.setShutterInterval(activity, Integer.parseInt(value));
                         } catch (NumberFormatException e) {
                             Toast.makeText(activity, "not a number", Toast.LENGTH_SHORT);
                         }
