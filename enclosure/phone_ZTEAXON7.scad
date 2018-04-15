@@ -28,7 +28,7 @@ module cavity(height) {
             }
         
             points_cav = [[0, 0], [-2, height+0.2], [2, height+0.2], [2, 0]];
-            translate([-1, size[1]-1.7, -.1]) rotate([90, 0, 90]) linear_extrude(height=200) polygon(points_cav);
+            translate([-1, size[1]-1.9, -.1]) rotate([90, 0, 90]) linear_extrude(height=200) polygon(points_cav);
         }
         
         translate([-10, -0.5]) cube([15, size[1]-1-2, height]);

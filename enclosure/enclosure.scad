@@ -721,7 +721,7 @@ module bottom() {
             
             // tripod screw holder
             translate([sizeBot[0]/2-45/2, +1]) hull() {
-                points_h = [[0, 0], [2+1, -(3+1)], [45-(2+1), -(3+1)], [45, 0]];
+                points_h = [[0, 0], [2+1, -5], [45-(2+1), -5], [45, 0]];
                 rotate([]) linear_extrude(height=18) polygon(points_h);
                 
                 a=1.5;
@@ -750,12 +750,12 @@ module bottom() {
 //        }
         
         // tripod socket holes
-        translate([sizeBot[0]/2, -3+(3*0.4+0.1), -1]) rotate([0, 90, 90]) hull() {
-            depth = 4.7+0.3;
+        translate([sizeBot[0]/2, -4+(4*0.4+0.1), -1]) rotate([0, 90, 90]) hull() {
+            depth = 4.7+0.5;
             cylinder($fn=6, h=depth, d=13.2); 
-            translate([-9, 0]) cylinder($fn=6, h=depth, d=13.2); 
+            translate([-9-1-0.2, 0]) cylinder($fn=6, h=depth, d=13.2); 
         }
-        translate([sizeBot[0]/2, -6.7+1, 9]) rotate([0, 90, 90]) cylinder($fn=32, h=10, d=7);
+        color("red") translate([sizeBot[0]/2, -6.7+1, 9]) rotate([0, 90, 90]) cylinder($fn=32, h=10, d=7);
         
         // rotation clamp holes
         if (screw_inset) {
