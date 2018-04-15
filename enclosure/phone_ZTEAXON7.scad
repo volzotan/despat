@@ -40,7 +40,13 @@ module cavity(height) {
         translate([75, -4, 0]) cube([48, 5, height]);
         
         // wedge nudge
-        translate([38, -10-1, -1]) cube([30, 10, 20]);
-        translate([38, -10+1, 0]) cube([30, 10, 20]);
+        difference() {
+            union() {
+                translate([38, -10-1, -1]) cube([30, 10, 20]);
+                translate([38, -10+1, 0]) cube([30, 10, 20]);
+            }
+            translate([38, -4, 4]) rotate([90, 0, 90]) cylinder($fn=32, d1=3, d=2, h=0.5);
+            translate([38+30, -4, 4]) rotate([90, 0, -90]) cylinder($fn=32, d1=3, d=2, h=0.5);
+        }
     }
 }

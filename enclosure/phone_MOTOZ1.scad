@@ -37,7 +37,13 @@ module cavity(height) {
         translate([24, 11, -0.6]) rotate([0, 0, 0]) linear_extrude(height=10) color("DarkRed") text("MOTO Z1");
 
         // wedge nudge
-        translate([38, -10-1, 0]) cube([30, 10, 20]);
-        translate([38, -10+1, 0+1]) cube([30, 10, 20]);
+        difference() {
+            union() {
+                translate([38, -10-1, 0]) cube([30, 10, 20]);
+                translate([38, -10+1, 0+1]) cube([30, 10, 20]);
+            }
+            translate([38, -3.5, 5]) rotate([90, 0, 90]) cylinder($fn=32, d1=3, d=2, h=0.5);
+            translate([38+30, -3.5, 5]) rotate([90, 0, -90]) cylinder($fn=32, d1=3, d=2, h=0.5);
+        }
     }
 }

@@ -25,7 +25,7 @@ module hinge_bottom(screwed=false) {
             translate([-z_offset, 0, -1+3*2 + hingeTol*2]) cylinder($fn=64, d=diam, h=5);
             translate([-z_offset, 0, 3*4 + 2 + hingeTol*4]) cylinder($fn=64, d=diam, h=4+2);
               
-            points = [[red-z_offset-1, diam/2], [3.54-z_offset, -3.54], [13.5, 5.5], [0.5+red-z_offset-1, 5.5]];
+            points = [[red-z_offset-1-1.5, diam/2-0.675], [3.54-z_offset, -3.54], [13.5, 5.5], [0.5+red-z_offset-1, 5.5]];
             color("red") translate([0, 0, -5]) linear_extrude(height=2*2 + 5*3 + 6 + hingeTol*4) polygon(points);
 
             if (screwed) {

@@ -25,7 +25,7 @@ w          = 2.4+.1; //3.2+.1;
 wb         = 1.2;
 
 seal_thickness = 1; // private
-heat_inset_diam = 4.2;
+heat_inset_diam = 4.1;
 
 screw_inset     = false;
 heat_inset      = true;
@@ -133,19 +133,19 @@ include<phone_ZTEAXON7.scad>;
 
 // --------------------------- TEST3 ---------------------------
 
-bottom();
+//bottom();
 //translate([0, 0, 50]) color("blue") phone();
 //translate([0, sizeTopF[1], sizeBot[2] + sizeTopF[2] + 0.2]) rotate([180, 0, 0]) top_flat();
 //translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
 //
 //translate([20, -0.1, 12+13.2]) rotate([90, 180, 0]) color("purple") {
-//    latch(distance=-1.3);
-//    translate([0, 14.5-1.3, 0]) latch_knob();
+//   latch(distance=-1.3);
+//   translate([0, 14.5-1.3, 0]) latch_knob();
 //}
 //
 //translate([sizeBot[0]-20, -0.1, 12+13.2]) rotate([90, 180, 0]) color("purple") {
-//    latch(distance=-1.3);
-//    translate([0, 14.5-1.3, 0]) latch_knob();
+//   latch(distance=-1.3);
+//   translate([0, 14.5-1.3, 0]) latch_knob();
 //}
 
 //translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
@@ -160,18 +160,18 @@ bottom();
 //seal2D();
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal_cutout();
 //
-//translate([0, 0]) {
-//    latch(distance=-1.7); 
-//    translate([0, 14.5-1.7, 0]) latch_knob();
-//}
-//translate([13, 0]){
-//    latch(distance=-1.7); 
-//    translate([0, 14.5-1.7, 0]) latch_knob();
-//}
+translate([0, 0]) {
+    latch(distance=-1.7); 
+    translate([0, 14.5-1.7, 0]) latch_knob();
+}
+translate([13, 0]) mirror([1, 0]) {
+    latch(distance=-1.7); 
+    translate([0, 14.5-1.7, 0]) latch_knob();
+}
 //translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
 //
-//translate([33, 20, 5.5]) rotate([90, 180, 0]) mirror([0, 0]) hinge_bottom(screwed=true);
-//translate([33, 55, 5.5]) rotate([90, 180, 0]) mirror([1, 0]) hinge_bottom(screwed=true);
+translate([33, 20, 5.5]) rotate([90, 180, 0]) mirror([0, 0]) hinge_bottom(screwed=true);
+translate([37, 48, 5.5]) rotate([90, 180, 0]) mirror([1, 0]) hinge_bottom(screwed=true);
 //
 //translate([20, 0, 0.3+12.5]) rotate([180, 0]) wedge();
 
