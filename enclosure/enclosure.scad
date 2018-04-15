@@ -34,15 +34,11 @@ seal_hard       = false;
 seal_rubber     = true;
 seal_flex       = false;
 
-// LG Nexus 5   ->
-// ZTE Axon 7   ->
-// Moto E       -> 
-// Moto Z       -> oversized-short
-
 //include<phone_NEXUS5.scad>;
 //include<phone_MOTOE2.scad>;
-include<phone_MOTOZ1.scad>;
-//include<phone_ZTEAXON7.scad>;
+//include<phone_MOTOZ1.scad>;
+include<phone_ZTEAXON7.scad>;
+//include<phone_GENERIC.scad>;
 
 
 //translate([11, 11, 8]) motoE();
@@ -759,7 +755,7 @@ module bottom() {
             cylinder($fn=6, h=depth, d=13.2); 
             translate([-9, 0]) cylinder($fn=6, h=depth, d=13.2); 
         }
-        translate([sizeBot[0]/2, -3.3-1, 9]) rotate([0, 90, 90]) cylinder($fn=32, h=10, d=7);
+        translate([sizeBot[0]/2, -6.7+1, 9]) rotate([0, 90, 90]) cylinder($fn=32, h=10, d=7);
         
         // rotation clamp holes
         if (screw_inset) {
