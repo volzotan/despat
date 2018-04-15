@@ -33,6 +33,7 @@ import android.util.Size;
 import android.util.SizeF;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.WindowManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -281,10 +282,21 @@ public class CameraController2 extends CameraController {
                 // TODO: move to a non-callback/run-on-main-thread section of code
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     public void run() {
+
+                        WindowManager windowService = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                        int currentRotation = windowService.getDefaultDisplay().getRotation();
+
                         Matrix mat = new Matrix();
                         mat.postScale(height / (float) width, width / (float) height);
-                        mat.postRotate(-90);
-                        mat.postTranslate(0, textureView.getHeight());
+
+                        if (Surface.ROTATION_90 == currentRotation) {
+                            mat.postRotate(-90);
+                            mat.postTranslate(0, textureView.getHeight());
+                        } else if (Surface.ROTATION_270 == currentRotation) {
+                            mat.postRotate(90);
+                            mat.postTranslate(textureView.getWidth(), 0);
+                        }
+
                         textureView.setTransform(mat);
                     }
                 });
