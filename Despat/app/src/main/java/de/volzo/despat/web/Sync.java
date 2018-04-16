@@ -32,6 +32,11 @@ public class Sync {
 
     public static synchronized void run(Context context, Class trigger, boolean ignoreMinSyncTime) {
 
+        if (!Config.getPhoneHome(context)) {
+            Log.d(TAG, "sync stopped. phoneHome set to false");
+            return;
+        }
+
         Date lastSync = Config.getLastSync(context);
         if (ignoreMinSyncTime == false && lastSync != null) {
             long diff = Calendar.getInstance().getTime().getTime() - lastSync.getTime();

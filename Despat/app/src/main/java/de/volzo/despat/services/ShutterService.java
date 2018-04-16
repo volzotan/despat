@@ -125,7 +125,6 @@ public class ShutterService extends Service {
 
         if (Config.getPersistentCamera(context)) {
             despat.acquireWakeLock(false);
-            handler.postDelayed(shutterReleaseRunnable, 5000);
 
             // start and release shutter
             try {
@@ -194,7 +193,9 @@ public class ShutterService extends Service {
                 Log.d(TAG, "delay: " + delay);
                 handler.postDelayed(shutterReleaseRunnable, delay);
 
-                Config.setNextShutterServiceInvocation(context, nextExecution);
+                // TODO: runs in different process. sharedPref can not be written and access from the
+                // ui thread
+//                Config.setNextShutterServiceInvocation(context, nextExecution);
 
                 if (Config.RERUN_METERING_BEFORE_CAPTURE) {
                     try {
@@ -240,6 +241,11 @@ public class ShutterService extends Service {
         @Override
         public void cameraReady(CameraController camera) {
             Log.d(TAG, ":: cameraReady");
+
+            if (Config.getPersistentCamera(context)) {
+                handler.post(shutterReleaseRunnable);
+                return;
+            }
 
             try {
                 camera.startMetering();

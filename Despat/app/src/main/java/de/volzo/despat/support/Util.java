@@ -48,6 +48,7 @@ import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
+import de.volzo.despat.preferences.Config;
 
 import static android.content.Context.ACCOUNT_SERVICE;
 
