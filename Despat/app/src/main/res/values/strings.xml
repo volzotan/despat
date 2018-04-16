@@ -6,11 +6,11 @@
     <!-- Strings related to Settings -->
 
     <string name="pref_title_deviceName">device name</string>
-    <string name="pref_summary_deviceName">human readable name to identify this phone</string>
+    <string name="pref_summary_deviceName">human readable name to identify this phone: %s</string>
     <string name="pref_title_resumeAfterReboot">Resume After Reboot</string>
-    <string name="pref_summary_resumeAfterReboot">...</string>
+    <string name="pref_summary_resumeAfterReboot">Continue capturing if the phone crashed</string>
     <string name="pref_title_workingDirectory">Working Directory</string>
-    <string name="pref_summary_workingDirectory">...</string>
+    <string name="pref_summary_workingDirectory">Where to save logs and output data</string>
 
     <string name="pref_title_persistentCamera">persistent camera</string>
     <string name="pref_summary_persistentCamera">
@@ -23,11 +23,11 @@
         This may solve compatibility issues on some older phones.
     </string>
     <string name="pref_title_shutterInterval">shutter interval</string>
-    <string name="pref_summary_shutterInterval">capture image every X milliseconds (1000ms = 1s)</string>
+    <string name="pref_summary_shutterInterval">capture image every: %d milliseconds</string>
 
     <string name="pref_title_phoneHome">data upload</string>
     <string name="pref_summary_phoneHome">upload data to the server</string>
     <string name="pref_title_serverAddress">server address</string>
-    <string name="pref_summary_serverAddress">servpat URL</string>
+    <string name="pref_summary_serverAddress">%s</string>
 
 </resources>

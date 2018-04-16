@@ -30,6 +30,13 @@
             android:layout_weight="1"
             android:text="image_view" />
 
+        <de.volzo.despat.DrawSurface
+            android:id="@+id/drawSurface"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:text="draw_surface" />
+
         <TextView
             android:id="@+id/tv_status"
             android:padding="5dp"
