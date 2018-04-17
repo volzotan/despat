@@ -217,7 +217,8 @@ public class Util {
         File logFile = null;
 
         if (sessionName != null) {
-            logFile = new File(logDirectory, "logcat_" + sessionName + ".txt");
+            DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT_LOGFILE, new Locale("de", "DE"));
+            logFile = new File(logDirectory, "logcat_" + sessionName + "_" + dateFormat.format(Calendar.getInstance().getTime()) + ".txt");
         } else {
             DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT_LOGFILE, new Locale("de", "DE"));
             logFile = new File(logDirectory, "logcat_" + dateFormat.format(Calendar.getInstance().getTime()) + ".txt");
@@ -293,15 +294,6 @@ public class Util {
 
         ContentResolver.requestSync(syncAccount, Config.SYNC_AUTHORITY, settingsBundle);
         Log.i(TAG, "MANUAL SYNC REQUESTED");
-    }
-
-    public static void purgeDatabase(Context context) {
-        AppDatabase db = AppDatabase.getAppDatabase(context);
-
-        db.eventDao().dropTable();
-        db.captureDao().dropTable();
-        db.sessionDao().dropTable();
-        db.statusDao().dropTable();
     }
 
     public static void sleep(int millis) {

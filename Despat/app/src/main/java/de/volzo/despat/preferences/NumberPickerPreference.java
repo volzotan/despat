@@ -19,7 +19,7 @@ public class NumberPickerPreference extends DialogPreference {
 
     private NumberPicker picker;
 
-    private int minValue = 0;
+    private int minValue = -1;
     private int maxValue = 100;
     private float factor = 1;
     private int defaultValue;

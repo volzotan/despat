@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
+import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
@@ -185,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
                 sendBroadcast(killIntent);
 
-                Util.purgeDatabase(activity);
+                AppDatabase.purgeDatabase(activity);
                 Config.reset(activity);
 
                 Log.i(TAG, "KILL: db purged. now attempting reboot!");
@@ -469,6 +470,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 sb.append(" | ");
                 sb.append("images: ");
                 sb.append(session.getImagesTaken());
+
+                int errors = session.getErrors();
+                if (errors > 0) {
+                    sb.append(" | ");
+                    sb.append("errors: ");
+                    sb.append(errors);
+                }
             } else {
                 activeSession = false;
             }

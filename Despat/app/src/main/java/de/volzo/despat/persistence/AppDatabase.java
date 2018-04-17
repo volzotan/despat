@@ -13,6 +13,7 @@ import android.content.Context;
 @Database(entities = {  Status.class,
                         Session.class,
                         Capture.class,
+                        Error.class,
                         Position.class,
                         Event.class},
                         version = 1)
@@ -26,6 +27,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract StatusDao statusDao();
     public abstract SessionDao sessionDao();
     public abstract CaptureDao captureDao();
+    public abstract ErrorDao errorDao();
     //public abstract PositionDao positionDao();
     public abstract EventDao eventDao();
 
@@ -40,6 +42,16 @@ public abstract class AppDatabase extends RoomDatabase {
                             .build();
         }
         return INSTANCE;
+    }
+
+    public static void purgeDatabase(Context context) {
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+
+        db.eventDao().dropTable();
+        db.errorDao().dropTable();
+        db.captureDao().dropTable();
+        db.sessionDao().dropTable();
+        db.statusDao().dropTable();
     }
 
     public static void destroyInstance() {

@@ -56,6 +56,11 @@ public class CameraController1 extends CameraController implements Camera.Previe
                 return;
             }
 
+            if (camera == null) {
+                Log.w(TAG, "camera killed without cancelling delayed task");
+                return;
+            }
+
             Log.d(TAG, "AF end by timeout");
             camera.cancelAutoFocus();
             autoFocusResult = false;

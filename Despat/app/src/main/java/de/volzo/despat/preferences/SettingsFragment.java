@@ -91,7 +91,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         prefShutterInterval.setKey(Config.KEY_SHUTTER_INTERVAL);
         category.addPreference(prefShutterInterval);
 
-
         // SERVER ----------------------------------------------------------------------------------
 
         category = new PreferenceCategory(context);

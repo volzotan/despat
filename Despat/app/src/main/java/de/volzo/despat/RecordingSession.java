@@ -6,6 +6,8 @@ import android.location.Location;
 import android.util.Log;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.List;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
+import de.volzo.despat.persistence.Error;
+import de.volzo.despat.persistence.ErrorDao;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
@@ -227,9 +231,8 @@ public class RecordingSession {
             Date now = Calendar.getInstance().getTime();
             long diff = now.getTime() - lastCap.getRecordingTime().getTime();
 
-            long maxDiff = Config.getShutterInterval(context) * 1000 + 3 * 1000;
+            long maxDiff = Config.getShutterInterval(context) + 3 * 1000;
             if (diff > maxDiff) {
-                //Util.saveEvent(context, Event.EventType.ERROR, "irregular capture pattern");
                 Util.saveEvent(context, Event.EventType.SCHEDULE_GLITCH, null);
             }
         }
@@ -242,6 +245,30 @@ public class RecordingSession {
         captureDao.insert(capture);
     }
 
+    public void addError(String desc, Throwable e) throws NotRecordingException {
+        if (!isActive()) throw new NotRecordingException();
+
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        ErrorDao errorDao = db.errorDao();
+
+        Error error = new Error();
+        error.setSessionId(session.getId());
+        error.setOccurenceTime(Calendar.getInstance().getTime());
+
+        error.setDescription(desc);
+
+        if (e != null) {
+            error.setType(e.toString());
+
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            error.setStacktrace(sw.toString());
+        }
+
+        errorDao.insert(error);
+    }
+
     public int getImagesTaken() {
         if (!isActive()) return -1;
 
@@ -250,6 +277,16 @@ public class RecordingSession {
         int numberImagesTaken = sessionDao.getNumberOfCaptures(session.getId());
 
         return numberImagesTaken;
+    }
+
+    public int getErrors() {
+        if (!isActive()) return -1;
+
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+        int numberErrors = sessionDao.getNumberOfErrors(session.getId());
+
+        return numberErrors;
     }
 
     public boolean checkForIntegrity() {

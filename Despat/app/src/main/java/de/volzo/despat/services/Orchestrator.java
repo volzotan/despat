@@ -106,7 +106,25 @@ public class Orchestrator extends BroadcastReceiver {
 
                         ArrayList<String> addInfo = new ArrayList<>();
                         addInfo.add(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), false));
-                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), 0, addInfo);
+                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), addInfo);
+                    } catch (RecordingSession.NotRecordingException nre) {
+                        Log.w(TAG, "resuming recording session failed");
+                    }
+
+                    break;
+
+                case Broadcast.ERROR_OCCURED:
+                    try {
+                        RecordingSession session = RecordingSession.getInstance(context);
+                        if (session == null) {
+                            Log.w(TAG, "error occured while no recordingSession is active");
+                            break;
+                        }
+                        String desc = intent.getStringExtra(Broadcast.DATA_DESCRIPTION);
+                        Throwable e = null; //intent.getParcelableExtra(Broadcast.DATA_THROWABLE);
+                        session.addError(desc, e);
+
+                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), null);
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
