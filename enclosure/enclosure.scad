@@ -363,6 +363,16 @@ module socket_flat() {
     }
 }
 
+module socket_nut_wedge() {
+    
+    tol = 0.1;
+    
+    translate([-5.7+tol, -tol, +0.2]) difference() {
+        translate([0, 0, -0.2]) cube([11.4-2*tol, 5.2-2*tol, 10]);
+        translate([5.7, -1, 9-.2]) rotate([0, 90, 90]) cylinder($fn=6, h=10, d=13.2); 
+    }
+}
+
 module seal() {
     height = 1;
     
