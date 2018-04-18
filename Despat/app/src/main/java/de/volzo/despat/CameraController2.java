@@ -156,11 +156,8 @@ public class CameraController2 extends CameraController {
 
             try {
                 createCaptureSession();
-            } catch (CameraAccessException e) {
-                Log.e(TAG, e.getMessage());
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
-
                 reportFailAndClose("creating capture session failed", e);
             }
 
@@ -276,15 +273,15 @@ public class CameraController2 extends CameraController {
             surface = new Surface(surfaceTexture);
             outputSurfaces.add(surface);
 
+            WindowManager windowService = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            final int currentRotation = windowService.getDefaultDisplay().getRotation();
+
             if (textureView != null) {
                 // Lowly camera API developers haven't deemed it necessary to integrate automatic screen rotation and aspect ratio
 
                 // TODO: move to a non-callback/run-on-main-thread section of code
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     public void run() {
-
-                        WindowManager windowService = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                        int currentRotation = windowService.getDefaultDisplay().getRotation();
 
                         Matrix mat = new Matrix();
                         mat.postScale(height / (float) width, width / (float) height);
@@ -308,6 +305,25 @@ public class CameraController2 extends CameraController {
             stillRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             if (Config.FORMAT_JPG) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
             if (Config.FORMAT_RAW) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
+
+            int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) * -1;
+
+            int deviceOrientationInDegree;
+            if (currentRotation == Surface.ROTATION_0) {
+                deviceOrientationInDegree = 0;
+            } else if (currentRotation == Surface.ROTATION_90) {
+                deviceOrientationInDegree = 90;
+            } else if (currentRotation == Surface.ROTATION_180) {
+                deviceOrientationInDegree = 180;
+            } else if (currentRotation == Surface.ROTATION_270) {
+                deviceOrientationInDegree = 270;
+            } else {
+               throw new Exception("unexpected device orientation");
+            }
+
+            int photoOrientation = (sensorOrientation + deviceOrientationInDegree + 360) % 360;
+
+            stillRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, photoOrientation);
 
             // enable lens shading correction for the RAW output
             stillRequestBuilder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_HIGH_QUALITY);
