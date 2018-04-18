@@ -116,8 +116,10 @@ public class Despat extends Application {
 
     public CameraController initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {
         if (Config.getLegacyCameraController(context)) {
+            Log.d(TAG, "initializing camera controller 1");
             this.camera = new CameraController1(context, controllerCallback, textureView);
         } else {
+            Log.d(TAG, "initializing camera controller 2");
             this.camera = new CameraController2(context, controllerCallback, textureView);
         }
 

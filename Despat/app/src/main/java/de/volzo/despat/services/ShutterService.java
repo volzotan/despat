@@ -136,18 +136,20 @@ public class ShutterService extends Service {
 
         if (Config.getPersistentCamera(context)) {
             despat.acquireWakeLock(false);
-        }
 
-        try {
-            startCamera();
-        } catch (Exception e) {
-            state = STATE_ERROR;
-            eventMalfunction("error during opening camera", e);
+            try {
+                startCamera();
+            } catch (Exception e) {
+                state = STATE_ERROR;
+                eventMalfunction("error during opening camera", e);
 
-            // if the service fails to start correctly
-            // it should not be restarted automatically
+                // if the service fails to start correctly
+                // it should not be restarted automatically
 
-            return START_NOT_STICKY;
+                return START_NOT_STICKY;
+            }
+        } else {
+            handler.post(shutterReleaseRunnable);
         }
 
         return START_STICKY;
@@ -280,14 +282,7 @@ public class ShutterService extends Service {
             }
 
         } else {
-            try {
-                state = STATE_BUSY;
-                camera.startMetering();
-            } catch (Exception e) {
-                state = STATE_ERROR;
-                eventMalfunction("metering failed: + ", e);
-                // no restart
-            }
+            triggerCamera();
         }
     }
 
@@ -295,7 +290,7 @@ public class ShutterService extends Service {
         state = STATE_CAMERA_READY;
 
         if (!Config.getPersistentCamera(context)) {
-            shutdownService();
+            shutdownCamera();
         }
     }
 
