@@ -5,11 +5,13 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.TextureView;
+import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
 
 import org.acra.annotation.AcraCore;
 
+import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
@@ -18,6 +20,8 @@ import de.volzo.despat.support.Util;
 public class Despat extends Application {
 
     public static String TAG = Despat.class.getSimpleName();
+
+    Context context;
 
     private CameraController camera;
     private SystemController systemController;
@@ -33,6 +37,7 @@ public class Despat extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        this.context = this;
 
         // Stetho Debug Library
         Stetho.initializeWithDefaults(this);
@@ -41,7 +46,34 @@ public class Despat extends Application {
 
         systemController = new SystemController(this);
 
-        Util.saveEvent(this, Event.EventType.INIT, null);
+        try {
+            Util.saveEvent(this, Event.EventType.INIT, null);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "room db schema outdated", e);
+            Toast.makeText(context, "Database outdated", Toast.LENGTH_LONG).show();
+
+            System.exit(0);
+        }
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+
+            @Override
+            public void uncaughtException(Thread arg0, Throwable arg1) {
+                String name = "";
+                String message = "";
+
+                Log.e(TAG, "Global uncaught exception: " + name + " | " + message);
+
+                if (arg0 != null) name = arg0.getName();
+                if (arg1 != null) message = arg1.getMessage();
+
+                Log.e(TAG, "Global uncaught exception: " + name + " | " + message);
+                Util.saveErrorEvent(context, "global uncaught exception in thread: " + name, arg1);
+                Util.backupLogcat(null);
+
+                // TODO: how to proceed? restart?
+            }
+        });
     }
 
     @Override
@@ -53,7 +85,7 @@ public class Despat extends Application {
         Util.saveEvent(this, Event.EventType.SHUTDOWN, null);
     }
 
-    public void acquireWakeLock(boolean temporary) {
+    public PowerManager.WakeLock acquireWakeLock(boolean temporary) {
         if (temporary) {
             Log.d(TAG, "acquiring temporary wake lock");
         } else {
@@ -63,7 +95,7 @@ public class Despat extends Application {
         if (wakeLock != null) {
             if (wakeLock.isHeld()) {
                 Log.d(TAG, "wake lock is already held");
-                return;
+                return wakeLock;
             }
         } else {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -71,7 +103,7 @@ public class Despat extends Application {
 
             if (wakeLock == null) {
                 Log.e(TAG, "acquiring wake lock failed");
-                return;
+                return null;
             }
         }
 
@@ -82,6 +114,12 @@ public class Despat extends Application {
         } else {
             wakeLock.acquire();
         }
+
+        return wakeLock;
+    }
+
+    public void setWakeLock(PowerManager.WakeLock wakeLock) {
+        this.wakeLock = wakeLock;
     }
 
     public void releaseWakeLock() {

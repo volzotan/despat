@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,6 +48,8 @@ import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.ErrorEvent;
+import de.volzo.despat.persistence.ErrorEventDao;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
 import de.volzo.despat.preferences.Config;
@@ -165,6 +169,35 @@ public class Util {
         event.setPayload(payload);
 
         eventDao.insert(event);
+    }
+
+
+    public static void saveErrorEvent(Context context, String message, Throwable e) {
+        saveErrorEvent(context, null, message, e);
+    }
+
+    public static void saveErrorEvent(Context context, Long sessionId, String message, Throwable e) {
+
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        ErrorEventDao errorEventDao = db.errorEventDao();
+
+        ErrorEvent errorEvent = new ErrorEvent();
+
+        errorEvent.setSessionId(sessionId); // TODO: try to obtain if null
+        errorEvent.setTimestamp(Calendar.getInstance().getTime());
+        errorEvent.setDescription(message);
+
+        if (e != null) {
+            errorEvent.setType(e.toString());
+            errorEvent.setExceptionMessage(e.getMessage());
+
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            errorEvent.setStacktrace(sw.toString());
+        }
+
+        errorEventDao.insert(errorEvent);
     }
 
     public static Despat getDespat(Context context) {

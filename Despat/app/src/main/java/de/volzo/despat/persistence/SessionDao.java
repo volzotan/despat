@@ -28,7 +28,7 @@ public interface SessionDao {
     @Query("SELECT COUNT(*) FROM capture WHERE session_id = :sessionId")
     int getNumberOfCaptures(long sessionId);
 
-    @Query("SELECT COUNT(*) FROM error WHERE session_id = :sessionId")
+    @Query("SELECT COUNT(*) FROM errorEvent WHERE session_id = :sessionId")
     int getNumberOfErrors(long sessionId);
 
     @Insert

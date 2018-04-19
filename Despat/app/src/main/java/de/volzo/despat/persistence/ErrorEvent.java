@@ -8,30 +8,29 @@ import android.arch.persistence.room.PrimaryKey;
 import java.io.File;
 import java.util.Date;
 
-/**
- * Created by christophergetschmann on 24.11.17.
- */
-
 @Entity(foreignKeys = @ForeignKey(  entity = Session.class,
                                     parentColumns = "id",
                                     childColumns = "session_id"))
 
-public class Error {
+public class ErrorEvent {
 
     @PrimaryKey(autoGenerate = true)
     private long id;
 
     @ColumnInfo(name = "session_id")
-    private long sessionId;
+    private Long sessionId;
 
-    @ColumnInfo(name = "occurence_time")
-    private Date occurenceTime;
+    @ColumnInfo(name = "timestamp")
+    private Date timestamp;
+
+    @ColumnInfo(name = "description")
+    private String description;
 
     @ColumnInfo(name = "type")
     private String type;
 
-    @ColumnInfo(name = "description")
-    private String description;
+    @ColumnInfo(name = "exception_message")
+    private String exceptionMessage;
 
     @ColumnInfo(name = "stacktrace")
     private String stacktrace;
@@ -44,20 +43,28 @@ public class Error {
         this.id = id;
     }
 
-    public long getSessionId() {
+    public Long getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(long sessionId) {
+    public void setSessionId(Long sessionId) {
         this.sessionId = sessionId;
     }
 
-    public Date getOccurenceTime() {
-        return occurenceTime;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
-    public void setOccurenceTime(Date occurenceTime) {
-        this.occurenceTime = occurenceTime;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getType() {
@@ -68,12 +75,12 @@ public class Error {
         this.type = type;
     }
 
-    public String getDescription() {
-        return description;
+    public String getExceptionMessage() {
+        return exceptionMessage;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setExceptionMessage(String exceptionMessage) {
+        this.exceptionMessage = exceptionMessage;
     }
 
     public String getStacktrace() {

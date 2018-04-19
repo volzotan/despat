@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
@@ -59,15 +60,13 @@ public class ShutterService extends Service {
     private static final int STATE_RESTART              = 4;
     private static final int STATE_SHUTDOWN             = 5;
 
-    private static final long MIN_TIME_BETWEEN_CAMERA_RESTARTS = 7 * 1000;
-
     Context context;
     Handler handler;
 
     CameraController camera;
 
     private int state = STATE_INIT;
-    private long lastCameraRestart;
+    private List<Long> cameraRestarts;
 
     public ShutterService() {}
 
@@ -119,6 +118,43 @@ public class ShutterService extends Service {
         this.context = this;
         this.handler = new Handler();
 
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+
+            @Override
+            public void uncaughtException(Thread arg0, Throwable arg1) {
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("ShutterService uncaught exception");
+
+                if (arg0 != null) {
+                    sb.append(" | Thread: ");
+                    sb.append(arg0.getName());
+                }
+
+                if (arg1 != null) {
+                    sb.append(" | Exception: ");
+                    sb.append(arg1.getMessage());
+
+                    Throwable cause = arg1.getCause();
+                    if (cause != null) {
+                        sb.append(" | Cause: ");
+                        sb.append(cause);
+                        sb.append(" ");
+                        sb.append(cause.getMessage());
+                    }
+                }
+
+                Log.e(TAG, sb.toString());
+
+                if (arg1 != null) arg1.printStackTrace();
+
+                Util.saveErrorEvent(context, "ShutterService uncaught exception", arg1);
+                Util.backupLogcat(null);
+
+                // TODO: how to proceed? restart?
+            }
+        });
+
         startForeground(FOREGROUND_NOTIFICATION_ID, Util.getShutterNotification(context, 0, 0, null));
 
         IntentFilter filter = new IntentFilter();
@@ -133,6 +169,10 @@ public class ShutterService extends Service {
 //        registerReceiver(powerReceiver, filter);
 
         Despat despat = Util.getDespat(this);
+
+
+//        if (true) throw new RuntimeException("This is a crash");
+
 
         if (Config.getPersistentCamera(context)) {
             despat.acquireWakeLock(false);
@@ -194,16 +234,26 @@ public class ShutterService extends Service {
 
     private void restartCameraAfterMalfunction() {
         Log.w(TAG, "camera restart after malfunction");
-        long diff = System.currentTimeMillis() - lastCameraRestart;
 
-        if (lastCameraRestart == 0 || diff > MIN_TIME_BETWEEN_CAMERA_RESTARTS) {
-            lastCameraRestart = System.currentTimeMillis();
+        // remove all restart timestamps which are too old
+        if (cameraRestarts == null) cameraRestarts = new ArrayList<Long>();
+        List<Long> rmList = new ArrayList<Long>();
+        for (Long t : cameraRestarts) {
+            long diff = System.currentTimeMillis() - t;
+            if (diff > Config.CAMERA_RESTART_TIME_WINDOW) rmList.add(t);
+        }
+        if (rmList.size() > 0) cameraRestarts.removeAll(rmList);
 
+        if (cameraRestarts.size() < Config.CAMERA_RESTART_MAX_NUMBER) {
+
+            cameraRestarts.add(System.currentTimeMillis());
             Util.saveEvent(this, Event.EventType.ERROR, "camera restart after malfunction");
+
             restartCamera();
 
         } else {
-            Log.w(TAG, String.format("camera restart after malfunction aborted. last restart happened %dms ago", diff));
+            Log.w(TAG, String.format("camera restart after malfunction aborted. " +
+                    "%d restarts happened in the last %dms", cameraRestarts.size(), cameraRestarts.get(cameraRestarts.size()-1)));
 
             // TODO: critical error?
 
@@ -306,35 +356,37 @@ public class ShutterService extends Service {
 
         Throwable e = null;
 
-        if (o != null) {
-            sb.append(" | ");
+        try {
+            e = (Throwable) o;
+        } catch (Exception castException) {
+            // do nothing
+        }
 
-            if (o instanceof Throwable) {
-                e = (Throwable) o;
-                sb.append(e.getMessage());
-                sb.append(" --- ");
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                sb.append(sw.toString());
-            } else {
-                sb.append(o.toString());
-            }
+        sb.append(" | ");
+        if (e != null) {
+            e = (Throwable) o;
+            sb.append(e.getMessage());
+            sb.append(" --- ");
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            sb.append(sw.toString());
+        } else {
+            sb.append(o.toString());
         }
 
         Log.e(TAG, sb.toString());
 
         // persist error
         Util.saveEvent(this, Event.EventType.ERROR, sb.toString());
+        Util.saveErrorEvent(this, "generic ShutterService malfunction: " + message, e);
 
         // send error broadcast
         Intent intent = new Intent(Broadcast.ERROR_OCCURED);
+        intent.putExtra(Broadcast.DATA_DESCRIPTION, message);
         // TODO pack throwable in parcel
         if (e != null) intent.putExtra(Broadcast.DATA_THROWABLE, e);
         context.sendBroadcast(intent);
-
-        // backup logcat
-        Util.backupLogcat(null);
 
         // notify user
         Toast.makeText(context, "ShutterService failed: " + message, Toast.LENGTH_SHORT).show();

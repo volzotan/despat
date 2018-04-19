@@ -6,8 +6,6 @@ import android.location.Location;
 import android.util.Log;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -15,8 +13,6 @@ import java.util.List;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
-import de.volzo.despat.persistence.Error;
-import de.volzo.despat.persistence.ErrorDao;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
@@ -76,6 +72,12 @@ public class RecordingSession {
                 }
             }
         }
+
+        // TODO:
+        // the RecordingSession Singleton may be killed at any time during normal
+        // operation of the ShutterService, but still the session variable should
+        // be "repopulated" once the instance will be required again
+        // just use resume session?
 
         return instance;
     }
@@ -248,25 +250,7 @@ public class RecordingSession {
     public void addError(String desc, Throwable e) throws NotRecordingException {
         if (!isActive()) throw new NotRecordingException();
 
-        AppDatabase db = AppDatabase.getAppDatabase(context);
-        ErrorDao errorDao = db.errorDao();
-
-        Error error = new Error();
-        error.setSessionId(session.getId());
-        error.setOccurenceTime(Calendar.getInstance().getTime());
-
-        error.setDescription(desc);
-
-        if (e != null) {
-            error.setType(e.toString());
-
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            error.setStacktrace(sw.toString());
-        }
-
-        errorDao.insert(error);
+        Util.saveErrorEvent(context, session.getId(), desc, e);
     }
 
     public int getImagesTaken() {

@@ -87,6 +87,12 @@ public class Config {
     // recommended: SHUTTER_INTERVAL - 1000
     public static final long WAKELOCK_MAX_LIFETIME                  = 9000;
 
+    // ---SHUTTER SERVICE---------------------------------------------------------------------------
+
+    public static final long CAMERA_RESTART_TIME_WINDOW             = 60 * 1000;
+
+    public static final long CAMERA_RESTART_MAX_NUMBER              = 8;
+
     // ---------------------------------------------------------------------------------------------
 
     public static final String ACRA_REPORT_URL                      = "http://zoltep.de/report";
@@ -101,7 +107,7 @@ public class Config {
     public static final File LOGCAT_DIR                             = new File(Environment.getExternalStorageDirectory(), ("despat"));
 
     // dateformat used for the logcat file name
-    public static final String DATEFORMAT_LOGFILE                   = "yyyy-MM-dd";
+    public static final String DATEFORMAT_LOGFILE                   = "yyyy-MM-dd_HH-mm-ss.SSS";
 
     // reboots the device if sudo rights are granted and a
     // critical error happened (usually the camera)
