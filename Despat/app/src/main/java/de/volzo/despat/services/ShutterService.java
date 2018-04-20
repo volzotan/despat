@@ -371,7 +371,7 @@ public class ShutterService extends Service {
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             sb.append(sw.toString());
-        } else {
+        } else if (o != null){
             sb.append(o.toString());
         }
 
@@ -385,7 +385,7 @@ public class ShutterService extends Service {
         Intent intent = new Intent(Broadcast.ERROR_OCCURED);
         intent.putExtra(Broadcast.DATA_DESCRIPTION, message);
         // TODO pack throwable in parcel
-        if (e != null) intent.putExtra(Broadcast.DATA_THROWABLE, e);
+        // if (e != null) intent.putExtra(Broadcast.DATA_THROWABLE, e);
         context.sendBroadcast(intent);
 
         // notify user
@@ -405,8 +405,8 @@ public class ShutterService extends Service {
 
             switch (state) {
                 case STATE_INIT: {
-                    // camera failed during startup. do nothing
-                    state = STATE_ERROR;
+                    // camera failed during startup
+                    restartCameraAfterMalfunction();
                     break;
                 }
                 case STATE_RESTART: {
@@ -573,10 +573,11 @@ public class ShutterService extends Service {
 
         if (Config.getPersistentCamera(context)) {
 
-            if (despat.getCamera() != null && !despat.getCamera().isDead()) {
+            if (despat.getCamera() != null) {
                 camera.closeCamera();
             } else {
                 // camera already dead. something went wrong
+                Log.w(TAG, "camera already dead on ShutterService shutdown");
             }
 
         } else {

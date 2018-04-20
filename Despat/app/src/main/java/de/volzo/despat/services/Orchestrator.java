@@ -120,9 +120,25 @@ public class Orchestrator extends BroadcastReceiver {
                             Log.w(TAG, "error occured while no recordingSession is active");
                             break;
                         }
-                        String desc = intent.getStringExtra(Broadcast.DATA_DESCRIPTION);
-                        Throwable e = null; //intent.getParcelableExtra(Broadcast.DATA_THROWABLE);
+
+                        // save error event
+                        String desc = null;
+                        Throwable e = null;
+
+                        try {
+                            desc = intent.getStringExtra(Broadcast.DATA_DESCRIPTION);
+                            e = intent.getParcelableExtra(Broadcast.DATA_THROWABLE);
+                        } catch (Exception ve) {
+                            Log.w(TAG, "unpacking error broadcast failed", ve);
+                        }
+
                         session.addError(desc, e);
+
+                        // backup logfile
+                        Util.backupLogcat(null);
+
+                        // log
+                        Log.e(TAG, "error occured: " + desc, e);
 
                         Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), null);
                     } catch (RecordingSession.NotRecordingException nre) {

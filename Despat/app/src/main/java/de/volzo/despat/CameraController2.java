@@ -1,6 +1,7 @@
 package de.volzo.despat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -50,7 +51,10 @@ import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.Util;
 
 
 /**
@@ -238,27 +242,7 @@ public class CameraController2 extends CameraController {
 
             CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
 
-            if (Config.FORMAT_JPG) {
-                Size[] jpgSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
-                if (jpgSizes == null) {
-                    Log.e(TAG, "no JPEG image size could be determined");
-                    return;
-                }
-
-                imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES*2);
-                imageReaderJpg.setOnImageAvailableListener(readerListenerJpg, backgroundHandler);
-            }
-
-            if (Config.FORMAT_RAW) {
-                Size[] rawSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.RAW_SENSOR);
-                if (rawSizes == null) {
-                    Log.e(TAG, "no RAW image size could be determined");
-                    return;
-                }
-
-                imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, Config.NUMBER_OF_BURST_IMAGES*2);
-                imageReaderRaw.setOnImageAvailableListener(readerListenerRaw, backgroundHandler);
-            }
+            initializeImageReaders(characteristics);
 
             // output surfaces
             List<Surface> outputSurfaces = new ArrayList<Surface>(3);
@@ -494,6 +478,11 @@ public class CameraController2 extends CameraController {
     };
 
     public void startMetering() throws IllegalAccessException {
+
+        // TODO:
+//        double random = Math.random();
+//        if (random > 0.95) throw new IllegalAccessException("test");
+
         Log.d(TAG, "# startMetering");
 
         if (cameraDevice == null) {
@@ -525,15 +514,84 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    public void captureImages() throws IllegalAccessException {
+    public void captureImages() throws Exception {
         if (cameraDevice == null) {
             Log.e(TAG, "camera device missing");
             throw new IllegalAccessException("camera device missing");
         }
 
-        Log.d(TAG, "imageReader: " + imageReaderJpg);
+        // TODO: purge prev. requests? clear image readers
+        purgeImageReaderAndSaver();
+
+        // TODO:
+//        double random = Math.random();
+//        if (random > 0.95) throw new IllegalAccessException("test");
 
         captureStillPicture(false); // TODO: metering successful
+    }
+
+    private void purgeImageReaderAndSaver() {
+
+        //        if (captureSession != null) {
+//            captureSession.abortCaptures();
+//        } else {
+//            Log.w(TAG, "captureSession missing");
+//        }
+
+//        if (imageReaderJpg != null) {
+//            imageReaderJpg.close();
+//        }
+//        if (imageReaderRaw != null) {
+//            imageReaderRaw.close();
+//        }
+//        initializeImageReaders(cameraManager.getCameraCharacteristics(cameraDevice.getId()));
+
+        // hacky solution to clear the imageReader without closing and reinitializing
+        int removeCounter = 0;
+        try {
+            for(removeCounter=0; removeCounter<Config.NUMBER_OF_BURST_IMAGES*2+1; removeCounter++) imageReaderJpg.acquireNextImage().close();
+        } catch (Exception e) {
+            // done
+        } finally {
+            if (removeCounter > 0) {
+                String msg = "clearing " + removeCounter + " scheduled JPEG images from ImageReader";
+                Log.w(TAG, msg);
+                Util.saveEvent(context, Event.EventType.ERROR, msg);
+            }
+        }
+        removeCounter = 0;
+        try {
+            for(removeCounter=0; removeCounter<Config.NUMBER_OF_BURST_IMAGES*2+1; removeCounter++) imageReaderRaw.acquireNextImage().close();
+        } catch (Exception e) {
+            // done
+        } finally {
+            if (removeCounter > 0) {
+                String msg = "clearing " + removeCounter + " scheduled RAW images from ImageReader";
+                Log.w(TAG, msg);
+                Util.saveEvent(context, Event.EventType.ERROR, msg);
+            }
+        }
+
+        synchronized (queueRemoveLock) {
+            if (jpgResultQueue != null && jpgResultQueue.size() > 0) {
+                String msg = "clearing " + jpgResultQueue.size() + " scheduled JPEG images from ImageSaver";
+                Log.w(TAG, msg);
+                Util.saveEvent(context, Event.EventType.ERROR, msg);
+                for (Map.Entry<Integer, ImageSaver> entry : jpgResultQueue.entrySet()) {
+                    entry.getValue().close();
+                }
+                jpgResultQueue.clear();
+            }
+            if (rawResultQueue != null && rawResultQueue.size() > 0) {
+                String msg = "clearing " + rawResultQueue.size() + " scheduled RAW images from ImageSaver";
+                Log.w(TAG, msg);
+                Util.saveEvent(context, Event.EventType.ERROR, msg);
+                for (Map.Entry<Integer, ImageSaver> entry : rawResultQueue.entrySet()) {
+                    entry.getValue().close();
+                }
+                rawResultQueue.clear();
+            }
+        }
     }
 
     private void captureStillPicture(boolean meteringSuccessful) {
@@ -624,21 +682,31 @@ public class CameraController2 extends CameraController {
                         ImageSaver jpgImageSaver = jpgResultQueue.get(n);
                         ImageSaver rawImageSaver = rawResultQueue.get(n);
 
-                        if (jpgImageSaver != null) jpgImageSaver.captureResult = result;
-                        if (rawImageSaver != null) rawImageSaver.captureResult = result;
+                        if (jpgImageSaver != null) {
+                            jpgImageSaver.captureResult = result;
 
-                        // if the imageReader has already saved its data in the imageSaver
-                        // then is now the time to actually run it
+                            // if the imageReader has already saved its data in the imageSaver
+                            // then is now the time to actually run it
 
-                        if (jpgImageSaver.isComplete()) {
-                            jpgResultQueue.remove(n);
-                            jpgImageSaver.save();
-                            Log.d(TAG, "+++ jpgResultQueue size: " + jpgResultQueue.size());
+                            if (jpgImageSaver.isComplete()) {
+                                jpgResultQueue.remove(n);
+                                jpgImageSaver.save();
+                                Log.d(TAG, "+++ jpgResultQueue size: " + jpgResultQueue.size());
+                            }
+                        } else {
+                            Log.e(TAG, "ImageSaver has been removed, CaptureResult will be dropped");
                         }
-                        if (rawImageSaver.isComplete()) {
-                            rawResultQueue.remove(n);
-                            rawImageSaver.save();
-                            Log.d(TAG, "+++ rawResultQueue size: " + rawResultQueue.size());
+
+                        if (rawImageSaver != null) {
+                            rawImageSaver.captureResult = result;
+
+                            if (rawImageSaver.isComplete()) {
+                                rawResultQueue.remove(n);
+                                rawImageSaver.save();
+                                Log.d(TAG, "+++ rawResultQueue size: " + rawResultQueue.size());
+                            }
+                        } else {
+                            Log.e(TAG, "ImageSaver has been removed, CaptureResult will be dropped");
                         }
 
                         if (jpgImageSaver != null) {
@@ -762,20 +830,29 @@ public class CameraController2 extends CameraController {
                     captureSession.close();
                     captureSession = null;
                 }
-            } catch (CameraAccessException cae) {
-                cae.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (cameraDevice != null) {
-                        cameraDevice.close();
-                        cameraDevice = null;
-                    }
-                }
-            }, 1000); // TODO: delay really necessary?
+//            final Handler handler = new Handler();
+//            handler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (cameraDevice != null) {
+//                        cameraDevice.close();
+//                        cameraDevice = null;
+//                    }
+//                }
+//            }, 1000); // TODO: delay really necessary?
+
+            try {
+                if (cameraDevice != null) cameraDevice.close();
+            } catch (Exception e) {
+                Log.w(TAG, "attempt to close already closed camera", e);
+            } finally {
+                cameraDevice = null;
+            }
+
 
         } catch (InterruptedException ie) {
             Log.e(TAG, "lock could not be acquired", ie);
@@ -965,6 +1042,30 @@ public class CameraController2 extends CameraController {
         return "class: " + o.getClass().getName() + " = " + o.toString();
     }
 
+    private void initializeImageReaders(CameraCharacteristics characteristics) {
+        if (Config.FORMAT_JPG) {
+            Size[] jpgSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
+            if (jpgSizes == null) {
+                Log.e(TAG, "no JPEG image size could be determined");
+                return;
+            }
+
+            imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES*2);
+            imageReaderJpg.setOnImageAvailableListener(readerListenerJpg, backgroundHandler);
+        }
+
+        if (Config.FORMAT_RAW) {
+            Size[] rawSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.RAW_SENSOR);
+            if (rawSizes == null) {
+                Log.e(TAG, "no RAW image size could be determined");
+                return;
+            }
+
+            imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, Config.NUMBER_OF_BURST_IMAGES*2);
+            imageReaderRaw.setOnImageAvailableListener(readerListenerRaw, backgroundHandler);
+        }
+    }
+
     private ImageReader.OnImageAvailableListener readerListenerJpg = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
@@ -976,12 +1077,27 @@ public class CameraController2 extends CameraController {
                 Map.Entry<Integer, ImageSaver> entry = jpgResultQueue.firstEntry();
 
                 ImageSaver imageSaver = entry.getValue();
-                imageSaver.image = reader.acquireNextImage();
 
-                // TODO: W/ImageReader_JNI: Unable to acquire a buffer item, very likely client tried to acquire more than maxImages buffers
-                // old images haven't been discarded in time?
+                try {
+                    imageSaver.image = reader.acquireNextImage();
+                } catch (IllegalStateException ise) {
+                    String msg = "ImageReader buffer full. dropping JPEG image!";
+                    Log.e(TAG, msg);
+                    imageSaver.close();
+                    jpgResultQueue.remove(entry.getKey());
+                    imageSaver = null;
 
-                if (imageSaver.isComplete()) {
+                    // TODO: probably not a good idea to send the Broadcast directly from within the
+                    // camera controller
+                    Intent intent = new Intent(Broadcast.ERROR_OCCURED);
+                    intent.putExtra(Broadcast.DATA_DESCRIPTION, msg);
+                    context.sendBroadcast(intent);
+
+                    // error broadcast
+                    Util.saveErrorEvent(context, msg, null);
+                }
+
+                if (imageSaver != null && imageSaver.isComplete()) {
                     jpgResultQueue.remove(entry.getKey());
                     imageSaver.save();
                     Log.d(TAG, "+++ jpgResultQueue size: " + jpgResultQueue.size());
@@ -997,10 +1113,22 @@ public class CameraController2 extends CameraController {
 
             synchronized (queueRemoveLock) {
                 Map.Entry<Integer, ImageSaver> entry = rawResultQueue.firstEntry();
-                ImageSaver imageSaver = entry.getValue();
-                imageSaver.image = reader.acquireNextImage();
 
-                if (imageSaver.isComplete()) {
+                ImageSaver imageSaver = entry.getValue();
+
+                try {
+                    imageSaver.image = reader.acquireNextImage();
+                } catch (IllegalStateException ise) {
+                    Log.e(TAG, "ImageReader buffer full. dropping RAW image!");
+                    imageSaver.close();
+                    rawResultQueue.remove(entry.getKey());
+                    imageSaver = null;
+
+                    // error broadcast
+                    Util.saveErrorEvent(context, "ImageReader buffer full. dropping RAW image!", null);
+                }
+
+                if (imageSaver != null && imageSaver.isComplete()) {
                     rawResultQueue.remove(entry.getKey());
                     imageSaver.save();
                     Log.d(TAG, "+++ rawResultQueue size: " + rawResultQueue.size());

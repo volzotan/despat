@@ -84,6 +84,7 @@ public class Util {
         Notification.InboxStyle inboxNotification = new Notification.InboxStyle(builder);
 
         inboxNotification.addLine(numberOfCaptures + " captures");
+        inboxNotification.addLine(numberOfErrors + " errors");
         if (additionalInfo != null) {
             for (String info : additionalInfo) {
                 inboxNotification.addLine(info);
