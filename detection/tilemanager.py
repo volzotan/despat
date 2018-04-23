@@ -84,6 +84,10 @@ class TileManager(object):
         return data
 
 
+    def get_image_size(self):
+        return self.image.size
+
+
     def get_all_tile_ids(self):
         return [item[0] for item in self.tiles.items()]
 

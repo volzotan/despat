@@ -11,6 +11,7 @@ from PIL import Image
 # import opencv2 as cv2
 
 from tilemanager import TileManager
+import bbox2voc
 
 sys.path.append("/Users/volzotan/Downloads/tensorflow/models/research")
 from object_detection.utils import ops as utils_ops
@@ -23,9 +24,9 @@ OD_FRAMEWORK_PATH = "/Users/volzotan/Downloads/tensorflow/models/research/object
 
 #MODEL_NAME = "ssd_mobilenet_v1_coco_2017_11_17"
 #MODEL_NAME = "ssd_mobilenet_v2_coco_2018_03_29" 
-#MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28" 
+MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28" 
 #MODEL_NAME = "faster_rcnn_resnet101_coco_2018_01_28" 
-MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28" 
+#MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28" 
 
 PATH_TO_CKPT = os.path.join("models", MODEL_NAME, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
@@ -212,7 +213,24 @@ def run(sess, filename, tilesize, outputsize):
     # Image.fromarray(image_np).save(os.path.join(OUTPUT_IMG_FOLDER, "result.jpg"))
 
     tm._draw_bounding_boxes("output_{}_{}-{}.jpg".format(MODEL_NAME, tilesize, outputsize), output_dict["detection_boxes"], output_dict["detection_scores"])
-    print("get results: {0:.2f} viz: {1:.2f}".format(time7-time6, time.time()-time7))    
+
+    # bbox2voc.convert(".", filename, tm.get_image_size(), output_dict["detection_boxes"])
+
+    print(output_dict["detection_classes"])
+
+    print(len(output_dict["detection_boxes"]))
+    print(len(output_dict["detection_classes"]))
+
+    # print(bbox2voc.class_indices_to_class_names(category_index, output_dict["detection_classes"]))
+    # print(category_index)
+
+    import pickle
+    pickle.dump(output_dict["detection_boxes"], open( "detection_boxes.pickle", "wb" ))
+    pickle.dump(output_dict["detection_classes"], open( "detection_classes.pickle", "wb" ))
+    pickle.dump(output_dict["detection_scores"], open( "detection_scores.pickle", "wb" ))
+    pickle.dump(category_index, open( "category_index.pickle", "wb" ))
+
+    # print("get results: {0:.2f} viz: {1:.2f}".format(time7-time6, time.time()-time7))    
 
 
 import time
@@ -220,9 +238,11 @@ import time
 with detection_graph.as_default():                                
     with tf.Session() as sess:
 
-        for tilesize in [3000, 2000, 1500, 1000, 500]:
-            for outputsize in [3000, 2000, 1500, 1000, 500]:
-                run(sess, "pedestriancrossing.jpg", tilesize, outputsize)
+        # for tilesize in [3000, 2000, 1500, 1000, 500]:
+        #     for outputsize in [3000, 2000, 1500, 1000, 500]:
+        #         run(sess, "pedestriancrossing.jpg", tilesize, outputsize)
+
+        run(sess, "pedestriancrossing.jpg", 500, 500)
 
 
          
