@@ -112,7 +112,8 @@ public class Stopwatch {
             for (Double val : getLast(key, 10)) {
                 sb.append(String.format(Locale.ENGLISH, "%6.0f ", val));
             }
-            sb.append(String.format(Locale.ENGLISH,"| avg: %-5.3f", getAverage(key, -10)));
+            sb.append(String.format(Locale.ENGLISH,"| avg: %-5.2f", getAverage(key, -10)));
+            sb.append("\n");
         }
 
         System.out.println(sb.toString());

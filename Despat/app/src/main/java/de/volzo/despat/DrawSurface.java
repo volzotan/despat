@@ -3,16 +3,21 @@ package de.volzo.despat;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Size;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.List;
 
 public class DrawSurface extends SurfaceView {
 
@@ -60,6 +65,39 @@ public class DrawSurface extends SurfaceView {
         paint2.setColor(Color.RED);
         paint2.setStyle(Paint.Style.STROKE);
         paint2.setStrokeWidth(4.0f);
+    }
+
+    public void clearCanvas() {
+
+    }
+
+    public void drawBoxes(Size referenceFrame, List<RectF> rectangles, boolean clearBeforeDraw) throws Exception {
+
+        if (!holder.getSurface().isValid()) {
+            throw new Exception("surface not valid");
+        }
+
+        Canvas canvas = holder.lockCanvas();
+
+        Log.i(TAG, "canvas size: " + canvas.getWidth() + " x " + canvas.getHeight());
+
+        Matrix mat = new Matrix();
+        mat.setScale((float) canvas.getWidth() / (float) referenceFrame.getWidth(), (float) canvas.getHeight() / (float) referenceFrame.getHeight());
+
+        if (canvas == null) {
+            throw new Exception("canvas not valid");
+        }
+
+        if (clearBeforeDraw) {
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        }
+
+        for (RectF rect : rectangles) {
+            mat.mapRect(rect);
+            canvas.drawRect(rect, paint1);
+        }
+
+        holder.unlockCanvasAndPost(canvas);
     }
 
     @Override

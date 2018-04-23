@@ -15,6 +15,8 @@ import org.opencv.objdetect.HOGDescriptor;
 
 import java.io.File;
 
+import de.volzo.despat.DrawSurface;
+
 public class DetectorHOG extends Detector {
 
 
@@ -30,6 +32,11 @@ public class DetectorHOG extends Detector {
 
     @Override
     public void run() throws Exception {
+
+    }
+
+    @Override
+    public void display(DrawSurface drawSurface) {
 
     }
 

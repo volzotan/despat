@@ -84,11 +84,9 @@ public class TensorFlowObjectDetectionAPIModel implements TensorFlowDetector {
         br = new BufferedReader(new InputStreamReader(labelsInput));
         String line;
         while ((line = br.readLine()) != null) {
-            Log.w(TAG, line);
             d.labels.add(line);
         }
         br.close();
-
 
         d.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
 

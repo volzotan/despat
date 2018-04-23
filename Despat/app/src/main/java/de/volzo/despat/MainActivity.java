@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
+import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
@@ -238,15 +239,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
 
 //        btSettings.callOnClick();
-
-//        try {
-//            detector = new DetectorSSD(activity);
-//            detector.init();
-//            detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
-//            detector.run();
-//        } catch (Exception e) {
-//            Log.wtf(TAG, "detector failed", e);
-//        }
 
 
 //        startCapturing.callOnClick();
@@ -494,23 +486,22 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         TextView tvStatus = (TextView) findViewById(R.id.tv_status);
         tvStatus.setText(sb.toString());
 
-        if (activeSession) {
-            ImageRollover imgroll = new ImageRollover(context, ".jpg");
-            File newestImage = imgroll.getNewestImage();
-
-            if (newestImage == null) return;
-
-            Bitmap imgBitmap = BitmapFactory.decodeFile(newestImage.getAbsolutePath());
-            ImageView imageView = findViewById(R.id.imageView);
-            imageView.setImageBitmap(imgBitmap);
-
-            if (photoViewAttacher != null) {
-                photoViewAttacher.cleanup();
-            }
-            photoViewAttacher = new PhotoViewAttacher(imageView);
-            photoViewAttacher.update();
-
-        }
+//        if (activeSession) {
+//            ImageRollover imgroll = new ImageRollover(context, ".jpg");
+//            File newestImage = imgroll.getNewestImage();
+//
+//            if (newestImage == null) return;
+//
+//            ImageView imageView = findViewById(R.id.imageView);
+//            imageView.setImageBitmap(BitmapFactory.decodeFile(newestImage.getAbsolutePath()));
+//
+//            if (photoViewAttacher != null) {
+//                photoViewAttacher.cleanup();
+//            }
+//            photoViewAttacher = new PhotoViewAttacher(imageView);
+//            photoViewAttacher.update();
+//
+//        }
     }
 
     private void startProgressBarUpdate() {
@@ -558,6 +549,20 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     public void runRecognizer() {
+        try {
+            detector = new DetectorSSD(activity);
+            detector.init();
+            detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
+            detector.run();
+            detector.display((DrawSurface) findViewById(R.id.drawSurface));
+        } catch (Exception e) {
+            Log.wtf(TAG, "detector failed", e);
+        }
+
+
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        imageView.setImageBitmap(BitmapFactory.decodeFile(new File(Config.getImageFolder(activity), "test.jpg").getAbsolutePath()));
+
 //        // remove the textureView from the preview
 //        FixedAspectRatioFrameLayout aspectRatioLayout = (FixedAspectRatioFrameLayout) findViewById(R.id.aspectratio_layout);
 //        aspectRatioLayout.removeView(findViewById(R.id.textureView));
