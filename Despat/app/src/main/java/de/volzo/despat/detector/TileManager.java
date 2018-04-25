@@ -55,6 +55,17 @@ public class TileManager {
         return new Size(image.getWidth(), image.getHeight());
     }
 
+    public List<RectF> getTileBoxes() {
+        List<RectF> rectangles = new ArrayList<RectF>();
+
+        for (Tile tile : tiles) {
+            int[] dim = getDimForTile(tile.x, tile.y);
+            rectangles.add(new RectF(dim[0], dim[1], dim[2], dim[3]));
+        }
+
+        return rectangles;
+    }
+
     public List<Tile> getAllTiles() {
         return tiles;
     }
@@ -127,7 +138,6 @@ public class TileManager {
             this.matrix = new Matrix();
             matrix.setScale((float) tilesize / (float) outputsize, (float) tilesize/ (float) outputsize);
             matrix.postTranslate(xoffset + x * tilesize, yoffset + y * tilesize);
-            Log.wtf("Tile", matrix.toString());
         }
 
         public void setResults(List<TensorFlowDetector.Recognition> results) {

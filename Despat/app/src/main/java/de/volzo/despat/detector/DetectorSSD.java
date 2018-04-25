@@ -134,6 +134,16 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
+    public void postprocess() throws Exception {
+
+    }
+
+    @Override
+    public void save() throws Exception {
+
+    }
+
+    @Override
     public void display(DrawSurface surface) {
         List<TensorFlowDetector.Recognition> results = tileManager.getFullResults();
 
@@ -142,12 +152,13 @@ public class DetectorSSD extends Detector {
             if (result.getConfidence() < MINIMUM_CONFIDENCE_TF_OD_API) {
                 continue;
             }
-
             rectangles.add(result.getLocation());
         }
 
         try {
-            surface.drawBoxes(tileManager.getImageSize(), rectangles, false);
+            surface.clearCanvas();
+            surface.addBoxes(tileManager.getImageSize(), tileManager.getTileBoxes(), surface.paintBlack);
+            surface.addBoxes(tileManager.getImageSize(), rectangles, surface.paintGreen);
         } catch (Exception e) {
             Log.e(TAG, "displaying results failed. unable to draw on canvas", e);
         }

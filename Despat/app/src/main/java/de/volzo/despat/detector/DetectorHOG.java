@@ -36,6 +36,16 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
+    public void postprocess() throws Exception {
+
+    }
+
+    @Override
+    public void save() throws Exception {
+
+    }
+
+    @Override
     public void display(DrawSurface drawSurface) {
 
     }
