@@ -1,7 +1,11 @@
 #import xml.etree.cElementTree as et
 import lxml.etree as et
+import json
+import os
+from datetime import datetime
 
-MIN_CONFIDENCE = 0.5
+DATEFORMAT_STORE            = "%Y-%m-%d %H:%M:%S.%f"
+MIN_CONFIDENCE_VOC_EXPORT   = 0.5
 
 def class_indices_to_class_names(index, classes):
     result = []
@@ -12,7 +16,43 @@ def class_indices_to_class_names(index, classes):
     return result
 
 
-def convert(folder_filename, image_filename, image_path, imagesize, bboxes, classes, scores, output_filename):
+def jsonToVoc(filename_json, filename_voc):
+
+    output = json.load(open(filename_json, "r"))
+
+    file_folder_only, file_name_only = os.path.split(output["path"])
+
+    folder_filename = file_folder_only
+    image_filename  = file_name_only
+    image_path      = output["path"]
+    imagesize       = output["imagesize"]
+    bboxes          = output["detection_boxes"]
+    classes         = output["detection_classes"]
+    scores          = output["detection_scores"]
+    output_filename = filename_voc
+
+    print(output)
+
+    convertToVoc(folder_filename, image_filename, image_path, imagesize, bboxes, classes, scores, output_filename)
+
+
+def convertToJson(folder_filename, image_filename, image_path, imagesize, bboxes, classes, scores, output_filename):
+
+    output = {}
+
+    output["filename"]  = image_filename
+    output["path"]      = image_path
+    output["imagesize"] = imagesize
+    output["timestamp"] = datetime.now().strftime(DATEFORMAT_STORE)
+
+    output["detection_boxes"]   = bboxes.tolist()
+    output["detection_classes"] = classes
+    output["detection_scores"]  = scores.tolist()
+
+    json.dump(output, open(output_filename, "w"), indent=4)
+
+
+def convertToVoc(folder_filename, image_filename, image_path, imagesize, bboxes, classes, scores, output_filename):
 
     root = et.Element("annotation")
 
@@ -36,7 +76,7 @@ def convert(folder_filename, image_filename, image_path, imagesize, bboxes, clas
 
     for i in range(len(bboxes)):
 
-        if scores[i] < MIN_CONFIDENCE:
+        if scores[i] < MIN_CONFIDENCE_VOC_EXPORT:
             continue
 
         node_object             = et.SubElement(root, "object")
@@ -62,13 +102,25 @@ def convert(folder_filename, image_filename, image_path, imagesize, bboxes, clas
 
 if __name__ == "__main__":
 
-    import pickle
-    bboxes = pickle.load(open("detection_boxes.pickle", "rb"))
-    classes = pickle.load(open("detection_classes.pickle", "rb"))
-    scores = pickle.load(open("detection_scores.pickle", "rb"))
-    category_index = pickle.load(open("category_index.pickle", "rb"))
+    # import pickle
+    # bboxes = pickle.load(open("detection_boxes.pickle", "rb"))
+    # classes = pickle.load(open("detection_classes.pickle", "rb"))
+    # scores = pickle.load(open("detection_scores.pickle", "rb"))
+    # category_index = pickle.load(open("category_index.pickle", "rb"))
 
-    # print(scores)
+    # # print(scores)
 
-    convert("detection", "pedestriancrossing.jpg", "/Users/volzotan/GIT/despat/detection/pedestriancrossing.jpg", [4000, 3000], bboxes, class_indices_to_class_names(category_index, classes), scores, "pedestriancrossing.xml")
+    # convert("detection", "pedestriancrossing.jpg", "/Users/volzotan/GIT/despat/detection/pedestriancrossing.jpg", [4000, 3000], bboxes, class_indices_to_class_names(category_index, classes), scores, "pedestriancrossing.xml")
+
+    for root, dirs, files in os.walk("output"):
+        for f in files:
+            if (not f.endswith(".json")):
+                continue
+
+            image = os.path.join(root, f)
+            print(image)
+            jsonToVoc(image, str(image[:-5] + ".xml"))
+  
+
+    # jsonToVoc("output/1523267077487_0.json", "output/1523267077487_0.xml")
 

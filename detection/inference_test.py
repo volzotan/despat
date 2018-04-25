@@ -21,6 +21,7 @@ parser.add_argument("--output", default=".")
 
 parser.add_argument("--models", default="models")
 parser.add_argument("--tensorflow-object-detection-path", default="/Users/volzotan/Downloads/tensorflow/models/research")
+parser.add_argument("--export", default="json", choices=["xml", "json"])
 parser.add_argument("--export-images", action='store_true')
 
 # parser.add_argument("-i", "--input", default=".", nargs='+')
@@ -149,6 +150,20 @@ def run(sess, filename, tilesize, outputsize):
 
     print("{}: {}_{}".format(filename, tilesize, outputsize))
 
+    file_full_path = filename
+    file_folder_only, file_name_only = os.path.split(file_full_path)
+    file_output_full_path = os.path.join(OUTPUT_FOLDER, file_name_only[:-4])
+    if args.export == "xml":
+        file_output_full_path += ".xml"
+    elif args.export == "json":
+        file_output_full_path += ".json"
+    else:
+        raise Exception("unknown file extension")
+
+    if os.path.exists(file_output_full_path):
+        print("{} already existing".format(file_output_full_path))
+        return
+
     tm = TileManager(filename, tilesize=tilesize, outputsize=outputsize)
 
     for tile_id in tm.get_all_tile_ids():
@@ -253,15 +268,20 @@ def run(sess, filename, tilesize, outputsize):
     # pickle.dump(output_dict["detection_scores"], open( "detection_scores.pickle", "wb" ))
     # pickle.dump(category_index, open( "category_index.pickle", "wb" ))
 
-    file_full_path = filename
-    file_folder_only, file_name_only = os.path.split(file_full_path)
-    file_output_full_path = os.path.join(OUTPUT_FOLDER, file_name_only[:-4] + ".xml")
-
     if args.export_images:
         export_filename = os.path.join(OUTPUT_FOLDER, "{}_{}_{}x{}-{}x{}.jpg".format(file_name_only, MODEL_NAME, tilesize[0], tilesize[1], outputsize[0], outputsize[1]))
         tm._draw_bounding_boxes(export_filename, output_dict["detection_boxes"], output_dict["detection_scores"])
 
-    bbox2voc.convert(
+    converter = None
+
+    if args.export == "xml":
+        converter = bbox2voc.convertToVoc
+    elif args.export == "json":
+        converter = bbox2voc.convertToJson
+    else:
+        raise Exception("unknown file extension")
+
+    converter(
         file_folder_only, 
         file_name_only, 
         file_full_path, 
