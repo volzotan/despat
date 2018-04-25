@@ -14,9 +14,15 @@ class TileManager(object):
     # if the network does further scaling as preprocessing
     # _convert_coordinate() will yield wrong results
 
-    def __init__(self, filename, tilesize=1000, outputsize=300, centered=True):
+    def __init__(self, filename, tilesize=[1000, 1000], outputsize=[300, 300], centered=True):
 
         self.filename = filename
+
+        if type(tilesize) is int:
+            tilesize = [tilesize, tilesize]
+
+        if type(outputsize) is int:
+            outputsize = [outputsize, outputsize] 
 
         self.tilesize = tilesize
         self.outputsize = outputsize
@@ -30,11 +36,11 @@ class TileManager(object):
         self.yoffset = 0
 
         if centered:
-            self.xoffset = int( (self.imagewidth % self.tilesize) / 2 )
-            self.yoffset = int( (self.imageheight % self.tilesize) / 2 )
+            self.xoffset = int( (self.imagewidth % self.tilesize[0]) / 2 )
+            self.yoffset = int( (self.imageheight % self.tilesize[1]) / 2 )
 
-        x_tiles = int (self.imagewidth / self.tilesize)
-        y_tiles = int (self.imageheight / self.tilesize)
+        x_tiles = int( self.imagewidth / self.tilesize[0] )
+        y_tiles = int( self.imageheight / self.tilesize[1] )
 
         # self.tiles = [[{"x": x, "y": y} for x in range(0, x_tiles)] for y in range(0, y_tiles)]
 
@@ -53,10 +59,10 @@ class TileManager(object):
 
     def _get_dim_for_tile(self, x, y):
         dim = (
-            x * self.tilesize + self.xoffset, 
-            y * self.tilesize + self.yoffset, 
-            x * self.tilesize + self.xoffset + self.tilesize,
-            y * self.tilesize + self.yoffset + self.tilesize
+            x * self.tilesize[0] + self.xoffset, 
+            y * self.tilesize[1] + self.yoffset, 
+            x * self.tilesize[0] + self.xoffset + self.tilesize[0],
+            y * self.tilesize[1] + self.yoffset + self.tilesize[1]
         )
         return dim
 
@@ -64,10 +70,10 @@ class TileManager(object):
     def _convert_coordinates(self, data, x, y, normalized=True):
 
         if normalized:
-            data = np.multiply(data, self.outputsize)
+            data = np.multiply(data, [self.outputsize[1], self.outputsize[0], self.outputsize[1], self.outputsize[0]])
 
-        if self.tilesize != self.outputsize:
-            scale = float(self.tilesize) / float(self.outputsize)
+        if self.tilesize[0] != self.outputsize[0] or self.tilesize[1] != self.outputsize[1]:
+            scale = float(self.tilesize[0]) / float(self.outputsize[0])
             data = np.multiply(data, scale)
 
         # bboxes are encoded as [y_min, x_min, y_max, x_max]
@@ -75,11 +81,11 @@ class TileManager(object):
         # add to the second and fourth row the x offset
         # and vice versa for the y offset
 
-        data[:, 0] = np.add(data[:, 0], self.yoffset + y * self.tilesize)
-        data[:, 1] = np.add(data[:, 1], self.xoffset + x * self.tilesize)
+        data[:, 0] = np.add(data[:, 0], self.yoffset + y * self.tilesize[1])
+        data[:, 1] = np.add(data[:, 1], self.xoffset + x * self.tilesize[0])
 
-        data[:, 2] = np.add(data[:, 2], self.yoffset + y * self.tilesize)
-        data[:, 3] = np.add(data[:, 3], self.xoffset + x * self.tilesize)
+        data[:, 2] = np.add(data[:, 2], self.yoffset + y * self.tilesize[1])
+        data[:, 3] = np.add(data[:, 3], self.xoffset + x * self.tilesize[0])
             
         return data
 
@@ -105,7 +111,7 @@ class TileManager(object):
         crop_dim = self._get_dim_for_tile(tile["x"], tile["y"])
 
         cropped = self.image.crop(crop_dim)
-        resized = cropped.resize((self.outputsize, self.outputsize), PIL.Image.BICUBIC)
+        resized = cropped.resize((self.outputsize[0], self.outputsize[1]), PIL.Image.BICUBIC)
 
         return resized
 
@@ -173,6 +179,16 @@ class TileManager(object):
             scores.append(tile["result"]["detection_scores"])
             classes.append(tile["result"]["detection_classes"])
 
+        if full_results["num_detections"] == 0:
+            # TODO: useful behaviour for zero detections
+            full_results["detection_boxes"] = None
+            full_results["detection_scores"] = None
+            full_results["detection_classes"] = None
+
+            print("EMPTY RESULTS")
+
+            return full_results
+
         full_results["detection_boxes"] = np.concatenate(boxes, axis=0)
         full_results["detection_scores"] = np.hstack(scores)
         full_results["detection_classes"] = np.hstack(classes)
@@ -181,13 +197,13 @@ class TileManager(object):
 
 
 if __name__ == "__main__":
-    tm = TileManager("pedestriancrossing.jpg")
+    tm = TileManager("pedestriancrossing.jpg", [2000, 1000], [1000, 500])
     # for i in range(0, 10):
     #     print(tm.get_next_tile())
 
     # print(tm.get_all_tiles())
 
-    tile = tm.get_all_tiles()[2]
+    tile = tm.get_all_tiles()[0]
     image = tm.get_tile_image(tile["tileid"])
     print("{} {}".format(tile["x"], tile["y"]))
     image.show()

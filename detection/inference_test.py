@@ -12,28 +12,49 @@ from PIL import Image
 
 from tilemanager import TileManager
 import bbox2voc
+import argparse
 
-sys.path.append("/Users/volzotan/Downloads/tensorflow/models/research")
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--images", default=".")
+parser.add_argument("--output", default=".")
+
+parser.add_argument("--models", default="models")
+parser.add_argument("--tensorflow-object-detection-path", default="/Users/volzotan/Downloads/tensorflow/models/research")
+parser.add_argument("--export-images", action='store_true')
+
+# parser.add_argument("-i", "--input", default=".", nargs='+')
+# parser.add_argument("-o", "--output", default="tiles", nargs='?')
+# parser.add_argument("-e", "--extension", default=".jpg", nargs='?')
+# parser.add_argument("-t", "--tilesize", default=300, type=int, nargs='?')
+# parser.add_argument("-c", "--centered", default=True, type=bool, nargs='?')
+# parser.add_argument("-r", "--outputsize", type=int, nargs='?')
+# parser.add_argument("-m", "--mode", default=MODE_TILE, choices=[MODE_TILE, MODE_UNTILE])
+
+
+args = parser.parse_args()
+
+sys.path.append(args.tensorflow_object_detection_path)
 from object_detection.utils import ops as utils_ops
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
-OD_FRAMEWORK_PATH = "/Users/volzotan/Downloads/tensorflow/models/research/object_detection"
+OD_FRAMEWORK_PATH = os.path.join(args.tensorflow_object_detection_path, "object_detection")
 
 
 #MODEL_NAME = "ssd_mobilenet_v1_coco_2017_11_17"
 #MODEL_NAME = "ssd_mobilenet_v2_coco_2018_03_29" 
-MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28" 
+#MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28" 
 #MODEL_NAME = "faster_rcnn_resnet101_coco_2018_01_28" 
-#MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28" 
+MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28" 
 
-PATH_TO_CKPT = os.path.join("models", MODEL_NAME, "frozen_inference_graph.pb")
+PATH_TO_CKPT = os.path.join(args.models, MODEL_NAME, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
-TILESIZE = 2000
-OUTPUTSIZE = 300 #300 # whats fed into the network
+TILESIZE = [2000, 1500]
+OUTPUTSIZE = [2000, 1500] #300 # whats fed into the network
 
 
 def load_image_into_numpy_array(image):
@@ -98,28 +119,30 @@ label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
+SOURCE = args.images #"background_subtraction/scaled_2000"
+OUTPUT_FOLDER = args.output #"output"
+print(OUTPUT_FOLDER)
 
-#INPUT_IMG_PATH = "/Users/volzotan/GIT/despat/detection"
-#INPUT_IMG_FOLDER = "tiles_500"
-#OUTPUT_IMG_FOLDER = "output_" + INPUT_IMG_FOLDER 
-OUTPUT_IMG_FOLDER = "output"
-
-if not os.path.exists(OUTPUT_IMG_FOLDER):
+if not os.path.exists(OUTPUT_FOLDER):
     try:
-        os.makedirs(OUTPUT_IMG_FOLDER)
-        print("created output dir: {}".format(OUTPUT_IMG_FOLDER))
+        os.makedirs(OUTPUT_FOLDER)
+        print("created output dir: {}".format(OUTPUT_FOLDER))
     except Exception as e:
-        print("could not create output dir: {}".format(OUTPUT_IMG_FOLDER))
+        print("could not create output dir: {}".format(OUTPUT_FOLDER))
         print(e)
         print("exit")
         sys.exit(-1)
 
-#TEST_IMAGE_PATHS = []
-#for root, dirs, files in os.walk(os.path.join(INPUT_IMG_PATH, INPUT_IMG_FOLDER)):
-#    for f in files:
-#        if (not f.endswith(".jpg")):
-#            continue
-#        TEST_IMAGE_PATHS.append(os.path.join(root, f))                    
+images = []
+
+if (SOURCE.endswith(".jpg")):
+    images.append(SOURCE)
+else: 
+    for root, dirs, files in os.walk(SOURCE):
+       for f in files:
+           if (not f.endswith(".jpg")):
+               continue
+           images.append(os.path.join(root, f))                    
 
 
 def run(sess, filename, tilesize, outputsize):
@@ -212,37 +235,58 @@ def run(sess, filename, tilesize, outputsize):
     # )
     # Image.fromarray(image_np).save(os.path.join(OUTPUT_IMG_FOLDER, "result.jpg"))
 
-    tm._draw_bounding_boxes("output_{}_{}-{}.jpg".format(MODEL_NAME, tilesize, outputsize), output_dict["detection_boxes"], output_dict["detection_scores"])
+    # tm._draw_bounding_boxes("output_{}_{}-{}.jpg".format(MODEL_NAME, tilesize, outputsize), output_dict["detection_boxes"], output_dict["detection_scores"])
 
     # bbox2voc.convert(".", filename, tm.get_image_size(), output_dict["detection_boxes"])
 
-    print(output_dict["detection_classes"])
+    # print(output_dict["detection_classes"])
 
-    print(len(output_dict["detection_boxes"]))
-    print(len(output_dict["detection_classes"]))
+    # print(len(output_dict["detection_boxes"]))
+    # print(len(output_dict["detection_classes"]))
 
     # print(bbox2voc.class_indices_to_class_names(category_index, output_dict["detection_classes"]))
     # print(category_index)
 
-    import pickle
-    pickle.dump(output_dict["detection_boxes"], open( "detection_boxes.pickle", "wb" ))
-    pickle.dump(output_dict["detection_classes"], open( "detection_classes.pickle", "wb" ))
-    pickle.dump(output_dict["detection_scores"], open( "detection_scores.pickle", "wb" ))
-    pickle.dump(category_index, open( "category_index.pickle", "wb" ))
+    # import pickle
+    # pickle.dump(output_dict["detection_boxes"], open( "detection_boxes.pickle", "wb" ))
+    # pickle.dump(output_dict["detection_classes"], open( "detection_classes.pickle", "wb" ))
+    # pickle.dump(output_dict["detection_scores"], open( "detection_scores.pickle", "wb" ))
+    # pickle.dump(category_index, open( "category_index.pickle", "wb" ))
 
-    # print("get results: {0:.2f} viz: {1:.2f}".format(time7-time6, time.time()-time7))    
+    file_full_path = filename
+    file_folder_only, file_name_only = os.path.split(file_full_path)
+    file_output_full_path = os.path.join(OUTPUT_FOLDER, file_name_only[:-4] + ".xml")
+
+    if args.export_images:
+        export_filename = os.path.join(OUTPUT_FOLDER, "{}_{}_{}x{}-{}x{}.jpg".format(file_name_only, MODEL_NAME, tilesize[0], tilesize[1], outputsize[0], outputsize[1]))
+        tm._draw_bounding_boxes(export_filename, output_dict["detection_boxes"], output_dict["detection_scores"])
+
+    bbox2voc.convert(
+        file_folder_only, 
+        file_name_only, 
+        file_full_path, 
+        image.size, 
+        output_dict["detection_boxes"], 
+        bbox2voc.class_indices_to_class_names(category_index, output_dict["detection_classes"]), 
+        output_dict["detection_scores"], 
+        file_output_full_path
+    )
+
+    print("get results: {0:.2f} viz: {1:.2f}".format(time7-time6, time.time()-time7))    
 
 
 import time
 
-with detection_graph.as_default():                                
-    with tf.Session() as sess:
+for item in images:
+    with detection_graph.as_default():                                
+        with tf.Session() as sess:
 
-        # for tilesize in [3000, 2000, 1500, 1000, 500]:
-        #     for outputsize in [3000, 2000, 1500, 1000, 500]:
-        #         run(sess, "pedestriancrossing.jpg", tilesize, outputsize)
+            # for tilesize in [3000, 2000, 1500, 1000, 500]:
+            #     for outputsize in [3000, 2000, 1500, 1000, 500]:
+            #         run(sess, "pedestriancrossing.jpg", tilesize, outputsize)
 
-        run(sess, "pedestriancrossing.jpg", 500, 500)
+            for item in images:
+                run(sess, item, TILESIZE, OUTPUTSIZE)
 
 
          
