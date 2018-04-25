@@ -249,6 +249,9 @@ public class ShutterService extends Service {
             cameraRestarts.add(System.currentTimeMillis());
             Util.saveEvent(this, Event.EventType.ERROR, "camera restart after malfunction");
 
+            // purge all scheduled trigger events as to not interrupt while the camera is not ready
+            // When the cmaera has restarted, it will schedule a new one
+            handler.removeCallbacksAndMessages(null);
             restartCamera();
 
         } else {
@@ -322,8 +325,9 @@ public class ShutterService extends Service {
                     break;
                 }
                 case STATE_RESTART: {
-                    // do not schedule a new trigger event, trigger right away
-                    triggerCamera();
+                    // existing scheduled shutter events have been killed for restart,
+                    // schedule a new one
+                    handler.post(shutterReleaseRunnable);
                     break;
                 }
                 default: {
