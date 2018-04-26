@@ -166,6 +166,12 @@ public class SystemController {
         return (int) (((float) level / (float) scale) * 100.0f);
     }
 
+    public float getBatteryTemperature() {
+        Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int output = batteryIntent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1);
+        return (float) output / 10f;
+    }
+
     public double getFreeRAM() {
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

@@ -41,8 +41,11 @@ public class Status {
     @ColumnInfo(name = "state_charging")
     private boolean stateCharging;
 
-    @ColumnInfo(name = "temperature")
-    private float temperature;
+    @ColumnInfo(name = "temperature_device")
+    private float temperatureDevice;
+
+    @ColumnInfo(name = "temperature_battery")
+    private float temperatureBattery;
 
     public long getId() {
         return id;
@@ -116,11 +119,19 @@ public class Status {
         this.stateCharging = stateCharging;
     }
 
-    public float getTemperature() {
-        return temperature;
+    public float getTemperatureDevice() {
+        return temperatureDevice;
     }
 
-    public void setTemperature(float temperature) {
-        this.temperature = temperature;
+    public void setTemperatureDevice(float temperatureDevice) {
+        this.temperatureDevice = temperatureDevice;
+    }
+
+    public float getTemperatureBattery() {
+        return temperatureBattery;
+    }
+
+    public void setTemperatureBattery(float temperatureBattery) {
+        this.temperatureBattery = temperatureBattery;
     }
 }

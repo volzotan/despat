@@ -229,9 +229,6 @@ public class CameraController2 extends CameraController {
             Log.e(TAG, "--> Camera: onError: " + error);
             cameraOpenCloseLock.release();
 
-            // TODO
-//            Toast.makeText(context, "Opening Camera failed", Toast.LENGTH_SHORT).show();
-
             reportFailAndClose("camera: onError", error);
         }
     };
@@ -312,8 +309,10 @@ public class CameraController2 extends CameraController {
             // enable lens shading correction for the RAW output
             stillRequestBuilder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_HIGH_QUALITY);
 
-            // TODO: does the stillRequestBuilder really need the 3A controls? metering and focusing should
+            // TODO: does the stillRequestBuilder really need
+            // the 3A controls? metering and focusing should
             // be done by the previewRequest
+
             setup3AControls(stillRequestBuilder);
 
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
@@ -520,9 +519,6 @@ public class CameraController2 extends CameraController {
             throw new IllegalAccessException("camera device missing");
         }
 
-        // TODO: purge prev. requests? clear image readers
-        purgeImageReaderAndSaver();
-
         // TODO:
 //        double random = Math.random();
 //        if (random > 0.95) throw new IllegalAccessException("test");
@@ -532,21 +528,7 @@ public class CameraController2 extends CameraController {
 
     private void purgeImageReaderAndSaver() {
 
-        //        if (captureSession != null) {
-//            captureSession.abortCaptures();
-//        } else {
-//            Log.w(TAG, "captureSession missing");
-//        }
-
-//        if (imageReaderJpg != null) {
-//            imageReaderJpg.close();
-//        }
-//        if (imageReaderRaw != null) {
-//            imageReaderRaw.close();
-//        }
-//        initializeImageReaders(cameraManager.getCameraCharacteristics(cameraDevice.getId()));
-
-        // hacky solution to clear the imageReader without closing and reinitializing
+        // clear ImageReader // hacky solution to clear the imageReader without closing and reinitializing
         int removeCounter = 0;
         try {
             for(removeCounter=0; removeCounter<Config.NUMBER_OF_BURST_IMAGES*2+1; removeCounter++) imageReaderJpg.acquireNextImage().close();
@@ -572,22 +554,29 @@ public class CameraController2 extends CameraController {
             }
         }
 
+        // clear ResultQueue
         synchronized (queueRemoveLock) {
-            if (jpgResultQueue != null && jpgResultQueue.size() > 0) {
+
+            if (Config.FORMAT_JPG && jpgResultQueue != null && jpgResultQueue.size() > 0) {
+
                 String msg = "clearing " + jpgResultQueue.size() + " scheduled JPEG images from ImageSaver";
                 Log.w(TAG, msg);
                 Util.saveEvent(context, Event.EventType.ERROR, msg);
-                for (Map.Entry<Integer, ImageSaver> entry : jpgResultQueue.entrySet()) {
-                    entry.getValue().close();
+                for (Integer i : jpgResultQueue.keySet()) {
+                    ImageSaver saver = jpgResultQueue.get(i);
+                    saver.close();
                 }
                 jpgResultQueue.clear();
             }
-            if (rawResultQueue != null && rawResultQueue.size() > 0) {
+
+            if (Config.FORMAT_RAW && rawResultQueue != null && rawResultQueue.size() > 0) {
+
                 String msg = "clearing " + rawResultQueue.size() + " scheduled RAW images from ImageSaver";
                 Log.w(TAG, msg);
                 Util.saveEvent(context, Event.EventType.ERROR, msg);
-                for (Map.Entry<Integer, ImageSaver> entry : rawResultQueue.entrySet()) {
-                    entry.getValue().close();
+                for (Integer i : rawResultQueue.keySet()) {
+                    ImageSaver saver = rawResultQueue.get(i);
+                    saver.close();
                 }
                 rawResultQueue.clear();
             }
@@ -618,23 +607,7 @@ public class CameraController2 extends CameraController {
             captureSession.stopRepeating();
 //            captureSession.abortCaptures();
 
-            synchronized (queueRemoveLock) {
-                if (jpgResultQueue != null) {
-                    for (Integer i : jpgResultQueue.keySet()) {
-                        ImageSaver saver = jpgResultQueue.get(i);
-                        saver.close();
-                    }
-                    jpgResultQueue.clear();
-                }
-
-                if (rawResultQueue != null) {
-                    for (Integer i : rawResultQueue.keySet()) {
-                        ImageSaver saver = rawResultQueue.get(i);
-                        saver.close();
-                    }
-                    rawResultQueue.clear();
-                }
-            }
+            purgeImageReaderAndSaver();
 
 
             final int burstLength = Config.NUMBER_OF_BURST_IMAGES; // TODO: make burstLength a function parameter
@@ -828,22 +801,12 @@ public class CameraController2 extends CameraController {
                 if (captureSession != null) {
                     captureSession.stopRepeating();
                     captureSession.close();
-                    captureSession = null;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.w(TAG, "attempt to close captureSession of an already closed camera", e);
+            } finally {
+                captureSession = null;
             }
-
-//            final Handler handler = new Handler();
-//            handler.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (cameraDevice != null) {
-//                        cameraDevice.close();
-//                        cameraDevice = null;
-//                    }
-//                }
-//            }, 1000); // TODO: delay really necessary?
 
             try {
                 if (cameraDevice != null) cameraDevice.close();

@@ -57,10 +57,12 @@ public class HeartbeatService extends JobService {
         // Temperature sensors are found in just a small number of devices, namely some Samsung 3 and Moto X
         // if a sensor is present, use the reading from the last heartbeat and start a new measurement for the next
         float temp = systemController.getTemperature();
-        status.setTemperature(temp);
+        status.setTemperatureDevice(temp);
         if (temp > 0) {
             systemController.startTemperatureMeasurement();
         }
+
+        status.setTemperatureBattery(systemController.getBatteryTemperature());
 
         AppDatabase db = AppDatabase.getAppDatabase(despat);
         StatusDao statusDao = db.statusDao();

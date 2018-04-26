@@ -81,12 +81,20 @@ public class ShutterService extends Service {
     Runnable cameraWatchdogRunnable = new Runnable() {
         @Override
         public void run() {
-            Log.wtf(TAG, "CAMERA WATCHDOG KILL");
-            Util.saveEvent(context, Event.EventType.ERROR, "camera: watchdog kill");
 
             if (Config.getPersistentCamera(context)) {
                 // TODO: reschedule new shutterRelease? restart camera?
+
+                // TODO: has a new picture been taken? is everything in its orderly fashion?
+
             } else {
+
+                // on calling the watchdog the camera is still alive
+                // the ShutterService failed to close the camera in time.
+
+                Log.wtf(TAG, "CAMERA WATCHDOG KILL");
+                Util.saveEvent(context, Event.EventType.ERROR, "camera: watchdog kill");
+
                 Despat despat = Util.getDespat(context);
                 despat.closeCamera();
             }
@@ -405,6 +413,7 @@ public class ShutterService extends Service {
     }
 
     private void eventCameraShutdown() {
+        Log.d(TAG, "eventCameraShutdown");
         if (Config.getPersistentCamera(context)) {
 
             switch (state) {

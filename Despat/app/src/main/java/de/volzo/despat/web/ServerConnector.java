@@ -201,6 +201,9 @@ public class ServerConnector {
 
                 o.put("stateCharging", status.isStateCharging());
 
+                o.put("temperatureDevice", status.getTemperatureDevice());
+                o.put("temperatureBattery", status.getTemperatureBattery());
+
                 arr.put(o);
             }
 
