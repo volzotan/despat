@@ -33,11 +33,14 @@ import android.widget.ToggleButton;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Session;
+import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
@@ -253,6 +256,20 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        compressor.init(bitmap.getWidth(), bitmap.getHeight());
 //        compressor.add(imgroll.getNewestImage());
 //        compressor.toJpeg(new File(Environment.getExternalStorageDirectory(), ("despat/foo.jpg")));
+
+        AppDatabase db = AppDatabase.getAppDatabase(this);
+        SessionDao sessionDao = db.sessionDao();
+        List<Session> sessions = sessionDao.getAll();
+
+        for (Session session : sessions) {
+            boolean noGlitch = RecordingSession.checkForIntegrity(this, session);
+
+            if (noGlitch) {
+                Log.i(TAG, "session [" + session.getSessionName() + "] has no glitch");
+            } else {
+                Log.i(TAG, "session [" + session.getSessionName() + "] has glitches");
+            }
+        }
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

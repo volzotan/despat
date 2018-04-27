@@ -184,8 +184,6 @@ public class DrawSurface extends SurfaceView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        Log.wtf(TAG, "onDraw");
-
         for (RectF rect : rectanglesBlack) {
             canvas.drawRect(rect, paintBlack);
         }

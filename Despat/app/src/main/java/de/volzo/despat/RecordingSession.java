@@ -6,6 +6,8 @@ import android.location.Location;
 import android.util.Log;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -273,7 +275,7 @@ public class RecordingSession {
         return numberErrors;
     }
 
-    public boolean checkForIntegrity() {
+    public static boolean checkForIntegrity(Context context, Session session) {
 
         // check the DB if shutter events have occurred at the timed interval
         // or if android suppressed the alarm manager
@@ -284,19 +286,29 @@ public class RecordingSession {
 
         List<Capture> captures = captureDao.getAllBySession(session.getId());
 
-        long maxTimeDiff = Config.getShutterInterval(context) * 1000 + 3 * 1000;
+        boolean result = true;
+
+        long maxTimeDiff = 1000;
         Date comp = session.getStart();
-        for (Capture cap : captures) {
-            long diff = cap.getRecordingTime().getTime() - comp.getTime();
+
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+        StringBuilder sb = new StringBuilder("\n");
+
+        for (int i=0; i<captures.size(); i++) {
+            long diff = captures.get(i).getRecordingTime().getTime() - comp.getTime() - Config.getShutterInterval(context);
 
             if (diff > maxTimeDiff) {
-                return false;
+                result = false;
+                sb.append(String.format("%s | schedule glitch at capture %d (diff: %d)\n", df.format(captures.get(i).getRecordingTime().getTime()), i, diff));
             }
 
-            comp = cap.getRecordingTime();
+            comp = captures.get(i).getRecordingTime();
         }
 
-        return true;
+        System.out.println(sb.toString());
+
+        return result;
     }
 
     public String getSessionName() throws NotRecordingException {
