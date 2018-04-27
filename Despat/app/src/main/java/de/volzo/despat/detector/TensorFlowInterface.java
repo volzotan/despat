@@ -19,7 +19,6 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Trace;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,9 +37,9 @@ import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
  * Wrapper for frozen detection models trained using the Tensorflow Object Detection API:
  * github.com/tensorflow/models/tree/master/research/object_detection
  */
-public class TensorFlowObjectDetectionAPIModel implements TensorFlowDetector {
+public class TensorFlowInterface {
 
-    public static final String TAG = TensorFlowObjectDetectionAPIModel.class.getSimpleName();
+    public static final String TAG = TensorFlowInterface.class.getSimpleName();
 
     // Only return this many results.
     private static final int MAX_RESULTS = 100;
@@ -70,12 +69,13 @@ public class TensorFlowObjectDetectionAPIModel implements TensorFlowDetector {
      * @param modelFilename The filepath of the model GraphDef protocol buffer.
      * @param labelFilename The filepath of label file for classes.
      */
-    public static TensorFlowDetector create(
+    public static TensorFlowInterface create(
             final AssetManager assetManager,
             final String modelFilename,
             final String labelFilename,
             final int inputSize) throws IOException {
-        final TensorFlowObjectDetectionAPIModel d = new TensorFlowObjectDetectionAPIModel();
+
+        final TensorFlowInterface d = new TensorFlowInterface();
 
         InputStream labelsInput = null;
         String actualFilename = labelFilename.split("file:///android_asset/")[1];
@@ -129,10 +129,9 @@ public class TensorFlowObjectDetectionAPIModel implements TensorFlowDetector {
         return d;
     }
 
-    private TensorFlowObjectDetectionAPIModel() {}
+    private TensorFlowInterface() {}
 
-    @Override
-    public List<Recognition> recognizeImage(final Bitmap bitmap) {
+    public List<Detector.Recognition> recognizeImage(final Bitmap bitmap) {
         // Log this method so that it can be analyzed with systrace.
         Trace.beginSection("recognizeImage");
 
@@ -171,12 +170,12 @@ public class TensorFlowObjectDetectionAPIModel implements TensorFlowDetector {
         Trace.endSection();
 
         // Find the best detections.
-        final PriorityQueue<Recognition> pq =
-                new PriorityQueue<Recognition>(
+        final PriorityQueue<Detector.Recognition> pq =
+                new PriorityQueue<Detector.Recognition>(
                         1,
-                        new Comparator<Recognition>() {
+                        new Comparator<Detector.Recognition>() {
                             @Override
-                            public int compare(final Recognition lhs, final Recognition rhs) {
+                            public int compare(final Detector.Recognition lhs, final Detector.Recognition rhs) {
                                 // Intentionally reversed to put high confidence at the head of the queue.
                                 return Float.compare(rhs.getConfidence(), lhs.getConfidence());
                             }
@@ -190,11 +189,10 @@ public class TensorFlowObjectDetectionAPIModel implements TensorFlowDetector {
                             outputLocations[4 * i] * inputSize,
                             outputLocations[4 * i + 3] * inputSize,
                             outputLocations[4 * i + 2] * inputSize);
-            pq.add(
-                    new Recognition("" + i, labels.get((int) outputClasses[i]), outputScores[i], detection));
+            pq.add(new Detector.Recognition("" + i, labels.get((int) outputClasses[i]), outputScores[i], detection));
         }
 
-        final ArrayList<Recognition> recognitions = new ArrayList<Recognition>();
+        final ArrayList<Detector.Recognition> recognitions = new ArrayList<Detector.Recognition>();
         for (int i = 0; i < Math.min(pq.size(), MAX_RESULTS); ++i) {
             recognitions.add(pq.poll());
         }
@@ -202,17 +200,14 @@ public class TensorFlowObjectDetectionAPIModel implements TensorFlowDetector {
         return recognitions;
     }
 
-    @Override
     public void enableStatLogging(final boolean logStats) {
         this.logStats = logStats;
     }
 
-    @Override
     public String getStatString() {
         return inferenceInterface.getStatString();
     }
 
-    @Override
     public void close() {
         inferenceInterface.close();
     }

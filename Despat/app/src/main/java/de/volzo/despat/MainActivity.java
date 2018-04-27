@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
+import de.volzo.despat.detector.DetectorHOG;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Session;
@@ -567,11 +568,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void runRecognizer() {
         try {
-            detector = new DetectorSSD(activity);
+//            detector = new DetectorSSD(activity);
+            detector = new DetectorHOG(activity);
             detector.init();
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
-            detector.run();
-            detector.display((DrawSurface) findViewById(R.id.drawSurface));
+            List<Detector.Recognition> detections = detector.run();
+            detector.display((DrawSurface) findViewById(R.id.drawSurface), detections);
         } catch (Exception e) {
             Log.wtf(TAG, "detector failed", e);
         }

@@ -25,7 +25,7 @@ public class DetectorSSD extends Detector {
 
     private Context context;
 
-    private TensorFlowDetector tfDetector;
+    private TensorFlowInterface tfInterface;
     private Stopwatch stopwatch;
 
     private static final int TF_OD_API_INPUT_SIZE = 300;
@@ -57,7 +57,7 @@ public class DetectorSSD extends Detector {
         stopwatch = new Stopwatch();
 
         try {
-            tfDetector = TensorFlowObjectDetectionAPIModel.create(
+            tfInterface = TensorFlowInterface.create(
                     context.getAssets(),
                     TF_OD_API_MODEL_FILE,
                     TF_OD_API_LABELS_FILE,
@@ -90,15 +90,15 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
-    public void run() {
+    public List<Detector.Recognition> run() {
 //        Log.i(TAG, "Running detection on image " + currTimestamp);
 
-        List<TensorFlowDetector.Recognition> results;
+        List<Detector.Recognition> results;
 
         for (TileManager.Tile tile : tileManager.getAllTiles()){
             stopwatch.start("totalInference");
             Bitmap crop = tileManager.getTileImage(tile);
-            results = tfDetector.recognizeImage(crop);
+            results = tfInterface.recognizeImage(crop);
             crop.recycle();
             stopwatch.stop("totalInference");
 
@@ -111,6 +111,7 @@ public class DetectorSSD extends Detector {
 
         stopwatch.print();
 
+        return tileManager.getFullResults();
 
 //        for (final TensorFlowDetector.Recognition result : results) {
 //
@@ -134,21 +135,15 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
-    public void postprocess() throws Exception {
-
-    }
-
-    @Override
     public void save() throws Exception {
 
     }
 
     @Override
-    public void display(DrawSurface surface) {
-        List<TensorFlowDetector.Recognition> results = tileManager.getFullResults();
+    public void display(DrawSurface surface, List<Detector.Recognition> results) {
 
         List<RectF> rectangles = new ArrayList<RectF>();
-        for (TensorFlowDetector.Recognition result : results) {
+        for (Detector.Recognition result : results) {
             if (result.getConfidence() < MINIMUM_CONFIDENCE_TF_OD_API) {
                 continue;
             }

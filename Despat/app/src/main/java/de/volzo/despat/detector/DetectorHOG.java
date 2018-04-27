@@ -1,44 +1,106 @@
 package de.volzo.despat.detector;
 
-import android.graphics.Bitmap;
+import android.content.Context;
+import android.graphics.RectF;
+import android.util.Log;
+import android.util.Size;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.HOGDescriptor;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.volzo.despat.DrawSurface;
+import de.volzo.despat.support.Stopwatch;
 
 public class DetectorHOG extends Detector {
 
+    public static final String TAG = DetectorHOG.class.getSimpleName();
+
+    Context context;
+    Stopwatch stopwatch;
+
+    HOGDescriptor hog;
+    File image;
+    Size imageSize;
+
+    public DetectorHOG(Context context) {
+        this.context = context;
+    }
 
     @Override
     public void init() throws Exception {
+
+        stopwatch = new Stopwatch();
+        stopwatch.start("HOG init");
+
+        System.loadLibrary("opencv_java3");
+        hog = new HOGDescriptor();
+        hog.setSVMDetector(HOGDescriptor.getDefaultPeopleDetector());
+
+        stopwatch.stop("HOG init");
 
     }
 
     @Override
     public void load(File fullFilename) {
-
+        this.image = fullFilename;
     }
 
     @Override
-    public void run() throws Exception {
+    public List<Recognition> run() throws Exception {
 
+        stopwatch.start("totalInference");
+        stopwatch.start("preparation");
+
+        Mat cvimage = Imgcodecs.imread(image.getAbsolutePath());
+        MatOfRect foundLocations = new MatOfRect();
+        MatOfDouble foundWeights = new MatOfDouble();
+
+        stopwatch.stop("preparation");
+        stopwatch.start("detection");
+
+        hog.detectMultiScale(cvimage, foundLocations, foundWeights);
+
+        stopwatch.stop("detection");
+        stopwatch.start("conversion");
+
+        Rect[] rects = foundLocations.toArray();
+        List<Recognition> results = new ArrayList<Recognition>();
+
+        for (Rect rect : rects) {
+
+            Recognition rec = new Recognition(
+                    "",
+                    "person",
+                    1.0f,
+                    new RectF(
+                            (float) rect.x,
+                            (float) rect.y,
+                            (float) rect.x + rect.width,
+                            (float) rect.y + rect.height
+                    ));
+
+            results.add(rec);
+        }
+
+        stopwatch.stop("conversion");
+        stopwatch.stop("totalInference");
+
+        imageSize = new Size(cvimage.width(), cvimage.height());
+
+        stopwatch.print();
+        System.out.println("hits: " + results.size());
+
+        return results;
     }
 
-    @Override
-    public void postprocess() throws Exception {
-
-    }
 
     @Override
     public void save() throws Exception {
@@ -46,99 +108,18 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
-    public void display(DrawSurface drawSurface) {
+    public void display(DrawSurface surface, List<Detector.Recognition> results) {
+        List<RectF> rectangles = new ArrayList<RectF>();
+        for (Detector.Recognition result : results) {
+            rectangles.add(result.getLocation());
+        }
 
+        try {
+            surface.clearCanvas();
+            surface.addBoxes(imageSize, rectangles, surface.paintGreen);
+        } catch (Exception e) {
+            Log.e(TAG, "displaying results failed. unable to draw on canvas", e);
+        }
     }
 
-
-    private long[] computationTime = new long[4];
-
-    public DetectorHOG() {
-        System.loadLibrary("opencv_java3");
-    }
-
-    public RecognizerResultset run(File image) {
-
-        long timestart = System.currentTimeMillis();
-
-        HOGDescriptor hog = new HOGDescriptor();
-        hog.setSVMDetector(HOGDescriptor.getDefaultPeopleDetector());
-
-        computationTime[0] = System.currentTimeMillis() - timestart; // init descriptor
-
-        Mat cvimage = Imgcodecs.imread(image.getAbsolutePath());
-        Mat cvimage2 = cvimage.clone();
-        MatOfRect foundLocations = new MatOfRect();
-        MatOfDouble foundWeights = new MatOfDouble();
-
-        computationTime[1] = System.currentTimeMillis() - timestart; // read image
-
-//        hog.detectMultiScale(cvimage, foundLocations, foundWeights,
-//                1,
-//                new Size(4, 4),
-//                new Size(8, 8),
-//                1.03, 1, false);
-
-        hog.detectMultiScale(cvimage, foundLocations, foundWeights);
-
-        Rect[] rects = foundLocations.toArray();
-
-        computationTime[2] = System.currentTimeMillis() - timestart; // computation
-
-        for (Rect rect : rects) {
-            Imgproc.rectangle(cvimage2, new Point(rect.x, rect.y),
-                    new Point(rect.x+rect.width, rect.y+rect.height),
-                    new Scalar(0, 0, 255), 2);
-        }
-
-        System.out.println("hits: " + rects.length);
-
-        double[][] coordinates = new double[rects.length][2];
-        for (int i=0; i<rects.length; i++) {
-            Rect rect = rects[i];
-
-            coordinates[i][0] = rect.x + (rect.width / 2);
-            coordinates[i][1] = rect.y + (rect.height / 10);
-        }
-
-        computationTime[3] = System.currentTimeMillis() - timestart; // drawing boxes
-
-        RecognizerResultset recognizerResultset = new RecognizerResultset();
-        recognizerResultset.setCoordinates(coordinates);
-        recognizerResultset.setBitmap(cvimage2);
-        recognizerResultset.setComputationTime(computationTime);
-
-        float timestop = (System.currentTimeMillis() - timestart) / 1000f;
-        System.out.println("runtime: " + Math.round(timestop) + "s");
-
-        return recognizerResultset;
-
-        // Imgcodecs.imwrite("result.jpg", cvimage2);
-    }
-
-    class RecognizerResultset {
-
-        public double[][] coordinates;
-        public Bitmap bitmap;
-        public long[] computationTime;
-
-        public RecognizerResultset() {}
-
-        void setCoordinates(double[][] coordinates) {
-            this.coordinates = coordinates;
-        }
-
-        void setBitmap(Mat image) {
-            Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
-            Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
-            Bitmap resultBitmap = Bitmap.createBitmap(image.width(), image.height(), conf);
-            Utils.matToBitmap(image, resultBitmap);
-            this.bitmap = resultBitmap;
-        }
-
-        void setComputationTime(long[] computationTime) {
-            this.computationTime = computationTime;
-        }
-
-    }
 }

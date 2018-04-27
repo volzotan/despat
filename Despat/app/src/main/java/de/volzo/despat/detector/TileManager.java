@@ -105,16 +105,16 @@ public class TileManager {
         return imageOutput;
     }
 
-    public void passResult(Tile tile, List<TensorFlowDetector.Recognition> results) {
+    public void passResult(Tile tile, List<Detector.Recognition> results) {
         tile.results = results;
 
-        for(TensorFlowDetector.Recognition r : tile.results) {
+        for(Detector.Recognition r : tile.results) {
             r.setLocation(convertCoordinates(tile.matrix, r.getLocation()));
         }
     }
 
-    public List<TensorFlowDetector.Recognition> getFullResults() {
-        List<TensorFlowDetector.Recognition> fullResultset = new LinkedList<TensorFlowDetector.Recognition>();
+    public List<Detector.Recognition> getFullResults() {
+        List<Detector.Recognition> fullResultset = new LinkedList<Detector.Recognition>();
 
         for (Tile t : this.tiles) {
             fullResultset.addAll(t.results);
@@ -128,7 +128,7 @@ public class TileManager {
         private int x;
         private int y;
         private Matrix matrix;
-        List<TensorFlowDetector.Recognition> results;
+        List<Detector.Recognition> results;
 
         public Tile(int tileId, int x, int y) {
             this.tileId = tileId;
@@ -140,7 +140,7 @@ public class TileManager {
             matrix.postTranslate(xoffset + x * tilesize, yoffset + y * tilesize);
         }
 
-        public void setResults(List<TensorFlowDetector.Recognition> results) {
+        public void setResults(List<Detector.Recognition> results) {
             this.results = results;
         }
     }
