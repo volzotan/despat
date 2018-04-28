@@ -75,19 +75,15 @@ def _iou(box1, box2):
     return float(intersection) / float(union)
 
 
-def evaluate(gt, dt, filter_classes=[]):
+def evaluate(gt, dt, min_confidence=0.5, filter_classes=[]):
 
     if len(filter_classes) > 0: 
         pass
 
-    min_confidence = 0.5
     iou_threshold = 0.5
 
     gt_boxes = _split_by_class_and_filter(gt["box"], gt["class"], None, "person", 0)
     dt_boxes = _split_by_class_and_filter(dt["box"], dt["class"], dt["score"], "person", min_confidence)
-
-    print(len(gt_boxes))
-    print(len(dt_boxes))
 
     true_positives = []
     false_positives = []
@@ -117,11 +113,16 @@ def evaluate(gt, dt, filter_classes=[]):
         if gbox not in detected_gt:
             false_negatives.append(gbox)
 
-    print("true_positives: {}".format(len(true_positives)))
-    print("false_positives: {}".format(len(false_positives)))
-    print("false_negatives: {}".format(len(false_negatives)))
+    return (true_positives, false_positives, false_negatives)
 
-    visualize(true_positives, false_positives, false_negatives)
+    # print("true_positives: {}".format(len(true_positives)))
+    # print("false_positives: {}".format(len(false_positives)))
+    # print("false_negatives: {}".format(len(false_negatives)))
+    #
+    # print("recall: {}".format(len(true_positives) / (len(true_positives) + len(false_positives))))
+    # print("precision: {}".format(len(true_positives) / (len(true_positives) + len(false_negatives))))
+    #
+    # visualize(true_positives, false_positives, false_negatives)
 
 
 def visualize(tp, fp, fn):
@@ -135,4 +136,18 @@ def visualize(tp, fp, fn):
 if __name__ == "__main__":
     # print(vocToBbox("output/1523266900504_0.xml"))
 
-    evaluate(vocToBbox("pedestriancrossing_gt.xml"), jsonToBbox("output/pedestriancrossing.json"))
+    gt = vocToBbox("pedestriancrossing_gt.xml")
+    dt = jsonToBbox("output/pedestriancrossing.json")
+
+    p = []
+    r = []
+
+    tp, fp, fn = evaluate(gt, dt)
+    precision = len(tp) / (len(tp) + len(fp))
+    recall = len(tp) / (len(tp) + len(fn))
+    p.append(precision)
+    r.append(recall)
+
+    print(p)
+    print(r)
+
