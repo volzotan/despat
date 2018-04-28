@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw
 import PIL
 import numpy as np
-import os
+from drawhelper import Drawhelper
 
 class TileManager(object):
 
@@ -137,25 +137,22 @@ class TileManager(object):
         #print(result)
 
 
-    def _draw_bounding_boxes(self, filename, bboxes, scores):
-        draw = ImageDraw.Draw(self.image)
+    def _draw_bounding_boxes(self, filename, bboxes, scores, threshold):
 
-        b = bboxes
-        s = scores
-
-        for i in range(0, len(b)):
-            if s[i] < 0.5:
+        boxes_above_threshold = []
+        for i in range(0, len(bboxes)):
+            if scores is not None and scores[i] < threshold:
                 continue
-            color = (0, 255, 0)
-            draw.rectangle([b[i][1]+0, b[i][0]+0, b[i][3]-0, b[i][2]-0], outline=color)
-            draw.rectangle([b[i][1]+1, b[i][0]+1, b[i][3]-1, b[i][2]-1], outline=color)
-            draw.rectangle([b[i][1]+2, b[i][0]+2, b[i][3]-2, b[i][2]-2], outline=color)
+            boxes_above_threshold.append(bboxes[i]) #[bboxes[i][1], bboxes[i][0], bboxes[i][3], bboxes[i][2]])
 
+        boxes_tiles = []
         for _, tile in self.tiles.items():
-            draw.rectangle(self._get_dim_for_tile(tile["x"], tile["y"]), outline=0)
+            boxes_tiles.append(self._get_dim_for_tile(tile["x"], tile["y"]))
 
-        del draw
-        self.image.save(filename)
+        drawhelper = Drawhelper(self.filename, filename)
+        drawhelper.add_boxes(boxes_above_threshold, color=(0, 255, 0), strokewidth=4, inverse_coordinates=True)
+        drawhelper.add_boxes(boxes_tiles, color=(0, 0, 0), strokewidth=1)
+        drawhelper.draw()
 
 
     def get_full_results(self):

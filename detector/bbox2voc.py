@@ -45,7 +45,7 @@ def convertToJson(folder_filename, image_filename, image_path, imagesize, bboxes
     output["imagesize"] = imagesize
     output["timestamp"] = datetime.now().strftime(DATEFORMAT_STORE)
 
-    output["detection_boxes"]   = bboxes.tolist()
+    output["detection_boxes"]   = bboxes.tolist() # inv coord format!
     output["detection_classes"] = classes
     output["detection_scores"]  = scores.tolist()
 

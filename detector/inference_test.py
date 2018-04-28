@@ -45,17 +45,17 @@ OD_FRAMEWORK_PATH = os.path.join(args.tensorflow_object_detection_path, "object_
 
 
 #MODEL_NAME = "ssd_mobilenet_v1_coco_2017_11_17"
-#MODEL_NAME = "ssd_mobilenet_v2_coco_2018_03_29" 
-#MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28" 
+#MODEL_NAME = "ssd_mobilenet_v2_coco_2018_03_29"
+#MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28"
 #MODEL_NAME = "faster_rcnn_resnet101_coco_2018_01_28" 
-MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28" 
+MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28"
 
 PATH_TO_CKPT = os.path.join(args.models, MODEL_NAME, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
-TILESIZE = [2000, 1500]
-OUTPUTSIZE = [2000, 1500] #300 # whats fed into the network
+TILESIZE = [1000, 1000] #[4320/2, 3240/2]
+OUTPUTSIZE = [1000, 1000] #[4320/2, 3240/2] #300 # whats fed into the network
 
 
 def load_image_into_numpy_array(image):
@@ -270,7 +270,7 @@ def run(sess, filename, tilesize, outputsize):
 
     if args.export_images:
         export_filename = os.path.join(OUTPUT_FOLDER, "{}_{}_{}x{}-{}x{}.jpg".format(file_name_only, MODEL_NAME, tilesize[0], tilesize[1], outputsize[0], outputsize[1]))
-        tm._draw_bounding_boxes(export_filename, output_dict["detection_boxes"], output_dict["detection_scores"])
+        tm._draw_bounding_boxes(export_filename, output_dict["detection_boxes"], output_dict["detection_scores"], 0.5)
 
     converter = None
 
