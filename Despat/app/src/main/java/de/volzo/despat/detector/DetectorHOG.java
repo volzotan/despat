@@ -74,18 +74,21 @@ public class DetectorHOG extends Detector {
         Rect[] rects = foundLocations.toArray();
         List<Recognition> results = new ArrayList<Recognition>();
 
-        for (Rect rect : rects) {
+        for (int i=0; i<rects.length; i++) {
+            Rect rect = rects[i];
 
             Recognition rec = new Recognition(
                     "",
                     "person",
-                    1.0f,
+                    (float) foundWeights.get(i, 0)[0],
                     new RectF(
                             (float) rect.x,
                             (float) rect.y,
                             (float) rect.x + rect.width,
                             (float) rect.y + rect.height
                     ));
+
+            System.out.println(rec.toString());
 
             results.add(rec);
         }

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6073747e6c2cd1b8fb3d481e2ac1b737",
+    "identityHash": "60dc64745e47c59ef786ba700a76180f",
     "entities": [
       {
         "tableName": "Status",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` TEXT, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature` REAL NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` TEXT, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature_device` REAL NOT NULL, `temperature_battery` REAL NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -63,8 +63,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "temperature",
-            "columnName": "temperature",
+            "fieldPath": "temperatureDevice",
+            "columnName": "temperature_device",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temperatureBattery",
+            "columnName": "temperature_battery",
             "affinity": "REAL",
             "notNull": true
           }
@@ -385,7 +391,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"6073747e6c2cd1b8fb3d481e2ac1b737\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"60dc64745e47c59ef786ba700a76180f\")"
     ]
   }
 }
