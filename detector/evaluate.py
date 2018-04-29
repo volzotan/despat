@@ -1,6 +1,10 @@
 import xml.etree.ElementTree as et
 import json
 from drawhelper import Drawhelper
+import matplotlib.pyplot as plt
+import numpy as np
+
+IOU_THRESHOLD = 0.5
 
 def vocToBbox(filename):
     res = {}
@@ -75,15 +79,10 @@ def _iou(box1, box2):
     return float(intersection) / float(union)
 
 
-def evaluate(gt, dt, min_confidence=0.5, filter_classes=[]):
+def evaluate(gt, dt, name_of_class, min_confidence=0.5):
 
-    if len(filter_classes) > 0: 
-        pass
-
-    iou_threshold = 0.5
-
-    gt_boxes = _split_by_class_and_filter(gt["box"], gt["class"], None, "person", 0)
-    dt_boxes = _split_by_class_and_filter(dt["box"], dt["class"], dt["score"], "person", min_confidence)
+    gt_boxes = _split_by_class_and_filter(gt["box"], gt["class"], None, name_of_class, 0)
+    dt_boxes = _split_by_class_and_filter(dt["box"], dt["class"], dt["score"], name_of_class, min_confidence)
 
     true_positives = []
     false_positives = []
@@ -99,8 +98,7 @@ def evaluate(gt, dt, min_confidence=0.5, filter_classes=[]):
             if gbox in detected_gt:
                 continue
 
-            iou = _iou(dbox, gbox)
-            if iou >= iou_threshold:
+            if _iou(dbox, gbox) >= IOU_THRESHOLD:
                 true_positives.append(dbox)
                 detected_gt.append(gbox)
                 found = True
@@ -133,21 +131,50 @@ def visualize(tp, fp, fn):
     drawhelper.draw()
 
 
+def precision_recall_curve(gt, dt, name_of_class):
+    p = []
+    r = []
+
+    for threshold in [x / 10.0 for x in range(0, 11)]:
+        tp, fp, fn = evaluate(gt, dt, name_of_class, min_confidence=threshold)
+
+        precision = 1
+
+        if len(tp) > 0:
+            precision = len(tp) / (len(tp) + len(fp))
+
+        recall = len(tp) / (len(tp) + len(fn))
+        r.append(recall)
+        p.append(precision)
+
+    return (p, r)
+
+
 if __name__ == "__main__":
     # print(vocToBbox("output/1523266900504_0.xml"))
 
     gt = vocToBbox("pedestriancrossing_gt.xml")
     dt = jsonToBbox("output/pedestriancrossing.json")
 
-    p = []
-    r = []
+    classes = ["person"]
 
-    tp, fp, fn = evaluate(gt, dt)
-    precision = len(tp) / (len(tp) + len(fp))
-    recall = len(tp) / (len(tp) + len(fn))
-    p.append(precision)
-    r.append(recall)
+    plt.xlabel('recall')
+    plt.ylabel('precision')
 
-    print(p)
-    print(r)
+    axes = plt.gca()
+    axes.set_xlim([0, 1.05])
+    axes.set_ylim([0, 1.05])
+
+    handles = []
+
+    for c in classes:
+        p, r = precision_recall_curve(gt, dt, c)
+
+        print("{} mAP: {}".format(c, np.average(p)))
+
+        handle = plt.plot(r, p, label=c)
+        handles.append(handle)
+
+    plt.legend(classes)
+    plt.show()
 
