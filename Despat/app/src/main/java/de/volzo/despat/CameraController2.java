@@ -287,9 +287,10 @@ public class CameraController2 extends CameraController {
             if (Config.FORMAT_JPG) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
             if (Config.FORMAT_RAW) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
 
+            // image rotation
             int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) * -1;
-
             int deviceOrientationInDegree;
+
             if (currentRotation == Surface.ROTATION_0) {
                 deviceOrientationInDegree = 0;
             } else if (currentRotation == Surface.ROTATION_90) {
@@ -303,8 +304,10 @@ public class CameraController2 extends CameraController {
             }
 
             int photoOrientation = (sensorOrientation + deviceOrientationInDegree + 360) % 360;
-
             stillRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, photoOrientation);
+
+            // JPEG Quality
+            stillRequestBuilder.set(CaptureRequest.JPEG_QUALITY, Config.JPEG_QUALITY);
 
             // enable lens shading correction for the RAW output
             stillRequestBuilder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_HIGH_QUALITY);

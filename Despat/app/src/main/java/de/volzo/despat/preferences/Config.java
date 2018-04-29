@@ -60,6 +60,9 @@ public class Config {
     // over- or underexposure compensation | v1 only
     public static final int EXPOSURE_COMPENSATION                   = 0;
 
+    // set the JPEG image quality | v2 only
+    public static final byte JPEG_QUALITY                           = 60;
+
     // maximal time the AF/AE/AWB metering functions
     // may try to find a fix before shutter is
     // released anyway

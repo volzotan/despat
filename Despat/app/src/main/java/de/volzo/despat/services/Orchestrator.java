@@ -102,7 +102,11 @@ public class Orchestrator extends BroadcastReceiver {
                             break;
                         }
                         String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
-                        if (path != null) session.addCapture(new File(path));
+                        if (path != null) {
+                            session.addCapture(new File(path));
+                        } else {
+                            Log.w(TAG, "path missing. capture could not be saved");
+                        }
 
                         ArrayList<String> addInfo = new ArrayList<>();
                         addInfo.add(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), false));
@@ -110,7 +114,6 @@ public class Orchestrator extends BroadcastReceiver {
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
-
                     break;
 
                 case Broadcast.ERROR_OCCURED:
@@ -144,7 +147,6 @@ public class Orchestrator extends BroadcastReceiver {
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
-
                     break;
 
                 default:
@@ -289,7 +291,6 @@ public class Orchestrator extends BroadcastReceiver {
         if (Config.getPersistentCamera(context)) {
 
         } else {
-
             // alarm Manager
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
