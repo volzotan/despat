@@ -48,16 +48,16 @@ OD_FRAMEWORK_PATH = os.path.join(args.tensorflow_object_detection_path, "object_
 
 #MODEL_NAME = "ssd_mobilenet_v1_coco_2017_11_17"
 #MODEL_NAME = "ssd_mobilenet_v2_coco_2018_03_29"
-MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28"
+#MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28"
 #MODEL_NAME = "faster_rcnn_resnet101_coco_2018_01_28" 
-#MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28"
+MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28"
 
 PATH_TO_CKPT = os.path.join(args.models, MODEL_NAME, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
-TILESIZE = [1000, 1000] #[4320/2, 3240/2]
-OUTPUTSIZE = [1000, 1000] #[4320/2, 3240/2] #300 # whats fed into the network
+TILESIZE = [int(4320/2), int(3240/2)]
+OUTPUTSIZE = [int(4320/2), int(3240/2)] #300 # whats fed into the network
 
 
 def load_image_into_numpy_array(image):
@@ -153,7 +153,10 @@ def run(sess, filename, tilesize, outputsize):
     print("{}: {}_{}".format(filename, tilesize, outputsize))
 
     file_full_path = filename
-    file_folder_only, file_name_only = os.path.split(file_full_path)
+
+    file_folder_only, file_name_only = os.path.split(file_full_path) # /foo/bar, baz.py
+    _, file_folder_only = os.path.split(file_folder_only)            # /foo, bar  
+
     file_output_full_path = os.path.join(OUTPUT_FOLDER, file_name_only[:-4])
     if args.export == "xml":
         file_output_full_path += ".xml"
@@ -299,16 +302,19 @@ def run(sess, filename, tilesize, outputsize):
 
 import time
 
-for item in images:
-    with detection_graph.as_default():                                
-        with tf.Session() as sess:
+counter = 0
+with detection_graph.as_default():                                
+    with tf.Session() as sess:
 
-            # for tilesize in [3000, 2000, 1500, 1000, 500]:
-            #     for outputsize in [3000, 2000, 1500, 1000, 500]:
-            #         run(sess, "pedestriancrossing.jpg", tilesize, outputsize)
+        # for tilesize in [3000, 2000, 1500, 1000, 500]:
+        #     for outputsize in [3000, 2000, 1500, 1000, 500]:
+        #         run(sess, "pedestriancrossing.jpg", tilesize, outputsize)
 
-            for item in images:
-                run(sess, item, TILESIZE, OUTPUTSIZE)
+        for item in images:
+            counter += 1
+            run(sess, item, TILESIZE, OUTPUTSIZE)
+    
+            print("{}/{}".format(counter, len(images)))
 
 
          

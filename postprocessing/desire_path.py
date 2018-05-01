@@ -30,8 +30,7 @@ def run(data_list):
     print(len(boxes))
 
     plt.clf()
-
-
+    plt.rcParams["figure.figsize"] = (8, 6)
 
     plt.axis([0, imagesize[0], 0, imagesize[1]])
 
@@ -47,17 +46,21 @@ def run(data_list):
     x = [x[0]+(x[2]-x[0])/2 for x in boxes]
     y = [x[1]+(x[3]-x[1])/2 for x in boxes]
 
-    plt.imshow(np.asarray(Image.open(data["path"]).convert("L")), cmap="gray")
+    BACKGROUND_IMAGE_PATH = data["path"]
+    BACKGROUND_IMAGE_PATH = "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_stack/output.jpg"
+
+    # .convert("L")
+    plt.imshow(np.asarray(Image.open(BACKGROUND_IMAGE_PATH)), cmap="gray")
 
     # plt.scatter(x, y, alpha=0.1, marker="+", color=(1.0, 0.0, 0.0))
 
-    # heatmap, xedges, yedges = np.histogram2d(x, y, bins=(imagesize[0]/100, imagesize[1]/100))
+    # heatmap, xedges, yedges = np.histogram2d(x, y, bins=100)
     # extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    # plt.imshow(heatmap.T, extent=extent, origin='lower')
+    # masked_data = np.ma.masked_where(heatmap.T > 1, heatmap.T)
+    # plt.imshow(masked_data, extent=extent, origin='lower', interpolation='none')
 
     x += [0, imagesize[0], 0, imagesize[0]]
     y += [0, 0, imagesize[1], imagesize[1]]
-
     gridsize = 70
     plt.hexbin(x, y, gridsize=gridsize, mincnt=2, bins=10, alpha=0.8, cmap="magma")
 
@@ -66,7 +69,7 @@ def run(data_list):
 
 
 if __name__ == "__main__":
-    inp_dir = "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation"
+    inp_dir = "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation"
 
     json_files = []
     data_list = []
