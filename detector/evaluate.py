@@ -140,14 +140,14 @@ def precision_recall_curve(gt, dt, name_of_class):
 
         precision = 1
 
-        if len(tp) > 0:
+        if len(tp) > 0 or len(fp) > 0:
             precision = len(tp) / (len(tp) + len(fp))
 
         recall = len(tp) / (len(tp) + len(fn))
         r.append(recall)
         p.append(precision)
 
-    return (p, r)
+    return p, r
 
 
 if __name__ == "__main__":

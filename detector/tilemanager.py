@@ -1,7 +1,10 @@
 from PIL import Image, ImageDraw
 import PIL
 import numpy as np
-from drawhelper import Drawhelper
+import sys
+sys.path.append('..')
+from util.drawhelper import Drawhelper
+import util.converter
 
 class TileManager(object):
 

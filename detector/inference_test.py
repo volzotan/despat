@@ -11,8 +11,10 @@ from PIL import Image
 # import opencv2 as cv2
 
 from tilemanager import TileManager
-import bbox2voc
 import argparse
+
+sys.path.append('..')
+from util import converter
 
 parser = argparse.ArgumentParser()
 
@@ -46,9 +48,9 @@ OD_FRAMEWORK_PATH = os.path.join(args.tensorflow_object_detection_path, "object_
 
 #MODEL_NAME = "ssd_mobilenet_v1_coco_2017_11_17"
 #MODEL_NAME = "ssd_mobilenet_v2_coco_2018_03_29"
-#MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28"
+MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28"
 #MODEL_NAME = "faster_rcnn_resnet101_coco_2018_01_28" 
-MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28"
+#MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28"
 
 PATH_TO_CKPT = os.path.join(args.models, MODEL_NAME, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
@@ -272,27 +274,27 @@ def run(sess, filename, tilesize, outputsize):
         export_filename = os.path.join(OUTPUT_FOLDER, "{}_{}_{}x{}-{}x{}.jpg".format(file_name_only, MODEL_NAME, tilesize[0], tilesize[1], outputsize[0], outputsize[1]))
         tm._draw_bounding_boxes(export_filename, output_dict["detection_boxes"], output_dict["detection_scores"], 0.5)
 
-    converter = None
+    exporter = None
 
     if args.export == "xml":
-        converter = bbox2voc.convertToVoc
+        exporter = converter.convert_to_voc
     elif args.export == "json":
-        converter = bbox2voc.convertToJson
+        exporter = converter.convert_to_json
     else:
         raise Exception("unknown file extension")
 
-    converter(
+    exporter(
         file_folder_only, 
         file_name_only, 
         file_full_path, 
-        image.size, 
-        output_dict["detection_boxes"], 
-        bbox2voc.class_indices_to_class_names(category_index, output_dict["detection_classes"]), 
-        output_dict["detection_scores"], 
+        tm.get_image_size(),
+        converter.sanitize_coordinate_order(output_dict["detection_boxes"]),
+        converter.class_indices_to_class_names(category_index, output_dict["detection_classes"]),
+        output_dict["detection_scores"].tolist(),
         file_output_full_path
     )
 
-    print("get results: {0:.2f} viz: {1:.2f}".format(time7-time6, time.time()-time7))    
+    print("get results: {0:.2f} viz/exp: {1:.2f}".format(time7-time6, time.time()-time7))
 
 
 import time

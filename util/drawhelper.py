@@ -2,11 +2,11 @@ from PIL import Image, ImageDraw
 
 class Drawhelper(object):
 
-    box_list = []
-
     def __init__(self, input_filename, output_filename):
         self.input_filename = input_filename
         self.output_filename = output_filename
+        self.box_list = []
+
 
     def add_boxes(self, boxes, color, strokewidth=1, inverse_coordinates=False):
         boxset = {}
@@ -23,6 +23,7 @@ class Drawhelper(object):
         boxset["strokewidth"] = strokewidth
 
         self.box_list.append(boxset)
+
 
     def draw(self):
         image = Image.open(self.input_filename)
