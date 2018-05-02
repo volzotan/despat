@@ -80,6 +80,11 @@ if __name__ == "__main__":
     sys.exit(0)
 
 
+# 6th decimal place in lat/lon has a precision of 0.11m
+
+
+
+
 # im_src = cv2.imread('book2.jpg')
 # # Four corners of the book in source image
 # pts_src = np.array([[141, 131], [480, 159], [493, 630],[64, 601]])

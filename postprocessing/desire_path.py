@@ -43,8 +43,8 @@ def run(data_list):
 
     plt.gca().invert_yaxis()
 
-    x = [x[0]+(x[2]-x[0])/2 for x in boxes]
-    y = [x[1]+(x[3]-x[1])/2 for x in boxes]
+    x = [b[0]+(b[2]-b[0])/2 for b in boxes]
+    y = [b[3] for b in boxes]
 
     BACKGROUND_IMAGE_PATH = data["path"]
     BACKGROUND_IMAGE_PATH = "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_stack/output.jpg"
@@ -61,7 +61,7 @@ def run(data_list):
 
     x += [0, imagesize[0], 0, imagesize[0]]
     y += [0, 0, imagesize[1], imagesize[1]]
-    gridsize = 70
+    gridsize = 90
     plt.hexbin(x, y, gridsize=gridsize, mincnt=2, bins=10, alpha=0.8, cmap="magma")
 
     plt.show()
