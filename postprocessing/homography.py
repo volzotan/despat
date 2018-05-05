@@ -4,8 +4,6 @@ import numpy as np
 import argparse
 import sys
 
-image           = None
-scaling_factor  = 1
 counter         = 0
 
 def draw_text(image, x, y, text):
@@ -47,65 +45,85 @@ def click(event, x, y, flags, param):
         pass
 
 
+def calculate_homography(points_src, points_dst):
+
+    pts_src = np.array(points_src, dtype=np.float)
+    pts_dst = np.array(points_dst, dtype=np.float)
+
+    h, status = cv2.findHomography(pts_src, pts_dst)
+
+    return h, status
+
+
 if __name__ == "__main__":
 
-    global image, scaling_factor
+    # global image, scaling_factor
 
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--image", required=True, help="Path to the image")
-    args = vars(ap.parse_args())
+    # ap = argparse.ArgumentParser()
+    # ap.add_argument("-i", "--image", required=True, help="Path to the image")
+    # args = vars(ap.parse_args())
 
-    image = cv2.imread(args["image"])
-    height, width = image.shape[:2]
-    scaling_factor = 1000 / float(width)
-    image = cv2.resize(image, None, fx=scaling_factor, fy=scaling_factor, interpolation=cv2.INTER_CUBIC)
+    # image = cv2.imread(args["image"])
+    # height, width = image.shape[:2]
+    # scaling_factor = 1000 / float(width)
+    # image = cv2.resize(image, None, fx=scaling_factor, fy=scaling_factor, interpolation=cv2.INTER_CUBIC)
 
-    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-    cv2.setMouseCallback("image", click)
+    # cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+    # cv2.setMouseCallback("image", click)
 
-    while True:
-        # display the image and wait for a keypress
-        cv2.imshow("image", image)
+    # while True:
+    #     # display the image and wait for a keypress
+    #     cv2.imshow("image", image)
 
-        key = cv2.waitKey(1) & 0xFF
+    #     key = cv2.waitKey(1) & 0xFF
      
-        if key == ord("s"):
-            cv2.imwrite(args["image"] + "_output.jpg", image);
-            break
+    #     if key == ord("s"):
+    #         cv2.imwrite(args["image"] + "_output.jpg", image);
+    #         break
      
-        elif key == ord("c"):
-            break
+    #     elif key == ord("c"):
+    #         break
           
-    cv2.destroyAllWindows()
-    sys.exit(0)
+    # cv2.destroyAllWindows()
+    # sys.exit(0)
 
 
 # 6th decimal place in lat/lon has a precision of 0.11m
 
 
+    src = [
+        [1124, 1416],
+        [1773, 2470],
+        [3785, 1267],
+        [3416, 928],
+        [2856, 1303],
+        [2452, 916]
+    ]
+
+    dst = [
+        [50.971296, 11.037630],
+        [50.971173, 11.037914],
+        [50.971456, 11.037915],
+        [50.971705, 11.037711],
+        [50.971402, 11.037796],
+        [50.971636, 11.037486]
+    ]
 
 
-# im_src = cv2.imread('book2.jpg')
-# # Four corners of the book in source image
-# pts_src = np.array([[141, 131], [480, 159], [493, 630],[64, 601]])
+    # Calculate Homography
+    h, status = calculate_homography(src, dst)
 
-# # Read destination image.
-# im_dst = cv2.imread('book1.jpg')
-# # Four corners of the book in destination image.
-# pts_dst = np.array([[318, 256],[534, 372],[316, 670],[73, 473]])
+    print(h, status)
 
-# pts_src = pts_src.astype(float)
-# pts_dst = pts_dst.astype(float)
+    np.save("h_matrix.npy", h) # evil python2 pickle
+    np.savetxt("h_matrix.txt", h)
 
-# # Calculate Homography
-# h, status = cv2.findHomography(pts_src, pts_dst)
- 
-# # Warp source image to destination based on homography
-# im_out = cv2.warpPerspective(im_src, h, (im_dst.shape[1],im_dst.shape[0]))
- 
-# # Display images
-# cv2.imshow("Source Image", im_src)
-# cv2.imshow("Destination Image", im_dst)
-# cv2.imshow("Warped Source Image", im_out)
+    # Warp source image to destination based on homography
+    # im_out = cv2.warpPerspective(im_src, h, (im_dst.shape[1], im_dst.shape[0]))
+     
+    # Display images
+    # cv2.imshow("Source Image", im_src)
+    # cv2.imshow("Destination Image", im_dst)
+    # cv2.imshow("Warped Source Image", im_out)
 
-# cv2.waitKey(0)
+    # cv2.waitKey(0)

@@ -2,19 +2,19 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
 import sys
 sys.path.append('..')
 from util import converter
 
+
 CONFIDENCE_THRESHOLD = 0.3
 CLASS_NAME = "person"
 
-def run(data_list):
-
-    imagesize = data_list[0]["image_size"]
-
+def _extract_boxes(data_list):
     boxes = []
+
     for data in data_list:
 
         for i in range(0, len(data["boxes"])):
@@ -27,7 +27,13 @@ def run(data_list):
 
             boxes.append(data["boxes"][i])
 
-    print(len(boxes))
+    return boxes
+
+def run(data_list):
+
+    imagesize = data_list[0]["image_size"]
+
+    boxes = _extract_boxes(data_list)
 
     plt.clf()
     plt.rcParams["figure.figsize"] = (8, 6)
@@ -88,6 +94,10 @@ if __name__ == "__main__":
         data = converter.parse_json(f)
         data_list.append(data)
 
-    run(data_list)
+    boxes = _extract_boxes(data_list)
+
+    pickle.dump(boxes, open("boxes.pickle", "wb"))
+    print(boxes)
+    # run(data_list)
 
 
