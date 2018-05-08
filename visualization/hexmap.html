@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<style>
+
+    .hexagon {
+      stroke: #000;
+      stroke-width: 0.1px;
+    }
+
+</style>
+
+<svg width="1488" height="837">
+
+    <polygon points="0,0 1488,0 1488,837 0,837" fill="url(#bgimg)"/>
+</svg>
+
+<script src="d3.v4.min.js"></script>
+<script src="d3-hexbin.v0.2.min.js"></script>
+<script>
+
+    d3.text("boxes.txt", function(error, raw) {
+
+        var dataWidth = 1488; //5952/4;
+            dataHeight = 837; //3348/4;
+
+        var svg = d3.select("svg"),
+            margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = +svg.attr("width") - margin.left - margin.right,
+            height = +svg.attr("height") - margin.top - margin.bottom,
+            g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var xScale = d3.scaleLinear()
+            .domain([0, 5952])
+            .range([0, width]);
+
+        var yScale = d3.scaleLinear()
+            .domain([0, 3348])
+            .range([0, height]);
+
+        var boxes = d3.dsvFormat(" ").parseRows(raw);
+        boxes.forEach((box, index) => {
+            var x = xScale(+box[0] - (box[2]-box[0])/2);
+                y = yScale(+box[3]);
+            return boxes[index] = [x, y];
+        });
+
+        console.log(boxes[10]);
+        console.log(boxes[100]);
+        console.log(boxes[1000]);
+
+        var randomX = d3.randomNormal(width / 2, 80),
+            randomY = d3.randomNormal(height / 2, 80),
+            points = d3.range(2000).map(function() { return [randomX(), randomY()]; });
+
+        var color = d3.scaleSequential(d3.interpolateLab("white", "steelblue"))
+            .domain([0, 50]);
+
+        var alpha = d3.scaleLinear()
+            .domain([0, 50])
+            .range([0.2, 1.0]);
+
+        var hexbin = d3.hexbin()
+            .radius(5)
+            .extent([[0, 0], [width, height]]);
+
+        var x = d3.scaleLinear()
+            .domain([0, width])
+            .range([0, width]);
+
+        var y = d3.scaleLinear()
+            .domain([0, height])
+            .range([height, 0]);
+
+        // g.append("clipPath")
+        //     .attr("id", "clip")
+        //   .append("rect")
+        //     .attr("width", width)
+        //     .attr("height", height);
+
+        // console.log(points);
+
+        g.append("g")
+            .attr("class", "hexagon")
+            .attr("clip-path", "url(#clip)")
+          .selectAll("path")
+          .data(hexbin(boxes))
+          .enter().append("path")
+            .attr("d", hexbin.hexagon())
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+            .attr("fill", function(d) { return color(d.length); })
+            .attr("fill-opacity", function(d) { return alpha(d.length); });
+
+        var defs= svg.append("defs");
+        defs.append("pattern")
+            .attr("id", "bgimg")
+            .attr("patternUnits", "userSpaceOnUse")
+            .attr("width", dataWidth)
+            .attr("height", dataHeight)
+            .append("svg:image")
+            .attr("xlink:href", "bg.jpg")
+            .attr("width", dataWidth)
+            .attr("height", dataHeight)
+            .attr("x", 0)
+            .attr("y", 0);
+
+        // g.append("g")
+        //     .attr("class", "axis axis--y")
+        //     .call(d3.axisLeft(y).tickSizeOuter(-width));
+        //
+        // g.append("g")
+        //     .attr("class", "axis axis--x")
+        //     .attr("transform", "translate(0," + height + ")")
+        //     .call(d3.axisBottom(x).tickSizeOuter(-height));
+
+    });
+
+</script>
