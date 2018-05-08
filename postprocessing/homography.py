@@ -4,6 +4,8 @@ import numpy as np
 import argparse
 import sys
 
+import pickle
+
 counter         = 0
 
 def draw_text(image, x, y, text):
@@ -87,10 +89,6 @@ if __name__ == "__main__":
     # cv2.destroyAllWindows()
     # sys.exit(0)
 
-
-# 6th decimal place in lat/lon has a precision of 0.11m
-
-
     src = [
         [1124, 1416],
         [1773, 2470],
@@ -109,21 +107,34 @@ if __name__ == "__main__":
         [50.971636, 11.037486]
     ]
 
-
     # Calculate Homography
     h, status = calculate_homography(src, dst)
 
     print(h, status)
 
-    np.save("h_matrix.npy", h) # evil python2 pickle
-    np.savetxt("h_matrix.txt", h)
+    boxes = pickle.load(open("boxes.pickle", "rb"))
 
-    # Warp source image to destination based on homography
-    # im_out = cv2.warpPerspective(im_src, h, (im_dst.shape[1], im_dst.shape[0]))
-     
-    # Display images
-    # cv2.imshow("Source Image", im_src)
-    # cv2.imshow("Destination Image", im_dst)
-    # cv2.imshow("Warped Source Image", im_out)
+    boxes_warped = []
 
-    # cv2.waitKey(0)
+    for b in boxes:
+        # TODO:
+        # float32 should be enough (6 decimal places)
+        # 6th decimal place in lat/lon has a precision of 0.11m
+
+        # beware: only a single point (the anchor) of the bounding box should be transformed (or the bbox will be grossly warped)
+        x = b[0] #+(b[2]-b[0])/2.0
+        y = b[3]
+
+        values = np.array([[[x, y]]], dtype=np.float64)
+        pointsOut = cv2.perspectiveTransform(values, h)
+        boxes_warped.append([pointsOut[0][0][0], pointsOut[0][0][1]])
+
+    pickle.dump(boxes_warped, open("box_anchors_warped.pickle", "wb"))
+
+    with open("boxes_warped.txt", "a") as f:
+        for box in boxes_warped:
+            f.write("{} {}\n".format(box[0], box[1]))
+
+    # np.save("h_matrix.npy", h) # evil python2 pickle
+    # np.savetxt("h_matrix.txt", h)
+

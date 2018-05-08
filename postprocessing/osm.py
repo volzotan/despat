@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import math
-import urllib2
-import StringIO
+import urllib.request
+from io import StringIO
 from PIL import Image, ImageDraw
 
 import sys
@@ -93,7 +93,7 @@ class OSM(object):
                     else:
                         imgurl = smurl.format(self.zoom, tiles_x[x], tiles_y[y])
                         print("loading: " + imgurl)
-                        imgstr = urllib2.urlopen(imgurl).read()
+                        imgstr = urllib.request.retrieve(imgurl).read()
                         tile = Image.open(StringIO.StringIO(imgstr))
                         tile.save(fname)
 
@@ -116,7 +116,7 @@ class OSM(object):
             ys.append(self.cropoffset_y + y)
 
         # print(x, y)
-        plt.scatter(xs, ys, marker="+", color=(1, 0, 0))
+        plt.scatter(xs, ys, marker="+", color=(1, 0, 0), alpha=0.1)
 
 
     def plot_rectangle(self, image):
@@ -176,10 +176,15 @@ if __name__ == '__main__':
 
     # 77.992634, 16.045922
 
-    h = np.loadtxt("h_matrix.txt")
-    boxes = pickle.load(open("boxes.pickle", "rb"))
+    boxes = pickle.load(open("box_anchors_warped.pickle", "rb"))
 
     print(len(boxes))
 
+    # xs = [b[0]+(b[2]-b[0])/2.0 for b in boxes]
+    # ys = [b[3] for b in boxes]
+
+    xs = [b[0] for b in boxes]
+    ys = [b[1] for b in boxes]
+
     map = OSM(lat, lon, 200, 200)
-    map.plot_map([], [])
+    map.plot_map(xs, ys)

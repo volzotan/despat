@@ -89,7 +89,6 @@ if __name__ == "__main__":
             json_files.append(full_path)
             print(full_path)
 
-
     for f in json_files:
         data = converter.parse_json(f)
         data_list.append(data)
@@ -97,7 +96,11 @@ if __name__ == "__main__":
     boxes = _extract_boxes(data_list)
 
     pickle.dump(boxes, open("boxes.pickle", "wb"))
-    print(boxes)
+
+    with open("boxes.txt", "a") as f:
+        for box in boxes:
+            f.write("{} {} {} {}\n".format(box[0], box[1], box[2], box[3]))
+
     # run(data_list)
 
 
