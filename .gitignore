@@ -11,11 +11,18 @@ DespatPlayground/testimages
 /enclosure/**/*.lck
 /enclosure/**/*.pro
 
+/detection
+
 /datasets/*
 result*.jpg
-/detection/**/*.jpg
-/detection/*.xml
-/detection/models/*
+/detector/**/*.jpg
+/detector/*.xml
+/detector/models/*
+
+/postprocessing/*.jpg
+/postprocessing/*.png
+
+/visualization/tiles
 
 servpat/UPLOAD
 

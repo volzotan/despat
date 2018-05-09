@@ -36,10 +36,10 @@
             .domain([0, 3348])
             .range([0, height]);
 
-        var boxes = d3.dsvFormat(" ").parseRows(raw);
+        var boxes = d3.dsvFormat("|").parseRows(raw);
         boxes.forEach((box, index) => {
-            var x = xScale(+box[0] - (box[2]-box[0])/2);
-                y = yScale(+box[3]);
+            var x = xScale(+box[6] - (box[8]-box[6])/2);
+                y = yScale(+box[9]);
             return boxes[index] = [x, y];
         });
 
