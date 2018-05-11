@@ -15,6 +15,25 @@ import pickle
 
 ZOOM_LEVEL = 19 # max zoom level is 19
 
+# OSM
+TILE_URL = "http://a.tile.openstreetmap.org/{0}/{1}/{2}.png"
+TILE_DIR = "tiles/osm_mapnik/{}/{}/"
+
+# GMAPS satellite
+# TILE_URL = "http://mt0.google.com/vt/lyrs=" + "s" + "@132&hl=de&x={1}&y={2}&z={0}"
+# TILE_DIR = "tiles/gmaps_satellite/{}/{}/"
+
+# GMAPS standard roadmap
+# TILE_URL = "http://mt0.google.com/vt/lyrs=" + "m" + "@132&hl=de&x={1}&y={2}&z={0}"
+# TILE_DIR = "tiles/gmaps_roadmap/{}/{}/"
+
+# GMAPS standard hybrid
+# TILE_URL = "http://mt0.google.com/vt/lyrs=" + "y" + "@132&hl=de&x={1}&y={2}&z={0}"
+# TILE_DIR = "tiles/gmaps_hybrid/{}/{}/"
+
+TILE_SAVE_PATH = os.path.join(TILE_DIR, "{}.png")
+
+
 """
 taken from: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
 
@@ -79,8 +98,8 @@ class OSM(object):
 
 
     def get_image(self, tiles_x, tiles_y, z):
-        smurl = r"http://a.tile.openstreetmap.org/{0}/{1}/{2}.png"
-        imgfname = "tiles/{}/{}/{}.png"
+        smurl = TILE_URL
+        imgfname = TILE_SAVE_PATH
 
         for x in range(0, len(tiles_x)):
             for y in range(0, len(tiles_y)):
@@ -96,7 +115,7 @@ class OSM(object):
                     tile = Image.open(BytesIO(response.content))
 
                     try:
-                        os.makedirs("tiles/{}/{}".format(z, tiles_x[x]))
+                        os.makedirs(TILE_DIR.format(z, tiles_x[x]))
                     except FileExistsError:
                         pass
 
@@ -124,11 +143,6 @@ class OSM(object):
         tiles_x = [x for x in range(self.xmin, self.xmax+1)]
         tiles_y = [y for y in range(self.ymin, self.ymax+1)]
 
-        print(self.xmin, self.xmax)
-        print(self.ymin, self.ymax)
-        print("")
-        print(self.lat, self.lon + delta_lon)
-
         a = self.get_image(tiles_x, tiles_y, z)
 
 
@@ -137,6 +151,6 @@ if __name__ == '__main__':
     lat = 50.971403
     lon = 11.037798
 
-    for z in range(14, 19):
+    for z in range(14, 19+1):
         map = OSM(lat, lon, 2000, 2000, z)
         map.load(z)
