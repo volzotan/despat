@@ -54,14 +54,63 @@ var dataset = {
     }
 };
 
+dataset["mapprovider"] = [
+    {
+        "name": "OpenStreetMap",
+        "tilefunc": function (d) {
+            return "http://" + "abc"[getRandomInt(0, 2)] + ".tile.openstreetmap.org/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
+        }
+    },
+    {
+        "name": "GoogleMaps satellite",
+        "tilefunc": function (d) {
+            return "http://mt" + getRandomInt(0, 2) + ".google.com/vt/lyrs=" + "s" + "@132&hl=de&x=" + d[0] + "&y=" + d[1] + "&z=" + d[2];
+        }
+    },
+    {
+        "name": "GoogleMaps Roadmap",
+        "tilefunc": function (d) {
+            return "http://mt" + getRandomInt(0, 2) + ".google.com/vt/lyrs=" + "m" + "@132&hl=de&x=" + d[0] + "&y=" + d[1] + "&z=" + d[2];
+        }
+    },
+    {
+        "name": "GoogleMaps Hybrid",
+        "tilefunc": function (d) {
+            return "http://mt" + getRandomInt(0, 2) + ".google.com/vt/lyrs=" + "y" + "@132&hl=de&x=" + d[0] + "&y=" + d[1] + "&z=" + d[2];
+        }
+    },
+    {
+        "name": "local OpenStreetMap",
+        "tilefunc": function (d) {
+            return "tiles/" + "osm_mapnik" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
+        }
+    },
+    {
+        "name": "local GoogleMaps satellite",
+        "tilefunc": function (d) {
+            return "tiles/" + "gmaps_satellite" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
+        }
+    },
+    {
+        "name": "local GoogleMaps Roadmap",
+        "tilefunc": function (d) {
+            return "tiles/" + "gmaps_roadmap" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
+        }
+    },
+    {
+        "name": "local GoogleMaps Hybrid",
+        "tilefunc": function (d) {
+            return "tiles/" + "gmaps_hybrid" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
+        }
+    },
+];
+
 var pi = Math.PI,
     tau = 2 * pi;
 
 var svg = d3.select("svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height")
-// margin = {top: 20, right: 20, bottom: 30, left: 40},
-// g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     layer_map = svg.append("g");
 
@@ -103,6 +152,8 @@ var hexbin = d3.hexbin()
     .radius(5)
     .extent([[0, 0], [width, height]]);
 
+buildUI(dataset);
+
 d3.text(dataset["data"], function(error, raw) {
     if (error) throw error;
 
@@ -118,15 +169,83 @@ d3.text(dataset["data"], function(error, raw) {
 });
 
 $("li").click(function () {
+    $(this).toggleClass("option-selected");
 
-    // TODO: toggle element and run refresh
+    if ($(this).data("type") === "mapprovider") {
 
-   console.log("foo");
+        console.log($(this).data("type"));
+        // $("#mapprovider-selector .li").each(function() {
+        //     $(this).removeClass("option-selected");
+        // });
+        $("#mapprovider-selector li").removeClass("option-selected");
+        $(this).addClass("option-selected");
+    }
+
+    refresh();
 });
 
 function refresh() {
     //
     // buildGraph()
+}
+
+function buildUI(dataset) {
+
+    console.log(dataset["cameras"]);
+
+    var cameras = d3.select("#camera-selector")
+        .append("ul")
+        .attr("class", "list-group mb-3");
+
+    cameras.selectAll("ul")
+        .data(dataset["cameras"])
+        .enter()
+            .append("li")
+            .attr("class", "list-group-item d-flex justify-content-between lh-condensed option-selected")
+            .attr("data-type", "camera")
+            .attr("data-id", function (d) {
+                return d["id"];
+            })
+        .append("h6")
+            .attr("class", "my-0")
+            .text(function (d) {
+                return d["id"] + " : " + d["name"];
+        });
+
+    var mapProvider = d3.select("#mapprovider-selector")
+        .append("ul")
+        .attr("class", "list-group mb-3");
+
+    mapProvider.selectAll("ul")
+        .data(dataset["mapprovider"])
+        .enter()
+        .append("li")
+        .attr("data-type", "mapprovider")
+        .attr("class", function(d, i) {
+            var classes = "list-group-item d-flex justify-content-between lh-condensed";
+
+            if (i === 0) {
+                classes += " option-selected"
+            }
+
+            return classes;
+        })
+        .append("h6")
+        .attr("class", "my-0")
+        .text(function (d) {
+            return d["name"];
+        });
+
+    console.log(mapProvider);
+
+// <ul class="list-group mb-3">
+//         <li class="list-group-item d-flex justify-content-between lh-condensed">
+//         <div>
+//         <h6 class="my-0">Camera 1 : MotoZ</h6>
+//     </div>
+//     </li>
+//     </ul>
+
 }
 
 function buildGraph(cameras, points, boxes, classmap) {

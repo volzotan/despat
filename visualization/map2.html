@@ -31,6 +31,7 @@
 
     li:hover {
         background: #F0F0F0;
+        cursor: pointer;
     }
 
     li.option-selected {
@@ -52,8 +53,6 @@
             </filter>
 
         </svg>
-
-
     </div>
 </div>
 
@@ -65,25 +64,25 @@
                 <span class="text-muted">Layer</span>
             </h5>
             <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected" data-type="layer" data-id="sym">
                     <div>
                         <h6 class="my-0">Symbols</h6>
                         <small class="text-muted">Camera position and mapped points</small>
                     </div>
                 </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected" data-type="layer" data-id="sca">
                     <div>
                         <h6 class="my-0">Scatterplot</h6>
                         <small class="text-muted">Point representations</small>
                     </div>
                 </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected">
+                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected" data-type="layer" data-id="hex">
                     <div>
                         <h6 class="my-0">Octagons</h6>
                         <small class="text-muted">octagonal heatmap</small>
                     </div>
                 </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected">
+                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected" data-type="layer" data-id="map">
                     <div>
                         <h6 class="my-0">Map</h6>
                     </div>
@@ -96,39 +95,12 @@
             <h5 class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">Cameras</span>
             </h5>
-            <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
-                    <div>
-                        <h6 class="my-0">Camera 1 : MotoZ</h6>
-                    </div>
-                </li>
-            </ul>
+            <div id="camera-selector"></div>
 
             <h5 class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">Map Provider</span>
             </h5>
-            <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
-                    <div>
-                        <h6 class="my-0">OpenStreetMap</h6>
-                    </div>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
-                    <div>
-                        <h6 class="my-0">Google Maps satellite</h6>
-                    </div>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
-                    <div>
-                        <h6 class="my-0">Google Maps roadmap</h6>
-                    </div>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
-                    <div>
-                        <h6 class="my-0">Google Maps hybrid</h6>
-                    </div>
-                </li>
-            </ul>
+            <div id="mapprovider-selector"></div>
         </div>
 
         <div class="col-sm">
@@ -140,7 +112,7 @@
                 <span class="text-muted">Classes</span>
             </h5>
             <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected">
                     <div>
                         <h6 class="my-0">Person</h6>
                     </div>
