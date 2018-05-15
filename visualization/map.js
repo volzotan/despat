@@ -159,6 +159,7 @@ d3.json("dataset.json", function(dataset) {
 
         buildGraph(dataset["cameras"], dataset["corresponding_points"], boxes, null);
         buildUI(dataset);
+        $("#overlay").hide();
     });
 });
 
@@ -238,11 +239,15 @@ function buildUI(dataset) {
     //     console.log(event);
     // });
 
-    $("#sliderHex").on("input", function(event) {
+    $("#sliderHexAlpha").on("input", function(event) {
         d3.select(".layer_hex").attr("opacity", $(this).val()/100);
     });
 
-    $("#sliderMap").on("input", function(event) {
+    $("#sliderHexSize").on("input", function(event) {
+        // d3.select(".layer_hex").attr("opacity", $(this).val()/100);
+    });
+
+    $("#sliderMapAlpha").on("input", function(event) {
         d3.select(".layer_map").attr("opacity", $(this).val()/100);
     });
 
@@ -250,8 +255,10 @@ function buildUI(dataset) {
 
     $("li[data-type=layer][data-id=sca]").click();
     $("li[data-type=layer][data-id=sym]").click();
-    $("#sliderHex").val(80);
-    $("#sliderMap").val(100);
+
+    $("#sliderHexAlpha").val( 85).trigger("input");
+    $("#sliderHexSize ").val( 50).trigger("input");
+    $("#sliderMapAlpha").val(100).trigger("input");
 }
 
 function buildGraph(cameras, points, boxes, classmap) {
@@ -279,20 +286,6 @@ function buildGraph(cameras, points, boxes, classmap) {
     // heatmap graph
     draw_heatmap_bin_frequency("#svg-heatmap", hbins);
     draw_confidence_frequency("#svg-confidence", boxes);
-
-    layer_hex
-        .attr("class", "layer_hex")
-        .append("g")
-        .attr("class", "hexagon")
-        .attr("clip-path", "url(#clip)")
-        .selectAll("path")
-        .data(hbins)
-        .enter().append("path")
-        .attr("d", hexbin.hexagon())
-        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-        .attr("fill", function(d) { return color(d.length); });
-        // .attr("fill-opacity", function(d) { return alpha(d.length); });
-        // .attr("fill-opacity", function(d) { return "0.5"; });
 
     layer_sca.draw = function() {
         layer_sca.clearRect(0, 0, width, height);
@@ -404,6 +397,40 @@ function drawLayerMap(tileFunc) {
         .attr("y", function(d) { return (d[1] + tiles.translate[1]) * tiles.scale; })
         .attr("width", tiles.scale)
         .attr("height", tiles.scale);
+}
+
+function drawLayerHex(octagonSize) {
+
+    $(".layer_hex").empty();
+
+    var boxesRaw = [];
+    boxes.forEach((box, index) => {
+        boxesRaw.push([box[5], box[4]]);
+    });
+
+    var hbins = hexbin(boxesRaw);
+
+    hbins.sort(function(a, b){
+        return a.length - b.length;
+    });
+
+    var percentage_cutoff = (hbins.length/100) * 1,
+        hbins_minmaxcutoff = hbins.slice(percentage_cutoff, hbins.length-percentage_cutoff);
+
+    var color = d3.scaleSequential(d3.interpolateViridis)
+        .domain(d3.extent(hbins_minmaxcutoff, function(d) { return d.length; }));
+
+    layer_hex
+        .attr("class", "layer_hex")
+        .append("g")
+        .attr("class", "hexagon")
+        .attr("clip-path", "url(#clip)")
+        .selectAll("path")
+        .data(hbins)
+        .enter().append("path")
+        .attr("d", hexbin.hexagon())
+        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        .attr("fill", function(d) { return color(d.length); });
 }
 
 function draw_timeBar(classname, timeBins) {

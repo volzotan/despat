@@ -8,7 +8,7 @@ sys.path.append('..')
 from util import converter
 
 CONFIDENCE_THRESHOLD = 0.1
-CLASS_NAME = "person"
+CLASS_WHITELIST = ["car", "truck", "bus", "bicycle", "motorcycle", "person"]
 
 def calculate_homography(points_src, points_dst):
 
@@ -69,7 +69,7 @@ for data in data_list:
         if data["scores"] is not None and data["scores"][i] < CONFIDENCE_THRESHOLD:
             continue
 
-        if data["classes"] is not None and data["classes"][i] != CLASS_NAME:
+        if data["classes"] is not None and data["classes"][i] not in CLASS_WHITELIST:
             continue
 
         out = []
@@ -103,5 +103,17 @@ for data in data_list:
 
 with open("boxes.txt", "w") as outputfile:
     writer = csv.writer(outputfile, delimiter="|", quotechar="'", quoting=csv.QUOTE_MINIMAL)
+    writer.writerow([
+        "timestamp",
+        "device",
+        "class",
+        "confidence",
+        "lat",
+        "lon",
+        "minx",
+        "miny",
+        "maxx",
+        "maxy"
+    ])
     for line in output:
         writer.writerow(line)

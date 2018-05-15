@@ -4,6 +4,35 @@
 <link rel="stylesheet" href="css/bootstrap.min.css" />
 <style>
 
+    #overlay {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 1.0);
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    .loader {
+        margin: 200px auto;
+        top: 50%;
+        border: 16px solid #f3f3f3;
+        border-top: 16px solid #999;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
     #map {
         width: 960px;
         margin: 0 auto;
@@ -71,6 +100,10 @@
 
 </style>
 
+<div id="overlay">
+    <div class="loader"></div>
+</div>
+
 <div id="map">
     <div class="mapcontainer">
         <svg id=svg-map" width="900" height="600">
@@ -123,26 +156,30 @@
             <h5 class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">Options</span>
             </h5>
-
             <li class="list-group-item d-flex justify-content-between lh-condensed" >
                 <div class="slidercontainer">
                     <div class="slidertext"><h6 class="my-0">Heatmap opacity</h6></div>
                     <div class="slider">
-                        <input type="range" min="1" max="100" value="100" class="slider" id="sliderHex">
+                        <input type="range" min="1" max="100" value="100" class="slider" id="sliderHexAlpha">
                     </div>
                 </div>
             </li>
-
+            <li class="list-group-item d-flex justify-content-between lh-condensed" >
+                <div class="slidercontainer">
+                    <div class="slidertext"><h6 class="my-0">Heatmap bin size</h6></div>
+                    <div class="slider">
+                        <input type="range" min="1" max="100" value="100" class="slider" id="sliderHexSize">
+                    </div>
+                </div>
+            </li>
             <li class="list-group-item d-flex justify-content-between lh-condensed" >
                 <div class="slidercontainer">
                     <div class="slidertext"><h6 class="my-0">Map opacity</h6></div>
                     <div class="slider">
-                        <input type="range" min="1" max="100" value="100" class="slider" id="sliderMap">
+                        <input type="range" min="1" max="100" value="100" class="slider" id="sliderMapAlpha">
                     </div>
                 </div>
             </li>
-
-
 
         </div>
 
