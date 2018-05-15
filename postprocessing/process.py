@@ -7,8 +7,7 @@ import sys
 sys.path.append('..')
 from util import converter
 
-
-CONFIDENCE_THRESHOLD = 0.3
+CONFIDENCE_THRESHOLD = 0.1
 CLASS_NAME = "person"
 
 def calculate_homography(points_src, points_dst):

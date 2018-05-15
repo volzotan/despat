@@ -9,6 +9,13 @@
         margin: 0 auto;
     }
 
+    #svg-map {
+        border: 1px solid #CCC;
+    }
+
+    #svg-heatmap {
+    }
+
     .mapcontainer {
         width: 900px;
         height: 600px;
@@ -19,17 +26,37 @@
         padding: 0.5rem 0.5rem;
     }
 
-    /*.list-group-item {*/
-        /*padding: 0.5rem 10px;*/
-    /*}*/
+    .invisible {
+        display: none;
+    }
 
-    /*li.option-selected {*/
-        /*!*background: #DFDFDF;*!*/
-        /*border-left: 4px solid #888;*/
-        /*padding-left: 6px;*/
-    /*}*/
+    #timeselector {
+        width: 900px;
+        height: 80px;
+        margin: 0 auto;
+    }
 
-    li:hover {
+    #sliderTime {
+        width: 800px;
+    }
+
+    .slidercontainer {
+        width: 100%;
+    }
+
+    .slidercontainer .slidertext {
+        float: left;
+    }
+
+    .slider {
+        float: right;
+    }
+
+    .bar {
+        fill: #666;
+    }
+
+    li.selectable:hover {
         background: #F0F0F0;
         cursor: pointer;
     }
@@ -46,7 +73,7 @@
 
 <div id="map">
     <div class="mapcontainer">
-        <svg width="900" height="600">
+        <svg id=svg-map" width="900" height="600">
 
              <filter id="grayscale">
                   <feColorMatrix type="saturate" values="0"/>
@@ -54,6 +81,10 @@
 
         </svg>
     </div>
+</div>
+
+<div id="timeselector">
+    <svg id="svg-time" width="900" height="40"></svg>
 </div>
 
 <div class="container">
@@ -64,30 +95,55 @@
                 <span class="text-muted">Layer</span>
             </h5>
             <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected" data-type="layer" data-id="sym">
+                <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected" data-type="layer" data-id="sym">
                     <div>
                         <h6 class="my-0">Symbols</h6>
                         <small class="text-muted">Camera position and mapped points</small>
                     </div>
                 </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected" data-type="layer" data-id="sca">
+                <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected" data-type="layer" data-id="sca">
                     <div>
                         <h6 class="my-0">Scatterplot</h6>
                         <small class="text-muted">Point representations</small>
                     </div>
                 </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected" data-type="layer" data-id="hex">
+                <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected" data-type="layer" data-id="hex">
                     <div>
-                        <h6 class="my-0">Octagons</h6>
+                        <h6 class="my-0">Heatmap</h6>
                         <small class="text-muted">octagonal heatmap</small>
                     </div>
                 </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected" data-type="layer" data-id="map">
+                <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected" data-type="layer" data-id="map">
                     <div>
                         <h6 class="my-0">Map</h6>
                     </div>
                 </li>
             </ul>
+
+            <h5 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted">Options</span>
+            </h5>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed" >
+                <div class="slidercontainer">
+                    <div class="slidertext"><h6 class="my-0">Heatmap opacity</h6></div>
+                    <div class="slider">
+                        <input type="range" min="1" max="100" value="100" class="slider" id="sliderHex">
+                    </div>
+                </div>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed" >
+                <div class="slidercontainer">
+                    <div class="slidertext"><h6 class="my-0">Map opacity</h6></div>
+                    <div class="slider">
+                        <input type="range" min="1" max="100" value="100" class="slider" id="sliderMap">
+                    </div>
+                </div>
+            </li>
+
+
+
         </div>
 
         <div class="col-sm">
@@ -107,24 +163,39 @@
             <h5 class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">Confidence</span>
             </h5>
+            <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                    <svg id="svg-confidence" width="340" height="130"></svg>
+                </li>
+            </ul>
+
+
+            <h5 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted">Heatmap Detections per bin</span>
+            </h5>
+            <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                    <svg id="svg-heatmap" width="340" height="130"></svg>
+                </li>
+            </ul>
 
             <h5 class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">Classes</span>
             </h5>
             <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-condensed option-selected">
+                <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected">
                     <div>
                         <h6 class="my-0">Person</h6>
                     </div>
                     <span class="text-muted">123</span>
                 </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                <li class="list-group-item d-flex justify-content-between lh-condensed selectable">
                     <div>
                         <h6 class="my-0">Bicycle</h6>
                     </div>
                     <span class="text-muted">456</span>
                 </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                <li class="list-group-item d-flex justify-content-between lh-condensed selectable">
                     <div>
                         <h6 class="my-0">Car</h6>
                     </div>

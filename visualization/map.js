@@ -1,60 +1,5 @@
-var dataset = {
 
-    "cameras": [
-        {
-            "id": "1",
-            "name": "Moto Z",
-            "position": [50.971040, 11.038093]
-        },
-        {
-            "id": "2",
-            "name": "ZTE",
-            "position": [50.970930, 11.038083]
-        }
-        ],
-
-    "corresponding_points": [
-        {
-            "id": "1",
-            "position": [50.971296, 11.037630]
-        },
-        {
-            "id": "2",
-            "position": [50.971173, 11.037914]
-
-        },
-        {
-            "id": "3",
-            "position": [50.971456, 11.037915]
-
-        },
-        {
-            "id": "4",
-            "position": [50.971705, 11.037711]
-
-        },
-        {
-            "id": "5",
-            "position": [50.971402, 11.037796]
-
-        },
-        {
-            "id": "5",
-            "position": [50.971636, 11.037486]
-
-        }
-    ],
-
-    "data": "boxes.txt",
-
-    "classmap": {
-        "1": "person",
-        "2": "car"
-
-    }
-};
-
-dataset["mapprovider"] = [
+var mapproviders = [
     {
         "name": "OpenStreetMap",
         "tilefunc": function (d) {
@@ -108,7 +53,7 @@ dataset["mapprovider"] = [
 var pi = Math.PI,
     tau = 2 * pi;
 
-var svg = d3.select("svg"),
+var svg = d3.select("#map svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height")
 
@@ -116,7 +61,9 @@ var svg = d3.select("svg"),
 
     layer_hex = svg.append("g");
 
-    foreignObject = svg.append("foreignObject")
+    foreignObject = svg.append("g")
+        .attr("class", "layer_sca")
+        .append("foreignObject")
         .attr("x", 0)
         .attr("y", 0)
         .attr("width", width)
@@ -136,52 +83,83 @@ var svg = d3.select("svg"),
 
     layer_sym = svg.append("g");
 
+    svgTime = d3.select("#timeselector svg");
+    timeBar = svgTime.append("g");
+
 var projection = d3.geoMercator()
     .scale((1 << 8 + 19) / tau)
     .translate([width / 2, height / 2])
     .center([11.037630, 50.971296]);
 
-var color = d3.scaleSequential(d3.interpolateLab("white", "steelblue"))
-    .domain([0, 70]);
+// var zoom = d3.behavior.zoom()
+//     .scale(1 << 12)
+//     .scaleExtent([1 << 9, 1 << 23])
+//     .translate([width / 2, height / 2])
+//     .on("zoom", zoomed);
 
-var alpha = d3.scaleLinear()
-    .domain([0, 70])
-    .range([0.2, 1.0]);
+// var alpha = d3.scaleLinear()
+//     .domain([0, 110])
+//     .range([0.8, 0.8]);
+//     // .range([0.3, 0.7]);
+//     // .range([0.2, 1.0]);
 
 var hexbin = d3.hexbin()
     .radius(5)
     .extent([[0, 0], [width, height]]);
 
-buildUI(dataset);
+var tiles = d3.tile()
+    .size([width, height])
+    .scale(projection.scale() * tau)
+    .translate(projection([0, 0]))
+    ();
 
-d3.text(dataset["data"], function(error, raw) {
-    if (error) throw error;
+// zoomed();
 
-    var boxes = d3.dsvFormat("|").parseRows(raw);
-    boxes.forEach((box, index) => {
-        var coord = projection([box[5], box[4]]);
-        box[5] = coord[0];
-        box[4] = coord[1];
-        return boxes[index] = box; // lonlat!
+// function zoomed() {
+//     var tiles = tile
+//         .scale(zoom.scale())
+//         .translate(zoom.translate())
+//         ();
+//
+//     projection
+//         .scale(zoom.scale() / 2 / Math.PI)
+//         .translate(zoom.translate());
+//
+//     var image = layer
+//         .style(prefix + "transform", matrix3d(tiles.scale, tiles.translate))
+//         .selectAll(".tile")
+//         .data(tiles, function(d) { return d; });
+//
+//     image.exit()
+//         .remove();
+//
+//     image.enter().append("img")
+//         .attr("class", "tile")
+//         .attr("src", function(d) { return "http://" + ["a", "b", "c"][Math.random() * 3 | 0] + ".tile.openstreetmap.org/" + d[2] + "/" + d[0] + "/" + d[1] + ".png"; })
+//         .style("left", function(d) { return (d[0] << 8) + "px"; })
+//         .style("top", function(d) { return (d[1] << 8) + "px"; });
+// }
+
+d3.json("dataset.json", function(dataset) {
+
+    dataset["mapprovider"] = mapproviders;
+
+    drawLayerMap(mapproviders[0]["tilefunc"]);
+
+    d3.text(dataset["data"], function(error, raw) {
+        if (error) throw error;
+
+        var boxes = d3.dsvFormat("|").parseRows(raw);
+        boxes.forEach((box, index) => {
+            var coord = projection([box[5], box[4]]);
+            box[5] = coord[0];
+            box[4] = coord[1];
+            return boxes[index] = box; // lonlat!
+        });
+
+        buildGraph(dataset["cameras"], dataset["corresponding_points"], boxes, null);
+        buildUI(dataset);
     });
-
-    buildGraph(dataset["cameras"], dataset["corresponding_points"], boxes, null);
-});
-
-$("li").click(function () {
-    $(this).toggleClass("option-selected");
-
-    if ($(this).data("type") === "mapprovider") {
-
-        console.log($(this).data("type"));
-        // $("#mapprovider-selector .li").each(function() {
-        //     $(this).removeClass("option-selected");
-        // });
-        $("#mapprovider-selector li").removeClass("option-selected");
-        $(this).addClass("option-selected");
-    }
-
-    refresh();
 });
 
 function refresh() {
@@ -189,9 +167,26 @@ function refresh() {
     // buildGraph()
 }
 
-function buildUI(dataset) {
+var clickFunction = function () {
 
-    console.log(dataset["cameras"]);
+    $(this).toggleClass("option-selected");
+
+    if ($(this).data("type") === "layer") {
+        var layername = $(this).data("id");
+        $("svg .layer_" + layername).toggle("invisible");
+    }
+
+    if ($(this).data("type") === "mapprovider") {
+        $("#mapprovider-selector li").removeClass("option-selected");
+        $(this).addClass("option-selected");
+
+        drawLayerMap(mapproviders[+$(this).data("id")]["tilefunc"]);
+    }
+
+    refresh();
+}
+
+function buildUI(dataset) {
 
     var cameras = d3.select("#camera-selector")
         .append("ul")
@@ -201,7 +196,7 @@ function buildUI(dataset) {
         .data(dataset["cameras"])
         .enter()
             .append("li")
-            .attr("class", "list-group-item d-flex justify-content-between lh-condensed option-selected")
+            .attr("class", "list-group-item d-flex justify-content-between lh-condensed selectable option-selected")
             .attr("data-type", "camera")
             .attr("data-id", function (d) {
                 return d["id"];
@@ -221,8 +216,9 @@ function buildUI(dataset) {
         .enter()
         .append("li")
         .attr("data-type", "mapprovider")
+        .attr("data-id", function(d, i) { return i; })
         .attr("class", function(d, i) {
-            var classes = "list-group-item d-flex justify-content-between lh-condensed";
+            var classes = "list-group-item d-flex justify-content-between selectable lh-condensed";
 
             if (i === 0) {
                 classes += " option-selected"
@@ -236,16 +232,26 @@ function buildUI(dataset) {
             return d["name"];
         });
 
-    console.log(mapProvider);
+    $("li.selectable").click(clickFunction);
 
-// <ul class="list-group mb-3">
-//         <li class="list-group-item d-flex justify-content-between lh-condensed">
-//         <div>
-//         <h6 class="my-0">Camera 1 : MotoZ</h6>
-//     </div>
-//     </li>
-//     </ul>
+    // $("#sliderHex").on("change", function(event) {
+    //     console.log(event);
+    // });
 
+    $("#sliderHex").on("input", function(event) {
+        d3.select(".layer_hex").attr("opacity", $(this).val()/100);
+    });
+
+    $("#sliderMap").on("input", function(event) {
+        d3.select(".layer_map").attr("opacity", $(this).val()/100);
+    });
+
+    // set defaults
+
+    $("li[data-type=layer][data-id=sca]").click();
+    $("li[data-type=layer][data-id=sym]").click();
+    $("#sliderHex").val(80);
+    $("#sliderMap").val(100);
 }
 
 function buildGraph(cameras, points, boxes, classmap) {
@@ -253,30 +259,26 @@ function buildGraph(cameras, points, boxes, classmap) {
     // data:
     // timestamp device class confidence lat lon minx miny maxx maxy
 
-    console.log(boxes[0])
-
     var boxesRaw = [];
     boxes.forEach((box, index) => {
         boxesRaw.push([box[5], box[4]]);
     });
 
-    var tiles = d3.tile()
-        .size([width, height])
-        .scale(projection.scale() * tau)
-        .translate(projection([0, 0]))
-        ();
+    var hbins = hexbin(boxesRaw);
 
-    layer_map
-        .attr("class", "layer_map")
-        .selectAll("image")
-        .data(tiles)
-        .enter().append("image")
-        .attr("xlink:href", getImg)
-        .attr("filter", "url(#grayscale)")
-        .attr("x", function(d) { return (d[0] + tiles.translate[0]) * tiles.scale; })
-        .attr("y", function(d) { return (d[1] + tiles.translate[1]) * tiles.scale; })
-        .attr("width", tiles.scale)
-        .attr("height", tiles.scale);
+    hbins.sort(function(a, b){
+        return a.length - b.length;
+    });
+
+    var percentage_cutoff = (hbins.length/100) * 1,
+        hbins_minmaxcutoff = hbins.slice(percentage_cutoff, hbins.length-percentage_cutoff);
+
+    var color = d3.scaleSequential(d3.interpolateViridis)
+        .domain(d3.extent(hbins_minmaxcutoff, function(d) { return d.length; }));
+
+    // heatmap graph
+    draw_heatmap_bin_frequency("#svg-heatmap", hbins);
+    draw_confidence_frequency("#svg-confidence", boxes);
 
     layer_hex
         .attr("class", "layer_hex")
@@ -284,12 +286,13 @@ function buildGraph(cameras, points, boxes, classmap) {
         .attr("class", "hexagon")
         .attr("clip-path", "url(#clip)")
         .selectAll("path")
-        .data(hexbin(boxesRaw))
+        .data(hbins)
         .enter().append("path")
         .attr("d", hexbin.hexagon())
         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-        .attr("fill", function(d) { return color(d.length); })
-        .attr("fill-opacity", function(d) { return alpha(d.length); });
+        .attr("fill", function(d) { return color(d.length); });
+        // .attr("fill-opacity", function(d) { return alpha(d.length); });
+        // .attr("fill-opacity", function(d) { return "0.5"; });
 
     layer_sca.draw = function() {
         layer_sca.clearRect(0, 0, width, height);
@@ -304,7 +307,6 @@ function buildGraph(cameras, points, boxes, classmap) {
             // layer_sca.stroke();
             layer_sca.fill();
             layer_sca.closePath();
-
         });
     };
     layer_sca.draw();
@@ -354,20 +356,148 @@ function buildGraph(cameras, points, boxes, classmap) {
         .attr("width", 10)
         .attr("transform", "translate(" + -5.5 + "," + +5 + ")")
         .text(function(d) { return d["type"][0] });
+
+    // timeslider
+
+    var	parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f"),
+        timeMinMax = d3.extent(boxes, function(d) { return parseDate(d[0]); }),
+        binNumber = 100,
+        binSize = (timeMinMax[1] - timeMinMax[0]) / binNumber;
+        timeBins = new Array(binNumber).fill(0);
+
+    boxes.forEach((box, index) => {
+        var timestamp = parseDate(box[0]);
+            bin = Math.floor((timestamp - timeMinMax[0]) / binSize);
+
+            if (bin >= binNumber) {
+                bin = binNumber-1;
+            }
+        timeBins[bin] += 1;
+    });
+
+    console.log(timeBins);
+
+    draw_timeBar("#svg-time", timeBins);
+
+    // timeBar.selectAll(".bar")
+    //     .data(boxes)
+    //     .enter().append("rect")
+    //     .attr("class", "bar")
+    //     .attr("x", function(d) { return x(d.letter); })
+    //     .attr("y", function(d) { return y(d.frequency); })
+    //     .attr("width", x.bandwidth())
+    //     .attr("height", function(d) { return height - y(d.frequency); });
 }
 
-function getImg(d) {
+function drawLayerMap(tileFunc) {
 
-    console.log(d[2]);
+    $(".layer_map").empty();
 
-    var osmTilename = d[2] + "/" + d[0] + "/" + d[1] + ".png";
+    layer_map
+        .attr("class", "layer_map")
+        .selectAll("image")
+        .data(tiles)
+        .enter().append("image")
+        .attr("xlink:href", tileFunc)
+        .attr("filter", "url(#grayscale)")
+        .attr("x", function(d) { return (d[0] + tiles.translate[0]) * tiles.scale; })
+        .attr("y", function(d) { return (d[1] + tiles.translate[1]) * tiles.scale; })
+        .attr("width", tiles.scale)
+        .attr("height", tiles.scale);
+}
 
-    // var url = "http://" + "abc"[getRandomInt(0, 2)] + ".tile.openstreetmap.org/" + osmTilename;
-    // var url = "http://a.tile.stamen.com/toner/" + osmTilename;
-    // var url = "tiles/" + osmTilename;
-    // var url = "http://mt" + getRandomInt(0, 2) + ".google.com/vt/lyrs=" + "s" + "@132&hl=de&x=" + d[0] + "&y=" + d[1] + "&z=" + d[2];
+function draw_timeBar(classname, timeBins) {
 
-    var url = "tiles/" + "gmaps_satellite" + "/" + osmTilename;
+    var svg = d3.select(classname),
+        width = +svg.attr("width"),
+        height = +svg.attr("height"),
+        g = svg.append("g");
 
-    return url;
+    var x = d3.scaleBand()
+        // .domain([0, timeBins.length])
+        .domain(timeBins.map(function(d, i) { return i; }))
+        .range([0, width])
+        .padding(0.1);
+
+    var y = d3.scaleLinear()
+        // .domain(d3.extent(timeBins))
+        .domain([0, d3.max(timeBins)])
+        .rangeRound([height, 0]);
+
+    g.selectAll(".bar")
+        .data(timeBins)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d, i) { return x(i); })
+        .attr("y", function(d) { return y(d); })
+        .attr("width", x.bandwidth())
+        .attr("height", function(d) { return height - y(d); });
+}
+
+function draw_heatmap_bin_frequency(classname, bins) {
+
+    // expects already sorted bins array
+
+    var svg = d3.select(classname),
+        width = +svg.attr("width"),
+        height = +svg.attr("height"),
+        g = svg.append("g");
+
+    var x = d3.scaleLinear()
+        .domain([0, bins.length])
+        .rangeRound([0, width]);
+
+    var y = d3.scaleLinear()
+        .domain(d3.extent(bins, function (d) { return d.length; }))
+        .rangeRound([height, 0]);
+
+    var line = d3.line()
+        .x(function(d, i) { return x(i); })
+        .y(function(d) { return y(d.length); });
+
+    g.append("path")
+        .datum(bins)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 1.5)
+        .attr("d", line);
+}
+
+function draw_confidence_frequency(classname, boxes) {
+
+    var confidences = Array(boxes.length);
+
+    boxes.forEach((box, index) => {
+        confidences[index] = box[3];
+    });
+
+    confidences.sort();
+
+    var svg = d3.select(classname),
+        width = +svg.attr("width"),
+        height = +svg.attr("height"),
+        g = svg.append("g");
+
+    var x = d3.scaleLinear()
+        .domain([0, confidences.length])
+        .rangeRound([0, width]);
+
+    var y = d3.scaleLinear()
+        .domain([0, 1.1])
+        .rangeRound([height, 0]);
+
+    var line = d3.line()
+        .x(function(d, i) { return x(i); })
+        .y(function(d) { return y(d); });
+
+    g.append("path")
+        .datum(confidences)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 1.5)
+        .attr("d", line);
 }
