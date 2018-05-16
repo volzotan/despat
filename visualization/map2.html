@@ -106,7 +106,7 @@
 
 <div id="map">
     <div class="mapcontainer">
-        <svg id=svg-map" width="900" height="600">
+        <svg id="svg-map" width="900" height="600">
 
              <filter id="grayscale">
                   <feColorMatrix type="saturate" values="0"/>
@@ -117,7 +117,7 @@
 </div>
 
 <div id="timeselector">
-    <svg id="svg-time" width="900" height="40"></svg>
+    <svg id="svg-time" width="900" height="50"></svg>
 </div>
 
 <div class="container">
@@ -168,7 +168,7 @@
                 <div class="slidercontainer">
                     <div class="slidertext"><h6 class="my-0">Heatmap bin size</h6></div>
                     <div class="slider">
-                        <input type="range" min="1" max="100" value="100" class="slider" id="sliderHexSize">
+                        <input type="range" min="1" max="30" value="15" class="slider" id="sliderHexSize">
                     </div>
                 </div>
             </li>
@@ -191,7 +191,7 @@
             <div id="camera-selector"></div>
 
             <h5 class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted">Map Provider</span>
+                <span class="text-muted">Map</span>
             </h5>
             <div id="mapprovider-selector"></div>
         </div>
@@ -219,26 +219,7 @@
             <h5 class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">Classes</span>
             </h5>
-            <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected">
-                    <div>
-                        <h6 class="my-0">Person</h6>
-                    </div>
-                    <span class="text-muted">123</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed selectable">
-                    <div>
-                        <h6 class="my-0">Bicycle</h6>
-                    </div>
-                    <span class="text-muted">456</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed selectable">
-                    <div>
-                        <h6 class="my-0">Car</h6>
-                    </div>
-                    <span class="text-muted">789</span>
-                </li>
-            </ul>
+            <div id="classes-selector"></div>
         </div>
 
     </div>

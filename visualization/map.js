@@ -103,15 +103,14 @@ var projection = d3.geoMercator()
 //     // .range([0.3, 0.7]);
 //     // .range([0.2, 1.0]);
 
-var hexbin = d3.hexbin()
-    .radius(5)
-    .extent([[0, 0], [width, height]]);
-
 var tiles = d3.tile()
     .size([width, height])
     .scale(projection.scale() * tau)
     .translate(projection([0, 0]))
     ();
+
+var boxes = null;
+    dataset = null;
 
 // zoomed();
 
@@ -140,24 +139,36 @@ var tiles = d3.tile()
 //         .style("top", function(d) { return (d[1] << 8) + "px"; });
 // }
 
-d3.json("dataset.json", function(dataset) {
+d3.json("dataset.json", function(input) {
 
-    dataset["mapprovider"] = mapproviders;
+    input["mapprovider"] = mapproviders;
+    dataset = input;
 
     drawLayerMap(mapproviders[0]["tilefunc"]);
 
     d3.text(dataset["data"], function(error, raw) {
         if (error) throw error;
 
-        var boxes = d3.dsvFormat("|").parseRows(raw);
+        boxes = d3.dsvFormat("|").parse(raw);
         boxes.forEach((box, index) => {
-            var coord = projection([box[5], box[4]]);
-            box[5] = coord[0];
-            box[4] = coord[1];
-            return boxes[index] = box; // lonlat!
+            var coord = projection([box.lon, box.lat]), // lonlat!
+                item = Array(10);
+
+            item[0] = box["timestamp"];
+            item[1] = box["device"];
+            item[2] = box["class"];
+            item[3] = box["confidence"];
+            item[4] = coord[1];
+            item[5] = coord[0];
+            item[6] = box["minx"];
+            item[7] = box["miny"];
+            item[8] = box["maxx"];
+            item[9] = box["maxy"];
+
+            return boxes[index] = item;
         });
 
-        buildGraph(dataset["cameras"], dataset["corresponding_points"], boxes, null);
+        buildGraph(dataset["cameras"], dataset["corresponding_points"], null);
         buildUI(dataset);
         $("#overlay").hide();
     });
@@ -233,6 +244,15 @@ function buildUI(dataset) {
             return d["name"];
         });
 
+    drawClassSelector();
+
+        // <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected">
+        // <div>
+        // <h6 class="my-0">Person</h6>
+        // </div>
+        // <span class="text-muted">123</span>
+        // </li>
+
     $("li.selectable").click(clickFunction);
 
     // $("#sliderHex").on("change", function(event) {
@@ -244,7 +264,7 @@ function buildUI(dataset) {
     });
 
     $("#sliderHexSize").on("input", function(event) {
-        // d3.select(".layer_hex").attr("opacity", $(this).val()/100);
+        drawLayerHex($(this).val());
     });
 
     $("#sliderMapAlpha").on("input", function(event) {
@@ -257,19 +277,57 @@ function buildUI(dataset) {
     $("li[data-type=layer][data-id=sym]").click();
 
     $("#sliderHexAlpha").val( 85).trigger("input");
-    $("#sliderHexSize ").val( 50).trigger("input");
+    $("#sliderHexSize ").val( 5).trigger("input");
     $("#sliderMapAlpha").val(100).trigger("input");
 }
 
-function buildGraph(cameras, points, boxes, classmap) {
+function buildGraph(cameras, points, classmap) {
 
     // data:
     // timestamp device class confidence lat lon minx miny maxx maxy
+
+    // drawLayerHex(30);
+    draw_confidence_frequency("#svg-confidence", boxes);
+
+    drawLayerSca();
+
+    drawLayerSym();
+
+    draw_timeBar("#svg-time");
+
+}
+
+function drawLayerMap(tileFunc) {
+
+    $(".layer_map").empty();
+
+    layer_map
+        .attr("class", "layer_map")
+        .selectAll("image")
+        .data(tiles)
+        .enter().append("image")
+        .attr("xlink:href", tileFunc)
+        .attr("filter", "url(#grayscale)")
+        .attr("x", function(d) { return (d[0] + tiles.translate[0]) * tiles.scale; })
+        .attr("y", function(d) { return (d[1] + tiles.translate[1]) * tiles.scale; })
+        .attr("width", tiles.scale)
+        .attr("height", tiles.scale);
+}
+
+function drawLayerHex(octagonRadius) {
+
+    $(".layer_hex").empty();
+
+    console.log(boxes.length);
 
     var boxesRaw = [];
     boxes.forEach((box, index) => {
         boxesRaw.push([box[5], box[4]]);
     });
+
+    var hexbin = d3.hexbin()
+        .radius(octagonRadius)
+        .extent([[0, 0], [width, height]]);
 
     var hbins = hexbin(boxesRaw);
 
@@ -285,8 +343,22 @@ function buildGraph(cameras, points, boxes, classmap) {
 
     // heatmap graph
     draw_heatmap_bin_frequency("#svg-heatmap", hbins);
-    draw_confidence_frequency("#svg-confidence", boxes);
 
+    layer_hex
+        .attr("class", "layer_hex")
+        .append("g")
+        .attr("class", "hexagon")
+        .attr("clip-path", "url(#clip)")
+        .selectAll("path")
+        .data(hbins)
+        .enter().append("path")
+        .attr("d", hexbin.hexagon())
+        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        .attr("fill", function(d) { return color(d.length); });
+}
+
+function drawLayerSca() {
+    
     layer_sca.draw = function() {
         layer_sca.clearRect(0, 0, width, height);
         boxes.forEach((box, index) => {
@@ -303,15 +375,18 @@ function buildGraph(cameras, points, boxes, classmap) {
         });
     };
     layer_sca.draw();
+}
 
-    // symbols
+function drawLayerSym() {
+
+    $(".layer_sym").empty();
 
     var symbols = [];
-    cameras.forEach((cam, index) => {
+    dataset["cameras"].forEach((cam, index) => {
         cam["type"] = "CAMERA";
         symbols.push(cam);
     });
-    points.forEach((point, index) => {
+    dataset["corresponding_points"].forEach((point, index) => {
         point["type"] = "POINT";
         symbols.push(point);
     });
@@ -349,95 +424,36 @@ function buildGraph(cameras, points, boxes, classmap) {
         .attr("width", 10)
         .attr("transform", "translate(" + -5.5 + "," + +5 + ")")
         .text(function(d) { return d["type"][0] });
+}
 
-    // timeslider
+function draw_timeBar(classname) {
 
     var	parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f"),
         timeMinMax = d3.extent(boxes, function(d) { return parseDate(d[0]); }),
         binNumber = 100,
-        binSize = (timeMinMax[1] - timeMinMax[0]) / binNumber;
+        binSize = (timeMinMax[1] - timeMinMax[0]) / binNumber,
         timeBins = new Array(binNumber).fill(0);
 
     boxes.forEach((box, index) => {
-        var timestamp = parseDate(box[0]);
+        var timestamp = parseDate(box[0]),
             bin = Math.floor((timestamp - timeMinMax[0]) / binSize);
 
-            if (bin >= binNumber) {
-                bin = binNumber-1;
-            }
+        if (timestamp === null) {
+            console.log("warn: illegal data in boxes");
+            return;
+        }
+
+        if (bin >= binNumber) {
+            bin = binNumber-1;
+        }
+
         timeBins[bin] += 1;
     });
-
-    console.log(timeBins);
-
-    draw_timeBar("#svg-time", timeBins);
-
-    // timeBar.selectAll(".bar")
-    //     .data(boxes)
-    //     .enter().append("rect")
-    //     .attr("class", "bar")
-    //     .attr("x", function(d) { return x(d.letter); })
-    //     .attr("y", function(d) { return y(d.frequency); })
-    //     .attr("width", x.bandwidth())
-    //     .attr("height", function(d) { return height - y(d.frequency); });
-}
-
-function drawLayerMap(tileFunc) {
-
-    $(".layer_map").empty();
-
-    layer_map
-        .attr("class", "layer_map")
-        .selectAll("image")
-        .data(tiles)
-        .enter().append("image")
-        .attr("xlink:href", tileFunc)
-        .attr("filter", "url(#grayscale)")
-        .attr("x", function(d) { return (d[0] + tiles.translate[0]) * tiles.scale; })
-        .attr("y", function(d) { return (d[1] + tiles.translate[1]) * tiles.scale; })
-        .attr("width", tiles.scale)
-        .attr("height", tiles.scale);
-}
-
-function drawLayerHex(octagonSize) {
-
-    $(".layer_hex").empty();
-
-    var boxesRaw = [];
-    boxes.forEach((box, index) => {
-        boxesRaw.push([box[5], box[4]]);
-    });
-
-    var hbins = hexbin(boxesRaw);
-
-    hbins.sort(function(a, b){
-        return a.length - b.length;
-    });
-
-    var percentage_cutoff = (hbins.length/100) * 1,
-        hbins_minmaxcutoff = hbins.slice(percentage_cutoff, hbins.length-percentage_cutoff);
-
-    var color = d3.scaleSequential(d3.interpolateViridis)
-        .domain(d3.extent(hbins_minmaxcutoff, function(d) { return d.length; }));
-
-    layer_hex
-        .attr("class", "layer_hex")
-        .append("g")
-        .attr("class", "hexagon")
-        .attr("clip-path", "url(#clip)")
-        .selectAll("path")
-        .data(hbins)
-        .enter().append("path")
-        .attr("d", hexbin.hexagon())
-        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-        .attr("fill", function(d) { return color(d.length); });
-}
-
-function draw_timeBar(classname, timeBins) {
 
     var svg = d3.select(classname),
         width = +svg.attr("width"),
         height = +svg.attr("height"),
+        timeAxisHeight = 15,
         g = svg.append("g");
 
     var x = d3.scaleBand()
@@ -449,7 +465,26 @@ function draw_timeBar(classname, timeBins) {
     var y = d3.scaleLinear()
         // .domain(d3.extent(timeBins))
         .domain([0, d3.max(timeBins)])
-        .rangeRound([height, 0]);
+        .rangeRound([height-timeAxisHeight, 0]);
+
+    var timeScale = d3.scaleTime()
+        .domain(timeMinMax)
+        .range([1, width - 2 * 1]);
+
+    var axis = d3.axisBottom(timeScale)
+        // .tickFormat(d3.timeFormat("%Y-%m-%d"))
+        .tickFormat(d3.timeFormat("%d.%m %H:%M"))
+        .ticks(5);
+
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + (height - timeAxisHeight) + ")")
+        .call(axis)
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em");
+        // .attr("transform", "rotate(-65)");
 
     g.selectAll(".bar")
         .data(timeBins)
@@ -458,12 +493,54 @@ function draw_timeBar(classname, timeBins) {
         .attr("x", function(d, i) { return x(i); })
         .attr("y", function(d) { return y(d); })
         .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d); });
+        .attr("height", function(d) { return height - timeAxisHeight - y(d); });
+}
+
+function drawClassSelector() {
+
+    var classCount = Array(dataset["classmap"].length).fill(0);
+
+    boxes.forEach((box, index) => {
+        classCount[box[2]-1] += 1;
+    });
+
+    var classes = d3.select("#classes-selector")
+        .append("ul")
+        .attr("class", "list-group mb-3")
+        .selectAll("ul")
+        .data(dataset["classmap"])
+        .enter()
+        .append("li")
+        .attr("class", "list-group-item d-flex justify-content-between lh-condensed selectable")
+        .attr("data-type", "class")
+        .attr("data-id", function (d, i) {
+            return i;
+        })
+        .attr("style", function(d, i) {
+            if (classCount[i] === 0) {
+                return "display: none!important;"
+            }
+            return "display: block;"
+
+        });
+
+    classes.append("h6")
+        .attr("class", "my-0")
+        .text(function (d) {
+            return d;
+        });
+    classes.append("span")
+        .attr("class", "text-muted")
+        .text(function (d, i) {
+            return classCount[i];
+        });
 }
 
 function draw_heatmap_bin_frequency(classname, bins) {
 
     // expects already sorted bins array
+
+    $(classname).empty();
 
     var svg = d3.select(classname),
         width = +svg.attr("width"),
