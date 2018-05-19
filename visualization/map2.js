@@ -91,97 +91,29 @@ var layer_sym = view.append("g");
 var svgTime = d3.select("#timeselector svg"),
     timeBar = svgTime.append("g");
 
-// var projection = d3.geoMercator()
-//     .scale((1 / tau))
-//     .translate([0, 0])
-    // .scale((1 << 8 + 19) / tau)
-    // .translate([width / 2, height / 2])
-    // .center([11.037630, 50.971296]);
-
-// var zoom = d3.zoom()
-// .scale(1 << 12)
-//     .scaleExtent([1 << 9, 1 << 23])
-//     .translateExtent([width / 2, height / 2])
-//     .on("zoom", zoomed);
-
-// var tile = d3.tile()
-//     .size([width, height])
-//     .scale(projection.scale() * tau)
-//     .translate(projection([0, 0]))
-//     ();
-
 var projection = d3.geoMercator()
     .scale((1 / tau))
-    .translate([0, 0]);
+    .translate([0, 0])
+    .scale((1 << 8 + 19) / tau)
+    .translate([width / 2, height / 2])
+    .center([11.037630, 50.971296]);
 
-var tile = d3.tile()
-    .size([width, height]);
 
-var zoom = d3.zoom()
-    .scaleExtent([1 << 18, 1 << 30])
-    .on("zoom", zoomed);
-
-var center = projection([11.037630+0.001000, 50.971296]);
-// var center = projection([-98.5, 39.5]);
+var tiles = d3.tile()
+    .size([width, height])
+    .scale(projection.scale() * tau)
+    .translate(projection([0, 0]))
+    ();
 
 var boxes = null;
     dataset = null;
-
-function zoomed() {
-
-    var transform = d3.event.transform;
-
-    console.log(transform.k);
-
-    var tiles = tile
-        .scale(transform.k)
-        .translate([transform.x, transform.y])
-        ();
-
-    projection
-        .scale(transform.k / tau)
-        .translate([transform.x, transform.y]);
-
-    layer_map
-        .attr("transform", stringify(tiles.scale, tiles.translate));
-
-    layer_hex
-        .attr("transform", transform);
-        // .style("stroke-width", 1 / transform.k);
-
-    layer_sym
-        .attr("transform", transform)
-        .style("stroke-width", 1 / transform.k);
-
-    var image = layer_map
-        .selectAll("image")
-        .data(tiles, function(d) { return d; });
-
-    image.exit().remove();
-
-    var tileFunc = mapproviders[initialMapProvider]["tilefunc"];
-
-    image.enter().append("image")
-        .attr("xlink:href", tileFunc)
-        .attr("filter", "url(#grayscale)")
-        .attr("x", function(d) { return d[0] * 256; })
-        .attr("y", function(d) { return d[1] * 256; })
-        .attr("width", 256)
-        .attr("height", 256);
-
-}
-
-function stringify(scale, translate) {
-    var k = scale / 256, r = scale % 1 ? Number : Math.round;
-    return "translate(" + r(translate[0] * scale) + "," + r(translate[1] * scale) + ") scale(" + k + ")";
-}
 
 d3.json("dataset.json", function(input) {
 
     input["mapprovider"] = mapproviders;
     dataset = input;
 
-    // drawLayerMap(mapproviders[initialMapProvider]["tilefunc"]);
+    drawLayerMap(mapproviders[initialMapProvider]["tilefunc"]);
 
     d3.text(dataset["data"], function(error, raw) {
         if (error) throw error;
@@ -207,12 +139,6 @@ d3.json("dataset.json", function(input) {
 
         buildGraph(dataset["cameras"], dataset["corresponding_points"], null);
         buildUI(dataset);
-
-        svg.call(zoom)
-            .call(zoom.transform, d3.zoomIdentity
-                .translate(width / 2, height / 2)
-                .scale(1 << 8+19-2)
-                .translate(-center[0], -center[1]));
 
         $("#overlay").hide();
     });
@@ -295,7 +221,7 @@ function buildUI(dataset) {
     });
 
     $("#sliderHexSize").on("input", function(event) {
-        drawLayerHex($(this).val()/1000000);
+        drawLayerHex($(this).val());
     });
 
     $("#sliderMapAlpha").on("input", function(event) {
@@ -308,7 +234,7 @@ function buildUI(dataset) {
     // $("li[data-type=layer][data-id=sym]").click();
 
     $("#sliderHexAlpha").val( 85).trigger("input");
-    $("#sliderHexSize ").val( 50).trigger("input");
+    $("#sliderHexSize ").val( 5).trigger("input");
     $("#sliderMapAlpha").val(100).trigger("input");
 }
 
@@ -330,21 +256,19 @@ function buildGraph(cameras, points, classmap) {
 
 function drawLayerMap(tileFunc) {
 
-    return;
-
     $(".layer_map").empty();
 
     layer_map
         .attr("class", "layer_map")
         .selectAll("image")
-        .data(tile)
+        .data(tiles)
         .enter().append("image")
         .attr("xlink:href", tileFunc)
         .attr("filter", "url(#grayscale)")
-        .attr("x", function(d) { return (d[0] + tile.translate[0]) * tile.scale; })
-        .attr("y", function(d) { return (d[1] + tile.translate[1]) * tile.scale; })
-        .attr("width", tile.scale)
-        .attr("height", tile.scale);
+        .attr("x", function(d) { return ((d[0] + tiles.translate[0]) * tiles.scale)|0; }) // double to int
+        .attr("y", function(d) { return ((d[1] + tiles.translate[1]) * tiles.scale)|0; })
+        .attr("width", tiles.scale)
+        .attr("height", tiles.scale);
 }
 
 function drawLayerHex(octagonRadius) {
@@ -360,7 +284,7 @@ function drawLayerHex(octagonRadius) {
     });
 
     var hexbin = d3.hexbin()
-        .radius(0.00000005) // TODO
+        .radius(octagonRadius)
         .extent([[0, 0], [width, height]]);
 
     var hbins = hexbin(boxesRaw);
@@ -384,7 +308,7 @@ function drawLayerHex(octagonRadius) {
         .attr("class", "layer_hex")
         .append("g")
         .attr("class", "hexagon")
-        // .attr("clip-path", "url(#clip)")
+        .attr("clip-path", "url(#clip)")
         .selectAll("path")
         .data(hbins)
         .enter().append("path")
@@ -440,7 +364,7 @@ function drawLayerSym() {
 
     symbols.append("circle")
         .attr("class", "sym")
-        .attr("r", 1 / (1 << 4 + 19))
+        .attr("r", 10)
         .attr("cx", 0)
         .attr("cy", 0)
         .attr("fill-opacity", "1")
