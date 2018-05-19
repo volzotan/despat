@@ -50,116 +50,153 @@ var mapproviders = [
     },
 ];
 
+var initialMapProvider = 2; // TODO
+
 var pi = Math.PI,
     tau = 2 * pi;
 
 var svg = d3.select("#map svg"),
     width = +svg.attr("width"),
-    height = +svg.attr("height")
+    height = +svg.attr("height");
 
-    layer_map = svg.append("g");
+var view = svg.append("g");
 
-    layer_hex = svg.append("g");
+var layer_map = view.append("g")
+        .attr("class", "layer_map");
 
-    foreignObject = svg.append("g")
+var layer_hex = view.append("g");
+
+var foreignObject = view.append("g")
         .attr("class", "layer_sca")
         .append("foreignObject")
         .attr("x", 0)
         .attr("y", 0)
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height),
     foBody = foreignObject.append("xhtml:body")
         .style("margin", "0px")
         .style("padding", "0px")
         .style("background", "none")
         .style("width", width + "px")
-        .style("height", height + "px");
+        .style("height", height + "px"),
     canvas = foBody.append("canvas")
         .attr("x", 0)
         .attr("y", 0)
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height),
     layer_sca = canvas.node().getContext("2d");
 
-    layer_sym = svg.append("g");
+var layer_sym = view.append("g");
 
-    svgTime = d3.select("#timeselector svg");
+var svgTime = d3.select("#timeselector svg"),
     timeBar = svgTime.append("g");
 
-var projection = d3.geoMercator()
+var projectionHex = d3.geoMercator()
     .scale((1 << 8 + 19) / tau)
     .translate([width / 2, height / 2])
     .center([11.037630, 50.971296]);
 
-// var zoom = d3.behavior.zoom()
-//     .scale(1 << 12)
+// var projection = d3.geoMercator()
+//     .scale((1 / tau))
+//     .translate([0, 0])
+    // .scale((1 << 8 + 19) / tau)
+    // .translate([width / 2, height / 2])
+    // .center([11.037630, 50.971296]);
+
+// var zoom = d3.zoom()
+// .scale(1 << 12)
 //     .scaleExtent([1 << 9, 1 << 23])
-//     .translate([width / 2, height / 2])
+//     .translateExtent([width / 2, height / 2])
 //     .on("zoom", zoomed);
 
-// var alpha = d3.scaleLinear()
-//     .domain([0, 110])
-//     .range([0.8, 0.8]);
-//     // .range([0.3, 0.7]);
-//     // .range([0.2, 1.0]);
+// var tile = d3.tile()
+//     .size([width, height])
+//     .scale(projection.scale() * tau)
+//     .translate(projection([0, 0]))
+//     ();
 
-var tiles = d3.tile()
-    .size([width, height])
-    .scale(projection.scale() * tau)
-    .translate(projection([0, 0]))
-    ();
+var projection = d3.geoMercator()
+    .scale((1 / tau))
+    .translate([0, 0]);
+
+var tile = d3.tile()
+    .size([width, height]);
+
+var zoom = d3.zoom()
+    .on("zoom", zoomed);
+
+var center = projection([11.037630+0.001000, 50.971296]);
 
 var boxes = null;
     dataset = null;
 
-// zoomed();
+function zoomed() {
 
-// function zoomed() {
-//     var tiles = tile
-//         .scale(zoom.scale())
-//         .translate(zoom.translate())
-//         ();
-//
-//     projection
-//         .scale(zoom.scale() / 2 / Math.PI)
-//         .translate(zoom.translate());
-//
-//     var image = layer
-//         .style(prefix + "transform", matrix3d(tiles.scale, tiles.translate))
-//         .selectAll(".tile")
-//         .data(tiles, function(d) { return d; });
-//
-//     image.exit()
-//         .remove();
-//
-//     image.enter().append("img")
-//         .attr("class", "tile")
-//         .attr("src", function(d) { return "http://" + ["a", "b", "c"][Math.random() * 3 | 0] + ".tile.openstreetmap.org/" + d[2] + "/" + d[0] + "/" + d[1] + ".png"; })
-//         .style("left", function(d) { return (d[0] << 8) + "px"; })
-//         .style("top", function(d) { return (d[1] << 8) + "px"; });
-// }
+    console.log(d3.event.transform);
+
+    var transform = d3.event.transform;
+
+    var tiles = tile
+        .scale(transform.k)
+        .translate([transform.x, transform.y])
+        ();
+
+    projection
+        .scale(transform.k / tau)
+        .translate([transform.x, transform.y]);
+
+    layer_map.attr("transform", stringify(tiles.scale, tiles.translate));
+    // layer_hex.attr("transform", stringify(tiles.scale, tiles.translate));
+
+    var image = layer_map
+        .selectAll("image")
+        .data(tiles, function(d) { return d; });
+
+    image.exit().remove();
+
+    var tileFunc = mapproviders[initialMapProvider]["tilefunc"];
+
+    image.enter().append("image")
+        .attr("xlink:href", tileFunc)
+        .attr("filter", "url(#grayscale)")
+        .attr("x", function(d) { return d[0] * 256; })
+        .attr("y", function(d) { return d[1] * 256; })
+        .attr("width", 256)
+        .attr("height", 256);
+
+    $("#sliderHexSize ").trigger("input");
+
+    // layer_hex.attr("transform", d3.event.transform);
+    // // layer_sca.attr("transform", d3.event.transform);
+    // layer_sym.attr("transform", d3.event.transform);
+}
+
+function stringify(scale, translate) {
+    var k = scale / 256, r = scale % 1 ? Number : Math.round;
+    return "translate(" + r(translate[0] * scale) + "," + r(translate[1] * scale) + ") scale(" + k + ")";
+}
 
 d3.json("dataset.json", function(input) {
 
     input["mapprovider"] = mapproviders;
     dataset = input;
 
-    drawLayerMap(mapproviders[0]["tilefunc"]);
+    // drawLayerMap(mapproviders[initialMapProvider]["tilefunc"]);
 
     d3.text(dataset["data"], function(error, raw) {
         if (error) throw error;
 
         boxes = d3.dsvFormat("|").parse(raw);
         boxes.forEach((box, index) => {
-            var coord = projection([box.lon, box.lat]), // lonlat!
+            // var coord = projection([box.lon, box.lat]), // lonlat!
                 item = Array(10);
 
             item[0] = box["timestamp"];
             item[1] = box["device"];
             item[2] = box["class"];
             item[3] = box["confidence"];
-            item[4] = coord[1];
-            item[5] = coord[0];
+            item[4] = box["lat"];
+            item[5] = box["lon"];
             item[6] = box["minx"];
             item[7] = box["miny"];
             item[8] = box["maxx"];
@@ -170,14 +207,10 @@ d3.json("dataset.json", function(input) {
 
         buildGraph(dataset["cameras"], dataset["corresponding_points"], null);
         buildUI(dataset);
+
         $("#overlay").hide();
     });
 });
-
-function refresh() {
-    //
-    // buildGraph()
-}
 
 var clickFunction = function () {
 
@@ -195,8 +228,7 @@ var clickFunction = function () {
         drawLayerMap(mapproviders[+$(this).data("id")]["tilefunc"]);
     }
 
-    refresh();
-}
+};
 
 function buildUI(dataset) {
 
@@ -232,7 +264,7 @@ function buildUI(dataset) {
         .attr("class", function(d, i) {
             var classes = "list-group-item d-flex justify-content-between selectable lh-condensed";
 
-            if (i === 0) {
+            if (i === initialMapProvider) {
                 classes += " option-selected"
             }
 
@@ -245,13 +277,6 @@ function buildUI(dataset) {
         });
 
     drawClassSelector();
-
-        // <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected">
-        // <div>
-        // <h6 class="my-0">Person</h6>
-        // </div>
-        // <span class="text-muted">123</span>
-        // </li>
 
     $("li.selectable").click(clickFunction);
 
@@ -295,23 +320,31 @@ function buildGraph(cameras, points, classmap) {
 
     draw_timeBar("#svg-time");
 
+    svg.call(zoom)
+        .call(zoom.transform, d3.zoomIdentity
+            .translate(width / 2, height / 2)
+            .scale(1 << 8+19-2)
+            .translate(-center[0], -center[1]));
+
 }
 
 function drawLayerMap(tileFunc) {
+
+    return;
 
     $(".layer_map").empty();
 
     layer_map
         .attr("class", "layer_map")
         .selectAll("image")
-        .data(tiles)
+        .data(tile)
         .enter().append("image")
         .attr("xlink:href", tileFunc)
         .attr("filter", "url(#grayscale)")
-        .attr("x", function(d) { return (d[0] + tiles.translate[0]) * tiles.scale; })
-        .attr("y", function(d) { return (d[1] + tiles.translate[1]) * tiles.scale; })
-        .attr("width", tiles.scale)
-        .attr("height", tiles.scale);
+        .attr("x", function(d) { return (d[0] + tile.translate[0]) * tile.scale; })
+        .attr("y", function(d) { return (d[1] + tile.translate[1]) * tile.scale; })
+        .attr("width", tile.scale)
+        .attr("height", tile.scale);
 }
 
 function drawLayerHex(octagonRadius) {
@@ -322,7 +355,7 @@ function drawLayerHex(octagonRadius) {
 
     var boxesRaw = [];
     boxes.forEach((box, index) => {
-        boxesRaw.push([box[5], box[4]]);
+        boxesRaw.push(projection([box[5], box[4]]));
     });
 
     var hexbin = d3.hexbin()
@@ -358,7 +391,7 @@ function drawLayerHex(octagonRadius) {
 }
 
 function drawLayerSca() {
-    
+
     layer_sca.draw = function() {
         layer_sca.clearRect(0, 0, width, height);
         boxes.forEach((box, index) => {
@@ -476,6 +509,29 @@ function draw_timeBar(classname) {
         .tickFormat(d3.timeFormat("%d.%m %H:%M"))
         .ticks(5);
 
+    var brush = d3.brushX()
+        .extent([[0, 0], [width, height]])
+        .on("start brush end", brushmoved);
+
+    var gBrush = g.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    var handle = gBrush.selectAll(".handle--custom")
+        .data([{type: "w"}, {type: "e"}])
+        .enter().append("path")
+        .attr("class", "handle--custom")
+        .attr("fill", "#666")
+        .attr("fill-opacity", 0.8)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1.5)
+        .attr("cursor", "ew-resize")
+        .attr("d", d3.arc()
+            .innerRadius(0)
+            .outerRadius(height / 2)
+            .startAngle(0)
+            .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));
+
     svg.append("g")
         .attr("class", "axis")
         .attr("transform", "translate(0," + (height - timeAxisHeight) + ")")
@@ -494,6 +550,18 @@ function draw_timeBar(classname) {
         .attr("y", function(d) { return y(d); })
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return height - timeAxisHeight - y(d); });
+}
+
+function brushmoved() {
+    var s = d3.event.selection;
+    if (s == null) {
+        handle.attr("display", "none");
+        circle.classed("active", false);
+    } else {
+        var sx = s.map(x.invert);
+        circle.classed("active", function(d) { return sx[0] <= d && d <= sx[1]; });
+        handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + s[i] + "," + height / 2 + ")"; });
+    }
 }
 
 function drawClassSelector() {
