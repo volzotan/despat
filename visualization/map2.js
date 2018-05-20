@@ -50,14 +50,20 @@ var mapproviders = [
     },
 ];
 
-var initialMapProvider = 5; // TODO
+var initialMapProvider = 0; // TODO
 
 var pi = Math.PI,
     tau = 2 * pi;
 
-var svg = d3.select("#map svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+var width = Math.min(1140, window.innerWidth),
+    height = 600;
+
+var svg = d3.select("#map svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var basewidth = 3000,
+    baseheight = 3000;
 
 var view = svg.append("g");
 
@@ -88,22 +94,55 @@ var foreignObject = view.append("g")
 
 var layer_sym = view.append("g");
 
-var svgTime = d3.select("#timeselector svg"),
-    timeBar = svgTime.append("g");
+
+var svgTime = d3.select("#timeselector svg")
+    .attr("width", width)
+    .attr("height", 50);
+
+var timeBar = svgTime.append("g");
+
+
+var center = [11.037630, 50.971296];
 
 var projection = d3.geoMercator()
-    .scale((1 / tau))
-    .translate([0, 0])
     .scale((1 << 8 + 19) / tau)
-    .translate([width / 2, height / 2])
-    .center([11.037630, 50.971296]);
-
+    .translate([basewidth / 2, baseheight / 2])
+    // .translate([width / 2, height / 2])
+    .center(center);
+    // .center([11.037630-0.001, 50.971296-0.0005]);
 
 var tiles = d3.tile()
-    .size([width, height])
+    .size([basewidth, baseheight])
     .scale(projection.scale() * tau)
     .translate(projection([0, 0]))
     ();
+
+var zoom = d3.zoom()
+    .scaleExtent([0.4, 7])
+    .translateExtent([[0, 0], [basewidth, baseheight]])
+    .on("zoom", zoomed);
+
+svg.call(zoom)
+    .call(zoom.transform, d3.zoomIdentity
+        .translate(-(basewidth-width)/2, -(baseheight-height)/2));
+
+function zoomed() {
+
+    var transform = d3.event.transform;
+
+    layer_hex.attr("transform", transform);
+
+    layer_sym
+        .attr("transform", transform)
+        .style("stroke-width", 1 / transform.k);
+
+    layer_map.attr("transform", transform);
+}
+
+function stringify(scale, translate) {
+    var k = scale / 256, r = scale % 1 ? Number : Math.round;
+    return "translate(" + r(translate[0] * scale) + "," + r(translate[1] * scale) + ") scale(" + k + ")";
+}
 
 var boxes = null;
     dataset = null;
@@ -255,7 +294,7 @@ function buildGraph(cameras, points, classmap) {
 }
 
 function drawLayerMap(tileFunc) {
-
+    
     $(".layer_map").empty();
 
     layer_map
