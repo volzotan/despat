@@ -50,7 +50,7 @@ var mapproviders = [
     },
 ];
 
-var initialMapProvider = 0; // TODO
+var initialMapProvider = 4; // TODO
 
 var pi = Math.PI,
     tau = 2 * pi;
@@ -62,35 +62,19 @@ var svg = d3.select("#map svg")
     .attr("width", width)
     .attr("height", height);
 
-var basewidth = 3000,
-    baseheight = 3000;
+var basewidth = width*3,
+    baseheight = height*4;
 
 var view = svg.append("g");
 
 var layer_map = view.append("g")
         .attr("class", "layer_map");
 
+var layer_hbg = view.append("g");
+
 var layer_hex = view.append("g");
 
-var foreignObject = view.append("g")
-        .attr("class", "layer_sca")
-        .append("foreignObject")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", width)
-        .attr("height", height),
-    foBody = foreignObject.append("xhtml:body")
-        .style("margin", "0px")
-        .style("padding", "0px")
-        .style("background", "none")
-        .style("width", width + "px")
-        .style("height", height + "px"),
-    canvas = foBody.append("canvas")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", width)
-        .attr("height", height),
-    layer_sca = canvas.node().getContext("2d");
+var layer_sca = null;
 
 var layer_sym = view.append("g");
 
@@ -130,13 +114,15 @@ function zoomed() {
 
     var transform = d3.event.transform;
 
-    layer_hex.attr("transform", transform);
+    view.attr("transform", transform);
 
-    layer_sym
-        .attr("transform", transform)
-        .style("stroke-width", 1 / transform.k);
-
-    layer_map.attr("transform", transform);
+    // layer_hex.attr("transform", transform);
+    //
+    // layer_sym
+    //     .attr("transform", transform)
+    //     // .style("stroke-width", 1 / transform.k);
+    //
+    // layer_map.attr("transform", transform);
 }
 
 function stringify(scale, translate) {
@@ -162,12 +148,14 @@ d3.json("dataset.json", function(input) {
             // var coord = projection([box.lon, box.lat]), // lonlat!
                 item = Array(10);
 
+            var coords = projection([box["lon"], box["lat"]]);
+
             item[0] = box["timestamp"];
             item[1] = box["device"];
             item[2] = box["class"];
             item[3] = box["confidence"];
-            item[4] = box["lat"];
-            item[5] = box["lon"];
+            item[4] = coords[1];
+            item[5] = coords[0];
             item[6] = box["minx"];
             item[7] = box["miny"];
             item[8] = box["maxx"];
@@ -187,9 +175,19 @@ var clickFunction = function () {
 
     $(this).toggleClass("option-selected");
 
+    // if ($(this).data("type") === "layer" && $(this).data("id") === "sca") {
+    //     if ($(this).hasClass("option-selected") === true) {
+    //         drawLayerSca();
+    //     } else {
+    //         $("#layer_sca").empty();
+    //     }
+    // }
+
     if ($(this).data("type") === "layer") {
         var layername = $(this).data("id");
         $("svg .layer_" + layername).toggle("invisible");
+
+        return;
     }
 
     if ($(this).data("type") === "mapprovider") {
@@ -197,6 +195,8 @@ var clickFunction = function () {
         $(this).addClass("option-selected");
 
         drawLayerMap(mapproviders[+$(this).data("id")]["tilefunc"]);
+
+        return;
     }
 
 };
@@ -269,8 +269,9 @@ function buildUI(dataset) {
 
     // set defaults
 
+    $("li[data-type=layer][data-id=hbg]").click();
     $("li[data-type=layer][data-id=sca]").click();
-    // $("li[data-type=layer][data-id=sym]").click();
+    $("li[data-type=layer][data-id=sym]").click();
 
     $("#sliderHexAlpha").val( 85).trigger("input");
     $("#sliderHexSize ").val( 5).trigger("input");
@@ -279,8 +280,7 @@ function buildUI(dataset) {
 
 function buildGraph(cameras, points, classmap) {
 
-    // data:
-    // timestamp device class confidence lat lon minx miny maxx maxy
+    drawLayerHbg();
 
     // drawLayerHex(30);
     draw_confidence_frequency("#svg-confidence", boxes);
@@ -293,8 +293,19 @@ function buildGraph(cameras, points, classmap) {
 
 }
 
+function drawLayerHbg() {
+
+    layer_hbg
+        .attr("class", "layer_hbg")
+        .append("rect")
+        .attr("width", basewidth)
+        .attr("height", baseheight)
+        .attr("fill", function() { return d3.interpolateViridis(0); });
+
+}
+
 function drawLayerMap(tileFunc) {
-    
+
     $(".layer_map").empty();
 
     layer_map
@@ -319,7 +330,7 @@ function drawLayerHex(octagonRadius) {
 
     var boxesRaw = [];
     boxes.forEach((box, index) => {
-        boxesRaw.push(projection([box[5], box[4]]));
+        boxesRaw.push([box[5], box[4]]);
     });
 
     var hexbin = d3.hexbin()
@@ -358,22 +369,44 @@ function drawLayerHex(octagonRadius) {
 
 function drawLayerSca() {
 
-    layer_sca.draw = function() {
-        layer_sca.clearRect(0, 0, width, height);
+    var layer_sca = view.append("g")
+            .attr("class", "layer_sca")
+            .append("foreignObject")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", basewidth)
+            .attr("height", baseheight),
+        foBody = layer_sca.append("xhtml:body")
+            .style("margin", "0px")
+            .style("padding", "0px")
+            .style("background", "none")
+            .style("width", basewidth + "px")
+            .style("height", baseheight + "px"),
+        canvas = foBody.append("canvas")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", basewidth)
+            .attr("height", baseheight),
+        context = canvas.node().getContext("2d");
+
+    var draw = function() {
+        context.clearRect(0, 0, basewidth, baseheight);
         boxes.forEach((box, index) => {
+
             x = box[5];
             y = box[4];
 
-            layer_sca.beginPath();
-            layer_sca.fillStyle = "#333";
-            layer_sca.strokeStyle = "#333";
-            layer_sca.arc(x, y, 0.5, 0, 2 * Math.PI);
+            context.beginPath();
+            context.fillStyle = "#333";
+            context.strokeStyle = "#333";
+            context.arc(x, y, 0.5, 0, 2 * Math.PI);
             // layer_sca.stroke();
-            layer_sca.fill();
-            layer_sca.closePath();
+            context.fill();
+            context.closePath();
         });
     };
-    layer_sca.draw();
+
+    draw();
 }
 
 function drawLayerSym() {
@@ -625,6 +658,22 @@ function draw_confidence_frequency(classname, boxes) {
     var y = d3.scaleLinear()
         .domain([0, 1.1])
         .rangeRound([height, 0]);
+
+
+    var axis = d3.axisBottom(y)
+        .ticks(3);
+
+    g.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + 0 + ")")
+        .call(axis)
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em");
+        //.attr("transform", "rotate(-90)");
+
+
 
     var line = d3.line()
         .x(function(d, i) { return x(i); })
