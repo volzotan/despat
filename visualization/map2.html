@@ -107,9 +107,12 @@
 <div id="map">
     <div class="mapcontainer">
         <svg id="svg-map">
+            <filter id="grayscale">
+                <feColorMatrix type="saturate" values="0"/>
+            </filter>
 
-             <filter id="grayscale">
-                  <feColorMatrix type="saturate" values="0"/>
+            <filter id="blur">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
             </filter>
 
         </svg>
@@ -148,7 +151,7 @@
                 </li>
                 <li class="list-group-item d-flex justify-content-between lh-condensed selectable option-selected" data-type="layer" data-id="hbg">
                     <div>
-                        <h6 class="my-0">Heatmap BG</h6>
+                        <h6 class="my-0">Heatmap Background</h6>
                         <small class="text-muted">colored background for the heatmap</small>
                     </div>
                 </li>

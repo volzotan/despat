@@ -68,7 +68,7 @@ var basewidth = width*3,
 var view = svg.append("g");
 
 var layer_map = view.append("g")
-        .attr("class", "layer_map");
+    .attr("class", "layer_map");
 
 var layer_hbg = view.append("g");
 
@@ -77,6 +77,9 @@ var layer_hex = view.append("g");
 var layer_sca = null;
 
 var layer_sym = view.append("g");
+
+var layer_leg = svg.append("g")
+    .attr("class", "layer_leg");
 
 
 var svgTime = d3.select("#timeselector svg")
@@ -161,7 +164,7 @@ d3.json("dataset.json", function(input) {
             item[8] = box["maxx"];
             item[9] = box["maxy"];
 
-            return boxes[index] = item;
+            boxes[index] = item;
         });
 
         buildGraph(dataset["cameras"], dataset["corresponding_points"], null);
@@ -186,6 +189,7 @@ var clickFunction = function () {
     if ($(this).data("type") === "layer") {
         var layername = $(this).data("id");
         $("svg .layer_" + layername).toggle("invisible");
+        $("svg .legend_layer_" + layername).toggle("invisible");
 
         return;
     }
@@ -324,9 +328,7 @@ function drawLayerMap(tileFunc) {
 function drawLayerHex(octagonRadius) {
 
     $(".layer_hex").empty();
-
-    console.log(octagonRadius);
-    console.log(boxes.length);
+    $(".legend_layer_hex").empty();
 
     var boxesRaw = [];
     boxes.forEach((box, index) => {
@@ -339,19 +341,20 @@ function drawLayerHex(octagonRadius) {
 
     var hbins = hexbin(boxesRaw);
 
-    console.log(hbins.length);
-
-    hbins.sort(function(a, b){
+    hbins.sort(function (a, b) {
         return a.length - b.length;
     });
 
-    var percentage_cutoff = (hbins.length/100) * 1,
-        hbins_minmaxcutoff = hbins.slice(percentage_cutoff, hbins.length-percentage_cutoff);
+    var percentage_cutoff = (hbins.length / 100) * 1,
+        hbins_minmaxcutoff = hbins.slice(percentage_cutoff, hbins.length - percentage_cutoff);
 
     var color = d3.scaleSequential(d3.interpolateViridis)
-        .domain(d3.extent(hbins_minmaxcutoff, function(d) { return d.length; }));
+        .domain(d3.extent(hbins_minmaxcutoff, function (d) {
+            return d.length;
+        }));
 
     // heatmap graph
+
     draw_heatmap_bin_frequency("#svg-heatmap", hbins);
 
     layer_hex
@@ -363,8 +366,72 @@ function drawLayerHex(octagonRadius) {
         .data(hbins)
         .enter().append("path")
         .attr("d", hexbin.hexagon())
-        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-        .attr("fill", function(d) { return color(d.length); });
+        .attr("transform", function (d) {
+            return "translate(" + d.x + "," + d.y + ")";
+        })
+        .attr("fill", function (d) {
+            return color(d.length);
+        });
+
+    // legend
+
+    var legendHeight = 200,
+        legendWidth = 20;
+
+    var gradient = layer_leg.append('defs')
+        .append('linearGradient')
+        .attr('id', 'gradient')
+        .attr('x1', '0%') // bottom
+        .attr('y1', '100%')
+        .attr('x2', '0%') // to top
+        .attr('y2', '0%')
+        .attr('spreadMethod', 'pad');
+
+    var colorLeg = d3.scaleSequential(d3.interpolateViridis)
+        .domain([0, 100-1]);
+
+    var colorPct = Array(100);
+    for (i = 0; i < colorPct.length; i++) {
+        colorPct[i] = [i + "%", colorLeg(i)];
+    }
+
+    colorPct.forEach(function(d) {
+        gradient.append('stop')
+            .attr('offset', d[0])
+            .attr('stop-color', d[1])
+            .attr('stop-opacity', 1);
+    });
+
+    var legend_hex = layer_leg.append("g")
+        .attr("class", "legend_layer_hex")
+        .attr("transform", function (d) {
+            return "translate(" + (svg.attr("width")-legendWidth-20) + "," + (svg.attr("height")-legendHeight-20) + ")";
+        });
+
+    legend_hex.append('rect')
+        .attr('x1', 0)
+        .attr('y1', 0)
+        .attr('width', legendWidth)
+        .attr('height', legendHeight)
+        .style('fill', 'url(#gradient)');
+
+    var legendScale = d3.scaleLinear()
+        .domain([-3, 3])
+        .domain(d3.extent(hbins_minmaxcutoff, function (d) {
+            return d.length;
+        }))
+        .range([legendHeight, 0]);
+
+    var legendAxis = d3.axisLeft()
+        .scale(legendScale)
+        // .tickValues(d3.range(0, 105, 10))
+        // .ticks(5)
+        .tickFormat(d3.format("d"));
+
+    legend_hex.append("g")
+        .attr("class", "legend axis")
+        .attr("transform", "translate(" + -3 + ", 0)")
+        .call(legendAxis);
 }
 
 function drawLayerSca() {
@@ -647,7 +714,8 @@ function draw_confidence_frequency(classname, boxes) {
     confidences.sort();
 
     var svg = d3.select(classname),
-        width = +svg.attr("width"),
+        marginY = 30;
+        width = +svg.attr("width")-marginY,
         height = +svg.attr("height"),
         g = svg.append("g");
 
@@ -660,7 +728,7 @@ function draw_confidence_frequency(classname, boxes) {
         .rangeRound([height, 0]);
 
 
-    var axis = d3.axisBottom(y)
+    var axis = d3.axisLeft(y)
         .ticks(3);
 
     g.append("g")
@@ -669,9 +737,21 @@ function draw_confidence_frequency(classname, boxes) {
         .call(axis)
         .selectAll("text")
         .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em");
+        // .attr("y", marginY-1)
+        // .attr("dx", "-.8em")
+        // .attr("dy", ".15em")
+        .attr("transform", "rotate(-90)");
         //.attr("transform", "rotate(-90)");
+
+    // g.append("g")
+    //     .attr("class", "axis axis--y")
+    //     .call(d3.axisLeft(y).ticks(10, "%"))
+    //     .append("text")
+    //     .attr("transform", "rotate(-90)")
+    //     .attr("y", 6)
+    //     .attr("dy", "0.71em")
+    //     .attr("text-anchor", "end")
+    //     .text("Frequency");
 
 
 
@@ -680,6 +760,7 @@ function draw_confidence_frequency(classname, boxes) {
         .y(function(d) { return y(d); });
 
     g.append("path")
+        .attr("transform", "translate(" + marginY + "," + 0 + ")")
         .datum(confidences)
         .attr("fill", "none")
         .attr("stroke", "steelblue")
