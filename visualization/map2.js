@@ -89,7 +89,7 @@ var svgTime = d3.select("#timeselector svg")
 var timeBar = svgTime.append("g");
 
 
-var center = [11.037630, 50.971296];
+var center = [11.037630+0.0002, 50.971296+0.0001];
 
 var projection = d3.geoMercator()
     .scale((1 << 8 + 19) / tau)
@@ -126,11 +126,6 @@ function zoomed() {
     //     // .style("stroke-width", 1 / transform.k);
     //
     // layer_map.attr("transform", transform);
-}
-
-function stringify(scale, translate) {
-    var k = scale / 256, r = scale % 1 ? Number : Math.round;
-    return "translate(" + r(translate[0] * scale) + "," + r(translate[1] * scale) + ") scale(" + k + ")";
 }
 
 var boxes = null;
@@ -405,7 +400,7 @@ function drawLayerHex(octagonRadius) {
     var legend_hex = layer_leg.append("g")
         .attr("class", "legend_layer_hex")
         .attr("transform", function (d) {
-            return "translate(" + (svg.attr("width")-legendWidth-20) + "," + (svg.attr("height")-legendHeight-20) + ")";
+            return "translate(" + (svg.attr("width")-legendWidth-15) + "," + (svg.attr("height")-legendHeight-15) + ")";
         });
 
     legend_hex.append('rect')
@@ -550,9 +545,9 @@ function draw_timeBar(classname) {
     });
 
     var svg = d3.select(classname),
-        width = +svg.attr("width"),
-        height = +svg.attr("height"),
-        timeAxisHeight = 15,
+        margin = {"top": 5, "right": 0, "bottom": 12, "left": 0},
+        width = +svg.attr("width")-margin.left-margin.right,
+        height = +svg.attr("height")-margin.top-margin.bottom,
         g = svg.append("g");
 
     var x = d3.scaleBand()
@@ -564,43 +559,23 @@ function draw_timeBar(classname) {
     var y = d3.scaleLinear()
         // .domain(d3.extent(timeBins))
         .domain([0, d3.max(timeBins)])
-        .rangeRound([height-timeAxisHeight, 0]);
+        .rangeRound([height, 0]);
 
     var timeScale = d3.scaleTime()
         .domain(timeMinMax)
         .range([1, width - 2 * 1]);
 
+    var tickValues = calculateTicksForTimespan(timeMinMax, 2);
+
     var axis = d3.axisBottom(timeScale)
         // .tickFormat(d3.timeFormat("%Y-%m-%d"))
         .tickFormat(d3.timeFormat("%d.%m %H:%M"))
-        .ticks(5);
-
-    var brush = d3.brushX()
-        .extent([[0, 0], [width, height]])
-        .on("start brush end", brushmoved);
-
-    var gBrush = g.append("g")
-        .attr("class", "brush")
-        .call(brush);
-
-    var handle = gBrush.selectAll(".handle--custom")
-        .data([{type: "w"}, {type: "e"}])
-        .enter().append("path")
-        .attr("class", "handle--custom")
-        .attr("fill", "#666")
-        .attr("fill-opacity", 0.8)
-        .attr("stroke", "#000")
-        .attr("stroke-width", 1.5)
-        .attr("cursor", "ew-resize")
-        .attr("d", d3.arc()
-            .innerRadius(0)
-            .outerRadius(height / 2)
-            .startAngle(0)
-            .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));
+        .tickValues(tickValues);
+        // .ticks(5);
 
     svg.append("g")
         .attr("class", "axis")
-        .attr("transform", "translate(0," + (height - timeAxisHeight) + ")")
+        .attr("transform", "translate(0," + height + ")")
         .call(axis)
         .selectAll("text")
         .style("text-anchor", "end")
@@ -615,19 +590,49 @@ function draw_timeBar(classname) {
         .attr("x", function(d, i) { return x(i); })
         .attr("y", function(d) { return y(d); })
         .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - timeAxisHeight - y(d); });
+        .attr("height", function(d) { return height - y(d); });
+
+    // brush
+
+    var brush = d3.brushX()
+        .extent([[margin.top, margin.left], [width, height]])
+        .on("start brush end", brushmoved);
+
+    var gBrush = g.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    gBrush.call(brush.move, timeMinMax);
+
+    // var handle = gBrush.selectAll(".handle--custom")
+    //     .data([{type: "w"}, {type: "e"}])
+    //     .enter().append("path")
+    //     .attr("class", "handle--custom")
+    //     .attr("fill", "#666")
+    //     .attr("fill-opacity", 0.8)
+    //     .attr("stroke", "#000")
+    //     .attr("stroke-width", 1.5)
+    //     .attr("cursor", "ew-resize")
+    //     .attr("d", d3.arc()
+    //         .innerRadius(0)
+    //         .outerRadius(height / 2)
+    //         .startAngle(0)
+    //         .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));
 }
 
 function brushmoved() {
-    var s = d3.event.selection;
-    if (s == null) {
-        handle.attr("display", "none");
-        circle.classed("active", false);
-    } else {
-        var sx = s.map(x.invert);
-        circle.classed("active", function(d) { return sx[0] <= d && d <= sx[1]; });
-        handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + s[i] + "," + height / 2 + ")"; });
-    }
+
+    console.log("handle moved");
+
+    // var s = d3.event.selection;
+    // if (s == null) {
+    //     handle.attr("display", "none");
+    //     circle.classed("active", false);
+    // } else {
+    //     var sx = s.map(x.invert);
+    //     circle.classed("active", function(d) { return sx[0] <= d && d <= sx[1]; });
+    //     handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + s[i] + "," + height / 2 + ")"; });
+    // }
 }
 
 function drawClassSelector() {
@@ -677,8 +682,9 @@ function draw_heatmap_bin_frequency(classname, bins) {
     $(classname).empty();
 
     var svg = d3.select(classname),
-        width = +svg.attr("width"),
-        height = +svg.attr("height"),
+        margin = {"top": 5, "right": 10, "bottom": 5, "left": 28};
+        width = +svg.attr("width")-margin.left-margin.right,
+        height = +svg.attr("height")-margin.top-margin.bottom,
         g = svg.append("g");
 
     var x = d3.scaleLinear()
@@ -689,11 +695,21 @@ function draw_heatmap_bin_frequency(classname, bins) {
         .domain(d3.extent(bins, function (d) { return d.length; }))
         .rangeRound([height, 0]);
 
+    var axis = d3.axisLeft()
+        .scale(y)
+        .ticks(3);
+
+    g.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + (margin.left-3) + ", " + margin.top + ")")
+        .call(axis);
+
     var line = d3.line()
         .x(function(d, i) { return x(i); })
         .y(function(d) { return y(d.length); });
 
     g.append("path")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .datum(bins)
         .attr("fill", "none")
         .attr("stroke", "steelblue")
@@ -714,9 +730,9 @@ function draw_confidence_frequency(classname, boxes) {
     confidences.sort();
 
     var svg = d3.select(classname),
-        marginY = 30;
-        width = +svg.attr("width")-marginY,
-        height = +svg.attr("height"),
+        margin = {"top": 5, "right": 10, "bottom": 5, "left": 28};
+        width = +svg.attr("width")-margin.left-margin.right,
+        height = +svg.attr("height")-margin.top-margin.bottom,
         g = svg.append("g");
 
     var x = d3.scaleLinear()
@@ -724,43 +740,24 @@ function draw_confidence_frequency(classname, boxes) {
         .rangeRound([0, width]);
 
     var y = d3.scaleLinear()
-        .domain([0, 1.1])
+        .domain([0, 1.0])
         .rangeRound([height, 0]);
 
-
-    var axis = d3.axisLeft(y)
+    var axis = d3.axisLeft()
+        .scale(y)
         .ticks(3);
 
     g.append("g")
         .attr("class", "axis")
-        .attr("transform", "translate(0," + 0 + ")")
-        .call(axis)
-        .selectAll("text")
-        .style("text-anchor", "end")
-        // .attr("y", marginY-1)
-        // .attr("dx", "-.8em")
-        // .attr("dy", ".15em")
-        .attr("transform", "rotate(-90)");
-        //.attr("transform", "rotate(-90)");
-
-    // g.append("g")
-    //     .attr("class", "axis axis--y")
-    //     .call(d3.axisLeft(y).ticks(10, "%"))
-    //     .append("text")
-    //     .attr("transform", "rotate(-90)")
-    //     .attr("y", 6)
-    //     .attr("dy", "0.71em")
-    //     .attr("text-anchor", "end")
-    //     .text("Frequency");
-
-
+        .attr("transform", "translate(" + (margin.left-3) + ", " + margin.top + ")")
+        .call(axis);
 
     var line = d3.line()
         .x(function(d, i) { return x(i); })
         .y(function(d) { return y(d); });
 
     g.append("path")
-        .attr("transform", "translate(" + marginY + "," + 0 + ")")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .datum(confidences)
         .attr("fill", "none")
         .attr("stroke", "steelblue")
@@ -768,4 +765,16 @@ function draw_confidence_frequency(classname, boxes) {
         .attr("stroke-linecap", "round")
         .attr("stroke-width", 1.5)
         .attr("d", line);
+
+    // brush
+
+    var brush = d3.brushX()
+        .extent([[margin.left, margin.top], [width, height]])
+        .on("start brush end", brushmoved);
+
+    var gBrush = g.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    gBrush.call(brush.move, [margin.left, width]);
 }
