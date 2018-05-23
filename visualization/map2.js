@@ -52,6 +52,8 @@ var mapproviders = [
 
 var initialMapProvider = 4; // TODO
 
+var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f");
+
 var pi = Math.PI,
     tau = 2 * pi;
 
@@ -119,17 +121,26 @@ function zoomed() {
 
     view.attr("transform", transform);
 
-    // layer_hex.attr("transform", transform);
-    //
+    // TODO
+    // dont use canvas in basewidth size
+    // build "viewport" canvas in width size and translate
+    // if (layer_sca != null) {
+    //     console.log("redraw");
+    //     layer_sca.draw();
+    // }
+
     // layer_sym
     //     .attr("transform", transform)
     //     // .style("stroke-width", 1 / transform.k);
-    //
-    // layer_map.attr("transform", transform);
+
 }
 
 var boxes = null;
     dataset = null;
+
+    var settingHexSize = 5;
+
+    var settingFilterTime = null;
 
 d3.json("dataset.json", function(input) {
 
@@ -148,7 +159,7 @@ d3.json("dataset.json", function(input) {
 
             var coords = projection([box["lon"], box["lat"]]);
 
-            item[0] = box["timestamp"];
+            item[0] = parseDate(box["timestamp"]);
             item[1] = box["device"];
             item[2] = box["class"];
             item[3] = box["confidence"];
@@ -161,6 +172,8 @@ d3.json("dataset.json", function(input) {
 
             boxes[index] = item;
         });
+
+        // boxes = boxes.slice(0, 100);
 
         buildGraph(dataset["cameras"], dataset["corresponding_points"], null);
         buildUI(dataset);
@@ -259,7 +272,8 @@ function buildUI(dataset) {
     });
 
     $("#sliderHexSize").on("input", function(event) {
-        drawLayerHex($(this).val());
+        settingHexSize = $(this).val();
+        filter();
     });
 
     $("#sliderMapAlpha").on("input", function(event) {
@@ -273,7 +287,7 @@ function buildUI(dataset) {
     $("li[data-type=layer][data-id=sym]").click();
 
     $("#sliderHexAlpha").val( 85).trigger("input");
-    $("#sliderHexSize ").val( 5).trigger("input");
+    $("#sliderHexSize ").val(settingHexSize);
     $("#sliderMapAlpha").val(100).trigger("input");
 }
 
@@ -281,7 +295,8 @@ function buildGraph(cameras, points, classmap) {
 
     drawLayerHbg();
 
-    // drawLayerHex(30);
+    filter();
+
     draw_confidence_frequency("#svg-confidence", boxes);
 
     drawLayerSca();
@@ -290,6 +305,27 @@ function buildGraph(cameras, points, classmap) {
 
     draw_timeBar("#svg-time");
 
+}
+
+function filter() {
+
+    var data = boxes;
+
+    if (settingFilterTime != null) {
+        data = boxes.filter(function (d) {
+            if (d[0] < settingFilterTime[0]) {
+                return false
+            }
+
+            if (d[0] > settingFilterTime[1]) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    drawLayerHex(data, settingHexSize);
 }
 
 function drawLayerHbg() {
@@ -320,21 +356,22 @@ function drawLayerMap(tileFunc) {
         .attr("height", tiles.scale);
 }
 
-function drawLayerHex(octagonRadius) {
+function drawLayerHex(data, octagonRadius) {
 
     $(".layer_hex").empty();
     $(".legend_layer_hex").empty();
 
-    var boxesRaw = [];
-    boxes.forEach((box, index) => {
-        boxesRaw.push([box[5], box[4]]);
-    });
-
     var hexbin = d3.hexbin()
+        .x(function(d) {
+            return d[5];
+        })
+        .y(function(d) {
+            return d[4];
+        })
         .radius(octagonRadius)
         .extent([[0, 0], [width, height]]);
 
-    var hbins = hexbin(boxesRaw);
+    var hbins = hexbin(data);
 
     hbins.sort(function (a, b) {
         return a.length - b.length;
@@ -431,7 +468,7 @@ function drawLayerHex(octagonRadius) {
 
 function drawLayerSca() {
 
-    var layer_sca = view.append("g")
+    layer_sca = view.append("g")
             .attr("class", "layer_sca")
             .append("foreignObject")
             .attr("x", 0)
@@ -451,7 +488,7 @@ function drawLayerSca() {
             .attr("height", baseheight),
         context = canvas.node().getContext("2d");
 
-    var draw = function() {
+    layer_sca.draw = function() {
         context.clearRect(0, 0, basewidth, baseheight);
         boxes.forEach((box, index) => {
 
@@ -468,7 +505,7 @@ function drawLayerSca() {
         });
     };
 
-    draw();
+    layer_sca.draw();
 }
 
 function drawLayerSym() {
@@ -522,14 +559,13 @@ function drawLayerSym() {
 
 function draw_timeBar(classname) {
 
-    var	parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f"),
-        timeMinMax = d3.extent(boxes, function(d) { return parseDate(d[0]); }),
-        binNumber = 100,
+    var timeMinMax = d3.extent(boxes, function(d) { return d[0]; }),
+        binNumber = 200,
         binSize = (timeMinMax[1] - timeMinMax[0]) / binNumber,
         timeBins = new Array(binNumber).fill(0);
 
     boxes.forEach((box, index) => {
-        var timestamp = parseDate(box[0]),
+        var timestamp = box[0],
             bin = Math.floor((timestamp - timeMinMax[0]) / binSize);
 
         if (timestamp === null) {
@@ -544,11 +580,12 @@ function draw_timeBar(classname) {
         timeBins[bin] += 1;
     });
 
-    var svg = d3.select(classname),
-        margin = {"top": 5, "right": 0, "bottom": 12, "left": 0},
+    var svg = d3.select(classname)
+        .attr("height", 60);
+
+    var margin = {"top": 5, "right": 5, "bottom": 12, "left": 5},
         width = +svg.attr("width")-margin.left-margin.right,
-        height = +svg.attr("height")-margin.top-margin.bottom,
-        g = svg.append("g");
+        height = +svg.attr("height")-margin.top-margin.bottom;
 
     var x = d3.scaleBand()
         // .domain([0, timeBins.length])
@@ -565,7 +602,7 @@ function draw_timeBar(classname) {
         .domain(timeMinMax)
         .range([1, width - 2 * 1]);
 
-    var tickValues = calculateTicksForTimespan(timeMinMax, 2);
+    var tickValues = calculateTicksForTimespan(timeMinMax, 4);
 
     var axis = d3.axisBottom(timeScale)
         // .tickFormat(d3.timeFormat("%Y-%m-%d"))
@@ -575,18 +612,33 @@ function draw_timeBar(classname) {
 
     svg.append("g")
         .attr("class", "axis")
-        .attr("transform", "translate(0," + height + ")")
+        .attr("transform", "translate(" + margin.left + "," + (height+margin.top) + ")")
         .call(axis)
         .selectAll("text")
-        .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em");
-        // .attr("transform", "rotate(-65)");
+        .attr("dx", function(d, i) {
+            if (i === 0) {
+                return ".8em";
+            }
 
-    g.selectAll(".bar")
+            return "-.8em";
+        })
+        .attr("dy", ".15em")
+        .style("text-anchor", function(d, i) {
+            if (i === 0) {
+                return "start";
+            }
+
+            return "end";
+        });
+
+    svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .selectAll(".bar")
         .data(timeBins)
         .enter().append("rect")
-        .attr("class", "bar")
+        .attr("class", function(d) {
+            return "bar";
+        })
         .attr("x", function(d, i) { return x(i); })
         .attr("y", function(d) { return y(d); })
         .attr("width", x.bandwidth())
@@ -595,14 +647,25 @@ function draw_timeBar(classname) {
     // brush
 
     var brush = d3.brushX()
-        .extent([[margin.top, margin.left], [width, height]])
-        .on("start brush end", brushmoved);
+        .extent([[margin.left, margin.top], [width+margin.left, height+margin.top]])
+        // .on("start brush end", function() {
+        .on("end", function() {
+        // .on("brush", function() {
+            var s = d3.event.selection;
+            if (s == null) {
 
-    var gBrush = g.append("g")
+            } else {
+                var sx = s.map(timeScale.invert);
+                settingFilterTime = sx;
+                filter();
+            }
+        });
+
+    var gBrush = svg.append("g")
         .attr("class", "brush")
         .call(brush);
 
-    gBrush.call(brush.move, timeMinMax);
+    gBrush.call(brush.move, [margin.left, width+margin.left]);
 
     // var handle = gBrush.selectAll(".handle--custom")
     //     .data([{type: "w"}, {type: "e"}])
@@ -620,20 +683,6 @@ function draw_timeBar(classname) {
     //         .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));
 }
 
-function brushmoved() {
-
-    console.log("handle moved");
-
-    // var s = d3.event.selection;
-    // if (s == null) {
-    //     handle.attr("display", "none");
-    //     circle.classed("active", false);
-    // } else {
-    //     var sx = s.map(x.invert);
-    //     circle.classed("active", function(d) { return sx[0] <= d && d <= sx[1]; });
-    //     handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + s[i] + "," + height / 2 + ")"; });
-    // }
-}
 
 function drawClassSelector() {
 
@@ -730,7 +779,7 @@ function draw_confidence_frequency(classname, boxes) {
     confidences.sort();
 
     var svg = d3.select(classname),
-        margin = {"top": 5, "right": 10, "bottom": 5, "left": 28};
+        margin = {"top": 5, "right": 10, "bottom": 5, "left": 28},
         width = +svg.attr("width")-margin.left-margin.right,
         height = +svg.attr("height")-margin.top-margin.bottom,
         g = svg.append("g");
@@ -768,13 +817,34 @@ function draw_confidence_frequency(classname, boxes) {
 
     // brush
 
-    var brush = d3.brushX()
-        .extent([[margin.left, margin.top], [width, height]])
-        .on("start brush end", brushmoved);
+    // var brush = d3.brushX()
+    //     .extent([[margin.left, margin.top], [width+margin.left, height+margin.top]])
+    //     .on("start brush end", brushmoved);
+    //
+    // var gBrush = g.append("g")
+    //     .attr("class", "brush")
+    //     .call(brush);
+    //
+    // gBrush.selectAll("rect").attr("height", height);
+    // gBrush.selectAll(".resize").append("path").attr("d", resizePath);
 
-    var gBrush = g.append("g")
-        .attr("class", "brush")
-        .call(brush);
-
-    gBrush.call(brush.move, [margin.left, width]);
+    // gBrush.call(brush.move, [margin.left, width+margin.left]);
 }
+
+// function resizePath(d) {
+//
+//     console.log("foo");
+//
+//     var e = +(d == "e"),
+//         x = e ? 1 : -1,
+//         y = height / 3;
+//     return "M" + (.5 * x) + "," + y
+//         + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6)
+//         + "V" + (2 * y - 6)
+//         + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y)
+//         + "Z"
+//         + "M" + (2.5 * x) + "," + (y + 8)
+//         + "V" + (2 * y - 8)
+//         + "M" + (4.5 * x) + "," + (y + 8)
+//         + "V" + (2 * y - 8);
+// }

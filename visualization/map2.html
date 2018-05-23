@@ -47,13 +47,14 @@
         border: 1px solid #CCC;
     }
 
-    #svg-heatmap {
-    }
-
     .mapcontainer {
         width: 1140px;
         height: 600px;
-        margin: 30px 0;
+        margin: 20px 0 2px;
+    }
+
+    .handle {
+        fill: #333;
     }
 
     .list-group-item {
@@ -66,12 +67,7 @@
 
     #timeselector {
         width: 1140px;
-        height: 80px;
-        margin: 0 auto;
-    }
-
-    #sliderTime {
-        width: 800px;
+        margin: 10px auto 5px;
     }
 
     .slidercontainer {
@@ -182,7 +178,7 @@
                 <div class="slidercontainer">
                     <div class="slidertext"><h6 class="my-0">Heatmap bin size</h6></div>
                     <div class="slider">
-                        <input type="range" min="1" max="10" value="5" class="slider" id="sliderHexSize">
+                        <input type="range" min="1" max="15" value="5" class="slider" id="sliderHexSize">
                     </div>
                 </div>
             </li>
