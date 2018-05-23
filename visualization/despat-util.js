@@ -2,12 +2,103 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function calculateTicksForTimespan(extent, numberOfTicks) {
+function findBreakpoint(start, end) {
 
-    if (numberOfTicks <= 2) {
-        return extent;
+    // for each section find best breakpoint (day 00:00 / 12:00 , hour :00 / :30 / :15 / :45 , minute :*0 , :*5 , :**)
+
+    var a = new Date(start),
+        b = new Date(end),
+        diff = b-a,
+        r = new Date(a.getTime() + diff/2),
+        m = new Date(r);
+
+    var preferredValuesHours    = [0, 12, 6, 18];
+    var preferredValues         = [30, 15, 45, 5, 10, 20, 25, 35, 40, 50, 55];
+
+    // hours
+
+    for (var i=0; i < preferredValuesHours.length; i++) {
+        m.setHours(preferredValuesHours[i]);
+        m.setMinutes(0);
+        m.setSeconds(0);
+        m.setMilliseconds(0);
+        if (m > a && m < b) {
+            return m;
+        }
+        m = new Date(r);
     }
 
-    // slice timespan in x equivalent parts
-    // for each part find best breakpoint (day 00:00 / 12:00 , hour :00 / :30 / :15 / :45 , minute :*0 , :*5 , :**
+    for (var i=0; i<23; i+=1) {
+        m.setHours(i);
+        m.setMinutes(0);
+        m.setSeconds(0);
+        m.setMilliseconds(0);
+        if (m > a && m < b) {
+            return m;
+        }
+        m = new Date(r);
+    }
+
+    // minutes
+
+    for (var i=0; i < preferredValues.length; i++) {
+        m.setMinutes(preferredValues[i]);
+        m.setSeconds(0);
+        m.setMilliseconds(0);
+        if (m > a && m < b) {
+            return m;
+        }
+        m = new Date(r);
+    }
+
+    for (var i=0; i<59; i+=1) {
+        m.setMinutes(i);
+        m.setSeconds(0);
+        m.setMilliseconds(0);
+        if (m > a && m < b) {
+            return m;
+        }
+        m = new Date(r);
+    }
+
+    // seconds
+
+    for (var i=0; i < preferredValues.length; i++) {
+        m.setSeconds(preferredValues[i]);
+        m.setMilliseconds(0);
+        if (m > a && m < b) {
+            return m;
+        }
+        m = new Date(r);
+    }
+
+    for (var i=0; i<59; i+=1) {
+        m.setSeconds(i);
+        m.setMilliseconds(0);
+        if (m > a && m < b) {
+            return m;
+        }
+        m = new Date(r);
+    }
+
+    return m;
+}
+
+function calculateTicksForTimespan(extent, numberOfTicks) {
+
+    var ticks = Array(numberOfTicks);
+
+    ticks[0] = extent[0];
+    ticks[numberOfTicks-1] = extent[1];
+
+    var start = extent[0].getTime(),
+        end = extent[1].getTime(),
+        diff = end - start,
+        section = diff / numberOfTicks-1;
+
+    for (var i=1; i<numberOfTicks-1; i++) {
+        ticks[i] = findBreakpoint(start + section * i, start + section * (i+1));
+    }
+
+    return ticks;
 }

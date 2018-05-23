@@ -297,8 +297,6 @@ function buildGraph(cameras, points, classmap) {
 
     filter();
 
-    draw_confidence_frequency("#svg-confidence", boxes);
-
     drawLayerSca();
 
     drawLayerSym();
@@ -326,6 +324,7 @@ function filter() {
     }
 
     drawLayerHex(data, settingHexSize);
+    draw_confidence_frequency("#svg-confidence", data);
 }
 
 function drawLayerHbg() {
@@ -768,11 +767,13 @@ function draw_heatmap_bin_frequency(classname, bins) {
         .attr("d", line);
 }
 
-function draw_confidence_frequency(classname, boxes) {
+function draw_confidence_frequency(classname, data) {
+    
+    $(classname).empty();
 
-    var confidences = Array(boxes.length);
+    var confidences = Array(data.length);
 
-    boxes.forEach((box, index) => {
+    data.forEach((box, index) => {
         confidences[index] = box[3];
     });
 
