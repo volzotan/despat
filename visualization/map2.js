@@ -4,53 +4,41 @@ var mapproviders = [
         "name": "OpenStreetMap",
         "tilefunc": function (d) {
             return "http://" + "abc"[getRandomInt(0, 2)] + ".tile.openstreetmap.org/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
+        },
+        "tilefunc_local": function (d) {
+            return "tiles/" + "osm_mapnik" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
         }
     },
     {
         "name": "GoogleMaps satellite",
         "tilefunc": function (d) {
             return "http://mt" + getRandomInt(0, 2) + ".google.com/vt/lyrs=" + "s" + "@132&hl=de&x=" + d[0] + "&y=" + d[1] + "&z=" + d[2];
+        },
+        "tilefunc_local": function (d) {
+            return "tiles/" + "gmaps_satellite" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
         }
     },
     {
         "name": "GoogleMaps Roadmap",
         "tilefunc": function (d) {
             return "http://mt" + getRandomInt(0, 2) + ".google.com/vt/lyrs=" + "m" + "@132&hl=de&x=" + d[0] + "&y=" + d[1] + "&z=" + d[2];
+        },
+        "tilefunc_local": function (d) {
+            return "tiles/" + "gmaps_roadmap" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
         }
     },
     {
         "name": "GoogleMaps Hybrid",
         "tilefunc": function (d) {
             return "http://mt" + getRandomInt(0, 2) + ".google.com/vt/lyrs=" + "y" + "@132&hl=de&x=" + d[0] + "&y=" + d[1] + "&z=" + d[2];
-        }
-    },
-    {
-        "name": "local OpenStreetMap",
-        "tilefunc": function (d) {
-            return "tiles/" + "osm_mapnik" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
-        }
-    },
-    {
-        "name": "local GoogleMaps satellite",
-        "tilefunc": function (d) {
-            return "tiles/" + "gmaps_satellite" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
-        }
-    },
-    {
-        "name": "local GoogleMaps Roadmap",
-        "tilefunc": function (d) {
-            return "tiles/" + "gmaps_roadmap" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
-        }
-    },
-    {
-        "name": "local GoogleMaps Hybrid",
-        "tilefunc": function (d) {
+        },
+        "tilefunc_local": function (d) {
             return "tiles/" + "gmaps_hybrid" + "/" + d[2] + "/" + d[0] + "/" + d[1] + ".png";
         }
-    },
+    }
 ];
 
-var initialMapProvider = 4; // TODO
+var initialMapProvider = 1; // TODO
 
 var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f");
 
@@ -206,7 +194,25 @@ var clickFunction = function () {
         $("#mapprovider-selector li").removeClass("option-selected");
         $(this).addClass("option-selected");
 
-        drawLayerMap(mapproviders[+$(this).data("id")]["tilefunc"]);
+        if ($("#toggleMapCached").hasClass("option-selected")) {
+            drawLayerMap(mapproviders[+$(this).data("id")]["tilefunc_local"]);
+        } else {
+            drawLayerMap(mapproviders[+$(this).data("id")]["tilefunc"]);
+        }
+
+        return;
+    }
+
+    if ($(this).attr("id") === "toggleMapCached") {
+        var e = $("#mapprovider-selector li.option-selected");
+
+        console.log(e);
+
+        if ($(this).hasClass("option-selected")) {
+            drawLayerMap(mapproviders[+e.data("id")]["tilefunc_local"]);
+        } else {
+            drawLayerMap(mapproviders[+e.data("id")]["tilefunc"]);
+        }
 
         return;
     }
@@ -262,6 +268,7 @@ function buildUI(dataset) {
     drawClassSelector();
 
     $("li.selectable").click(clickFunction);
+    $("#toggleMapCached").click(clickFunction);
 
     // $("#sliderHex").on("change", function(event) {
     //     console.log(event);
@@ -286,7 +293,7 @@ function buildUI(dataset) {
     $("li[data-type=layer][data-id=sca]").click();
     $("li[data-type=layer][data-id=sym]").click();
 
-    $("#sliderHexAlpha").val( 85).trigger("input");
+    $("#sliderHexAlpha").val( 90).trigger("input");
     $("#sliderHexSize ").val(settingHexSize);
     $("#sliderMapAlpha").val(100).trigger("input");
 }
@@ -648,7 +655,8 @@ function draw_timeBar(classname) {
     var brush = d3.brushX()
         .extent([[margin.left, margin.top], [width+margin.left, height+margin.top]])
         // .on("start brush end", function() {
-        .on("end", function() {
+        // .on("end", function() {
+        .on("brush", function() {
         // .on("brush", function() {
             var s = d3.event.selection;
             if (s == null) {
@@ -768,7 +776,7 @@ function draw_heatmap_bin_frequency(classname, bins) {
 }
 
 function draw_confidence_frequency(classname, data) {
-    
+
     $(classname).empty();
 
     var confidences = Array(data.length);
