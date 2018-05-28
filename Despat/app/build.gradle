@@ -39,6 +39,7 @@ dependencies {
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:support-v4:26.1.0'
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -62,6 +63,9 @@ dependencies {
 
     // Volley for the Web-Interface
     implementation 'com.android.volley:volley:1.0.0'
+
+    // osmdroid for OSM support
+    implementation 'org.osmdroid:osmdroid-android:6.0.1'
 
     // ACRA for bug reporting
     def acraVersion = '5.0.0'
