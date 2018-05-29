@@ -1,4 +1,4 @@
-package de.volzo.despat;
+package de.volzo.despat.userinterface;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import com.google.android.gms.maps.MapView;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+
+import de.volzo.despat.R;
 
 public class OsmActivity extends AppCompatActivity {
 

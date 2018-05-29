@@ -1,4 +1,4 @@
-package de.volzo.despat;
+package de.volzo.despat.userinterface;
 
 import android.content.Context;
 import android.graphics.Canvas;

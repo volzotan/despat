@@ -1,4 +1,4 @@
-package de.volzo.despat;
+package de.volzo.despat.userinterface;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

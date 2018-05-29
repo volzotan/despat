@@ -1,7 +1,6 @@
-package de.volzo.despat;
+package de.volzo.despat.userinterface;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
@@ -12,23 +11,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
+import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.ErrorEvent;
 import de.volzo.despat.persistence.ErrorEventDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.support.Util;
 
 public class SessionDetailActivity extends AppCompatActivity {
 
     public static final String TAG = SessionDetailActivity.class.getSimpleName();
-    public SimpleDateFormat dateFormat = new SimpleDateFormat("mm.dd hh:mm:ss");
 
     private Session session;
 
@@ -63,8 +61,9 @@ public class SessionDetailActivity extends AppCompatActivity {
         ivCompressedPreview.setImageBitmap(bm);
 
         tvName.setText(session.getSessionName());
-        tvStart.setText(dateFormat.format(session.getStart()));
-        tvEnd.setText(dateFormat.format(session.getEnd()));
+        tvStart.setText(Util.getDateFormat().format(session.getStart()));
+        tvEnd.setText(Util.getDateFormat().format(session.getEnd()));
+        tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 //        recyclerView.setHasFixedSize(true);
@@ -87,18 +86,20 @@ class ErrorEventListAdapter extends RecyclerView.Adapter<ErrorEventListAdapter.V
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public ImageView preview;
-        public TextView name;
-//        public TextView start;
-//        public TextView end;
-//        public TextView duration;
-//        public TextView numberOfCaptures;
+        public TextView timestamp;
+        public TextView type;
+        public TextView description;
+        public TextView message;
+        public TextView stacktrace;
 
         public ViewHolder(View v) {
             super(v);
 
-            preview = (ImageView) v.findViewById(R.id.compressedpreview);
-            name = (TextView) v.findViewById(R.id.name);
+            timestamp = (TextView) v.findViewById(R.id.timestamp);
+            type = (TextView) v.findViewById(R.id.type);
+            description = (TextView) v.findViewById(R.id.description);
+            message = (TextView) v.findViewById(R.id.message);
+            stacktrace = (TextView) v.findViewById(R.id.stacktrace);
         }
     }
 
@@ -126,7 +127,7 @@ class ErrorEventListAdapter extends RecyclerView.Adapter<ErrorEventListAdapter.V
     public ErrorEventListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View v = (View) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recycleritem_session, parent, false);
+                .inflate(R.layout.recycleritem_errorevent, parent, false);
 
         v.setOnClickListener(this);
         return new ViewHolder(v);
@@ -136,9 +137,11 @@ class ErrorEventListAdapter extends RecyclerView.Adapter<ErrorEventListAdapter.V
     public void onBindViewHolder(ViewHolder holder, int position) {
         ErrorEvent errorEvent = errorEvents.get(position);
 
-        holder.name.setText(errorEvent.getType());
-//        holder.start.setText(dateFormat.format(session.getStart()));
-//        holder.end.setText(dateFormat.format(session.getEnd()));
+        holder.timestamp.setText(Util.getDateFormat().format(errorEvent.getTimestamp()));
+        holder.type.setText(errorEvent.getType());
+        holder.description.setText(errorEvent.getDescription());
+        holder.message.setText(errorEvent.getExceptionMessage());
+        holder.stacktrace.setText(errorEvent.getStacktrace());
     }
 
     @Override

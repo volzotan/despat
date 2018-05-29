@@ -6,7 +6,7 @@ import android.graphics.RectF;
 import java.io.File;
 import java.util.List;
 
-import de.volzo.despat.DrawSurface;
+import de.volzo.despat.userinterface.DrawSurface;
 
 public abstract class Detector {
 

@@ -16,7 +16,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.volzo.despat.DrawSurface;
+import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.support.Stopwatch;
 
 public class DetectorHOG extends Detector {

@@ -44,17 +44,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PreviewActivity"
+            android:name=".userinterface.PreviewActivity"
             android:screenOrientation="sensorLandscape" />
         <activity
-            android:name=".ConfigureActivity"
+            android:name=".userinterface.ConfigureActivity"
             android:screenOrientation="sensorLandscape" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".userinterface.SettingsActivity2"
             android:screenOrientation="sensorLandscape" />
         <activity
-            android:name=".SettingsActivity2"
-            android:screenOrientation="sensorLandscape" />
+            android:name=".userinterface.MapsActivity"
+            android:label="@string/title_activity_maps" />
+        <activity
+            android:name=".userinterface.OsmActivity"
+            android:label="@string/title_activity_osm" />
+        <activity
+            android:name=".userinterface.SessionActivity"
+            android:label="@string/title_activity_session" />
 
         <receiver
             android:name=".services.Orchestrator"
@@ -140,18 +146,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name=".MapsActivity"
-            android:label="@string/title_activity_maps" />
-        <activity
-            android:name=".OsmActivity"
-            android:label="@string/title_activity_osm"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".SessionActivity"
-            android:label="@string/title_activity_session"
-            android:theme="@style/AppTheme" />
-        <activity android:name=".SessionDetailActivity"></activity>
     </application>
 
 </manifest>

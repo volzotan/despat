@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorHOG;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Session;
@@ -46,6 +45,10 @@ import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
+import de.volzo.despat.userinterface.ConfigureActivity;
+import de.volzo.despat.userinterface.DrawSurface;
+import de.volzo.despat.userinterface.SessionActivity;
+import de.volzo.despat.userinterface.SettingsActivity2;
 import de.volzo.despat.web.Sync;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -271,6 +274,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 Log.i(TAG, "session [" + session.getSessionName() + "] has glitches");
             }
         }
+
+        startActivity(new Intent(activity, SessionActivity.class));
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -568,8 +573,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void runRecognizer() {
         try {
-//            detector = new DetectorSSD(activity);
-            detector = new DetectorHOG(activity);
+            detector = new DetectorSSD(activity);
+//            detector = new DetectorHOG(activity);
             detector.init();
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
             List<Detector.Recognition> detections = detector.run();

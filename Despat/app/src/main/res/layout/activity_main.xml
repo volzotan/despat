@@ -30,7 +30,7 @@
             android:layout_weight="1"
             android:text="image_view" />
 
-        <de.volzo.despat.DrawSurface
+        <de.volzo.despat.userinterface.DrawSurface
             android:id="@+id/drawSurface"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

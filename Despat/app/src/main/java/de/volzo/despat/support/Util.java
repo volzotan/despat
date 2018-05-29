@@ -398,6 +398,10 @@ public class Util {
         }
     }
 
+    public static DateFormat getDateFormat() {
+        return new SimpleDateFormat("MM.dd HH:mm:ss");
+    }
+
     public static String getHumanReadableTimediff(Date d1, Date d2, boolean verbose) {
         long diff = d2.getTime() - d1.getTime();
 

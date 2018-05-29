@@ -1,4 +1,4 @@
-package de.volzo.despat;
+package de.volzo.despat.userinterface;
 
 
 import android.app.Activity;
@@ -26,4 +26,12 @@ public class SettingsActivity2 extends Activity {
                 .commit();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.commit();
+    }
 }
