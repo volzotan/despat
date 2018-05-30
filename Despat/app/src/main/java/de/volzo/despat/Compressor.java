@@ -16,7 +16,9 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,8 +77,7 @@ public class Compressor {
         time_searchFiles = System.currentTimeMillis() - time_searchFiles;
         time_init = System.currentTimeMillis();
 
-//        images = images.subList(0, 10);
-        Log.wtf(TAG, "SIZE: " + images.size());
+        images = images.subList(0, 10);
         Bitmap bitmap = BitmapFactory.decodeFile(images.get(0).getAbsolutePath());
 
         init(bitmap.getWidth(), bitmap.getHeight());
@@ -136,12 +137,71 @@ public class Compressor {
         counter++;
     }
 
-    public void store() {
+    public void store(File path) throws Exception {
+        try {
+            FileOutputStream fos = new FileOutputStream(path);
+            short[] data = new short[1];
+            byte[] binary = new byte[2];
 
+            if (mat == null) {
+                throw new Exception("compressor must be initialized");
+            }
+
+            for (int i=0; i<mat.rows(); i++) {
+                for (int j=0; j<mat.cols(); j++) {
+                    mat.get(i, j, data);
+
+                    binary[1] = (byte)(data[0] >>> 8);
+                    binary[0] = (byte)(data[0]);
+                    fos.write(binary);
+                }
+            }
+
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            Log.e(TAG, "storing failed", e);
+            throw e;
+        }
     }
 
-    public void unstore() {
+    public void unstore(File path) throws Exception {
+        try {
+            short[] data = new short[1];
+            byte[] binary = new byte[2];
 
+            if (mat == null) {
+                throw new Exception("compressor must be initialized");
+            }
+
+            FileInputStream fis = new FileInputStream(path);
+
+            for (int i=0; i<mat.rows(); i++) {
+                for (int j=0; j<mat.cols(); j++) {
+                    int pos = i * mat.rows() * 2 + j * 2;
+
+                    try {
+                        int ret = fis.read(binary);
+
+                        if (ret <= 0) {
+                            throw new IOException("file ended prematurely");
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        Log.e(TAG, "out of bounds. pos: " + pos);
+                        throw e;
+                    }
+
+                    data[0] = (short) ((binary[1] << 8) + binary[0]);
+
+                    mat.put(i, j, data);
+                }
+            }
+
+            fis.close();
+        } catch (IOException e) {
+            Log.e(TAG, "storing failed", e);
+            throw e;
+        }
     }
 
 
@@ -156,6 +216,7 @@ public class Compressor {
         matExportGray.release();
         Bitmap bitmap = Bitmap.createBitmap(matExportColor.width(), matExportColor.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(matExportColor, bitmap);
+        matExportColor.release();
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
