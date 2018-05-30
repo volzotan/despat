@@ -178,9 +178,7 @@ public class ShutterService extends Service {
 
         Despat despat = Util.getDespat(this);
 
-
 //        if (true) throw new RuntimeException("This is a crash");
-
 
         if (Config.getPersistentCamera(context)) {
             despat.acquireWakeLock(false);
@@ -199,6 +197,8 @@ public class ShutterService extends Service {
         } else {
             handler.post(shutterReleaseRunnable);
         }
+
+        Log.d(TAG, "Shutter service started successfully");
 
         return START_STICKY;
     }

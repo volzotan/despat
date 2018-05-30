@@ -169,4 +169,8 @@ public class Session {
     public void setExposureCompensation(Double exposureCompensation) {
         this.exposureCompensation = exposureCompensation;
     }
+
+    public String toString() {
+        return "[" + this.id + "] " + this.sessionName;
+    }
 }

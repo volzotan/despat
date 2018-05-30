@@ -85,10 +85,10 @@
             android:id="@+id/bt_toggleCamera" />
 
         <Button
-            android:text="Take Photo"
+            android:text="Sessions"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/bt_takePhoto" />
+            android:id="@+id/bt_sessions" />
 
         <Button
             android:text="Run Recognizer"

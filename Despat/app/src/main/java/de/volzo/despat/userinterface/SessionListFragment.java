@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import java.util.List;
 
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Capture;
+import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.Util;
@@ -105,7 +108,16 @@ public class SessionListFragment extends Fragment {
 
             holder.session = session;
 
-            Bitmap bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.missing_img);
+            AppDatabase db = AppDatabase.getAppDatabase(context);
+            CaptureDao captureDao = db.captureDao();
+            Bitmap bm = null;
+            try {
+                Capture lastCapture = captureDao.getLastFromSession(session.getId());
+                bm = BitmapFactory.decodeFile(lastCapture.getImage().getAbsolutePath());
+            } catch (Exception e) {
+                Log.w(TAG, "compressed preview for session " + session.toString() + "could not be loaded");
+                bm = BitmapFactory.decodeResource(getResources(), R.drawable.missing_img);
+            }
             holder.preview.setImageBitmap(bm);
 
             holder.name.setText(session.getSessionName());

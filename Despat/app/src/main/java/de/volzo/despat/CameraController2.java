@@ -291,6 +291,8 @@ public class CameraController2 extends CameraController {
             int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) * -1;
             int deviceOrientationInDegree;
 
+            // TODO: rotation is wrong after service restart
+
             if (currentRotation == Surface.ROTATION_0) {
                 deviceOrientationInDegree = 0;
             } else if (currentRotation == Surface.ROTATION_90) {

@@ -12,8 +12,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Capture;
+import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.Util;
@@ -59,6 +63,7 @@ public class SessionFragment extends Fragment {
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
+        CaptureDao captureDao = db.captureDao();
 
         final Session session = sessionDao.getById(sessionId);
 
@@ -69,7 +74,14 @@ public class SessionFragment extends Fragment {
         TextView tvDuration = (TextView) view.findViewById(R.id.duration);
         TextView tvNumberOfCaptures = (TextView) view.findViewById(R.id.numberOfCaptures);
 
-        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.missing_img);
+        Bitmap bm = null;
+        try {
+            Capture lastCapture = captureDao.getLastFromSession(sessionId);
+            bm = BitmapFactory.decodeFile(lastCapture.getImage().getAbsolutePath());
+        } catch (Exception e) {
+            Log.w(TAG, "compressed preview could not be loaded");
+//            bm = BitmapFactory.decodeResource(getResources(), R.drawable.missing_img);
+        }
         ivCompressedPreview.setImageBitmap(bm);
 
         tvName.setText(session.getSessionName());
