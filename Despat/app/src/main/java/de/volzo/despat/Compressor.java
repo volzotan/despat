@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
+import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -21,15 +23,26 @@ import java.util.List;
 import de.volzo.despat.preferences.Config;
 
 /**
- * Created by volzotan on 08.03.18.
+ *  The compressor takes up to 256 images and
+ *  computes the mean.
+ *
+ *  The images are stacked in a opencv 16UC1 matrix,
+ *  which overflows at 2^16=65536. JPEG consists of up to
+ *  2^8=256 per pixel. Thus, a maximum of 2^8=256 jpegs
+ *  can be stacked.
+ *
+ *  To preserve memory only a single grayscale channel
+ *  is used.
+ *
  */
 
 public class Compressor {
 
     public static final String TAG = Compressor.class.getSimpleName();
 
-//    private long[][][] mat;
     private Mat mat;
+    private int counter = 0;
+
     private int width;
     private int height;
 
@@ -38,6 +51,11 @@ public class Compressor {
     }
 
     public void test(Context context) {
+
+        long time_searchFiles = System.currentTimeMillis();
+        long time_init = 0;
+        long time_add = 0;
+        long time_toJpeg = 0;
 
         File imageFolder = Config.getImageFolder(context);
         List<File> images = new ArrayList<File>();
@@ -54,23 +72,42 @@ public class Compressor {
             images.add(fileEntry);
         }
 
-        images = images.subList(0, 1);
+        time_searchFiles = System.currentTimeMillis() - time_searchFiles;
+        time_init = System.currentTimeMillis();
+
+//        images = images.subList(0, 10);
+        Log.wtf(TAG, "SIZE: " + images.size());
         Bitmap bitmap = BitmapFactory.decodeFile(images.get(0).getAbsolutePath());
 
         init(bitmap.getWidth(), bitmap.getHeight());
 
+        time_init = System.currentTimeMillis() - time_init;
+        time_add = System.currentTimeMillis();
+
         for (File f : images) {
             add(f);
+            System.out.println(counter);
         }
 
+        time_add = System.currentTimeMillis() - time_add;
+        time_toJpeg = System.currentTimeMillis();
+
         toJpeg(new File(imageFolder, "compressed.jpg"));
+
+        time_toJpeg = System.currentTimeMillis() - time_toJpeg;
+
+        System.out.println();
+        System.out.println("searchFiles: " + time_searchFiles);
+        System.out.println("init: " + time_init);
+        System.out.println("add: " + time_add);
+        System.out.println("add per image: " + time_add/counter);
+        System.out.println("toJpeg: " + time_toJpeg);
     }
 
     public void init(int width, int height) {
         this.width = width;
         this.height = height;
-//        mat = new long[this.width][this.height][1];
-        mat = Mat.zeros(this.height, this.width, CvType.CV_16U);
+        mat = Mat.zeros(this.height, this.width, CvType.CV_16UC1);
     }
 
     public void add(Image image) {
@@ -78,9 +115,25 @@ public class Compressor {
     }
 
     public void add(File path) {
+        if (counter >= 255) {
+            Log.e(TAG, "overflow imminent. image ignored.");
+            return;
+        }
+
         Mat imgMat = Imgcodecs.imread(path.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+
+        if (imgMat.width() != this.width || imgMat.height() != this.height) {
+            Log.w(TAG, "incompatible size of file: " + path.getName());
+            return;
+        }
+
         Mat mask = Mat.ones(mat.height(), mat.width(), CvType.CV_8UC1);
         Core.add(mat, imgMat, mat, mask, CvType.CV_16U);
+
+        imgMat.release();
+        mask.release();
+
+        counter++;
     }
 
     public void store() {
@@ -91,12 +144,18 @@ public class Compressor {
 
     }
 
+
+
     public void toJpeg(File path) {
-        mat.convertTo(mat, CvType.CV_8UC1);
-        Mat mat2 = Mat.zeros(mat.height(), mat.width(), CvType.CV_8UC3);
-        Imgproc.cvtColor(mat, mat2, Imgproc.COLOR_GRAY2RGB);
-        Bitmap bitmap = Bitmap.createBitmap(mat2.width(), mat2.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mat2, bitmap);
+        Mat matExportGray = Mat.zeros(mat.height(), mat.width(), CvType.CV_8UC1);
+        Core.multiply(mat, new Scalar(1.0/counter), matExportGray);
+        matExportGray.convertTo(matExportGray, CvType.CV_8UC1);
+
+        Mat matExportColor = Mat.zeros(mat.height(), mat.width(), CvType.CV_8UC3);
+        Imgproc.cvtColor(matExportGray, matExportColor, Imgproc.COLOR_GRAY2RGB);
+        matExportGray.release();
+        Bitmap bitmap = Bitmap.createBitmap(matExportColor.width(), matExportColor.height(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(matExportColor, bitmap);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);

@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -109,8 +110,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 startActivity(intent);
             }
         });
-        final ToggleButton startStopCapturing = findViewById(R.id.bt_startStopCapturing);
-        startStopCapturing.setOnClickListener(new View.OnClickListener() {
+        final ToggleButton btStartStopCapturing = findViewById(R.id.bt_startStopCapturing);
+        btStartStopCapturing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!RecordingSession.getInstance(activity).isActive()) { // if (!Util.isServiceRunning(activity, ShutterService.class)) {
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         }
                     }, 1000);
                     startProgressBarUpdate();
-                    startStopCapturing.setChecked(true);
+                    btStartStopCapturing.setChecked(true);
                 } else {
                     Log.d(TAG, "stopCapturing");
                     RecordingSession session = RecordingSession.getInstance(activity);
@@ -138,20 +139,20 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         Log.e(TAG, "stopping Recording Session failed", e);
                     }
                     stopProgressBarUpdate();
-                    startStopCapturing.setChecked(false);
+                    btStartStopCapturing.setChecked(false);
                 }
             }
         });
         if (!RecordingSession.getInstance(activity).isActive()) {
-            startStopCapturing.setText("Start Capturing");
-            startStopCapturing.setChecked(false);
+            btStartStopCapturing.setText("Start Capturing");
+            btStartStopCapturing.setChecked(false);
         } else {
-            startStopCapturing.setText("Stop Capturing");
-            startStopCapturing.setChecked(true);
+            btStartStopCapturing.setText("Stop Capturing");
+            btStartStopCapturing.setChecked(true);
         }
 
-        Button toggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
-        toggleCamera.setOnClickListener(new View.OnClickListener() {
+        Button btToggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
+        btToggleCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -168,11 +169,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        Button takePhoto = (Button) findViewById(R.id.bt_takePhoto);
-        takePhoto.setOnClickListener(new View.OnClickListener() {
+        Button btSessions = (Button) findViewById(R.id.bt_sessions);
+        btSessions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activity.takePhoto();
+//                activity.takePhoto();
+
+                startActivity(new Intent(activity, SessionActivity.class));
             }
         });
 
@@ -269,13 +272,23 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             boolean noGlitch = RecordingSession.checkForIntegrity(this, session);
 
             if (noGlitch) {
-                Log.i(TAG, "session [" + session.getSessionName() + "] has no glitch");
+                Log.i(TAG, "session " + session.toString() + " has no glitch");
             } else {
-                Log.i(TAG, "session [" + session.getSessionName() + "] has glitches");
+                Log.i(TAG, "session " + session.toString() + " has glitches");
             }
         }
 
-        startActivity(new Intent(activity, SessionActivity.class));
+//        btSessions.callOnClick();
+
+        final Context c = this;
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Compressor compressor = new Compressor();
+                compressor.test(c);
+            }
+        });
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
