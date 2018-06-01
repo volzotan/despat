@@ -51,7 +51,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
 
-    // openCV for HOG
+    // openCV for HOG and the compressor
     implementation project(':openCVLibrary310')
 
     // tensorflow
@@ -69,6 +69,10 @@ dependencies {
 
     // osmdroid for OSM support
     implementation 'org.osmdroid:osmdroid-android:6.0.1'
+
+    // glide for displaying compressed images
+    implementation 'com.github.bumptech.glide:glide:4.3.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
 
     // ACRA for bug reporting
     def acraVersion = '5.0.0'

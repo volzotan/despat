@@ -2,8 +2,10 @@ package de.volzo.despat.support;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -11,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StatFs;
@@ -53,6 +56,7 @@ import de.volzo.despat.persistence.ErrorEventDao;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.services.ShutterService;
 
 import static android.content.Context.ACCOUNT_SERVICE;
 
@@ -63,6 +67,20 @@ import static android.content.Context.ACCOUNT_SERVICE;
 public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
+
+    @TargetApi(Build.VERSION_CODES.O)
+    public static void setUpShutterNotificationChannel(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.deleteNotificationChannel(ShutterService.NOTIFICATION_CHANNEL_ID);
+
+        NotificationChannel channel = new NotificationChannel(
+                ShutterService.NOTIFICATION_CHANNEL_ID,
+                "ShutterServiceNotification",
+                NotificationManager.IMPORTANCE_DEFAULT);
+
+        notificationManager.createNotificationChannel(channel);
+    }
 
     public static Notification getShutterNotification(Context context, int numberOfCaptures, int numberOfErrors, List<String> additionalInfo) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
@@ -80,6 +98,10 @@ public class Util {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_MAX);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(ShutterService.NOTIFICATION_CHANNEL_ID);
+        }
 
         Notification.InboxStyle inboxNotification = new Notification.InboxStyle(builder);
 

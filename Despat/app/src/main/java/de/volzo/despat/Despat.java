@@ -2,6 +2,7 @@ package de.volzo.despat;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.TextureView;
@@ -14,6 +15,8 @@ import org.acra.annotation.AcraCore;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.services.Orchestrator;
+import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.Util;
 
 @AcraCore(buildConfigClass = BuildConfig.class)
@@ -38,6 +41,8 @@ public class Despat extends Application {
     public void onCreate() {
         super.onCreate();
         this.context = this;
+
+        Log.d(TAG, "despat Application Init");
 
         // Stetho Debug Library
         Stetho.initializeWithDefaults(this);
@@ -74,6 +79,30 @@ public class Despat extends Application {
                 // TODO: how to proceed? restart?
             }
         });
+
+        initOrchestrator();
+    }
+
+    private void initOrchestrator() {
+//        try {
+//            unregisterReceiver();
+//        }
+
+        Log.d(TAG, "initializing broadcast receivers for Orchestrator");
+
+        Orchestrator o = new Orchestrator();
+        IntentFilter f = new IntentFilter();
+
+        f.addAction(Broadcast.ALL_SERVICES);
+        f.addAction(Broadcast.SHUTTER_SERVICE);
+        f.addAction(Broadcast.RECOGNITION_SERVICE);
+        f.addAction(Broadcast.HEARTBEAT_SERVICE);
+        f.addAction(Broadcast.UPLOAD_SERVICE);
+        f.addAction(Broadcast.COMMAND_SERVICE);
+        f.addAction(Broadcast.PICTURE_TAKEN);
+        f.addAction(Broadcast.ERROR_OCCURED);
+
+        registerReceiver(o, f);
     }
 
     @Override

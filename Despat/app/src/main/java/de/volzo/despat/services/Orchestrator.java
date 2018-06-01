@@ -235,10 +235,21 @@ public class Orchestrator extends BroadcastReceiver {
         // start the Shutter Service
         if (!Util.isServiceRunning(context, ShutterService.class)) {
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
-            context.startService(shutterServiceIntent);
 
-            Util.saveEvent(context, Event.EventType.INFO, "ShutterService START");
-            Log.i(TAG, "ShutterService start");
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(shutterServiceIntent);
+                } else {
+                    context.startService(shutterServiceIntent);
+                }
+
+                Util.saveEvent(context, Event.EventType.INFO, "ShutterService START");
+                Log.i(TAG, "ShutterService start");
+            } catch (IllegalStateException e) {
+                String msg = "ShutterService could not be started (probably due to background restrictions";
+                Log.e(TAG, msg);
+                Util.saveErrorEvent(context, msg, e);
+            }
         } else {
             Intent triggerIntent = new Intent();
             triggerIntent.setAction(Broadcast.SHUTTER_SERVICE_TRIGGER);

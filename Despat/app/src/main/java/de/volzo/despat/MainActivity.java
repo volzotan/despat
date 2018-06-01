@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.i(TAG, "application init");
+        Log.i(TAG, "despat MainActivity init");
 
         despat = ((Despat) getApplicationContext());
 

@@ -3,6 +3,7 @@ package de.volzo.despat.userinterface;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.io.File;
 
@@ -76,13 +79,16 @@ public class SessionFragment extends Fragment {
 
         Bitmap bm = null;
         try {
-            Capture lastCapture = captureDao.getLastFromSession(sessionId);
-            bm = BitmapFactory.decodeFile(lastCapture.getImage().getAbsolutePath());
+            File f = session.getCompressedImage();
+            if (f == null) throw new Exception("compressed image missing");
+//            bm = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(f.getAbsolutePath()), 1200, 900);
+            Glide.with(context).load(f.getAbsoluteFile()).into(ivCompressedPreview);
         } catch (Exception e) {
-            Log.w(TAG, "compressed preview could not be loaded");
-//            bm = BitmapFactory.decodeResource(getResources(), R.drawable.missing_img);
+            Log.w(TAG, "compressed preview for session " + session.toString() + "could not be loaded");
+            bm = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeResource(getResources(), R.drawable.missing_img), 1200, 900);
+            Glide.with(context).load(R.drawable.missing_img).into(ivCompressedPreview);
         }
-        ivCompressedPreview.setImageBitmap(bm);
+//        ivCompressedPreview.setImageBitmap(bm);
 
         tvName.setText(session.getSessionName());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));

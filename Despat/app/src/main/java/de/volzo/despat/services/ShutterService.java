@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -50,8 +51,9 @@ public class ShutterService extends Service {
      */
 
     public static final String TAG = ShutterService.class.getSimpleName();
-    public static final int REQUEST_CODE                = 0x1200;
-    public static final int FOREGROUND_NOTIFICATION_ID  = 0x0500;
+    public static final int REQUEST_CODE                = 0x0100;
+    public static final int FOREGROUND_NOTIFICATION_ID  = 0x0200;
+    public static final String NOTIFICATION_CHANNEL_ID  = "de.volzo.despat.notificationchannel.ShutterService";
 
     private static final int STATE_INIT                 = 0;
     private static final int STATE_CAMERA_READY         = 1;
@@ -163,6 +165,11 @@ public class ShutterService extends Service {
             }
         });
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Util.setUpShutterNotificationChannel(context);
+        }
+
         startForeground(FOREGROUND_NOTIFICATION_ID, Util.getShutterNotification(context, 0, 0, null));
 
         IntentFilter filter = new IntentFilter();
@@ -178,7 +185,7 @@ public class ShutterService extends Service {
 
         Despat despat = Util.getDespat(this);
 
-//        if (true) throw new RuntimeException("This is a crash");
+//        if (true) throw new RuntimeException("testcrash");
 
         if (Config.getPersistentCamera(context)) {
             despat.acquireWakeLock(false);

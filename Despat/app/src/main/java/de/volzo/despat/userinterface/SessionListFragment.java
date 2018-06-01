@@ -3,6 +3,7 @@ package de.volzo.despat.userinterface;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
+import java.io.File;
 import java.util.List;
 
 import de.volzo.despat.R;
@@ -105,20 +109,20 @@ public class SessionListFragment extends Fragment {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             Session session = sessions.get(position);
-
             holder.session = session;
 
-            AppDatabase db = AppDatabase.getAppDatabase(context);
-            CaptureDao captureDao = db.captureDao();
-            Bitmap bm = null;
             try {
-                Capture lastCapture = captureDao.getLastFromSession(session.getId());
-                bm = BitmapFactory.decodeFile(lastCapture.getImage().getAbsolutePath());
+                File f = session.getCompressedImage();
+                if (f == null) throw new Exception("compressed image missing");
+                Glide.with(context).load(f.getAbsoluteFile()).into(holder.preview);
             } catch (Exception e) {
                 Log.w(TAG, "compressed preview for session " + session.toString() + "could not be loaded");
-                bm = BitmapFactory.decodeResource(getResources(), R.drawable.missing_img);
+//                bm = BitmapFactory.decodeResource(getResources(), R.drawable.missing_img);
+
+                Bitmap bm = null;
+                bm = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeResource(getResources(), R.drawable.missing_img), 400, 300);
+                holder.preview.setImageBitmap(bm);
             }
-            holder.preview.setImageBitmap(bm);
 
             holder.name.setText(session.getSessionName());
             holder.start.setText(Util.getDateFormat().format(session.getStart()));
