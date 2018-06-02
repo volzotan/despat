@@ -111,6 +111,9 @@ public class SessionListFragment extends Fragment {
             Session session = sessions.get(position);
             holder.session = session;
 
+            AppDatabase db = AppDatabase.getAppDatabase(context);
+            SessionDao sessionDao = db.sessionDao();
+
             try {
                 File f = session.getCompressedImage();
                 if (f == null) throw new Exception("compressed image missing");
@@ -128,7 +131,7 @@ public class SessionListFragment extends Fragment {
             holder.start.setText(Util.getDateFormat().format(session.getStart()));
             holder.end.setText(Util.getDateFormat().format(session.getEnd()));
             holder.duration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
-//        holder.numberOfCaptures.setText();
+            holder.numberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.util.List;
 
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
@@ -77,23 +78,20 @@ public class SessionFragment extends Fragment {
         TextView tvDuration = (TextView) view.findViewById(R.id.duration);
         TextView tvNumberOfCaptures = (TextView) view.findViewById(R.id.numberOfCaptures);
 
-        Bitmap bm = null;
         try {
             File f = session.getCompressedImage();
             if (f == null) throw new Exception("compressed image missing");
-//            bm = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(f.getAbsolutePath()), 1200, 900);
             Glide.with(context).load(f.getAbsoluteFile()).into(ivCompressedPreview);
         } catch (Exception e) {
             Log.w(TAG, "compressed preview for session " + session.toString() + "could not be loaded");
-            bm = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeResource(getResources(), R.drawable.missing_img), 1200, 900);
             Glide.with(context).load(R.drawable.missing_img).into(ivCompressedPreview);
         }
-//        ivCompressedPreview.setImageBitmap(bm);
 
         tvName.setText(session.getSessionName());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));
         tvEnd.setText(Util.getDateFormat().format(session.getEnd()));
         tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
+        tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
         view.findViewById(R.id.bt_homography).setOnClickListener(new View.OnClickListener() {
             @Override
