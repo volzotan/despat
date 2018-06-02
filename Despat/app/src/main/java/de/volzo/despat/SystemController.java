@@ -217,7 +217,7 @@ public class SystemController {
         SensorManager sensorManager = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
         Sensor tempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
 
-        if (tempSensor != null){
+        if (tempSensor != null) {
             return true;
         }
 
@@ -250,6 +250,8 @@ public class SystemController {
     }
 
     public static abstract class LocationCallback {
-        public void locationAcquired(Location location) {}
+        public void locationAcquired(Location location) {
+        }
     }
 }
+

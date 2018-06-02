@@ -6,6 +6,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -48,12 +49,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.DevicePositioner;
 import de.volzo.despat.support.Util;
 
 
@@ -105,11 +112,17 @@ public class CameraController2 extends CameraController {
 
     private boolean noAF = false;
     private long captureTimer;
+    private Future<Integer> devicePositionFuture;
 
     public CameraController2(Context context, ControllerCallback controllerCallback, TextureView textureView) {
         this.context = context;
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
+
+//        this.devicePositioner = new DevicePositioner(context);
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        devicePositionFuture = executorService.submit(new DevicePositioner(context));
 
         startBackgroundThread();
 
@@ -254,6 +267,8 @@ public class CameraController2 extends CameraController {
             surface = new Surface(surfaceTexture);
             outputSurfaces.add(surface);
 
+            // TODO: window rotation
+            // may return always Surface.ROTATION_0 if run from service with dead app
             WindowManager windowService = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             final int currentRotation = windowService.getDefaultDisplay().getRotation();
 
@@ -287,26 +302,47 @@ public class CameraController2 extends CameraController {
             if (Config.FORMAT_JPG) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
             if (Config.FORMAT_RAW) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
 
-            // image rotation
-            int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) * -1;
-            int deviceOrientationInDegree;
+//            // TODO: (window?) rotation is wrong after service restart
+//
+//            // image rotation
+//            int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) * -1;
+//            int deviceOrientationInDegree;
+//
+//            if (currentRotation == Surface.ROTATION_0) {
+//                deviceOrientationInDegree = 0;
+//            } else if (currentRotation == Surface.ROTATION_90) {
+//                deviceOrientationInDegree = 90;
+//            } else if (currentRotation == Surface.ROTATION_180) {
+//                deviceOrientationInDegree = 180;
+//            } else if (currentRotation == Surface.ROTATION_270) {
+//                deviceOrientationInDegree = 270;
+//            } else {
+//               throw new Exception("unexpected device orientation");
+//            }
+//
+//            int photoOrientation = (sensorOrientation + deviceOrientationInDegree + 360) % 360;
 
-            // TODO: rotation is wrong after service restart
-
-            if (currentRotation == Surface.ROTATION_0) {
-                deviceOrientationInDegree = 0;
-            } else if (currentRotation == Surface.ROTATION_90) {
-                deviceOrientationInDegree = 90;
-            } else if (currentRotation == Surface.ROTATION_180) {
-                deviceOrientationInDegree = 180;
-            } else if (currentRotation == Surface.ROTATION_270) {
-                deviceOrientationInDegree = 270;
-            } else {
-               throw new Exception("unexpected device orientation");
+            int photoOrientation = 0;
+            try {
+                Integer result = devicePositionFuture.get(500, TimeUnit.MILLISECONDS);
+                if (result != null) photoOrientation = result;
+            } catch (InterruptedException | ExecutionException e) {
+                Log.w(TAG, "device positioner interrupted");
+                Util.saveErrorEvent(context, "device positioner interrupted", e);
+            } catch (TimeoutException e) {
+                Log.w(TAG, "device positioner timeout");
+                Util.saveErrorEvent(context, "device positioner timeout", null);
+            } finally {
+                devicePositionFuture.cancel(true);
             }
-
-            int photoOrientation = (sensorOrientation + deviceOrientationInDegree + 360) % 360;
             stillRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, photoOrientation);
+
+//            Log.wtf(TAG, "sensor orientation 1: " + characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION));
+//            Log.wtf(TAG, "sensor orientation 2: " + sensorOrientation);
+//            Log.wtf(TAG, "window rotation: " + windowService.getDefaultDisplay().getRotation());
+//            Log.wtf(TAG, "compass orientation: " + context.getResources().getConfiguration().orientation);
+//            Log.wtf(TAG, "device positioner: " + result);
+//            Log.wtf(TAG, "photo orientation: " + photoOrientation);
 
             // JPEG Quality
             stillRequestBuilder.set(CaptureRequest.JPEG_QUALITY, Config.JPEG_QUALITY);

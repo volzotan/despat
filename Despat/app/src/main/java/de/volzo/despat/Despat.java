@@ -17,6 +17,8 @@ import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.DevicePositioner;
+import de.volzo.despat.support.ProximitySensor;
 import de.volzo.despat.support.Util;
 
 @AcraCore(buildConfigClass = BuildConfig.class)
@@ -30,6 +32,8 @@ public class Despat extends Application {
     private SystemController systemController;
 
     private PowerManager.WakeLock wakeLock;
+
+    private ProximitySensor proximitySensor;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -67,12 +71,13 @@ public class Despat extends Application {
                 String name = "";
                 String message = "";
 
-                Log.e(TAG, "Global uncaught exception: " + name + " | " + message);
-
                 if (arg0 != null) name = arg0.getName();
                 if (arg1 != null) message = arg1.getMessage();
 
                 Log.e(TAG, "Global uncaught exception: " + name + " | " + message);
+
+                if (arg1 != null) arg1.printStackTrace();
+
                 Util.saveErrorEvent(context, "global uncaught exception in thread: " + name, arg1);
                 Util.backupLogcat(null);
 
@@ -81,6 +86,8 @@ public class Despat extends Application {
         });
 
         initOrchestrator();
+
+        proximitySensor = new ProximitySensor(this);
     }
 
     private void initOrchestrator() {
