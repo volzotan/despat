@@ -305,7 +305,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-
+//        ImageRollover imgroll = new ImageRollover(activity, Config.IMAGE_FILEEXTENSION);
+//        try {
+//            Util.shareFile(activity, imgroll.getNewestImage());
+//        } catch (Exception e) {
+//            Log.e(TAG, "file missing");
+//            e.printStackTrace();
+//        }
 
 //        ExecutorService executorService = Executors.newSingleThreadExecutor();
 //        Future<Integer> future = executorService.submit(new Compressor());

@@ -13,12 +13,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -388,6 +390,21 @@ public class Util {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void shareFile(Context context, File f) throws Exception {
+
+        if (f == null) {
+            throw new Exception("File missing");
+        }
+
+        Uri fileUri = FileProvider.getUriForFile(context, "de.volzo.despat.fileprovider", f);
+
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("application/csv");
+        i.putExtra(Intent.EXTRA_STREAM, fileUri);
+        i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        context.startActivity(Intent.createChooser(i, "Share session data"));
     }
 
     public static void playSound(Context context) {
