@@ -81,6 +81,11 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         prefLegacyCameraController.setKey(Config.KEY_LEGACY_CAMERA_CONTROLLER);
         category.addPreference(prefLegacyCameraController);
 
+        // NumberPickerPreference requires an initialized value
+        if (Config.getShutterInterval(context) == Config.DEFAULT_SHUTTER_INTERVAL) {
+            Config.setShutterInterval(context, Config.DEFAULT_SHUTTER_INTERVAL);
+        }
+
         NumberPickerPreference prefShutterInterval = new NumberPickerPreference(context);
         prefShutterInterval.setTitle(context.getString(R.string.pref_title_shutterInterval));
         prefShutterInterval.setSummary(context.getString(R.string.pref_summary_shutterInterval));

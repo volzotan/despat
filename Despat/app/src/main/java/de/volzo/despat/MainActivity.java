@@ -32,10 +32,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
@@ -45,6 +54,7 @@ import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.DevicePositioner;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.ConfigureActivity;
 import de.volzo.despat.userinterface.DrawSurface;
@@ -286,9 +296,34 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void run() {
                 Compressor compressor = new Compressor();
-                compressor.test(c);
+
+                AppDatabase db = AppDatabase.getAppDatabase(c);
+                SessionDao sessionDao = db.sessionDao();
+                Session newestSession = sessionDao.getLast();
+
+                compressor.runForSession(c, newestSession);
             }
         });
+
+
+
+//        ExecutorService executorService = Executors.newSingleThreadExecutor();
+//        Future<Integer> future = executorService.submit(new Compressor());
+//
+//        try {
+//            Integer result = future.get(10, TimeUnit.SECONDS);
+//            Log.wtf(TAG, "result: " + result);
+//        } catch (InterruptedException | ExecutionException e) {
+//            Log.d(TAG, "interrupt/execution");
+//            e.printStackTrace();
+//        } catch (TimeoutException e) {
+//            Log.d(TAG, "timeout");
+//            e.printStackTrace();
+//        } finally {
+//            future.cancel(true);
+//        }
+//
+
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -522,13 +557,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         TextView tvStatus = (TextView) findViewById(R.id.tv_status);
         tvStatus.setText(sb.toString());
 
-//        if (activeSession) {
-//            ImageRollover imgroll = new ImageRollover(context, ".jpg");
-//            File newestImage = imgroll.getNewestImage();
-//
-//            if (newestImage == null) return;
-//
-//            ImageView imageView = findViewById(R.id.imageView);
+        if (activeSession) {
+            ImageRollover imgroll = new ImageRollover(context, ".jpg");
+            File newestImage = imgroll.getNewestImage();
+
+            if (newestImage == null) return;
+
+            ImageView imageView = findViewById(R.id.imageView);
+
+            Glide.with(activity).load(newestImage).into(imageView);
+
 //            imageView.setImageBitmap(BitmapFactory.decodeFile(newestImage.getAbsolutePath()));
 //
 //            if (photoViewAttacher != null) {
@@ -536,8 +574,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            }
 //            photoViewAttacher = new PhotoViewAttacher(imageView);
 //            photoViewAttacher.update();
-//
-//        }
+
+        }
     }
 
     private void startProgressBarUpdate() {

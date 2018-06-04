@@ -3,7 +3,6 @@ package de.volzo.despat;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.util.Log;
 
 import org.opencv.android.Utils;
@@ -21,7 +20,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
+import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Capture;
+import de.volzo.despat.persistence.CaptureDao;
+import de.volzo.despat.persistence.Session;
+import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.Config;
 
 /**
@@ -38,7 +43,7 @@ import de.volzo.despat.preferences.Config;
  *
  */
 
-public class Compressor {
+public class Compressor implements Callable<Integer> {
 
     public static final String TAG = Compressor.class.getSimpleName();
 
@@ -51,6 +56,31 @@ public class Compressor {
     public Compressor() {
         System.loadLibrary("opencv_java3");
     }
+
+//    public void serializeTest(Context context) {
+//        File imageFolder = Config.getImageFolder(context);
+//
+//        init(20, 10);
+//        mat = Mat.ones(10, 20, CvType.CV_16UC1);
+//
+//        Core.add(mat, mat, mat);
+//        Core.add(mat, mat, mat);
+//        Core.add(mat, mat, mat);
+//        Core.add(mat, mat, mat);
+//        Core.add(mat, mat, mat);
+//        Core.add(mat, mat, mat);
+//
+//        Log.wtf(TAG, mat.dump());
+//
+//        store(new File(imageFolder, "mat.dat"));
+//
+//        init(20, 10);
+//        Log.wtf(TAG, mat.dump());
+//
+//        unstore(new File(imageFolder, "mat.dat"));
+//
+//        Log.wtf(TAG, mat.dump());
+//    }
 
     public void test(Context context) {
 
@@ -105,15 +135,53 @@ public class Compressor {
         System.out.println("toJpeg: " + time_toJpeg);
     }
 
+    public void runForSession(Context context, Session session) {
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+        CaptureDao captureDao = db.captureDao();
+
+        if (session.getCompressedImage() != null) {
+            Log.w(TAG, "cannot run compressor. session already has compressed image: " + session);
+            return;
+        }
+
+        List<Capture> captures = captureDao.getAllBySession(session.getId());
+
+        if (captures == null || captures.size() < 1) {
+            Log.w(TAG, "cannot run compressor. no captures for session: " + session);
+            return;
+        }
+
+        // load first image to get width and height for initialization
+        Bitmap bitmap = BitmapFactory.decodeFile(captures.get(0).getImage().getAbsolutePath());
+        init(bitmap.getWidth(), bitmap.getHeight());
+
+        captures = captures.subList(0, Math.min(captures.size(), 150));
+
+        for (Capture c : captures) {
+            add(c.getImage());
+            System.out.println(counter);
+        }
+
+        File imageFolder = Config.getImageFolder(context);
+        File compressedImagePath = new File(imageFolder, session.getSessionName() + ".jpg");
+        toJpeg(compressedImagePath);
+
+        session.setCompressedImage(compressedImagePath);
+        sessionDao.update(session);
+
+        Log.d(TAG, "created compressed image for session " + session + " in " + compressedImagePath);
+    }
+
     public void init(int width, int height) {
         this.width = width;
         this.height = height;
         mat = Mat.zeros(this.height, this.width, CvType.CV_16UC1);
     }
 
-    public void add(Image image) {
-
-    }
+//    public void add(Image image) {
+//
+//    }
 
     public void add(File path) {
         if (counter >= 255) {
@@ -182,7 +250,6 @@ public class Compressor {
 
                     try {
                         int ret = fis.read(binary);
-
                         if (ret <= 0) {
                             throw new IOException("file ended prematurely");
                         }
@@ -192,7 +259,6 @@ public class Compressor {
                     }
 
                     data[0] = (short) ((binary[1] << 8) + binary[0]);
-
                     mat.put(i, j, data);
                 }
             }
@@ -203,8 +269,6 @@ public class Compressor {
             throw e;
         }
     }
-
-
 
     public void toJpeg(File path) {
         Mat matExportGray = Mat.zeros(mat.height(), mat.width(), CvType.CV_8UC1);
@@ -229,5 +293,14 @@ public class Compressor {
         } catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void close() {
+        if (mat != null) mat.release();
+    }
+
+    @Override
+    public Integer call() throws Exception {
+        return null;
     }
 }

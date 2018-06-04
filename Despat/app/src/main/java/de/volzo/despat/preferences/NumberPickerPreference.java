@@ -27,6 +27,9 @@ public class NumberPickerPreference extends DialogPreference {
 
     public NumberPickerPreference(Context context) {
         super(context);
+
+        defaultValue = minValue;
+        currentValue = convertToDisplay(this.getPersistedInt(minValue));
     }
 
     public NumberPickerPreference(Context context, AttributeSet attrs) {

@@ -41,18 +41,36 @@
             android:text="undef." />
 
         <TextView
-            android:id="@+id/duration"
+            android:id="@+id/duration_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/start"
+            android:text="Duration:" />
+
+        <TextView
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_below="@+id/start"
+            android:layout_toRightOf="@+id/duration_label"
             android:text="undef." />
+
+        <TextView
+            android:id="@+id/numberOfCaptures_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/duration_label"
+            android:text="Number of captures:" />
 
         <TextView
             android:id="@+id/numberOfCaptures"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/duration"
-            android:text="-1" />
+            android:layout_marginLeft="5dp"
+            android:layout_below="@+id/duration_label"
+            android:layout_toRightOf="@+id/numberOfCaptures_label"
+            android:text="undef." />
 
     </RelativeLayout>
 
