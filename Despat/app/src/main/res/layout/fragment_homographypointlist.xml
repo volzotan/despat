@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.RecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/rv_homographypoint_list"
+        android:name="de.volzo.despat.HomographyPointListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="6dp"
+        app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+        tools:context=".userinterface.HomographyPointListFragment"
+        tools:listitem="@layout/fragment_homographypointlist_item" />
+
+    <Button
+        android:id="@+id/bt_addHomographyPoint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="add point" />
+
+</LinearLayout>

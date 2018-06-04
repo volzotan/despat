@@ -60,6 +60,7 @@
             android:label="@string/title_activity_osm" />
         <activity
             android:name=".userinterface.SessionActivity"
+            android:parentActivityName="MainActivity"
             android:label="@string/title_activity_session" />
 
         <receiver

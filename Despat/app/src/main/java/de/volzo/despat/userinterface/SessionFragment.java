@@ -93,12 +93,14 @@ public class SessionFragment extends Fragment {
         tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
-        view.findViewById(R.id.bt_homography).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onSessionActionSelection(sessionId, ACTION_HOMOGRAPHY);
-            }
-        });
+
+
+//        view.findViewById(R.id.bt_homography).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                listener.onSessionActionSelection(sessionId, ACTION_HOMOGRAPHY);
+//            }
+//        });
 
         view.findViewById(R.id.bt_errors).setOnClickListener(new View.OnClickListener() {
             @Override

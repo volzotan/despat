@@ -13,6 +13,7 @@ import android.content.Context;
 @Database(entities = {  Status.class,
                         Session.class,
                         Capture.class,
+                        HomographyPoint.class,
                         Position.class,
                         ErrorEvent.class,
                         Event.class},
@@ -27,6 +28,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract StatusDao statusDao();
     public abstract SessionDao sessionDao();
     public abstract CaptureDao captureDao();
+    public abstract HomographyPointDao homographyPointDao();
     // public abstract PositionDao positionDao();
     public abstract ErrorEventDao errorEventDao();
     public abstract EventDao eventDao();
@@ -49,6 +51,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
         db.eventDao().dropTable();
         db.errorEventDao().dropTable();
+        db.homographyPointDao().dropTable();
         db.captureDao().dropTable();
         db.sessionDao().dropTable();
         db.statusDao().dropTable();

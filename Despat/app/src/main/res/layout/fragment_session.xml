@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView
+<android.support.v4.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:fillViewport="true"
@@ -64,17 +64,12 @@
 
         </RelativeLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/list_points"
-            android:scrollbars="vertical"
+        <fragment
+            android:name="de.volzo.despat.userinterface.HomographyPointListFragment"
+            android:id="@+id/frag_homographyPoint"
+            android:background="#ffffff"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/bt_homography"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Homography" />
+            android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/bt_errors"
@@ -90,4 +85,4 @@
 
 
     </LinearLayout>
-</ScrollView>
+</android.support.v4.widget.NestedScrollView>

@@ -4,20 +4,24 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import java.util.ArrayList;
 
 import de.volzo.despat.R;
+import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.Session;
 
-public class SessionActivity extends AppCompatActivity implements SessionListFragment.OnSessionListSelectionListener, SessionFragment.OnSessionActionSelectionListener {
+public class SessionActivity extends AppCompatActivity implements SessionListFragment.OnSessionListSelectionListener, SessionFragment.OnSessionActionSelectionListener, HomographyPointListFragment.OnHomographyPointListSelectionListener {
 
     public static final String TAG = SessionActivity.class.getSimpleName();
 
     Activity activity;
+    ActionBar bar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +30,19 @@ public class SessionActivity extends AppCompatActivity implements SessionListFra
 
         this.activity = this;
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ((AppCompatActivity) this).setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar);
+        bar = getSupportActionBar();
+//        bar.setDisplayShowTitleEnabled(false);
+        bar.setTitle("Sessions");
+        bar.setDisplayHomeAsUpEnabled(true);
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         SessionListFragment fragment = new SessionListFragment();
-        fragmentTransaction.add(android.R.id.content, fragment);
+//        fragmentTransaction.add(android.R.id.content, fragment);
+        fragmentTransaction.add(R.id.fragment_container, fragment);
         fragmentTransaction.commit();
     }
 
@@ -43,10 +56,15 @@ public class SessionActivity extends AppCompatActivity implements SessionListFra
         args.putLong(SessionFragment.ARG_SESSION_ID, session.getId());
         newFragment.setArguments(args);
 
-        transaction.replace(android.R.id.content, newFragment);
+        transaction.replace(R.id.fragment_container, newFragment);
         transaction.addToBackStack(null);
 
         transaction.commit();
+
+        bar.setTitle("Session");
+        bar.setSubtitle(session.getSessionName());
+
+//        bar.set
     }
 
     @Override
@@ -93,6 +111,11 @@ public class SessionActivity extends AppCompatActivity implements SessionListFra
                 break;
             }
         }
+    }
+
+    @Override
+    public void onHomographyPointListSelectionListener(HomographyPoint homographyPoint) {
+
     }
 }
 
