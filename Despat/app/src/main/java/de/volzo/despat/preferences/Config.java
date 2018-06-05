@@ -333,7 +333,7 @@ public class Config {
 //        SharedPreferences settings = context.getSharedPreferences(SHAREDPREFNAME, Context.MODE_PRIVATE);
 //        SharedPreferences.Editor editor = settings.edit();
 //        editor.putInt("imagesTaken", count);
-//        editor.apply();
+//        editor.commit();
 //    }
 //
 //    public static int getImagesTaken(Context context) {
@@ -400,21 +400,28 @@ public class Config {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(key, value);
-        editor.apply();
+        editor.commit();
     }
 
     private static void setProperty(Context context, String key, boolean value) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean(key, value);
-        editor.apply();
+        editor.commit();
     }
 
     private static void setProperty(Context context, String key, long value) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(key, value);
-        editor.apply();
+        editor.commit();
+    }
+
+    private static void setProperty(Context context, String key, int value) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(key, value);
+        editor.commit();
     }
 
     private static String getProperty(Context context, String key, String defaultValue) {
@@ -459,7 +466,7 @@ public class Config {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(key, dateFormat.format(value));
-        editor.apply();
+        editor.commit();
     }
 
     // ---
