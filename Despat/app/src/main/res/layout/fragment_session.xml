@@ -64,12 +64,10 @@
 
         </RelativeLayout>
 
-        <fragment
-            android:name="de.volzo.despat.userinterface.HomographyPointListFragment"
-            android:id="@+id/frag_homographyPoint"
-            android:background="#ffffff"
+        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/fragment_container_homographypointlist"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent" />
 
         <Button
             android:id="@+id/bt_errors"

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,15 +26,33 @@ import de.volzo.despat.support.Util;
 
 public class ErrorEventListFragment extends Fragment {
 
+    public static final String TAG = ErrorEventListFragment.class.getSimpleName();
+
+    public static final String ARG_SESSION_ID       = "ARG_SESSION_ID";
+
     private OnErrorEventListSelectionListener listener;
+    private Session session;
 
     public ErrorEventListFragment() {
-        // TODO: pass session id
+
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle args = getArguments();
+        final long sessionId = args.getLong(ARG_SESSION_ID);
+
+        if (sessionId <= 0) {
+            Log.e(TAG, "invalid session ID for error list view: " + sessionId);
+        }
+
+        AppDatabase db = AppDatabase.getAppDatabase(getContext());
+        SessionDao sessionDao = db.sessionDao();
+
+        session = sessionDao.getById(sessionId);
+
     }
 
     @Override
@@ -85,7 +104,9 @@ public class ErrorEventListFragment extends Fragment {
             AppDatabase db = AppDatabase.getAppDatabase(context);
             ErrorEventDao errorEventDao = db.errorEventDao();
 
-            errorEvents = errorEventDao.getAll();
+            if (session != null) {
+                errorEvents = errorEventDao.getAllBySession(session.getId());
+            }
         }
 
         @Override

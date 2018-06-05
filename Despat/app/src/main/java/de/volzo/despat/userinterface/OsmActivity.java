@@ -32,7 +32,7 @@ public class OsmActivity extends AppCompatActivity {
         //inflate and create the map
         setContentView(R.layout.activity_main);
 
-        map = (MapView) findViewById(R.id.map);
+//        map = (MapView) findViewById(R.id.map); // TODO
 //        map.setTileSource(TileSourceFactory.MAPNIK);
     }
 

@@ -290,22 +290,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         }
 
+        RecordingSession recsession = RecordingSession.getInstance(this);
+        recsession.runMaintenance();
+
 //        btSessions.callOnClick();
-
-        final Context c = this;
-
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                Compressor compressor = new Compressor();
-
-                AppDatabase db = AppDatabase.getAppDatabase(c);
-                SessionDao sessionDao = db.sessionDao();
-                Session newestSession = sessionDao.getLast();
-
-                compressor.runForSession(c, newestSession);
-            }
-        });
 
 //        ImageRollover imgroll = new ImageRollover(activity, Config.IMAGE_FILEEXTENSION);
 //        try {
@@ -332,16 +320,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        }
 //
 
-//        HomographyPointDao homographyPointDao = db.homographyPointDao();
-//
-//        HomographyPoint point = new HomographyPoint();
-//        Session s = sessionDao.getLast();
-//        if (s != null){
-//            point.setSessionId(s.getId());
-//            homographyPointDao.insert(point);
-//        } else {
-//            Log.wtf(TAG, "session missing");
-//        }
+        HomographyPointDao homographyPointDao = db.homographyPointDao();
+
+        HomographyPoint point = new HomographyPoint();
+        Session s = sessionDao.getLast();
+        if (s != null){
+            point.setSessionId(s.getId());
+            homographyPointDao.insert(point);
+        } else {
+            Log.wtf(TAG, "session missing");
+        }
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

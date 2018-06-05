@@ -3,6 +3,7 @@ package de.volzo.despat;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.File;
@@ -211,6 +212,29 @@ public class RecordingSession {
         Util.saveEvent(context, Event.EventType.SESSION_STOP, session.getSessionName());
 
         session = null;
+
+        runMaintenance();
+    }
+
+    public void runMaintenance() {
+
+        final Context c = context;
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                AppDatabase db = AppDatabase.getAppDatabase(c);
+                SessionDao sessionDao = db.sessionDao();
+
+                List<Session> sessions = sessionDao.getAll();
+
+                for (Session session : sessions) {
+                    Compressor compressor = new Compressor();
+                    compressor.runForSession(c, session);
+                }
+            }
+        });
     }
 
     public boolean isActive() {
