@@ -6,6 +6,7 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity(foreignKeys = @ForeignKey(  entity = Session.class,
@@ -89,5 +90,10 @@ public class ErrorEvent {
 
     public void setStacktrace(String stacktrace) {
         this.stacktrace = stacktrace;
+    }
+
+    public String toString() {
+        SimpleDateFormat df = new SimpleDateFormat("MM.dd HH:mm:ss");
+        return df.format(timestamp) + " " + type;
     }
 }

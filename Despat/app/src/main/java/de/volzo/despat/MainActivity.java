@@ -49,6 +49,8 @@ import java.util.concurrent.TimeoutException;
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.HomographyPoint;
+import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.services.Orchestrator;
@@ -330,6 +332,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        }
 //
 
+//        HomographyPointDao homographyPointDao = db.homographyPointDao();
+//
+//        HomographyPoint point = new HomographyPoint();
+//        Session s = sessionDao.getLast();
+//        if (s != null){
+//            point.setSessionId(s.getId());
+//            homographyPointDao.insert(point);
+//        } else {
+//            Log.wtf(TAG, "session missing");
+//        }
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -680,7 +692,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
      */
     private void whitelistAppForDoze() {
         PowerManager powerManger = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
-        if (!powerManger.isIgnoringBatteryOptimizations("de.volzo.despat")) { // getPackageName()
+        if (!powerManger.isIgnoringBatteryOptimizations(activity.getPackageName())) {
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
             Uri uri = Uri.fromParts("package", getPackageName(), null);

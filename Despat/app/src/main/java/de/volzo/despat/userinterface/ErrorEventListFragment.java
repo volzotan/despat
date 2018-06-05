@@ -17,23 +17,19 @@ import java.util.List;
 
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.ErrorEvent;
+import de.volzo.despat.persistence.ErrorEventDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.Util;
 
 public class ErrorEventListFragment extends Fragment {
 
-    private OnSessionListSelectionListener listener;
+    private OnErrorEventListSelectionListener listener;
 
-    public ErrorEventListFragment() {}
-
-//    public static SessionListFragment newInstance(int columnCount) {
-//        SessionListFragment fragment = new SessionListFragment();
-//        Bundle args = new Bundle();
-//        args.putInt(ARG_COLUMN_COUNT, columnCount);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
+    public ErrorEventListFragment() {
+        // TODO: pass session id
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,12 +39,12 @@ public class ErrorEventListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_sessionlist, container, false);
+        View view = inflater.inflate(R.layout.fragment_erroreventlist, container, false);
 
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(new SessionRecyclerViewAdapter(getActivity(), listener));
+        recyclerView.setAdapter(new ErrorEventRecyclerViewAdapter(getActivity(), listener));
 
         return view;
     }
@@ -57,8 +53,8 @@ public class ErrorEventListFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof OnSessionListSelectionListener) {
-            listener = (OnSessionListSelectionListener) context;
+        if (context instanceof OnErrorEventListSelectionListener) {
+            listener = (OnErrorEventListSelectionListener) context;
         } else {
             throw new RuntimeException(context.toString() + " must implement listener");
         }
@@ -69,56 +65,53 @@ public class ErrorEventListFragment extends Fragment {
         super.onDetach();
     }
 
-    public interface OnSessionListSelectionListener {
-        void onSessionListSelection(Session session);
+    public interface OnErrorEventListSelectionListener {
+        void onErrorEventListSelection(ErrorEvent errorEvent);
     }
 
-    class SessionRecyclerViewAdapter extends RecyclerView.Adapter<SessionRecyclerViewAdapter.ViewHolder> {
+    class ErrorEventRecyclerViewAdapter extends RecyclerView.Adapter<ErrorEventRecyclerViewAdapter.ViewHolder> {
 
-        public final String TAG = SessionRecyclerViewAdapter.class.getSimpleName();
+        public final String TAG = ErrorEventRecyclerViewAdapter.class.getSimpleName();
 
         private Context context;
-        private final ErrorEventListFragment.OnSessionListSelectionListener listener;
-        private List<Session> sessions;
+        private final ErrorEventListFragment.OnErrorEventListSelectionListener listener;
+        private List<ErrorEvent> errorEvents;
 
-        public SessionRecyclerViewAdapter(Context context, ErrorEventListFragment.OnSessionListSelectionListener listener) {
+        public ErrorEventRecyclerViewAdapter(Context context, ErrorEventListFragment.OnErrorEventListSelectionListener listener) {
 
             this.context = context;
             this.listener = listener;
 
             AppDatabase db = AppDatabase.getAppDatabase(context);
-            SessionDao sessionDao = db.sessionDao();
+            ErrorEventDao errorEventDao = db.errorEventDao();
 
-            sessions = sessionDao.getAll();
+            errorEvents = errorEventDao.getAll();
         }
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_sessionlist_item, parent, false);
+                    .inflate(R.layout.fragment_erroreventlist_item, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            Session session = sessions.get(position);
+            ErrorEvent errorEvent = errorEvents.get(position);
 
-            holder.session = session;
+            holder.errorEvent = errorEvent;
 
-            Bitmap bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.missing_img);
-            holder.preview.setImageBitmap(bm);
-
-            holder.name.setText(session.getSessionName());
-            holder.start.setText(Util.getDateFormat().format(session.getStart()));
-            holder.end.setText(Util.getDateFormat().format(session.getEnd()));
-            holder.duration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
-//        holder.numberOfCaptures.setText();
+            holder.timestamp.setText(Util.getDateFormat().format(errorEvent.getTimestamp()));
+            holder.type.setText(errorEvent.getType());
+            holder.description.setText(errorEvent.getDescription());
+            holder.message.setText(errorEvent.getExceptionMessage());
+            holder.stacktrace.setText(errorEvent.getStacktrace());
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (null != listener) {
-                        listener.onSessionListSelection(holder.session);
+                        listener.onErrorEventListSelection(holder.errorEvent);
                     }
                 }
             });
@@ -126,37 +119,35 @@ public class ErrorEventListFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return sessions.size();
+            return errorEvents.size();
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
             public final View mView;
 
-            public ImageView preview;
-            public TextView name;
-            public TextView start;
-            public TextView end;
-            public TextView duration;
-            public TextView numberOfCaptures;
+            public TextView timestamp;
+            public TextView type;
+            public TextView description;
+            public TextView message;
+            public TextView stacktrace;
 
-            public Session session;
+            public ErrorEvent errorEvent;
 
             public ViewHolder(View view) {
                 super(view);
                 mView = view;
 
-                preview = (ImageView) view.findViewById(R.id.compressedpreview);
-                name = (TextView) view.findViewById(R.id.name);
-                start = (TextView) view.findViewById(R.id.start);
-                end = (TextView) view.findViewById(R.id.end);
-                duration = (TextView) view.findViewById(R.id.duration);
-                numberOfCaptures = (TextView) view.findViewById(R.id.numberOfCaptures);
+                timestamp = (TextView) view.findViewById(R.id.timestamp);
+                timestamp = (TextView) view.findViewById(R.id.type);
+                timestamp = (TextView) view.findViewById(R.id.description);
+                timestamp = (TextView) view.findViewById(R.id.message);
+                timestamp = (TextView) view.findViewById(R.id.stacktrace);
             }
 
             @Override
             public String toString() {
-                return super.toString() + " '" + name.getText() + "'";
+                return super.toString();
             }
         }
     }

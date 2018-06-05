@@ -38,11 +38,6 @@ public class HomographyPointListFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_homographypointlist, container, false);
 
-        Context context = view.getContext();
-//        RecyclerView recyclerView = (RecyclerView) view;
-//        recyclerView.setLayoutManager(new LinearLayoutManager(context));
-//        recyclerView.setAdapter(new HomographyPointRecyclerViewAdapter(getActivity(), listener));
-
         RecyclerView recyclerView = view.findViewById(R.id.rv_homographypoint_list);
         recyclerView.setAdapter(new HomographyPointRecyclerViewAdapter(getActivity(), listener));
 

@@ -94,7 +94,6 @@ public class SessionFragment extends Fragment {
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
 
-
 //        view.findViewById(R.id.bt_homography).setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {

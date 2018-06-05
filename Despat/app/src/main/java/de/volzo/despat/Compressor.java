@@ -140,6 +140,11 @@ public class Compressor implements Callable<Integer> {
         SessionDao sessionDao = db.sessionDao();
         CaptureDao captureDao = db.captureDao();
 
+        if (session == null) {
+            Log.w(TAG, "session null");
+            return;
+        }
+
         if (session.getCompressedImage() != null) {
             Log.w(TAG, "cannot run compressor. session already has compressed image: " + session);
             return;
