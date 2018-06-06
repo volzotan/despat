@@ -7,13 +7,16 @@ import android.arch.persistence.room.PrimaryKey;
 
 import java.io.File;
 
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
 /**
  * Created by christophergetschmann on 24.11.17.
  */
 
 @Entity(foreignKeys = @ForeignKey(  entity = Capture.class,
                                     parentColumns = "id",
-                                    childColumns = "capture_id"))
+                                    childColumns = "capture_id",
+                                    onDelete = CASCADE))
 
 public class Position {
 

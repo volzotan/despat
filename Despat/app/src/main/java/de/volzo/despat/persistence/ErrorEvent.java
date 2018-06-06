@@ -9,9 +9,12 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
 @Entity(foreignKeys = @ForeignKey(  entity = Session.class,
                                     parentColumns = "id",
-                                    childColumns = "session_id"))
+                                    childColumns = "session_id",
+                                    onDelete = CASCADE))
 
 public class ErrorEvent {
 
