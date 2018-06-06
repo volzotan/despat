@@ -56,11 +56,12 @@
             android:name=".userinterface.OsmActivity"
             android:label="@string/title_activity_osm" />
         <activity
-            android:name=".userinterface.SessionListActivity" />
+            android:name=".userinterface.SessionListActivity"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".userinterface.SessionActivity"
             android:label="@string/title_activity_session"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".userinterface.SessionListActivity" />
 
         <receiver
             android:name=".services.Orchestrator"

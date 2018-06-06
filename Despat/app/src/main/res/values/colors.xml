@@ -9,5 +9,8 @@
     <color name="black">#000000</color>
     <color name="opaqueBlack">#80000000</color>
 
+    <color name="bg_list_item">#666</color>
+    <color name="bg_row_background">#FF0000</color>
+
     <color name="error">#FF0000</color>
 </resources>

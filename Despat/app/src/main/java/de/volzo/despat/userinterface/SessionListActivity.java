@@ -5,24 +5,34 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.media.ThumbnailUtils;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
@@ -34,10 +44,13 @@ public class SessionListActivity extends AppCompatActivity {
 
     public static final String TAG = SessionActivity.class.getSimpleName();
 
+    Context context;
+
     Activity activity;
     ActionBar bar;
 
-    Context context;
+    List<Session> sessions;
+    HashMap<Session, Integer> sessionsDeleteList = new HashMap<Session, Integer>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +66,43 @@ public class SessionListActivity extends AppCompatActivity {
         bar.setTitle("Sessions");
         bar.setDisplayHomeAsUpEnabled(true);
 
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+        sessions = sessionDao.getAll();
+
+        SessionRecyclerViewAdapter adapter = new SessionRecyclerViewAdapter(activity, sessions, this);
+
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.session_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(new SessionRecyclerViewAdapter(activity, this));
+        recyclerView.setAdapter(adapter);
+
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(this, sessionsDeleteList, adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    public List<Session> getSessions() {
+        return sessions;
+    }
+
+    public void deleteSessions() {
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+
+        for (Map.Entry<Session, Integer> entry : sessionsDeleteList.entrySet()) {
+            Session session = entry.getKey();
+            Integer i = entry.getValue();
+
+            if (sessions != null && sessions.contains(session)) {
+                Log.w(TAG, "session " + session + " still in session list");
+                sessions.remove(session);
+            }
+
+            sessionDao.delete(session);
+            Log.d(TAG, "deleted session: " + session);
+        }
+
+        sessionsDeleteList.clear();
     }
 
     public void onSelect(Session session) {
@@ -64,7 +111,28 @@ public class SessionListActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    class SessionRecyclerViewAdapter extends RecyclerView.Adapter<SessionRecyclerViewAdapter.ViewHolder> {
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        deleteSessions();
+    }
+
+    public interface ItemTouchHelperAdapter {
+
+        boolean onItemMove(int fromPosition, int toPosition);
+
+        void onItemDismiss(int position);
+    }
+
+    public interface ItemTouchHelperViewHolder {
+
+        void onItemSelected();
+
+        void onItemClear();
+    }
+
+    class SessionRecyclerViewAdapter extends RecyclerView.Adapter<SessionRecyclerViewAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
         public final String TAG = SessionRecyclerViewAdapter.class.getSimpleName();
 
@@ -72,21 +140,17 @@ public class SessionListActivity extends AppCompatActivity {
         private final SessionListActivity activity;
         private List<Session> sessions;
 
-        public SessionRecyclerViewAdapter(Context context, SessionListActivity activity) {
+        public SessionRecyclerViewAdapter(Context context, List<Session> sessions, SessionListActivity activity) {
 
             this.context = context;
+            this.sessions = sessions;
             this.activity = activity;
-
-            AppDatabase db = AppDatabase.getAppDatabase(context);
-            SessionDao sessionDao = db.sessionDao();
-
-            sessions = sessionDao.getAll();
         }
 
         @Override
         public SessionRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_sessionlist_item, parent, false);
+                    .inflate(R.layout.activity_sessionlist_item, parent, false);
             return new SessionRecyclerViewAdapter.ViewHolder(view);
         }
 
@@ -117,7 +181,7 @@ public class SessionListActivity extends AppCompatActivity {
             holder.duration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
             holder.numberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
-            holder.mView.setOnClickListener(new View.OnClickListener() {
+            holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (activity != null) {
@@ -132,9 +196,34 @@ public class SessionListActivity extends AppCompatActivity {
             return sessions.size();
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
+        @Override
+        public boolean onItemMove(int fromPosition, int toPosition) {
+            return false;
+        }
 
-            public final View mView;
+        @Override
+        public void onItemDismiss(int position) {
+            removeItem(position);
+        }
+
+        public void removeItem(int position) {
+            sessions.remove(position);
+            // notify the item removed by position
+            // to perform recycler view delete animations
+            // NOTE: don't call notifyDataSetChanged()
+            notifyItemRemoved(position);
+        }
+
+        public void restoreItem(Session session, int position) {
+            sessions.add(position, session);
+            notifyItemInserted(position);
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+
+            public final View view;
+
+            public LinearLayout viewForeground;
 
             public ImageView preview;
             public TextView name;
@@ -147,7 +236,9 @@ public class SessionListActivity extends AppCompatActivity {
 
             public ViewHolder(View view) {
                 super(view);
-                mView = view;
+                this.view = view;
+
+                viewForeground = view.findViewById(R.id.view_foreground);
 
                 preview = (ImageView) view.findViewById(R.id.compressedpreview);
                 name = (TextView) view.findViewById(R.id.name);
@@ -158,8 +249,149 @@ public class SessionListActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onItemSelected() {
+                itemView.setBackgroundColor(Color.LTGRAY);
+            }
+
+            @Override
+            public void onItemClear() {
+                itemView.setBackgroundColor(0);
+            }
+
+            @Override
             public String toString() {
                 return super.toString() + " '" + name.getText() + "'";
+            }
+        }
+    }
+
+    public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
+
+        public static final float ALPHA_FULL = 1.0f;
+
+        private final SessionListActivity activity;
+        private final ItemTouchHelperAdapter adapter;
+
+        HashMap<Session, Integer> sessionsDeleteList;
+
+        public SimpleItemTouchHelperCallback(SessionListActivity activity, HashMap<Session, Integer> sessionsDeleteList, ItemTouchHelperAdapter adapter) {
+            this.activity = activity;
+            this.sessionsDeleteList = sessionsDeleteList;
+            this.adapter = adapter;
+        }
+
+        @Override
+        public boolean isLongPressDragEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isItemViewSwipeEnabled() {
+            return true;
+        }
+
+        @Override
+        public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+            if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
+                final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+                final int swipeFlags = 0;
+                return makeMovementFlags(dragFlags, swipeFlags);
+            } else {
+                final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                final int swipeFlags = ItemTouchHelper.START ; //ItemTouchHelper.START | ItemTouchHelper.END;
+                return makeMovementFlags(dragFlags, swipeFlags);
+            }
+        }
+
+        @Override
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder source, RecyclerView.ViewHolder target) {
+            if (source.getItemViewType() != target.getItemViewType()) {
+                return false;
+            }
+
+            adapter.onItemMove(source.getAdapterPosition(), target.getAdapterPosition());
+            return true;
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int i) {
+//            activity.onDelete(sessions.get(viewHolder.getAdapterPosition()));
+
+            Session session = activity.getSessions().get(viewHolder.getAdapterPosition());
+
+            if (session == null) {
+                Log.e(TAG, "delete failed, no sessions present");
+                Snackbar.make(findViewById(android.R.id.content), "delete failed, no sessions present", Snackbar.LENGTH_LONG).show();
+            }
+
+            if (sessionsDeleteList.containsKey(session)) {
+                Log.w(TAG, "session already in delete list");
+                return;
+            }
+
+            if (sessionsDeleteList.size() > 0) {
+                activity.deleteSessions();
+            }
+
+            sessionsDeleteList.put(session, viewHolder.getAdapterPosition());
+
+            String msg = null;
+
+            if (sessionsDeleteList.size() == 1) {
+                msg = "Deleted session";
+            } else {
+                msg = "Deleted " + sessionsDeleteList.size() + " sessions";
+            }
+
+            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG);
+            snackbar.setAction("UNDO", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    for (Map.Entry<Session, Integer> entry : sessionsDeleteList.entrySet()) {
+                        Session s = entry.getKey();
+                        Integer i = entry.getValue();
+                        ((SessionRecyclerViewAdapter) adapter).restoreItem(s, i);
+                    }
+                }
+            });
+            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
+
+            adapter.onItemDismiss(viewHolder.getAdapterPosition());
+        }
+
+        @Override
+        public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                final float alpha = ALPHA_FULL - Math.abs(dX) / (float) viewHolder.itemView.getWidth();
+//                viewHolder.itemView.setAlpha(alpha);
+                ((SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground.setTranslationX(dX);
+            } else {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        }
+
+        @Override
+        public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+            if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
+                if (viewHolder instanceof ItemTouchHelperViewHolder) {
+                    ItemTouchHelperViewHolder itemViewHolder = (ItemTouchHelperViewHolder) viewHolder;
+                    itemViewHolder.onItemSelected();
+                }
+            }
+
+            super.onSelectedChanged(viewHolder, actionState);
+        }
+
+        @Override
+        public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+            super.clearView(recyclerView, viewHolder);
+
+            viewHolder.itemView.setAlpha(ALPHA_FULL);
+
+            if (viewHolder instanceof ItemTouchHelperViewHolder) {
+                ItemTouchHelperViewHolder itemViewHolder = (SessionRecyclerViewAdapter.ViewHolder) viewHolder;
+                itemViewHolder.onItemClear();
             }
         }
     }
