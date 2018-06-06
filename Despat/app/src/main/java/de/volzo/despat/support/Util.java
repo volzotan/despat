@@ -79,7 +79,7 @@ public class Util {
         NotificationChannel channel = new NotificationChannel(
                 ShutterService.NOTIFICATION_CHANNEL_ID,
                 "ShutterServiceNotification",
-                NotificationManager.IMPORTANCE_MIN);
+                NotificationManager.IMPORTANCE_DEFAULT);
 
         notificationManager.createNotificationChannel(channel);
     }
@@ -99,7 +99,7 @@ public class Util {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentIntent(pendingIntent)
-                .setPriority(Notification.PRIORITY_MIN);
+                .setPriority(Notification.PRIORITY_DEFAULT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setChannelId(ShutterService.NOTIFICATION_CHANNEL_ID);

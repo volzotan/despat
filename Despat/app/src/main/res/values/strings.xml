@@ -34,4 +34,12 @@
     <string name="title_activity_osm">OsmActivity</string>
     <string name="title_activity_session">SessionActivity</string>
 
+    <!-- Tooltips -->
+
+    <string name="homographypoints_title">Corresponding points</string>
+    <string name="homographypoints_description">
+        To calculate the position of the detected objects, at least four points on the image must be
+        matched to their location on the map.
+    </string>
+
 </resources>

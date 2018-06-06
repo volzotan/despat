@@ -53,15 +53,14 @@
             android:name=".userinterface.SettingsActivity2"
             android:screenOrientation="sensorLandscape" />
         <activity
-            android:name=".userinterface.MapsActivity"
-            android:label="@string/title_activity_maps" />
-        <activity
             android:name=".userinterface.OsmActivity"
             android:label="@string/title_activity_osm" />
         <activity
+            android:name=".userinterface.SessionListActivity" />
+        <activity
             android:name=".userinterface.SessionActivity"
-            android:parentActivityName="MainActivity"
-            android:label="@string/title_activity_session" />
+            android:label="@string/title_activity_session"
+            android:parentActivityName=".MainActivity" />
 
         <receiver
             android:name=".services.Orchestrator"
@@ -69,14 +68,14 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <!--<action android:name="de.volzo.despat.ALL_SERVICES" />-->
-                <!--<action android:name="de.volzo.despat.SHUTTER_SERVICE" />-->
-                <!--<action android:name="de.volzo.despat.RECOGNITION_SERVICE" />-->
-                <!--<action android:name="de.volzo.despat.HEARTBEAT_SERVICE" />-->
-                <!--<action android:name="de.volzo.despat.UPLOAD_SERVICE" />-->
-                <!--<action android:name="de.volzo.despat.COMMAND_SERVICE" />-->
-                <!--<action android:name="de.volzo.despat.PICTURE_TAKEN" />-->
-                <!--<action android:name="de.volzo.despat.ERROR_OCCURED" />-->
+                <!-- <action android:name="de.volzo.despat.ALL_SERVICES" /> -->
+                <!-- <action android:name="de.volzo.despat.SHUTTER_SERVICE" /> -->
+                <!-- <action android:name="de.volzo.despat.RECOGNITION_SERVICE" /> -->
+                <!-- <action android:name="de.volzo.despat.HEARTBEAT_SERVICE" /> -->
+                <!-- <action android:name="de.volzo.despat.UPLOAD_SERVICE" /> -->
+                <!-- <action android:name="de.volzo.despat.COMMAND_SERVICE" /> -->
+                <!-- <action android:name="de.volzo.despat.PICTURE_TAKEN" /> -->
+                <!-- <action android:name="de.volzo.despat.ERROR_OCCURED" /> -->
             </intent-filter>
         </receiver>
 
@@ -134,12 +133,11 @@
             android:authorities="de.volzo.despat.web.provider"
             android:exported="false"
             android:syncable="true" />
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="de.volzo.despat.fileprovider"
-            android:grantUriPermissions="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />

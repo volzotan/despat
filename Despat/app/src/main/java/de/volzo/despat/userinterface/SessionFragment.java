@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -36,13 +37,7 @@ public class SessionFragment extends Fragment {
 
     public static final String TAG = SessionFragment.class.getSimpleName();
 
-    public static final String ARG_SESSION_ID       = "ARG_SESSION_ID";
-    public static final String ACTION_HOMOGRAPHY    = "ACTION_HOMOGRAPHY";
-    public static final String ACTION_ERRORS        = "ACTION_ERRORS";
-    public static final String ACTION_DELETE        = "ACTION_DELETE";
-
     Context context;
-    OnSessionActionSelectionListener listener;
 
     public SessionFragment() {
         // Required empty public constructor
@@ -61,14 +56,12 @@ public class SessionFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_session, container, false);
 
         Bundle args = getArguments();
-        final long sessionId = args.getLong(ARG_SESSION_ID);
+        final long sessionId = args.getLong(SessionActivity.ARG_SESSION_ID);
 
         if (sessionId <= 0) {
             Log.e(TAG, "invalid session ID for detail view: " + sessionId);
             return null;
         }
-
-        // TODO: move this to handler
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
@@ -98,49 +91,23 @@ public class SessionFragment extends Fragment {
         tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        HomographyPointListFragment newFragment = new HomographyPointListFragment();
-        Bundle newargs = new Bundle();
-        newargs.putLong(HomographyPointListFragment.ARG_SESSION_ID, session.getId());
-        newFragment.setArguments(newargs);
-        transaction.replace(R.id.fragment_container_homographypointlist, newFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-
-//        view.findViewById(R.id.bt_homography).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                listener.onSessionActionSelection(sessionId, ACTION_HOMOGRAPHY);
-//            }
-//        });
-
-        view.findViewById(R.id.bt_errors).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onSessionActionSelection(sessionId, ACTION_ERRORS);
-            }
-        });
-
-        view.findViewById(R.id.bt_delete).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onSessionActionSelection(sessionId, ACTION_DELETE);
-            }
-        });
+//        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+//        FragmentTransaction transaction = fragmentManager.beginTransaction();
+//        HomographyPointListFragment newFragment = new HomographyPointListFragment();
+//        Bundle newargs = new Bundle();
+//        newargs.putLong(SessionActivity.ARG_SESSION_ID, session.getId());
+//        newFragment.setArguments(newargs);
+//        transaction.replace(R.id.fragment_container_homographypointlist, newFragment);
+//        transaction.commit();
 
         return view;
+
+
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        if (context instanceof OnSessionActionSelectionListener) {
-            listener = (OnSessionActionSelectionListener) context;
-        } else {
-            throw new RuntimeException(context.toString() + " must implement listener");
-        }
     }
 
     @Override
@@ -148,7 +115,4 @@ public class SessionFragment extends Fragment {
         super.onDetach();
     }
 
-    public interface OnSessionActionSelectionListener {
-        void onSessionActionSelection(long sessionId, String action);
-    }
 }

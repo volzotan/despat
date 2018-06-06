@@ -1,13 +1,17 @@
 package de.volzo.despat.userinterface;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,62 +26,42 @@ import java.util.List;
 
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
-import de.volzo.despat.persistence.Capture;
-import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.Util;
 
-public class SessionListFragment extends Fragment {
+public class SessionListActivity extends AppCompatActivity {
 
-    private OnSessionListSelectionListener listener;
+    public static final String TAG = SessionActivity.class.getSimpleName();
 
-    public SessionListFragment() {}
+    Activity activity;
+    ActionBar bar;
 
-//    public static SessionListFragment newInstance(int columnCount) {
-//        SessionListFragment fragment = new SessionListFragment();
-//        Bundle args = new Bundle();
-//        args.putInt(ARG_COLUMN_COUNT, columnCount);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
+    Context context;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
+        setContentView(R.layout.activity_sessionlist);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        this.activity = this;
+        this.context = this;
 
-        View view = inflater.inflate(R.layout.fragment_sessionlist, container, false);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ((AppCompatActivity) this).setSupportActionBar(toolbar);
+        bar = ((AppCompatActivity) this).getSupportActionBar();
+        bar.setTitle("Sessions");
+        bar.setDisplayHomeAsUpEnabled(true);
 
-        Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view;
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.session_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(new SessionRecyclerViewAdapter(getActivity(), listener));
-
-        return view;
+        recyclerView.setAdapter(new SessionRecyclerViewAdapter(activity, this));
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        if (context instanceof OnSessionListSelectionListener) {
-            listener = (OnSessionListSelectionListener) context;
-        } else {
-            throw new RuntimeException(context.toString() + " must implement listener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-    public interface OnSessionListSelectionListener {
-        void onSessionListSelection(Session session);
+    public void onSelect(Session session) {
+        Intent intent = new Intent(activity, SessionActivity.class);
+        intent.putExtra(SessionActivity.ARG_SESSION_ID, session.getId());
+        startActivity(intent);
     }
 
     class SessionRecyclerViewAdapter extends RecyclerView.Adapter<SessionRecyclerViewAdapter.ViewHolder> {
@@ -85,13 +69,13 @@ public class SessionListFragment extends Fragment {
         public final String TAG = SessionRecyclerViewAdapter.class.getSimpleName();
 
         private Context context;
-        private final SessionListFragment.OnSessionListSelectionListener listener;
+        private final SessionListActivity activity;
         private List<Session> sessions;
 
-        public SessionRecyclerViewAdapter(Context context, SessionListFragment.OnSessionListSelectionListener listener) {
+        public SessionRecyclerViewAdapter(Context context, SessionListActivity activity) {
 
             this.context = context;
-            this.listener = listener;
+            this.activity = activity;
 
             AppDatabase db = AppDatabase.getAppDatabase(context);
             SessionDao sessionDao = db.sessionDao();
@@ -100,14 +84,14 @@ public class SessionListFragment extends Fragment {
         }
 
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public SessionRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.fragment_sessionlist_item, parent, false);
-            return new ViewHolder(view);
+            return new SessionRecyclerViewAdapter.ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
+        public void onBindViewHolder(final SessionRecyclerViewAdapter.ViewHolder holder, int position) {
             Session session = sessions.get(position);
             holder.session = session;
 
@@ -136,8 +120,8 @@ public class SessionListFragment extends Fragment {
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (null != listener) {
-                        listener.onSessionListSelection(holder.session);
+                    if (activity != null) {
+                        activity.onSelect(holder.session);
                     }
                 }
             });
@@ -180,4 +164,3 @@ public class SessionListFragment extends Fragment {
         }
     }
 }
-

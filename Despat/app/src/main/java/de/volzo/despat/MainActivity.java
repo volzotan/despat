@@ -61,6 +61,7 @@ import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.ConfigureActivity;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.userinterface.SessionActivity;
+import de.volzo.despat.userinterface.SessionListActivity;
 import de.volzo.despat.userinterface.SettingsActivity2;
 import de.volzo.despat.web.Sync;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -185,9 +186,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         btSessions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                activity.takePhoto();
-
-                startActivity(new Intent(activity, SessionActivity.class));
+                startActivity(new Intent(activity, SessionListActivity.class));
             }
         });
 

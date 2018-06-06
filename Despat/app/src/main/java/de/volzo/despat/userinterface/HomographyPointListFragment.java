@@ -34,8 +34,6 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
 
     public static final String TAG = HomographyPointListFragment.class.getSimpleName();
 
-    public static final String ARG_SESSION_ID = "ARG_SESSION_ID";
-
     private OnHomographyPointListSelectionListener listener;
 
     private Session session;
@@ -51,7 +49,7 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        final long sessionId = args.getLong(ARG_SESSION_ID);
+        final long sessionId = args.getLong(SessionActivity.ARG_SESSION_ID);
 
         if (sessionId <= 0) {
             Log.e(TAG, "invalid session ID for homography point list view: " + sessionId);
@@ -75,7 +73,6 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         SupportMapFragment newFragment = new SupportMapFragment();
         transaction.replace(R.id.fragment_container_map, newFragment);
-        transaction.addToBackStack(null);
         transaction.commit();
         newFragment.getMapAsync(this);
 
