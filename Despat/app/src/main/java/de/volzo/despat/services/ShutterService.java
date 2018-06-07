@@ -5,25 +5,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
-import de.volzo.despat.ImageRollover;
+import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.persistence.Event;

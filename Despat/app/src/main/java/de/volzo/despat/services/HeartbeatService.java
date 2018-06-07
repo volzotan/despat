@@ -7,7 +7,7 @@ import android.util.Log;
 import java.util.Calendar;
 
 import de.volzo.despat.Despat;
-import de.volzo.despat.ImageRollover;
+import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Status;

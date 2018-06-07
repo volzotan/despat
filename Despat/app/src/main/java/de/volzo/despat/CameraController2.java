@@ -6,7 +6,6 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -61,6 +60,7 @@ import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.DevicePositioner;
+import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
 
 

@@ -28,7 +28,7 @@ import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 
-public class SessionActivity extends AppCompatActivity implements HomographyPointListFragment.OnHomographyPointListSelectionListener, ErrorEventListFragment.OnErrorEventListSelectionListener {
+public class SessionActivity extends AppCompatActivity implements SessionFragment.OnSessionActionSelectionListener, HomographyPointListFragment.OnHomographyPointListSelectionListener, ErrorEventListFragment.OnErrorEventListSelectionListener {
 
     public static final String TAG = SessionActivity.class.getSimpleName();
 
@@ -84,6 +84,12 @@ public class SessionActivity extends AppCompatActivity implements HomographyPoin
 
 //        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
 //        viewPager.setAdapter(new CustomPagerAdapter(this));
+    }
+
+
+    @Override
+    public void onSessionActionSelection(long sessionId, String action) {
+
     }
 
     @Override

@@ -7,7 +7,7 @@ import android.util.Log;
 import java.io.File;
 
 import de.volzo.despat.Despat;
-import de.volzo.despat.ImageRollover;
+import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.web.ServerConnector;
 

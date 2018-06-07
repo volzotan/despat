@@ -37,7 +37,11 @@ public class SessionFragment extends Fragment {
 
     public static final String TAG = SessionFragment.class.getSimpleName();
 
+    public static final String ACTION_DELETE = "ACTION_DELETE";
+
     Context context;
+
+    OnSessionActionSelectionListener listener;
 
     public SessionFragment() {
         // Required empty public constructor
@@ -91,23 +95,25 @@ public class SessionFragment extends Fragment {
         tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
-//        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-//        FragmentTransaction transaction = fragmentManager.beginTransaction();
-//        HomographyPointListFragment newFragment = new HomographyPointListFragment();
-//        Bundle newargs = new Bundle();
-//        newargs.putLong(SessionActivity.ARG_SESSION_ID, session.getId());
-//        newFragment.setArguments(newargs);
-//        transaction.replace(R.id.fragment_container_homographypointlist, newFragment);
-//        transaction.commit();
+        view.findViewById(R.id.bt_delete).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onSessionActionSelection(sessionId, ACTION_DELETE);
+            }
+        });
 
         return view;
-
-
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        if (context instanceof OnSessionActionSelectionListener) {
+            listener = (OnSessionActionSelectionListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement listener");
+        }
     }
 
     @Override
@@ -115,4 +121,7 @@ public class SessionFragment extends Fragment {
         super.onDetach();
     }
 
+    public interface OnSessionActionSelectionListener {
+        void onSessionActionSelection(long sessionId, String action);
+    }
 }

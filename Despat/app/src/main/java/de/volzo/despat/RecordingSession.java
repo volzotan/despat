@@ -216,6 +216,20 @@ public class RecordingSession {
         runMaintenance();
     }
 
+    public static void deleteSessionFromDatabase(Context context, Session session) {
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+        CaptureDao captureDao = db.captureDao();
+
+        List<Capture> captures = captureDao.getAllBySession(session.getId());
+
+        for (Capture c : captures) {
+            // TODO: check if image exists in memory and delete it
+        }
+
+        sessionDao.delete(session);
+    }
+
     public void runMaintenance() {
 
         final Context c = context;

@@ -1,4 +1,4 @@
-package de.volzo.despat;
+package de.volzo.despat.support;
 
 import android.content.Context;
 import android.util.Log;
@@ -12,7 +12,6 @@ import java.util.Date;
 
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
-import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 20.12.16.

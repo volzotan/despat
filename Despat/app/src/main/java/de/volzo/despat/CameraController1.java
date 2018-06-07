@@ -19,6 +19,7 @@ import java.util.List;
 
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
 
 /**
