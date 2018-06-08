@@ -16,6 +16,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -28,6 +29,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 import de.volzo.despat.CameraController;
@@ -588,6 +591,36 @@ public class Util {
         if (size > maxSize) {
             for (int i=0; i < (size-maxSize); i++) {
                 list.remove(list.size()-1);
+            }
+        }
+    }
+
+    public static void deleteDirectory(File dir) throws Exception {
+        if (!dir.exists()) {
+            return;
+        }
+
+        if (!dir.isDirectory()) {
+            throw new Exception("path is not a directory");
+        }
+
+        String[] children = dir.list();
+        for (int i = 0; i < children.length; i++) {
+            new File(dir, children[i]).delete();
+        }
+
+        dir.delete();
+    }
+
+    public static void copyFile(File src, File dst) throws IOException {
+        try (InputStream in = new FileInputStream(src)) {
+            try (OutputStream out = new FileOutputStream(dst)) {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
             }
         }
     }

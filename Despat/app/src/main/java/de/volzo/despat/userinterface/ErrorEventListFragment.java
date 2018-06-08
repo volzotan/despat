@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -59,8 +60,12 @@ public class ErrorEventListFragment extends Fragment {
 
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view;
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(new ErrorEventRecyclerViewAdapter(getActivity(), listener));
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), layoutManager.getOrientation());
+        recyclerView.addItemDecoration(dividerItemDecoration);
 
         return view;
     }
@@ -157,10 +162,10 @@ public class ErrorEventListFragment extends Fragment {
                 mView = view;
 
                 timestamp = (TextView) view.findViewById(R.id.timestamp);
-                timestamp = (TextView) view.findViewById(R.id.type);
-                timestamp = (TextView) view.findViewById(R.id.description);
-                timestamp = (TextView) view.findViewById(R.id.message);
-                timestamp = (TextView) view.findViewById(R.id.stacktrace);
+                type = (TextView) view.findViewById(R.id.type);
+                description = (TextView) view.findViewById(R.id.description);
+                message = (TextView) view.findViewById(R.id.message);
+                stacktrace = (TextView) view.findViewById(R.id.stacktrace);
             }
 
             @Override

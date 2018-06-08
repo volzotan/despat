@@ -86,7 +86,7 @@ dependencies {
     // Test helpers for Room (optional)
     testImplementation "android.arch.persistence.room:testing:1.1.0"
 
-    // debug: access sqlite DB
+    // debug: access sqlite DB via chrome developer tools
     implementation 'com.facebook.stetho:stetho:1.5.0'
 
     // SU lib for reboots

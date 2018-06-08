@@ -5,6 +5,7 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,6 +20,9 @@ public interface StatusDao {
 
     @Query("SELECT * FROM status WHERE id IN (:ids)")
     List<Status> getAllById(List<Integer> ids);
+
+    @Query("SELECT * FROM status WHERE timestamp BETWEEN (:start) AND (:end)")
+    List<Status> getAllBetween(Date start, Date end);
 
 //    @Query("SELECT id, timestamp FROM status")
 //    List<Status> getIdsForSyncCheck();

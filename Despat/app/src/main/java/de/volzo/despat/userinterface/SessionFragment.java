@@ -37,7 +37,7 @@ public class SessionFragment extends Fragment {
 
     public static final String TAG = SessionFragment.class.getSimpleName();
 
-    public static final String ACTION_DELETE = "ACTION_DELETE";
+    public static final String ACTION_EXPORT = "ACTION_EXPORT";
 
     Context context;
 
@@ -91,14 +91,18 @@ public class SessionFragment extends Fragment {
 
         tvName.setText(session.getSessionName());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));
-        tvEnd.setText(Util.getDateFormat().format(session.getEnd()));
+        if (session.getEnd() != null) {
+            tvEnd.setText(Util.getDateFormat().format(session.getEnd()));
+        } else {
+            tvEnd.setText("no end date");
+        }
         tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
-        view.findViewById(R.id.bt_delete).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.bt_export).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onSessionActionSelection(sessionId, ACTION_DELETE);
+                listener.onSessionActionSelection(sessionId, ACTION_EXPORT);
             }
         });
 

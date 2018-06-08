@@ -3,6 +3,7 @@ package de.volzo.despat.userinterface;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -27,6 +28,7 @@ import de.volzo.despat.persistence.ErrorEvent;
 import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.support.SessionExporter;
 
 public class SessionActivity extends AppCompatActivity implements SessionFragment.OnSessionActionSelectionListener, HomographyPointListFragment.OnHomographyPointListSelectionListener, ErrorEventListFragment.OnErrorEventListSelectionListener {
 
@@ -89,7 +91,26 @@ public class SessionActivity extends AppCompatActivity implements SessionFragmen
 
     @Override
     public void onSessionActionSelection(long sessionId, String action) {
+        SessionExporter exporter = new SessionExporter(this, sessionId);
 
+        try {
+            exporter.export();
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG);
+//            snackbar.setAction("UNDO", new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    for (Map.Entry<Session, Integer> entry : sessionsDeleteList.entrySet()) {
+//                        Session s = entry.getKey();
+//                        Integer i = entry.getValue();
+//                        ((SessionRecyclerViewAdapter) adapter).restoreItem(s, i);
+//                    }
+//                }
+//            });
+//            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
+        }
     }
 
     @Override

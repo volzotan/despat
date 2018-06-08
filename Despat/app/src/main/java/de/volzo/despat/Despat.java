@@ -61,6 +61,8 @@ public class Despat extends Application {
             Log.e(TAG, "room db schema outdated", e);
             Toast.makeText(context, "Database outdated", Toast.LENGTH_LONG).show();
 
+            AppDatabase.purgeDatabase(this);
+
             System.exit(0);
         }
 

@@ -22,7 +22,6 @@
         android:id="@+id/session_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="6dp"
         app:layoutManager="android.support.v7.widget.LinearLayoutManager"
         tools:listitem="@layout/activity_sessionlist_item" />
 

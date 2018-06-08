@@ -12,24 +12,51 @@
         android:text="undef." />
 
     <TextView
+        android:id="@+id/label_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timestamp"
+        android:text="Type:" />
+
+    <TextView
         android:id="@+id/type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/timestamp"
+        android:layout_toRightOf="@+id/label_type"
+        android:layout_marginLeft="10dp"
         android:text="undef." />
+
+    <TextView
+        android:id="@+id/label_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/label_type"
+        android:text="error description:" />
 
     <TextView
         android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/type"
+        android:layout_below="@+id/label_type"
+        android:layout_toRightOf="@+id/label_description"
+        android:layout_marginLeft="10dp"
         android:text="undef." />
+
+    <TextView
+        android:id="@+id/label_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/label_description"
+        android:text="error message:" />
 
     <TextView
         android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/description"
+        android:layout_below="@+id/label_description"
+        android:layout_toRightOf="@+id/label_message"
+        android:layout_marginLeft="10dp"
         android:text="undef." />
 
     <TextView
@@ -37,6 +64,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/message"
+        android:typeface="monospace"
+        android:textSize="05pt"
         android:text="undef." />
 
 </RelativeLayout>

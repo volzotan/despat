@@ -26,11 +26,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/homographypoints_title"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_marginBottom="5dp"
             android:text="@string/homographypoints_description"/>
 
         <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -45,7 +42,7 @@
             android:id="@+id/rv_homographypoint_list"
             android:name="de.volzo.despat.HomographyPointListFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="6dp"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
             tools:context=".userinterface.HomographyPointListFragment"

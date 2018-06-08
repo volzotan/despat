@@ -29,7 +29,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract SessionDao sessionDao();
     public abstract CaptureDao captureDao();
     public abstract HomographyPointDao homographyPointDao();
-    // public abstract PositionDao positionDao();
+    public abstract PositionDao positionDao();
     public abstract ErrorEventDao errorEventDao();
     public abstract EventDao eventDao();
 
@@ -41,6 +41,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             // allow queries on the main thread.
                             // Don't do this on a real app! See PersistenceBasicSample for an example.
                             .allowMainThreadQueries()
+                            .fallbackToDestructiveMigration()
                             .build();
         }
         return INSTANCE;
@@ -52,6 +53,7 @@ public abstract class AppDatabase extends RoomDatabase {
         db.eventDao().dropTable();
         db.errorEventDao().dropTable();
         db.homographyPointDao().dropTable();
+        db.positionDao().dropTable();
         db.captureDao().dropTable();
         db.sessionDao().dropTable();
         db.statusDao().dropTable();

@@ -41,7 +41,7 @@ public class Config {
     public static final boolean FORMAT_RAW                          = false;
 
     // display a preview on the main activity
-    public static final boolean START_CAMERA_ON_ACTIVITY_START      = false;
+    public static final boolean START_CAMERA_ON_ACTIVITY_START      = true;
 
     // close the camera without cancelling the
     // AF requests | v2 only
@@ -107,7 +107,10 @@ public class Config {
     public static final boolean REDIRECT_LOGCAT                     = false;
 
     // logcat text file directory
-    public static final File LOGCAT_DIR                             = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final File LOGCAT_DIR                             = new File(Environment.getExternalStorageDirectory(), "despat");
+
+    // Session export temp directory
+    public static final File TMP_DIR                                = new File(new File(Environment.getExternalStorageDirectory(), "despat"), "tmp");
 
     // dateformat used for the logcat file name
     public static final String DATEFORMAT_LOGFILE                   = "yyyy-MM-dd_HH-mm-ss.SSS";
