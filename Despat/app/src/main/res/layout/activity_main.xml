@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -8,114 +9,193 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="de.volzo.despat.MainActivity">
-
-    <de.volzo.despat.support.FixedAspectRatioFrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:id="@+id/aspectratio_layout">
-
-        <TextureView
-            android:id="@+id/textureView"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:text="texture_view" />
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:text="image_view" />
-
-        <de.volzo.despat.userinterface.DrawSurface
-            android:id="@+id/drawSurface"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:text="draw_surface" />
-
-        <TextView
-            android:id="@+id/tv_status"
-            android:padding="5dp"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:gravity="right"
-            android:background="@color/opaqueBlack"
-            android:text="uninitialized"/>
-
-        <ProgressBar
-            android:id="@+id/captureProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:min="0"
-            android:max="100"
-            android:layout_marginTop="4dp"
-            android:layout_marginLeft="4dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-    </de.volzo.despat.support.FixedAspectRatioFrameLayout>
+    tools:context="de.volzo.despat.MainActivity" >
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:orientation="vertical"
-        android:background="@color/colorPrimary">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-        <Button
-            android:text="Configure"
+        <RelativeLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_configure" />
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
 
-        <ToggleButton
-            android:textOn="Stop Capturing"
-            android:textOff="Start Capturing"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_startStopCapturing" />
+            <!--Info Box-->
 
-        <Button
-            android:text="Toggle Camera"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_toggleCamera" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/opaqueBlack"
+                android:layout_marginLeft="4dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp">
 
-        <Button
-            android:text="Sessions"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_sessions" />
+                <ProgressBar
+                    android:id="@+id/captureProgressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:min="0"
+                    android:max="100"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-        <Button
-            android:text="Run Recognizer"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_runRecognizer" />
+                <TextView
+                    android:id="@+id/tv_status"
+                    android:padding="5dp"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="uninitialized"/>
 
-        <Button
-            android:text="Reset"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_kill" />
+            </LinearLayout>
 
-        <Button
-            android:text="Settings"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_settings" />
+            <GridLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="1dp"
+                android:layout_marginBottom="1dp"
+                android:columnCount="1"
+                android:rowCount="2">
+
+                <Button
+                    android:text="Datasets"
+                    android:drawableLeft="@drawable/ic_reorder_horizontal_white_18dp"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_row="0"
+                    android:id="@+id/bt_sessions" />
+
+                <Button
+                    android:text="Settings"
+                    android:drawableStart="@drawable/ic_settings_white_18dp"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_row="1"
+                    android:id="@+id/bt_settings" />
+
+            </GridLayout>
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="fill_parent"-->
+                <!--android:orientation="vertical"-->
+                <!--android:background="@color/colorPrimary">-->
+
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="Configure"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="fill_parent"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/bt_configure" />&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<ToggleButton&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:textOn="Stop Capturing"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:textOff="Start Capturing"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="fill_parent"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/bt_startStopCapturing" />&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="Toggle Camera"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="fill_parent"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/bt_toggleCamera" />&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="Sessions"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="fill_parent"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/bt_sessions" />&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="Run Recognizer"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="fill_parent"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/bt_runRecognizer" />&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="Reset"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="fill_parent"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/bt_kill" />&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="Settings"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="fill_parent"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/bt_settings" />&ndash;&gt;-->
+
+            <!--</LinearLayout>-->
+        </RelativeLayout>
+
+        <de.volzo.despat.support.FixedAspectRatioFrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_weight="0"
+            android:id="@+id/aspectratio_layout">
+
+            <TextureView
+                android:id="@+id/textureView"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="texture_view" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="image_view" />
+
+            <de.volzo.despat.userinterface.DrawSurface
+                android:id="@+id/drawSurface"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="draw_surface" />
+
+        </de.volzo.despat.support.FixedAspectRatioFrameLayout>
+
+        <!--<android.support.design.widget.FloatingActionButton-->
+            <!--android:id="@+id/fab_sync"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:src="@drawable/ic_record_rec_white_48dp"-->
+            <!--android:backgroundTint="@color/rec_button"-->
+            <!--android:layout_gravity="bottom|end"-->
+            <!--android:layout_margin="10dp" />-->
 
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_sync"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_dialog_alert"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="10dp" />
+        android:layout_gravity="bottom|right"
+        android:layout_margin="10dp" >
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fabRec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:color/transparent"
+            android:backgroundTint="@color/rec_button" />
+
+        <TextView
+            android:id="@+id/tvFapRec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="REC"
+            android:elevation="16dp"
+            android:textColor="@android:color/white"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </FrameLayout>
 
 </FrameLayout>

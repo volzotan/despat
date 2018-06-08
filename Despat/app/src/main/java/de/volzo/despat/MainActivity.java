@@ -106,24 +106,131 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             despat.getSystemController().startTemperatureMeasurement();
         }
 
-        powerbrain = new PowerbrainConnector(this);
-        powerbrain.connect();
+//        powerbrain = new PowerbrainConnector(this);
+//        powerbrain.connect();
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 
-        Button btConfigure = (Button) findViewById(R.id.bt_configure);
-        btConfigure.setOnClickListener(new View.OnClickListener() {
+//        Button btConfigure = (Button) findViewById(R.id.bt_configure);
+//        btConfigure.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(activity, ConfigureActivity.class);
+//                startActivity(intent);
+//            }
+//        });
+//        final ToggleButton btStartStopCapturing = findViewById(R.id.bt_startStopCapturing);
+//        btStartStopCapturing.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (!RecordingSession.getInstance(activity).isActive()) { // if (!Util.isServiceRunning(activity, ShutterService.class)) {
+//                    Log.d(TAG, "startCapturing");
+//
+//                    Despat despat = Util.getDespat(activity);
+//                    despat.closeCamera();
+//
+//                    final Handler handler = new Handler();
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            RecordingSession session = RecordingSession.getInstance(activity);
+//                            session.startRecordingSession(null);
+//                        }
+//                    }, 1000);
+//                    startProgressBarUpdate();
+//                    btStartStopCapturing.setChecked(true);
+//                } else {
+//                    Log.d(TAG, "stopCapturing");
+//                    RecordingSession session = RecordingSession.getInstance(activity);
+//                    try {
+//                        session.stopRecordingSession();
+//                    } catch (RecordingSession.NotRecordingException e) {
+//                        Log.e(TAG, "stopping Recording Session failed", e);
+//                    }
+//                    stopProgressBarUpdate();
+//                    btStartStopCapturing.setChecked(false);
+//                }
+//            }
+//        });
+//        if (!RecordingSession.getInstance(activity).isActive()) {
+//            btStartStopCapturing.setText("Start Capturing");
+//            btStartStopCapturing.setChecked(false);
+//        } else {
+//            btStartStopCapturing.setText("Stop Capturing");
+//            btStartStopCapturing.setChecked(true);
+//        }
+
+//        Button btToggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
+//        btToggleCamera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                ImageView iv = (ImageView) findViewById(R.id.imageView);
+//                iv.setImageDrawable(null);
+//
+//                CameraController camera = despat.getCamera();
+//
+//                if (camera == null || camera.isDead()) {
+//                    activity.startCamera();
+//                } else {
+//                    despat.closeCamera();
+//                }
+//            }
+//        });
+
+        Button btSessions = (Button) findViewById(R.id.bt_sessions);
+        btSessions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(activity, ConfigureActivity.class);
+                startActivity(new Intent(activity, SessionListActivity.class));
+            }
+        });
+
+//        Button btRunRec = (Button) findViewById(R.id.bt_runRecognizer);
+//        btRunRec.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                activity.runRecognizer();
+//            }
+//        });
+//
+//        Button btKill = (Button) findViewById(R.id.bt_kill);
+//        btKill.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                Intent killIntent = new Intent(activity, Orchestrator.class);
+//                killIntent.putExtra("service", Broadcast.ALL_SERVICES);
+//                killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
+//                sendBroadcast(killIntent);
+//
+//                AppDatabase.purgeDatabase(activity);
+//                Config.reset(activity);
+//
+//                Log.i(TAG, "KILL: db purged. now attempting reboot!");
+//
+//                Despat despat = Util.getDespat(activity);
+//                SystemController systemController = despat.getSystemController();
+//                systemController.reboot();
+//            }
+//        });
+
+        Button btSettings = (Button) findViewById(R.id.bt_settings);
+        btSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(activity, SettingsActivity2.class);
                 startActivity(intent);
             }
         });
-        final ToggleButton btStartStopCapturing = findViewById(R.id.bt_startStopCapturing);
-        btStartStopCapturing.setOnClickListener(new View.OnClickListener() {
+
+        final FloatingActionButton fabSync = findViewById(R.id.fabRec);
+        fabSync.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
+                // Sync.run(activity, MainActivity.class, true);
+
                 if (!RecordingSession.getInstance(activity).isActive()) { // if (!Util.isServiceRunning(activity, ShutterService.class)) {
                     Log.d(TAG, "startCapturing");
 
@@ -139,7 +246,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         }
                     }, 1000);
                     startProgressBarUpdate();
-                    btStartStopCapturing.setChecked(true);
+//                    btStartStopCapturing.setChecked(true);
+
+                    TextView tvFapRec = findViewById(R.id.tvFapRec);
+                    tvFapRec.setText("STOP");
                 } else {
                     Log.d(TAG, "stopCapturing");
                     RecordingSession session = RecordingSession.getInstance(activity);
@@ -149,87 +259,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         Log.e(TAG, "stopping Recording Session failed", e);
                     }
                     stopProgressBarUpdate();
-                    btStartStopCapturing.setChecked(false);
+//                    btStartStopCapturing.setChecked(false);
                 }
-            }
-        });
-        if (!RecordingSession.getInstance(activity).isActive()) {
-            btStartStopCapturing.setText("Start Capturing");
-            btStartStopCapturing.setChecked(false);
-        } else {
-            btStartStopCapturing.setText("Stop Capturing");
-            btStartStopCapturing.setChecked(true);
-        }
-
-        Button btToggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
-        btToggleCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                ImageView iv = (ImageView) findViewById(R.id.imageView);
-                iv.setImageDrawable(null);
-
-                CameraController camera = despat.getCamera();
-
-                if (camera == null || camera.isDead()) {
-                    activity.startCamera();
-                } else {
-                    despat.closeCamera();
-                }
-            }
-        });
-
-        Button btSessions = (Button) findViewById(R.id.bt_sessions);
-        btSessions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(activity, SessionListActivity.class));
-            }
-        });
-
-        Button btRunRec = (Button) findViewById(R.id.bt_runRecognizer);
-        btRunRec.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activity.runRecognizer();
-            }
-        });
-
-        Button btKill = (Button) findViewById(R.id.bt_kill);
-        btKill.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent killIntent = new Intent(activity, Orchestrator.class);
-                killIntent.putExtra("service", Broadcast.ALL_SERVICES);
-                killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
-                sendBroadcast(killIntent);
-
-                AppDatabase.purgeDatabase(activity);
-                Config.reset(activity);
-
-                Log.i(TAG, "KILL: db purged. now attempting reboot!");
-
-                Despat despat = Util.getDespat(activity);
-                SystemController systemController = despat.getSystemController();
-                systemController.reboot();
-            }
-        });
-
-        Button btSettings = (Button) findViewById(R.id.bt_settings);
-        btSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(activity, SettingsActivity2.class);
-                startActivity(intent);
-            }
-        });
-
-        FloatingActionButton fabSync = findViewById(R.id.fab_sync);
-        fabSync.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Sync.run(activity, MainActivity.class, true);
             }
         });
 
@@ -323,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         if (s != null){
             point.setSessionId(s.getId());
             homographyPointDao.insert(point);
+            Util.saveErrorEvent(this, s.getId(), "test", new Exception("testexception"));
         } else {
             Log.wtf(TAG, "session missing");
         }
@@ -638,7 +670,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
 
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
-        imageView.setImageBitmap(BitmapFactory.decodeFile(new File(Config.getImageFolder(activity), "test.jpg").getAbsolutePath()));
+        imageView.setImageBitmap(BitmapFactory.decodeFile(new File(Config.getImageFolder(activity), "test.jpg").getAbsolutePath())); // TODO: glide
 
 //        // remove the textureView from the preview
 //        FixedAspectRatioFrameLayout aspectRatioLayout = (FixedAspectRatioFrameLayout) findViewById(R.id.aspectratio_layout);
