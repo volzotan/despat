@@ -63,7 +63,7 @@ public class SessionListActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         ((AppCompatActivity) this).setSupportActionBar(toolbar);
         bar = ((AppCompatActivity) this).getSupportActionBar();
-        bar.setTitle("Sessions");
+        bar.setTitle("Datasets");
         bar.setDisplayHomeAsUpEnabled(true);
 
         AppDatabase db = AppDatabase.getAppDatabase(context);

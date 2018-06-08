@@ -75,7 +75,7 @@ public class SessionActivity extends AppCompatActivity implements SessionFragmen
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         ((AppCompatActivity) this).setSupportActionBar(toolbar);
         bar = ((AppCompatActivity) this).getSupportActionBar();
-        bar.setTitle("Session");
+        bar.setTitle("Dataset");
         bar.setSubtitle(session.getSessionName());
         bar.setDisplayHomeAsUpEnabled(true);
 
