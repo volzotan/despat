@@ -253,6 +253,8 @@
                 android:layout_weight="1"
                 android:text="draw_surface" />
 
+            <include layout="@layout/sysinfobox" />
+
         </de.volzo.despat.support.FixedAspectRatioFrameLayout>
 
         <!--<android.support.design.widget.FloatingActionButton-->

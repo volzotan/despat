@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Handler;
@@ -24,22 +23,22 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -57,11 +56,9 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
-import de.volzo.despat.userinterface.ConfigureActivity;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.userinterface.SessionListActivity;
 import de.volzo.despat.userinterface.SettingsActivity2;
-import de.volzo.despat.web.Sync;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -282,6 +279,62 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     findViewById(R.id.block_numberofimages).setVisibility(View.GONE);
                     findViewById(R.id.block_errors).setVisibility(View.GONE);
                 }
+            }
+        });
+
+        LinearLayout llBlockGeneral = (LinearLayout) findViewById(R.id.block_general);
+//        llBlockGeneral.setClickable(true);
+//        llBlockGeneral.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.wtf(TAG, "click");
+//            }
+//        });
+//        llBlockGeneral.setFocusable(true);
+//        llBlockGeneral.setHovered(true);
+//        llBlockGeneral.setOnHoverListener(new View.OnHoverListener() {
+//            @Override
+//            public boolean onHover(View v, MotionEvent event) {
+//                Log.wtf(TAG, "hover");
+//                return false;
+//            }
+//        });
+
+        llBlockGeneral.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        llBlockGeneral.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.wtf(TAG, "motion event: " + event);
+
+                LinearLayout tvSysinfo = (LinearLayout) findViewById(R.id.sysinfo);
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        tvSysinfo.setVisibility(View.VISIBLE);
+                        break;
+                    }
+
+                    case MotionEvent.ACTION_UP: {
+                        tvSysinfo.setVisibility(View.GONE);
+                        break;
+                    }
+
+                    case MotionEvent.ACTION_MOVE: {
+                        break;
+                    }
+
+                    default: {
+                        break;
+                    }
+                }
+
+                return true;
             }
         });
 
