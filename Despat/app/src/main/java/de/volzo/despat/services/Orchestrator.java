@@ -116,6 +116,10 @@ public class Orchestrator extends BroadcastReceiver {
                     }
                     break;
 
+                case Broadcast.NEXT_SHUTTER_INVOCATION:
+                    Config.setNextShutterServiceInvocation(context, intent.getLongExtra(Broadcast.DATA_TIME, -1));
+                    break;
+
                 case Broadcast.ERROR_OCCURED:
                     try {
                         RecordingSession session = RecordingSession.getInstance(context);
@@ -277,7 +281,9 @@ public class Orchestrator extends BroadcastReceiver {
             nextExecution -= nextExecution % 1000;
 
             // save the time of the next invocation for the progressBar in the UI
-            Config.setNextShutterServiceInvocation(context, nextExecution);
+            Intent nextInvocationIntent = new Intent(Broadcast.NEXT_SHUTTER_INVOCATION);
+            nextInvocationIntent.putExtra(Broadcast.DATA_TIME, nextExecution);
+            context.sendBroadcast(nextInvocationIntent);
 
             /*
              * A note on alarms:

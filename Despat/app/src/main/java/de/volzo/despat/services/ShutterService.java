@@ -536,7 +536,9 @@ public class ShutterService extends Service {
                 Log.d(TAG, "delay: " + delay);
                 handler.postDelayed(shutterReleaseRunnable, delay);
 
-                Config.setNextShutterServiceInvocation(context, nextExecution);
+                Intent nextInvocationIntent = new Intent(Broadcast.NEXT_SHUTTER_INVOCATION);
+                nextInvocationIntent.putExtra(Broadcast.DATA_TIME, nextExecution);
+                context.sendBroadcast(nextInvocationIntent);
 
                 triggerCamera();
 

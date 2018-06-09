@@ -20,6 +20,9 @@ public class Broadcast {
     public static final String PICTURE_TAKEN            = "de.volzo.despat.PICTURE_TAKEN";
     public static final String DATA_PICTURE_PATH        = "de.volzo.despat.DATA_PICTURE_PATH";
 
+    public static final String NEXT_SHUTTER_INVOCATION  = "de.volzo.despat.NEXT_SHUTTER_INVOCATION";
+    public static final String DATA_TIME                = "de.volzo.despat.DATA_TIME";
+
     public static final String ERROR_OCCURED            = "de.volzo.despat.ERROR_OCCURED";
     public static final String DATA_DESCRIPTION         = "de.volzo.despat.DATA_DESCRIPTION";
     public static final String DATA_THROWABLE           = "de.volzo.despat.DATA_THROWABLE";

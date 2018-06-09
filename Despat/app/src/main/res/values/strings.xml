@@ -9,6 +9,8 @@
     <string name="pref_summary_deviceName">human readable name to identify this phone: %s</string>
     <string name="pref_title_resumeAfterReboot">Resume After Reboot</string>
     <string name="pref_summary_resumeAfterReboot">Continue capturing if the phone crashed</string>
+    <string name="pref_title_showTooltips">Show Tooltips</string>
+    <string name="pref_summary_showTooltips">Explanations and little tooltips can be hidden</string>
     <string name="pref_title_workingDirectory">Working Directory</string>
     <string name="pref_summary_workingDirectory">Where to save logs and output data</string>
 
@@ -39,7 +41,8 @@
     <string name="homographypoints_title">Corresponding points</string>
     <string name="homographypoints_description">
         To calculate the position of the detected objects, at least four points on the image must be
-        matched to their location on the map.
+        matched to a location on the map. To increase the precision the points should be evenly
+        distributed in the whole image and not concentrated at one spot.
     </string>
 
 </resources>

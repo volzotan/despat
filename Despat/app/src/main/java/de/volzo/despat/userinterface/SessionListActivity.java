@@ -178,8 +178,15 @@ public class SessionListActivity extends AppCompatActivity {
 
             holder.name.setText(session.getSessionName());
             holder.start.setText(Util.getDateFormat().format(session.getStart()));
-            holder.end.setText(Util.getDateFormat().format(session.getEnd()));
-            holder.duration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
+
+            if (session.getEnd() != null) {
+                holder.end.setText(Util.getDateFormat().format(session.getEnd()));
+                holder.duration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
+            } else {
+                Log.w(TAG, "session " + session + "is missing end");
+                holder.end.setText("---");
+                holder.duration.setText("---");
+            }
             holder.numberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
             holder.view.setOnClickListener(new View.OnClickListener() {

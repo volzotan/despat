@@ -225,8 +225,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        final FloatingActionButton fabSync = findViewById(R.id.fabRec);
-        fabSync.setOnClickListener(new View.OnClickListener() {
+        final FloatingActionButton fabRec = findViewById(R.id.fabRec);
+        final TextView tvFapRec = findViewById(R.id.tvFapRec);
+        fabRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Sync.run(activity, MainActivity.class, true);
@@ -234,24 +235,31 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 if (!RecordingSession.getInstance(activity).isActive()) { // if (!Util.isServiceRunning(activity, ShutterService.class)) {
                     Log.d(TAG, "startCapturing");
 
+                    tvFapRec.setText("BUSY");
+
                     Despat despat = Util.getDespat(activity);
                     despat.closeCamera();
 
+                    final TextureView textureView = findViewById(R.id.textureView);
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
+                            Util.clearTextureView(textureView);
+                            Util.drawTextOnTextureView(textureView, "foo");
                             RecordingSession session = RecordingSession.getInstance(activity);
                             session.startRecordingSession(null);
+                            
+                            updatePreviewImage();
                         }
                     }, 1000);
                     startProgressBarUpdate();
 //                    btStartStopCapturing.setChecked(true);
 
-                    TextView tvFapRec = findViewById(R.id.tvFapRec);
                     tvFapRec.setText("STOP");
                 } else {
                     Log.d(TAG, "stopCapturing");
+                    Util.darkenTextureView(textureView);
                     RecordingSession session = RecordingSession.getInstance(activity);
                     try {
                         session.stopRecordingSession();
@@ -260,6 +268,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     }
                     stopProgressBarUpdate();
 //                    btStartStopCapturing.setChecked(false);
+
+                    tvFapRec.setText("REC");
+
+                    findViewById(R.id.block_general).setVisibility(View.VISIBLE);
+                    findViewById(R.id.block_session).setVisibility(View.GONE);
+                    findViewById(R.id.block_duration).setVisibility(View.GONE);
+                    findViewById(R.id.block_numberofimages).setVisibility(View.GONE);
+                    findViewById(R.id.block_errors).setVisibility(View.GONE);
                 }
             }
         });
@@ -550,29 +566,45 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void updatePreviewImage() {
         Context context = activity;
-
-        StringBuilder sb = new StringBuilder();
         RecordingSession session = RecordingSession.getInstance(context);
+
+        View blockGeneral = findViewById(R.id.block_general);
+        TextView tvGeneral = findViewById(R.id.tv_block_general);
+
+        View blockSession = findViewById(R.id.block_session);
+        TextView tvSession = findViewById(R.id.tv_block_session);
+
+        View blockDuration = findViewById(R.id.block_duration);
+        TextView tvDuration = findViewById(R.id.tv_block_duration);
+
+        View blockNumberOfImages = findViewById(R.id.block_numberofimages);
+        TextView tvNumberOfImages = findViewById(R.id.tv_block_numberofimages);
+
+        View blockErrors = findViewById(R.id.block_errors);
+        TextView tvErrors = findViewById(R.id.tv_block_errors);
 
         boolean activeSession = false;
         try {
             if (session.isActive()) {
                 activeSession = true;
 
-                sb.append("Session: ");
-                sb.append(session.getSessionName());
-                sb.append("\n"); //sb.append(" | ");
-                sb.append("running for: ");
-                sb.append(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), true));
-                sb.append(" | ");
-                sb.append("images: ");
-                sb.append(session.getImagesTaken());
+                blockGeneral.setVisibility(View.GONE);
+
+                blockSession.setVisibility(View.VISIBLE);
+                tvSession.setText(session.getSessionName());
+
+                blockDuration.setVisibility(View.VISIBLE);
+                tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), true));
+
+                blockNumberOfImages.setVisibility(View.VISIBLE);
+                tvNumberOfImages.setText(Integer.toString(session.getImagesTaken()));
 
                 int errors = session.getErrors();
                 if (errors > 0) {
-                    sb.append(" | ");
-                    sb.append("errors: ");
-                    sb.append(errors);
+                    blockErrors.setVisibility(View.VISIBLE);
+                    tvErrors.setText(Integer.toString(errors));
+                } else {
+
                 }
             } else {
                 activeSession = false;
@@ -582,23 +614,25 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
 
         if (!activeSession) {
-            sb.append("free: ");
+            StringBuilder sb = new StringBuilder();
+            sb.append("no active recording session");
+            sb.append("\n\n");
+            sb.append("free space on device: ");
             sb.append(String.format(Locale.ENGLISH, "%.0fmb", Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity))));
-            sb.append(" | ");
-            sb.append("no active session");
-        }
+            tvGeneral.setText(sb.toString());
 
-        TextView tvStatus = (TextView) findViewById(R.id.tv_status);
-        tvStatus.setText(sb.toString());
+            blockGeneral.setVisibility(View.VISIBLE);
+            blockSession.setVisibility(View.GONE);
+            blockDuration.setVisibility(View.GONE);
+            blockNumberOfImages.setVisibility(View.GONE);
+            blockErrors.setVisibility(View.GONE);
+        }
 
         if (activeSession) {
             ImageRollover imgroll = new ImageRollover(context, ".jpg");
             File newestImage = imgroll.getNewestImage();
-
             if (newestImage == null) return;
-
             ImageView imageView = findViewById(R.id.imageView);
-
             Glide.with(activity).load(newestImage).into(imageView);
 
 //            imageView.setImageBitmap(BitmapFactory.decodeFile(newestImage.getAbsolutePath()));

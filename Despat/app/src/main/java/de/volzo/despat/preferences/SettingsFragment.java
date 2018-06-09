@@ -53,6 +53,13 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         prefResumeAfterReboot.setKey(Config.KEY_PERSISTENT_CAMERA);
         category.addPreference(prefResumeAfterReboot);
 
+        SwitchPreference prefShowTooltips = new SwitchPreference(context);
+        prefShowTooltips.setTitle(context.getString(R.string.pref_title_showTooltips));
+        prefShowTooltips.setSummary(context.getString(R.string.pref_summary_showTooltips));
+        prefShowTooltips.setDefaultValue(Config.DEFAULT_SHOW_TOOLTIPS);
+        prefShowTooltips.setKey(Config.KEY_SHOW_TOOLTIPS);
+        category.addPreference(prefShowTooltips);
+
 //        TODO: FilePicker needed
 //        EditTextPreference prefWorkingDirectory = new EditTextPreference(context);
 //        prefWorkingDirectory.setTitle(context.getString(R.string.pref_title_workingDirectory));

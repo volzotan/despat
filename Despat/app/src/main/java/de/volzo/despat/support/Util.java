@@ -12,6 +12,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -23,6 +28,8 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.view.SurfaceView;
+import android.view.TextureView;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -451,6 +458,28 @@ public class Util {
         } catch (Exception e) {
             Log.e(TAG, "printing camera parameters failed: ", e);
         }
+    }
+
+    public static void clearTextureView(TextureView tv) {
+        Canvas canvas = tv.lockCanvas();
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        tv.unlockCanvasAndPost(canvas);
+    }
+
+    public static void darkenTextureView(TextureView tv) {
+        Canvas canvas = tv.lockCanvas();
+        canvas.drawColor(Color.argb(255/2, 0, 0, 0));
+        tv.unlockCanvasAndPost(canvas);
+    }
+
+    public static void drawTextOnTextureView(TextureView tv, String text) {
+        Canvas canvas = tv.lockCanvas();
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(20);
+        paint.setTypeface(Typeface.MONOSPACE);
+        canvas.drawText(text, 200, 200, paint);
+        tv.unlockCanvasAndPost(canvas);
     }
 
     public static DateFormat getDateFormat() {

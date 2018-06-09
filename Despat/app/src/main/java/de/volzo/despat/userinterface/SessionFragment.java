@@ -93,10 +93,11 @@ public class SessionFragment extends Fragment {
         tvStart.setText(Util.getDateFormat().format(session.getStart()));
         if (session.getEnd() != null) {
             tvEnd.setText(Util.getDateFormat().format(session.getEnd()));
+            tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
         } else {
             tvEnd.setText("no end date");
+            tvDuration.setText("no end date");
         }
-        tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
 
         view.findViewById(R.id.bt_export).setOnClickListener(new View.OnClickListener() {

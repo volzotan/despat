@@ -30,6 +30,7 @@ import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.preferences.Config;
 
 public class HomographyPointListFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
@@ -66,6 +67,9 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_homographypointlist, container, false);
+
+        TextView tooltip_homography = view.findViewById(R.id.tooltip_homography);
+        if (!Config.getShowTooltips(getContext())) tooltip_homography.setVisibility(View.INVISIBLE);
 
         RecyclerView recyclerView = view.findViewById(R.id.rv_homographypoint_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());

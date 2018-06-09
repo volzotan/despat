@@ -148,6 +148,19 @@ public class Config {
     }
 
     /**
+     * SHOW TOOLTIPS
+     */
+    public static final boolean DEFAULT_SHOW_TOOLTIPS               = true;
+    public static final String KEY_SHOW_TOOLTIPS                    = "de.volzo.despat.showTooltips";
+
+    public static boolean getShowTooltips(Context context) {
+        return getPropertyBoolean(context, KEY_RESUME_AFTER_REBOOT, DEFAULT_RESUME_AFTER_REBOOT);
+    }
+    public static void setShowTooltips(Context context, boolean showTooltips) {
+        setProperty(context, KEY_SHOW_TOOLTIPS, showTooltips);
+    }
+
+    /**
      * WORKING DIRECTORY
      */
     public static final File DEFAULT_WORKING_DIRECTORY              = new File(Environment.getExternalStorageDirectory(), ("despat"));
