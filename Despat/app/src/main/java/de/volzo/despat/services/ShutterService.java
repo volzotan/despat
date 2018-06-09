@@ -525,7 +525,28 @@ public class ShutterService extends Service {
             Despat despat = Util.getDespat(context);
             SystemController systemController = despat.getSystemController();
             RecordingSession session = RecordingSession.getInstance(context);
-            Log.i(TAG, "shutter released. BATT: " + systemController.getBatteryLevel() + "% | IMAGES: " + session.getImagesTaken());
+            float batteryLevel = systemController.getBatteryLevel();
+            Log.i(TAG, "shutter released. BATT: " + batteryLevel + "% | IMAGES: " + session.getImagesTaken());
+
+            if (batteryLevel <= Config.STOP_SESSION_AT_LOW_BATT_THRESHOLD) {
+                Log.w(TAG, "battery level below threshold! recording session stop");
+                Util.saveEvent(context, Event.EventType.INFO, "session stop due to low battery");
+
+                try {
+                    session.stopRecordingSession("low battery");
+                } catch (RecordingSession.NotRecordingException e) {
+                    Log.e(TAG, "stopping session failed. attempting stop via broadcast", e);
+                    Util.saveErrorEvent(context, "stopping session failed. attempting stop via broadcast", e);
+
+                    Intent stopIntent = new Intent(context, Orchestrator.class);
+                    stopIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
+                    stopIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
+                    stopIntent.putExtra(Orchestrator.REASON, "low battery");
+                    context.sendBroadcast(stopIntent);
+                }
+
+                return;
+            }
 
             if (Config.getPersistentCamera(context)) {
 

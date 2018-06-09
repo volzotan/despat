@@ -3,6 +3,7 @@ package de.volzo.despat.support;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -26,10 +27,12 @@ import android.os.Handler;
 import android.os.StatFs;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.TextureView;
+import android.view.View;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -480,6 +483,13 @@ public class Util {
         paint.setTypeface(Typeface.MONOSPACE);
         canvas.drawText(text, 200, 200, paint);
         tv.unlockCanvasAndPost(canvas);
+    }
+
+    public static void showSnackbar(Context context, String message, String reason) {
+        Intent intent = new Intent(Broadcast.SHOW_MESSAGE);
+        intent.putExtra(Broadcast.DATA_MESSAGE, message);
+        intent.putExtra(Broadcast.DATA_REASON, reason);
+        context.sendBroadcast(intent);
     }
 
     public static DateFormat getDateFormat() {

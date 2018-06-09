@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -37,12 +39,15 @@ import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Capture;
+import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Session;
@@ -201,8 +206,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            public void onClick(View view) {
 //
 //                Intent killIntent = new Intent(activity, Orchestrator.class);
-//                killIntent.putExtra("service", Broadcast.ALL_SERVICES);
-//                killIntent.putExtra("operation", Orchestrator.OPERATION_STOP);
+//                killIntent.putExtra(Orchestrator.SERVICE, Broadcast.ALL_SERVICES);
+//                killIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
 //                sendBroadcast(killIntent);
 //
 //                AppDatabase.purgeDatabase(activity);
@@ -280,19 +285,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Broadcast.PICTURE_TAKEN);
-        registerReceiver(broadcastReceiver, filter);
+        registerAllReceivers();
 
         Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
-        heartbeatIntent.putExtra("service", Broadcast.HEARTBEAT_SERVICE);
-        heartbeatIntent.putExtra("operation", Orchestrator.OPERATION_START);
+        heartbeatIntent.putExtra(Orchestrator.SERVICE, Broadcast.HEARTBEAT_SERVICE);
+        heartbeatIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
         sendBroadcast(heartbeatIntent);
 
         if (Config.getPhoneHome(this)) {
             Intent uploadIntent = new Intent(activity, Orchestrator.class);
-            uploadIntent.putExtra("service", Broadcast.UPLOAD_SERVICE);
-            uploadIntent.putExtra("operation", Orchestrator.OPERATION_ONCE);
+            uploadIntent.putExtra(Orchestrator.SERVICE, Broadcast.UPLOAD_SERVICE);
+            uploadIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_ONCE);
             sendBroadcast(uploadIntent);
         }
 
@@ -302,9 +305,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         startProgressBarUpdate();
         updatePreviewImage();
 
-
 //        btSettings.callOnClick();
-
 
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();
@@ -380,10 +381,35 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
-            Log.d("image taken", "path: " + path);
+            String action = intent.getAction();
 
-            updatePreviewImage();
+            switch (action) {
+                case Broadcast.PICTURE_TAKEN:
+                    String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
+                    Log.d("image taken", "path: " + path);
+                    updatePreviewImage();
+                    break;
+
+                case Broadcast.SHOW_MESSAGE:
+
+                    String message = intent.getStringExtra(Broadcast.DATA_MESSAGE);
+                    String reason = intent.getStringExtra(Broadcast.DATA_REASON);
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(message);
+                    if (reason != null) {
+                        sb.append(" | ");
+                        sb.append(reason);
+                    }
+
+                    Snackbar.make(
+                            activity.findViewById(android.R.id.content),
+                            sb.toString(),
+                            Snackbar.LENGTH_LONG
+                    ).show();
+
+                    break;
+            }
         }
     };
 
@@ -449,6 +475,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void registerAllReceivers() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.PICTURE_TAKEN);
+        filter.addAction(Broadcast.SHOW_MESSAGE);
         registerReceiver(broadcastReceiver, filter);
     }
 
@@ -631,9 +658,29 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
 
         if (activeSession) {
-            ImageRollover imgroll = new ImageRollover(context, ".jpg");
-            File newestImage = imgroll.getNewestImage();
+
+            File newestImage = null;
+
+            try {
+                AppDatabase db = AppDatabase.getAppDatabase(context);
+                CaptureDao captureDao = db.captureDao();
+                List<Capture> lastCaptures = captureDao.getLast3FromSession(session.getSessionId());
+
+                for (int i=lastCaptures.size()-1; i>=0; i--) {
+                    File img = lastCaptures.get(i).getImage();
+                    if (img != null && img.exists()) {
+                        newestImage = img;
+                    }
+                }
+            } catch (RecordingSession.NotRecordingException e) {
+                Log.w(TAG, "no session active, displaying last capture failed");
+            }
+
+//            ImageRollover imgroll = new ImageRollover(context, ".jpg");
+//            newestImage = imgroll.getNewestImage();
+
             if (newestImage == null) return;
+
             ImageView imageView = findViewById(R.id.imageView);
             Glide.with(activity).load(newestImage).into(imageView);
 

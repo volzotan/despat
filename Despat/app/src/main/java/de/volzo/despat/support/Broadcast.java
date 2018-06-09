@@ -23,6 +23,10 @@ public class Broadcast {
     public static final String NEXT_SHUTTER_INVOCATION  = "de.volzo.despat.NEXT_SHUTTER_INVOCATION";
     public static final String DATA_TIME                = "de.volzo.despat.DATA_TIME";
 
+    public static final String SHOW_MESSAGE             = "de.volzo.despat.SHOW_MESSAGE";
+    public static final String DATA_MESSAGE             = "de.volzo.despat.DATA_MESSAGE";
+    public static final String DATA_REASON              = "de.volzo.despat.DATA_REASON";
+
     public static final String ERROR_OCCURED            = "de.volzo.despat.ERROR_OCCURED";
     public static final String DATA_DESCRIPTION         = "de.volzo.despat.DATA_DESCRIPTION";
     public static final String DATA_THROWABLE           = "de.volzo.despat.DATA_THROWABLE";

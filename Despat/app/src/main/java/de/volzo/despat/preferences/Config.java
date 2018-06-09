@@ -119,6 +119,10 @@ public class Config {
     // critical error happened (usually the camera)
     public static final boolean REBOOT_ON_CRITICAL_ERROR            = false;
 
+    // stops the running recording session if battery drops
+    // below threshold
+    public static final float STOP_SESSION_AT_LOW_BATT_THRESHOLD    = 3;
+
     // ---------------------------------------------------------------------------------------------
 
     /**

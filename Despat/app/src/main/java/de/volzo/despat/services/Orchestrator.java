@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.RatingBar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,11 +33,17 @@ public class Orchestrator extends BroadcastReceiver {
 
     public static final String TAG = Orchestrator.class.getSimpleName();
 
+    public static final String SERVICE          = "service";
+    public static final String OPERATION        = "operation";
+    public static final String REASON           = "reason";
+
     public static final int OPERATION_START     = 1;
     public static final int OPERATION_STOP      = 2;
     public static final int OPERATION_ONCE      = 3;
 
     private Context context;
+
+    private String reason;
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -52,7 +59,7 @@ public class Orchestrator extends BroadcastReceiver {
         if (Config.BACKUP_LOGCAT) {
 
             // during saving and clearing the log some
-            // lines get lost if theres a lot of output happening
+            // lines get lost if there is a lot of output happening
 
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -64,10 +71,11 @@ public class Orchestrator extends BroadcastReceiver {
         }
 
         String action       = intent.getAction();
-        String service      = intent.getStringExtra("service");
-        int operation       = intent.getIntExtra("operation", -1);
+        String service      = intent.getStringExtra(SERVICE);
+        int operation       = intent.getIntExtra(OPERATION, -1);
+        reason              = intent.getStringExtra(REASON);
 
-        log(action, service, operation);
+        log(action, service, operation, reason);
 
         if (action != null && action.length() > 0) {
             switch (action) {
@@ -249,6 +257,8 @@ public class Orchestrator extends BroadcastReceiver {
 
                 Util.saveEvent(context, Event.EventType.INFO, "ShutterService START");
                 Log.i(TAG, "ShutterService start");
+
+                Util.showSnackbar(context, "Recording started", reason);
             } catch (IllegalStateException e) {
                 String msg = "ShutterService could not be started (probably due to background restrictions";
                 Log.e(TAG, msg);
@@ -270,8 +280,8 @@ public class Orchestrator extends BroadcastReceiver {
             long now = System.currentTimeMillis(); // alarm is set right away
 
             Intent shutterIntent = new Intent(context, Orchestrator.class);
-            shutterIntent.putExtra("service", Broadcast.SHUTTER_SERVICE);
-            shutterIntent.putExtra("operation", Orchestrator.OPERATION_START);
+            shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
+            shutterIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
 
             PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
                     ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -319,6 +329,8 @@ public class Orchestrator extends BroadcastReceiver {
         // shutter Service
         Intent shutterServiceIntent = new Intent(context, ShutterService.class);
         context.stopService(shutterServiceIntent);
+
+        Util.showSnackbar(context, "Recording stopped", reason);
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -420,7 +432,7 @@ public class Orchestrator extends BroadcastReceiver {
     }
 
 
-    private void log(String action, String service, int operation) {
+    private void log(String action, String service, int operation, String reason) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(">> ");
@@ -454,6 +466,13 @@ public class Orchestrator extends BroadcastReceiver {
                     sb.append("UNKNOWN");
                     break;
             }
+        }
+
+        if (reason != null) {
+            sb.append(" | ");
+            sb.append("(");
+            sb.append(reason);
+            sb.append(")");
         }
 
         Log.d(TAG, sb.toString());

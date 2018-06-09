@@ -88,7 +88,7 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         transaction.commit();
         newFragment.getMapAsync(this);
 
-        getView().findViewById(R.id.bt_addHomographyPoint).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.bt_addHomographyPoint).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (addListener != null) {

@@ -261,6 +261,10 @@ public class CameraController2 extends CameraController {
 
             // get empty dummy surface or surface with texture view
             surfaceTexture = getSurfaceTexture(textureView);
+            if (surfaceTexture == null) {
+                Log.w(TAG, "surface texture is null!");
+                throw new Exception("surface texture is null (textureView: " + textureView.toString());
+            }
             final int width = 640; //imageDimension.getWidth();   // TODO: drop hardcoded resolution
             final int height = 480; //imageDimension.getHeight();
             surfaceTexture.setDefaultBufferSize(width, height);
