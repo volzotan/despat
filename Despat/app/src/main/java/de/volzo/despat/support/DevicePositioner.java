@@ -29,8 +29,6 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
     public DevicePositioner(Context context) {
         this.context = context;
 
-        Log.wtf(TAG, "start");
-
         sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -104,7 +102,7 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
                 SensorManager.getOrientation(R, data);
                 // data contains: azimuth, pitch and roll
                 orientation = calculateOrientation(data[0], data[1], data[2]);
-                Log.wtf(TAG, "o: " + orientation);
+//                Log.wtf(TAG, "o: " + orientation);
                 close();
             }
 //            System.out.println("------- " + getRotationFromAccelerometerOnly(geomagnetic));

@@ -58,6 +58,10 @@
             android:name=".userinterface.SessionActivity"
             android:label="@string/title_activity_session"
             android:parentActivityName=".userinterface.SessionListActivity" />
+        <activity
+            android:name=".userinterface.IntroActivity" />
+        <activity
+            android:name=".userinterface.PointActivity" />
 
         <receiver
             android:name=".services.Orchestrator"

@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                             Util.drawTextOnTextureView(textureView, "foo");
                             RecordingSession session = RecordingSession.getInstance(activity);
                             session.startRecordingSession(null);
-                            
+
                             updatePreviewImage();
                         }
                     }, 1000);
@@ -403,6 +403,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         registerAllReceivers();
         startProgressBarUpdate();
         updatePreviewImage();
+
+        startCamera();
     }
 
     @Override

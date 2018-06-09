@@ -30,7 +30,11 @@ import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.SessionExporter;
 
-public class SessionActivity extends AppCompatActivity implements SessionFragment.OnSessionActionSelectionListener, HomographyPointListFragment.OnHomographyPointListSelectionListener, ErrorEventListFragment.OnErrorEventListSelectionListener {
+public class SessionActivity extends AppCompatActivity implements
+        SessionFragment.OnSessionActionSelectionListener,
+        HomographyPointListFragment.OnHomographyPointListSelectionListener,
+        HomographyPointListFragment.OnHomographyPointAddListener,
+        ErrorEventListFragment.OnErrorEventListSelectionListener {
 
     public static final String TAG = SessionActivity.class.getSimpleName();
 
@@ -116,6 +120,11 @@ public class SessionActivity extends AppCompatActivity implements SessionFragmen
     @Override
     public void onHomographyPointListSelectionListener(HomographyPoint homographyPoint) {
 
+    }
+
+    @Override
+    public void onHomographyPointAddListener(Session session) {
+        Log.d(TAG, "homography point add: " + session);
     }
 
     @Override

@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,7 +37,8 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
 
     public static final String TAG = HomographyPointListFragment.class.getSimpleName();
 
-    private OnHomographyPointListSelectionListener listener;
+    private OnHomographyPointListSelectionListener selectionListener;
+    private OnHomographyPointAddListener addListener;
 
     private Session session;
     private MapUtil mapUtil;
@@ -74,7 +76,7 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         RecyclerView recyclerView = view.findViewById(R.id.rv_homographypoint_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(new HomographyPointRecyclerViewAdapter(getActivity(), listener));
+        recyclerView.setAdapter(new HomographyPointRecyclerViewAdapter(getActivity(), selectionListener));
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), layoutManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
@@ -85,6 +87,15 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         transaction.replace(R.id.fragment_container_map, newFragment);
         transaction.commit();
         newFragment.getMapAsync(this);
+
+        getView().findViewById(R.id.bt_addHomographyPoint).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (addListener != null) {
+                    addListener.onHomographyPointAddListener(session);
+                }
+            }
+        });
 
         return view;
     }
@@ -125,9 +136,15 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         super.onAttach(context);
 
         if (context instanceof OnHomographyPointListSelectionListener) {
-            listener = (OnHomographyPointListSelectionListener) context;
+            selectionListener = (OnHomographyPointListSelectionListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement listener");
+            throw new RuntimeException(context.toString() + " must implement selection listener");
+        }
+
+        if (context instanceof OnHomographyPointAddListener) {
+            addListener = (OnHomographyPointAddListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement add listener");
         }
     }
 
@@ -173,6 +190,10 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         void onHomographyPointListSelectionListener(HomographyPoint homographyPoint);
     }
 
+    public interface OnHomographyPointAddListener {
+        void onHomographyPointAddListener(Session session);
+    }
+
     class HomographyPointRecyclerViewAdapter extends RecyclerView.Adapter<HomographyPointRecyclerViewAdapter.ViewHolder> {
 
         public final String TAG = HomographyPointRecyclerViewAdapter.class.getSimpleName();
@@ -208,10 +229,18 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
 
             holder.idNumber.setText(Long.toString(point.getId()));
 
-            holder.mView.setOnClickListener(new View.OnClickListener() {
+//            holder.view.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if (null != listener) {
+//                        listener.onHomographyPointListSelectionListener(holder.point);
+//                    }
+//                }
+//            });
+            holder.view.findViewById(R.id.bt_homography_delete).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (null != listener) {
+                    if (listener != null) {
                         listener.onHomographyPointListSelectionListener(holder.point);
                     }
                 }
@@ -225,7 +254,7 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
-            public final View mView;
+            public final View view;
 
             public TextView idNumber;
 
@@ -233,7 +262,7 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
 
             public ViewHolder(View view) {
                 super(view);
-                mView = view;
+                this.view = view;
 
                 idNumber = (TextView) view.findViewById(R.id.idNumber);
             }
