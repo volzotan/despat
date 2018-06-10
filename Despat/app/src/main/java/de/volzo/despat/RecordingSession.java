@@ -20,6 +20,7 @@ import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.services.Orchestrator;
+import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
@@ -240,23 +241,14 @@ public class RecordingSession {
 
     public void runMaintenance() {
 
-        final Context c = context;
-
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                AppDatabase db = AppDatabase.getAppDatabase(c);
-                SessionDao sessionDao = db.sessionDao();
-
-                List<Session> sessions = sessionDao.getAll();
-
-                for (Session session : sessions) {
-                    Compressor compressor = new Compressor();
-                    compressor.runForSession(c, session);
-                }
-            }
-        });
+//        if (session != null) {
+//            Intent detectorIntent = new Intent(context, RecognitionService.class);
+//            detectorIntent.putExtra(RecognitionService.SESSION_ID, session.getId());
+//            context.startService(detectorIntent);
+//        }
+//
+//        Intent compressorIntent = new Intent(context, Compressor.class);
+//        context.startService(compressorIntent);
     }
 
     public boolean isActive() {

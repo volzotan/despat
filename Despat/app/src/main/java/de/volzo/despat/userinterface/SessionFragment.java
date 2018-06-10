@@ -28,6 +28,7 @@ import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.HomographyPoint;
+import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.Util;
@@ -70,6 +71,7 @@ public class SessionFragment extends Fragment {
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
         CaptureDao captureDao = db.captureDao();
+        PositionDao positionDao = db.positionDao();
 
         final Session session = sessionDao.getById(sessionId);
 
@@ -79,6 +81,7 @@ public class SessionFragment extends Fragment {
         TextView tvEnd = (TextView) view.findViewById(R.id.end);
         TextView tvDuration = (TextView) view.findViewById(R.id.duration);
         TextView tvNumberOfCaptures = (TextView) view.findViewById(R.id.numberOfCaptures);
+        TextView tvNumberOfDetections = (TextView) view.findViewById(R.id.numberofDetections);
 
         try {
             File f = session.getCompressedImage();
@@ -91,6 +94,7 @@ public class SessionFragment extends Fragment {
 
         tvName.setText(session.getSessionName());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));
+
         if (session.getEnd() != null) {
             tvEnd.setText(Util.getDateFormat().format(session.getEnd()));
             tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), session.getEnd(), true));
@@ -98,7 +102,9 @@ public class SessionFragment extends Fragment {
             tvEnd.setText("no end date");
             tvDuration.setText("no end date");
         }
+
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
+        tvNumberOfDetections.setText(Integer.toString(positionDao.getCountBySession(session.getId())));
 
         view.findViewById(R.id.bt_export).setOnClickListener(new View.OnClickListener() {
             @Override

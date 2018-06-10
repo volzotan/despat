@@ -19,6 +19,12 @@ public interface PositionDao {
     @Query("SELECT * FROM position WHERE capture_id = :captureId")
     List<Position> getAllByCapture(long captureId);
 
+    @Query("SELECT * FROM position WHERE capture_id IN (SELECT id FROM capture WHERE session_id = :sessionId)")
+    List<Position> getAllBySession(long sessionId);
+
+    @Query("SELECT COUNT(*) FROM position WHERE capture_id IN (SELECT id FROM capture WHERE session_id = :sessionId)")
+    int getCountBySession(long sessionId);
+
     @Insert
     void insert(Position... positions);
 

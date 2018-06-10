@@ -1,4 +1,4 @@
-package de.volzo.despat;
+package de.volzo.despat.support;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -45,7 +45,7 @@ import de.volzo.despat.preferences.Config;
 
 public class Compressor implements Callable<Integer> {
 
-    public static final String TAG = Compressor.class.getSimpleName();
+    private static final String TAG = Compressor.class.getSimpleName();
 
     private Mat mat;
     private int counter = 0;

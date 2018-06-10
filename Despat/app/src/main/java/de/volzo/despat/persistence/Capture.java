@@ -33,6 +33,9 @@ public class Capture {
     @ColumnInfo(name = "image_path")
     private File image;
 
+    @ColumnInfo(name = "processed")
+    private boolean processed;
+
     public long getId() {
         return id;
     }
@@ -63,5 +66,13 @@ public class Capture {
 
     public void setImage(File image) {
         this.image = image;
+    }
+
+    public boolean isProcessed() {
+        return processed;
+    }
+
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
     }
 }

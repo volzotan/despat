@@ -58,10 +58,8 @@
             android:name=".userinterface.SessionActivity"
             android:label="@string/title_activity_session"
             android:parentActivityName=".userinterface.SessionListActivity" />
-        <activity
-            android:name=".userinterface.IntroActivity" />
-        <activity
-            android:name=".userinterface.PointActivity" />
+        <activity android:name=".userinterface.IntroActivity" />
+        <activity android:name=".userinterface.PointActivity" />
 
         <receiver
             android:name=".services.Orchestrator"
@@ -89,6 +87,11 @@
             android:name=".services.RecognitionService"
             android:exported="false"
             android:label="Recognition Service"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".services.CompressorService"
+            android:exported="false"
+            android:label="Compressor Service"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".services.HeartbeatService"

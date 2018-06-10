@@ -51,7 +51,9 @@ import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
+import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.ImageRollover;
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
 
         setContentView(R.layout.activity_main);
 
@@ -387,8 +390,15 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         }
 
-        RecordingSession recsession = RecordingSession.getInstance(this);
-        recsession.runMaintenance();
+        Session lastSession = sessionDao.getLast();
+        if (lastSession != null) {
+            Intent detectorIntent = new Intent(this, RecognitionService.class);
+            detectorIntent.putExtra(RecognitionService.SESSION_ID, lastSession.getId());
+            startService(detectorIntent);
+        }
+        Intent compressorIntent = new Intent(this, CompressorService.class);
+        compressorIntent.setAction("foo");
+        startService(compressorIntent);
 
 //        btSessions.callOnClick();
 
@@ -479,11 +489,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         Log.d(TAG, "MainActivity Resume");
 
+        textureView = (TextureView) findViewById(R.id.textureView);
+        textureView.setSurfaceTextureListener(this);
+
         registerAllReceivers();
         startProgressBarUpdate();
         updatePreviewImage();
-
-        startCamera();
     }
 
     @Override

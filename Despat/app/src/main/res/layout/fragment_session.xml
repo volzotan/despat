@@ -22,7 +22,7 @@
             android:orientation="vertical"
             android:layout_margin="7dp"
             android:columnCount="2"
-            android:rowCount="5" >
+            android:rowCount="6" >
 
             <TextView
                 android:id="@+id/label_name"
@@ -102,6 +102,22 @@
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_row="4"
+                android:text="-1" />
+
+            <TextView
+                android:id="@+id/label_numberofDetections"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_row="5"
+                android:text="objects:" />
+
+            <TextView
+                android:id="@+id/numberofDetections"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_row="5"
                 android:text="-1" />
 
         </GridLayout>

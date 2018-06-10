@@ -257,15 +257,6 @@
 
         </de.volzo.despat.support.FixedAspectRatioFrameLayout>
 
-        <!--<android.support.design.widget.FloatingActionButton-->
-            <!--android:id="@+id/fab_sync"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:src="@drawable/ic_record_rec_white_48dp"-->
-            <!--android:backgroundTint="@color/rec_button"-->
-            <!--android:layout_gravity="bottom|end"-->
-            <!--android:layout_margin="10dp" />-->
-
     </LinearLayout>
 
     <FrameLayout

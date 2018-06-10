@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "72d45b0dedf579f89adc970908cd2eb5",
+    "identityHash": "688540c23ddeb731c9377c5bd3267d7f",
     "entities": [
       {
         "tableName": "Status",
@@ -172,7 +172,7 @@
       },
       {
         "tableName": "Capture",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `recording_time` TEXT, `image_path` TEXT, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `recording_time` TEXT, `image_path` TEXT, `processed` INTEGER NOT NULL, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -197,6 +197,12 @@
             "columnName": "image_path",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "processed",
+            "columnName": "processed",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -290,7 +296,7 @@
       },
       {
         "tableName": "Position",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `capture_id` INTEGER NOT NULL, `x` INTEGER NOT NULL, `y` INTEGER NOT NULL, `latitude` TEXT, `longitude` TEXT, FOREIGN KEY(`capture_id`) REFERENCES `Capture`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `capture_id` INTEGER NOT NULL, `minx` REAL, `miny` REAL, `maxx` REAL, `maxy` REAL, `x` REAL, `y` REAL, `latitude` REAL, `longitude` REAL, `type` TEXT, `recognition_confidence` REAL, `position_confidence` REAL, FOREIGN KEY(`capture_id`) REFERENCES `Capture`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -305,27 +311,69 @@
             "notNull": true
           },
           {
+            "fieldPath": "minx",
+            "columnName": "minx",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "miny",
+            "columnName": "miny",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "maxx",
+            "columnName": "maxx",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "maxy",
+            "columnName": "maxy",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
             "fieldPath": "x",
             "columnName": "x",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "REAL",
+            "notNull": false
           },
           {
             "fieldPath": "y",
             "columnName": "y",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "REAL",
+            "notNull": false
           },
           {
             "fieldPath": "latitude",
             "columnName": "latitude",
-            "affinity": "TEXT",
+            "affinity": "REAL",
             "notNull": false
           },
           {
             "fieldPath": "longitude",
             "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
             "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recognitionConfidence",
+            "columnName": "recognition_confidence",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "positionConfidence",
+            "columnName": "position_confidence",
+            "affinity": "REAL",
             "notNull": false
           }
         ],
@@ -459,7 +507,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"72d45b0dedf579f89adc970908cd2eb5\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"688540c23ddeb731c9377c5bd3267d7f\")"
     ]
   }
 }
