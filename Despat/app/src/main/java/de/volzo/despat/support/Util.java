@@ -82,7 +82,7 @@ import static android.content.Context.ACCOUNT_SERVICE;
 
 public class Util {
 
-    public static final String TAG = Util.class.getSimpleName();
+    private static final String TAG = Util.class.getSimpleName();
 
     @TargetApi(Build.VERSION_CODES.O)
     public static void setUpShutterNotificationChannel(Context context) {

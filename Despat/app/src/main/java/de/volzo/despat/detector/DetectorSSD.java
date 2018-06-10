@@ -15,7 +15,7 @@ import de.volzo.despat.support.Stopwatch;
 
 public class DetectorSSD extends Detector {
 
-    public static final String TAG = DetectorSSD.class.getSimpleName();
+    private static final String TAG = DetectorSSD.class.getSimpleName();
 
     private Context context;
 

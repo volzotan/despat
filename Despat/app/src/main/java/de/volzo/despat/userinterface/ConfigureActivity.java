@@ -12,7 +12,7 @@ import de.volzo.despat.R;
 
 public class ConfigureActivity extends AppCompatActivity {
 
-    public static final String TAG = ConfigureActivity.class.getSimpleName();
+    private static final String TAG = ConfigureActivity.class.getSimpleName();
     ConfigureActivity activity;
 
     @Override

@@ -27,7 +27,7 @@ import de.volzo.despat.R;
 
 public class MultipartRequest extends Request<NetworkResponse> {
 
-    public static final String TAG = MultipartRequest.class.getSimpleName();
+    private static final String TAG = MultipartRequest.class.getSimpleName();
 
     private final Context context;
     private final String url;

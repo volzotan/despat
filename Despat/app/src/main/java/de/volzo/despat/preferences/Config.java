@@ -22,7 +22,7 @@ import de.volzo.despat.R;
 
 public class Config {
 
-    public static final String TAG = Config.class.getSimpleName();
+    private static final String TAG = Config.class.getSimpleName();
 
     public static final String DATEFORMAT                           = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";

@@ -21,7 +21,7 @@ import java.util.List;
 
 public class DrawSurface extends SurfaceView {
 
-    public static final String TAG = SurfaceView.class.getSimpleName();
+    private static final String TAG = SurfaceView.class.getSimpleName();
 
     public Paint paintBlack         = null;
     public Paint paintGreen         = null;

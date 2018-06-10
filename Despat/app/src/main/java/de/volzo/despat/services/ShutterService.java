@@ -47,7 +47,7 @@ public class ShutterService extends Service {
      *
      */
 
-    public static final String TAG = ShutterService.class.getSimpleName();
+    private static final String TAG = ShutterService.class.getSimpleName();
     public static final int REQUEST_CODE                = 0x0100;
     public static final int FOREGROUND_NOTIFICATION_ID  = 0x0200;
     public static final String NOTIFICATION_CHANNEL_ID  = "de.volzo.despat.notificationchannel.ShutterService";

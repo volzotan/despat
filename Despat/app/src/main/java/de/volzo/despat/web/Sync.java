@@ -28,7 +28,7 @@ import de.volzo.despat.support.Util;
 
 public class Sync {
 
-    public static final String TAG = Sync.class.getSimpleName();
+    private static final String TAG = Sync.class.getSimpleName();
 
     public static synchronized void run(Context context, Class trigger, boolean ignoreMinSyncTime) {
 

@@ -31,7 +31,7 @@ import de.volzo.despat.support.Util;
 
 public class RecordingSession {
 
-    public static final String TAG = RecordingSession.class.getSimpleName();
+    private static final String TAG = RecordingSession.class.getSimpleName();
 
     private static volatile RecordingSession instance;
     private Context context;

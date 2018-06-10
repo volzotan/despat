@@ -63,7 +63,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static final int PERMISSION_REQUEST_CODE = 0x123;
 
     Despat despat;

@@ -28,7 +28,7 @@ import de.volzo.despat.support.Util;
 
 public class CameraController1 extends CameraController implements Camera.PreviewCallback, Camera.PictureCallback, Camera.ShutterCallback, Camera.AutoFocusCallback, Camera.AutoFocusMoveCallback, Camera.ErrorCallback {
 
-    public static final String TAG = CameraController.class.getSimpleName();
+    private static final String TAG = CameraController.class.getSimpleName();
 
     private Context context;
     private TextureView textureView;

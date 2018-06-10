@@ -18,7 +18,7 @@ import de.volzo.despat.support.Broadcast;
 
 public abstract class CameraController {
 
-    public static final String TAG = CameraController.class.getSimpleName();
+    private static final String TAG = CameraController.class.getSimpleName();
 
     public CameraController.ControllerCallback callback;
 

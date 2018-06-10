@@ -26,7 +26,7 @@ import de.volzo.despat.R;
 
 public class MapUtil {
 
-    public static final String TAG = MapUtil.class.getSimpleName();
+    private static final String TAG = MapUtil.class.getSimpleName();
 
     Context context;
 

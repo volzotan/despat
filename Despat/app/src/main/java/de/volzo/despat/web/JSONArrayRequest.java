@@ -27,7 +27,7 @@ import de.volzo.despat.R;
 
 public class JSONArrayRequest extends Request<JSONArray> {
 
-    public static final String TAG = JSONArrayRequest.class.getSimpleName();
+    private static final String TAG = JSONArrayRequest.class.getSimpleName();
 
     private Context context;
 

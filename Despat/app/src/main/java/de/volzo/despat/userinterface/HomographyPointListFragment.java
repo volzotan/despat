@@ -35,7 +35,7 @@ import de.volzo.despat.preferences.Config;
 
 public class HomographyPointListFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
-    public static final String TAG = HomographyPointListFragment.class.getSimpleName();
+    private static final String TAG = HomographyPointListFragment.class.getSimpleName();
 
     private OnHomographyPointListSelectionListener selectionListener;
     private OnHomographyPointAddListener addListener;

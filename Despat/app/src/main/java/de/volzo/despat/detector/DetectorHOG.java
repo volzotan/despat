@@ -21,7 +21,7 @@ import de.volzo.despat.support.Stopwatch;
 
 public class DetectorHOG extends Detector {
 
-    public static final String TAG = DetectorHOG.class.getSimpleName();
+    private static final String TAG = DetectorHOG.class.getSimpleName();
 
     Context context;
     Stopwatch stopwatch;

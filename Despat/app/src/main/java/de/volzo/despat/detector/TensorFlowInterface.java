@@ -39,7 +39,7 @@ import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
  */
 public class TensorFlowInterface {
 
-    public static final String TAG = TensorFlowInterface.class.getSimpleName();
+    private static final String TAG = TensorFlowInterface.class.getSimpleName();
 
     // Only return this many results.
     private static final int MAX_RESULTS = 100;

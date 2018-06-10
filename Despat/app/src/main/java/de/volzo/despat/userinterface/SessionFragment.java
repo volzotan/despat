@@ -35,7 +35,7 @@ import de.volzo.despat.support.Util;
 
 public class SessionFragment extends Fragment {
 
-    public static final String TAG = SessionFragment.class.getSimpleName();
+    private static final String TAG = SessionFragment.class.getSimpleName();
 
     public static final String ACTION_EXPORT = "ACTION_EXPORT";
 

@@ -36,7 +36,7 @@ public class SessionActivity extends AppCompatActivity implements
         HomographyPointListFragment.OnHomographyPointAddListener,
         ErrorEventListFragment.OnErrorEventListSelectionListener {
 
-    public static final String TAG = SessionActivity.class.getSimpleName();
+    private static final String TAG = SessionActivity.class.getSimpleName();
 
     public static final String ARG_SESSION_ID = "ARG_SESSION_ID";
 

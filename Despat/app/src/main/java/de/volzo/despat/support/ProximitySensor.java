@@ -9,7 +9,7 @@ import android.util.Log;
 
 public class ProximitySensor implements SensorEventListener {
 
-    public static final String TAG = ProximitySensor.class.getSimpleName();
+    private static final String TAG = ProximitySensor.class.getSimpleName();
 
     Context context;
     Sensor sensor;

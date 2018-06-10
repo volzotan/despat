@@ -19,7 +19,7 @@ import java.util.HashMap;
 
 public class PowerbrainConnector {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = MainActivity.class.getSimpleName();
     public final String ACTION_USB_PERMISSION = "de.volzo.despat.USB_PERMISSION";
 
     UsbManager usbManager;

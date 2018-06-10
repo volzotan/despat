@@ -31,7 +31,7 @@ import de.volzo.despat.web.Sync;
 
 public class Orchestrator extends BroadcastReceiver {
 
-    public static final String TAG = Orchestrator.class.getSimpleName();
+    private static final String TAG = Orchestrator.class.getSimpleName();
 
     public static final String SERVICE          = "service";
     public static final String OPERATION        = "operation";

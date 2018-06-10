@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CameraController3 {
 
-    public static final String TAG = CameraController.class.getSimpleName();
+    private static final String TAG = CameraController.class.getSimpleName();
 
     private Context context;
     private TextureView mTextureView;

@@ -42,7 +42,7 @@ import de.volzo.despat.support.Util;
 
 public class SessionListActivity extends AppCompatActivity {
 
-    public static final String TAG = SessionActivity.class.getSimpleName();
+    private static final String TAG = SessionActivity.class.getSimpleName();
 
     Context context;
 

@@ -29,7 +29,7 @@ import de.volzo.despat.persistence.StatusDao;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
-    public static final String TAG = SyncAdapter.class.getSimpleName();
+    private static final String TAG = SyncAdapter.class.getSimpleName();
 
     ContentResolver contentResolver;
     Context context;

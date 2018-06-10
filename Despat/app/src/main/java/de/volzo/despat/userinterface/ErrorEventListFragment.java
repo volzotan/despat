@@ -27,7 +27,7 @@ import de.volzo.despat.support.Util;
 
 public class ErrorEventListFragment extends Fragment {
 
-    public static final String TAG = ErrorEventListFragment.class.getSimpleName();
+    private static final String TAG = ErrorEventListFragment.class.getSimpleName();
 
     private OnErrorEventListSelectionListener listener;
     private Session session;

@@ -11,7 +11,7 @@ import java.util.Locale;
 
 public class Stopwatch {
 
-    public static final String TAG = Stopwatch.class.getSimpleName();
+    private static final String TAG = Stopwatch.class.getSimpleName();
 
     HashMap<String, Date> start;
     HashMap<String, ArrayList<Double>> runtime;

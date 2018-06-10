@@ -13,7 +13,7 @@ import static android.content.Context.SENSOR_SERVICE;
 
 public class DevicePositioner implements SensorEventListener, Callable<Integer> {
 
-    public static final String TAG = DevicePositioner.class.getSimpleName();
+    private static final String TAG = DevicePositioner.class.getSimpleName();
 
     Context context;
 

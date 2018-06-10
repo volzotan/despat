@@ -70,7 +70,7 @@ import de.volzo.despat.support.Util;
 
 public class CameraController2 extends CameraController {
 
-    public static final String TAG = CameraController.class.getSimpleName();
+    private static final String TAG = CameraController.class.getSimpleName();
 
     private Context context;
     private TextureView textureView;
