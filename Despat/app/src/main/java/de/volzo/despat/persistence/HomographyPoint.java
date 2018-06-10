@@ -8,6 +8,8 @@ import android.arch.persistence.room.PrimaryKey;
 import java.io.File;
 import java.util.Date;
 
+import de.volzo.despat.detector.Detector;
+
 import static android.arch.persistence.room.ForeignKey.CASCADE;
 
 @Entity(foreignKeys = @ForeignKey(  entity = Session.class,
@@ -37,6 +39,15 @@ public class HomographyPoint {
 
     @ColumnInfo(name = "longitude")
     private Double longitude;
+
+    public HomographyPoint() {}
+
+    public HomographyPoint(Double x, Double y, Double latitude, Double longitude) {
+        this.x = x;
+        this.y = y;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
     public long getId() {
         return id;

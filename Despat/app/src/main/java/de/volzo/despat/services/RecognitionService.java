@@ -132,6 +132,11 @@ public class RecognitionService extends IntentService {
             pos.setMaxx(loc.right);
             pos.setMaxy(loc.bottom);
 
+            // The detected position is not the center of the bounding box
+            // but the approximate point where the object touches the ground
+            pos.setX((loc.right - loc.left)/2f);
+            pos.setY((loc.bottom);
+
             pos.setType(rec.getTitle());
             pos.setRecognitionConfidence(rec.getConfidence());
 

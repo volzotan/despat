@@ -56,6 +56,7 @@ import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.DrawSurface;
@@ -402,31 +403,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
 //        btSessions.callOnClick();
 
-//        ImageRollover imgroll = new ImageRollover(activity, Config.IMAGE_FILEEXTENSION);
-//        try {
-//            Util.shareFile(activity, imgroll.getNewestImage());
-//        } catch (Exception e) {
-//            Log.e(TAG, "file missing");
-//            e.printStackTrace();
-//        }
-
-//        ExecutorService executorService = Executors.newSingleThreadExecutor();
-//        Future<Integer> future = executorService.submit(new Compressor());
-//
-//        try {
-//            Integer result = future.get(10, TimeUnit.SECONDS);
-//            Log.wtf(TAG, "result: " + result);
-//        } catch (InterruptedException | ExecutionException e) {
-//            Log.d(TAG, "interrupt/execution");
-//            e.printStackTrace();
-//        } catch (TimeoutException e) {
-//            Log.d(TAG, "timeout");
-//            e.printStackTrace();
-//        } finally {
-//            future.cancel(true);
-//        }
-//
-
         HomographyPointDao homographyPointDao = db.homographyPointDao();
 
         HomographyPoint point = new HomographyPoint();
@@ -438,6 +414,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         } else {
             Log.wtf(TAG, "session missing");
         }
+
+        HomographyCalculator hcalc = new HomographyCalculator();
+        hcalc.test();
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

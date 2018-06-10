@@ -63,10 +63,7 @@ public class HomographyService extends IntentService {
             return;
         }
 
-
-
         List<Position> positions = positionDao.getAllBySession(sessionId);
-
         Session session = sessionDao.getById(sessionId);
 
         if (session == null) {
@@ -74,11 +71,7 @@ public class HomographyService extends IntentService {
             return;
         }
 
-
-
         List<Session> sessions = sessionDao.getAll();
-
-
-
+        
     }
 }
