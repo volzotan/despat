@@ -258,12 +258,12 @@ public class SessionListActivity extends AppCompatActivity {
 
             @Override
             public void onItemSelected() {
-                itemView.setBackgroundColor(Color.LTGRAY);
+//                itemView.setBackgroundColor(Color.LTGRAY);
             }
 
             @Override
             public void onItemClear() {
-                itemView.setBackgroundColor(0);
+//                itemView.setBackgroundColor(0);
             }
 
             @Override
@@ -359,11 +359,14 @@ public class SessionListActivity extends AppCompatActivity {
                         Session s = entry.getKey();
                         Integer i = entry.getValue();
                         ((SessionRecyclerViewAdapter) adapter).restoreItem(s, i);
+                        sessionsDeleteList.clear();
                     }
                 }
             });
-            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.setActionTextColor(getResources().getColor(R.color.colorAccent));
             snackbar.show();
+
+            ((SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground.setTranslationX(0);
 
             adapter.onItemDismiss(viewHolder.getAdapterPosition());
         }

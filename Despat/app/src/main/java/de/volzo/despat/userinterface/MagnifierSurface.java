@@ -81,11 +81,13 @@ public class MagnifierSurface extends SurfaceView implements SurfaceHolder.Callb
         markerPaint.setColor(Color.RED);
         markerPaint.setStrokeWidth(3.0f);
 
-        image = BitmapFactory.decodeFile(new File(Config.getImageFolder(context), "test.jpg").getAbsolutePath());
-
         prevMarker = new ArrayList<>();
         prevMarker.add(new Point(1000, 1000));
         prevMarker.add(new Point(2000, 1500));
+    }
+
+    public void setImage(File path) {
+        image = BitmapFactory.decodeFile(path.getAbsolutePath());
     }
 
     public void clearCanvas() throws Exception {
@@ -125,14 +127,16 @@ public class MagnifierSurface extends SurfaceView implements SurfaceHolder.Callb
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        if (image == null) return;
+
         canvas.drawARGB(255, 0, 0, 0);
 
         canvas.drawBitmap(image, (-1 * posX * image.getWidth()) + canvas.getWidth()/2, (-1 * posY * image.getHeight()) + canvas.getHeight()/2, bitmapPaint);
 
         canvas.drawLine(canvas.getWidth() / 2, 0, canvas.getWidth() / 2, canvas.getHeight(), linePaint);
-//        canvas.drawLine(canvas.getWidth() / 2 +1, 0, canvas.getWidth() / 2 +1, canvas.getHeight(), linePaint2);
+        canvas.drawLine(canvas.getWidth() / 2 +1, 0, canvas.getWidth() / 2 +1, canvas.getHeight(), linePaint2);
         canvas.drawLine(0, canvas.getHeight() / 2, canvas.getWidth(), canvas.getHeight() / 2, linePaint);
-//        canvas.drawLine(0, canvas.getHeight() / 2 +1, canvas.getWidth(), canvas.getHeight() / 2 +1, linePaint2);
+        canvas.drawLine(0, canvas.getHeight() / 2 +1, canvas.getWidth(), canvas.getHeight() / 2 +1, linePaint2);
 
         // TODO: draw marker
     }

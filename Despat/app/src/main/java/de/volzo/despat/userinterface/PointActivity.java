@@ -84,6 +84,11 @@ public class PointActivity extends AppCompatActivity implements
             return;
         }
 
+        if (session.getCompressedImage() == null || !session.getCompressedImage().exists()) {
+            Log.e(TAG, "compressed image missing from session: " + session);
+            return;
+        }
+
 //        ivPointSelector = (ImageView) findViewById(R.id.iv_point_selector);
 //        Glide.with(findViewById(android.R.id.content)).load(new File(Config.getImageFolder(this), "test.jpg")).into(ivPointSelector);
 //        ivPointSelector.setOnTouchListener(this);
@@ -96,6 +101,7 @@ public class PointActivity extends AppCompatActivity implements
         newFragment.getMapAsync(this);
 
         magnifierSurface = (MagnifierSurface) findViewById(R.id.iv_magnifier);
+        magnifierSurface.setImage(session.getCompressedImage());
         magnifierSurface.setOnTouchListener(this);
 
         btDone = findViewById(R.id.bt_done);

@@ -56,11 +56,17 @@ public class Stopwatch {
     public List<Double> getLast(String key, int count) {
         ArrayList<Double> times = runtime.get(key);
         if (count > times.size()) return times;
-        return times.subList(times.size()-count, times.size()-1);
+        return times.subList(times.size()-count-1, times.size()-1);
     }
 
     public Double getAverage(String key) {
         return getAverage(key, 0, 0);
+    }
+
+    public int getCount(String key) {
+        ArrayList<Double> times = runtime.get(key);
+
+        return times.size();
     }
 
     public Double getAverage(String key, int count) {
@@ -102,17 +108,68 @@ public class Stopwatch {
         return sum/counter;
     }
 
+    public Double getMin(String key) {
+        ArrayList<Double> times = runtime.get(key);
+
+        if (times.size() == 0) return -1d;
+
+        double min = times.get(0);
+        for (Double value : times) {
+            if (value < min) min = value;
+        }
+
+        return min;
+    }
+
+    public Double getMax(String key) {
+        ArrayList<Double> times = runtime.get(key);
+
+        if (times.size() == 0) return -1d;
+
+        double max = times.get(0);
+        for (Double value : times) {
+            if (value > max) max = value;
+        }
+
+        return max;
+    }
+
+    public Double getSum(String key) {
+        ArrayList<Double> times = runtime.get(key);
+
+        double sum = 0;
+        for (Double value : times) {
+            sum += value;
+        }
+
+        return sum;
+    }
+
     public void print() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("STOPWATCH \n");
+        sb.append("\n");
+        sb.append("STOPWATCH");
+        sb.append("\n");
 
         for (String key : runtime.keySet()) {
             sb.append(String.format("%-40s | ", key));
-            for (Double val : getLast(key, 10)) {
+
+            List<Double> values = getLast(key, 5);
+
+            for (Double val : values) {
                 sb.append(String.format(Locale.ENGLISH, "%6.0f ", val));
             }
-            sb.append(String.format(Locale.ENGLISH,"| avg: %-5.2f", getAverage(key, -10)));
+
+            for (int i=0; i<(10-values.size()); i++) {
+                sb.append("       ");
+            }
+
+            sb.append(String.format(Locale.ENGLISH,"| cnt: %-5d", getCount(key)));
+            sb.append(String.format(Locale.ENGLISH,"| avg: %-5.0f", getAverage(key)));
+            sb.append(String.format(Locale.ENGLISH,"| min: %-5.0f", getMin(key)));
+            sb.append(String.format(Locale.ENGLISH,"| max: %-5.0f", getMax(key)));
+            sb.append(String.format(Locale.ENGLISH,"| sum: %-5.0f ms", getSum(key)));
             sb.append("\n");
         }
 

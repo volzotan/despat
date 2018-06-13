@@ -11,10 +11,20 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <ImageView
-            android:id="@+id/compressedpreview"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/compressedpreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <de.volzo.despat.userinterface.DrawSurface
+                android:id="@+id/drawSurface_session"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
+        </FrameLayout>
 
         <GridLayout
             android:layout_width="match_parent"
@@ -121,6 +131,13 @@
                 android:text="-1" />
 
         </GridLayout>
+
+        <TextView
+            android:id="@+id/tv_glitches"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="" />
 
         <Button
             android:id="@+id/bt_export"
