@@ -16,27 +16,23 @@ public class FixedAspectRatioFrameLayout extends FrameLayout
     private int mAspectRatioWidth;
     private int mAspectRatioHeight;
 
-    public FixedAspectRatioFrameLayout(Context context)
-    {
+    public FixedAspectRatioFrameLayout(Context context) {
         super(context);
     }
 
-    public FixedAspectRatioFrameLayout(Context context, AttributeSet attrs)
-    {
+    public FixedAspectRatioFrameLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         init(context, attrs);
     }
 
-    public FixedAspectRatioFrameLayout(Context context, AttributeSet attrs, int defStyle)
-    {
+    public FixedAspectRatioFrameLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         init(context, attrs);
     }
 
-    private void init(Context context, AttributeSet attrs)
-    {
+    private void init(Context context, AttributeSet attrs) {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.FixedAspectRatioFrameLayout);
 
         mAspectRatioWidth = a.getInt(R.styleable.FixedAspectRatioFrameLayout_aspectRatioWidth, 4);
@@ -44,10 +40,9 @@ public class FixedAspectRatioFrameLayout extends FrameLayout
 
         a.recycle();
     }
-    // **overrides**
 
-    @Override protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec)
-    {
+    @Override
+    protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec) {
         int originalWidth = MeasureSpec.getSize(widthMeasureSpec);
 
         int originalHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -56,13 +51,11 @@ public class FixedAspectRatioFrameLayout extends FrameLayout
 
         int finalWidth, finalHeight;
 
-        if (calculatedHeight > originalHeight)
-        {
+        if (calculatedHeight > originalHeight) {
             finalWidth = originalHeight * mAspectRatioWidth / mAspectRatioHeight;
             finalHeight = originalHeight;
         }
-        else
-        {
+        else {
             finalWidth = originalWidth;
             finalHeight = calculatedHeight;
         }

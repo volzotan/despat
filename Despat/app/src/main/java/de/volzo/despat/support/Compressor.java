@@ -184,10 +184,6 @@ public class Compressor implements Callable<Integer> {
         mat = Mat.zeros(this.height, this.width, CvType.CV_16UC1);
     }
 
-//    public void add(Image image) {
-//
-//    }
-
     public void add(File path) {
         if (counter >= 255) {
             Log.e(TAG, "overflow imminent. image ignored.");

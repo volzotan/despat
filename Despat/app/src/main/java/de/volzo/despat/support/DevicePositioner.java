@@ -65,22 +65,22 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
         // flat on table
 
         if (Math.abs(pitch) > 1.0 && pitch < 0) {
-            System.out.println("portrait");
+            Log.d(TAG, "portrait");
             return 90;
         }
 
         if (Math.abs(pitch) > 1.0 && pitch > 0) {
-            System.out.println("portrait reverse");
+            Log.d(TAG, "portrait reverse");
             return 270;
         }
 
         if (Math.abs(roll) > 0.5 && roll < 0) {
-            System.out.println("landscape");
+            Log.d(TAG, "landscape");
             return 0;
         }
 
         if (Math.abs(roll) > 0.5 && roll > 0) {
-            System.out.println("landscape reverse");
+            Log.d(TAG, "landscape reverse");
             return 180;
         }
 

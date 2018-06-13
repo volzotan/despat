@@ -89,7 +89,5 @@ public class HomographyCalculator {
         src.fromList(imagePoints);
 
         Core.perspectiveTransform(src, dst, this.h);
-
-        Log.wtf(TAG, dst.dump());
     }
 }
