@@ -119,7 +119,11 @@ public class MapUtil {
         map.getUiSettings().setAllGesturesEnabled(!action);
     }
 
-    private void placeMarkersOnMap(List<DespatMarker> markers) {
+    public void clearAllMarkersOnMap() {
+        map.clear();
+    }
+
+    public void placeMarkersOnMap(List<DespatMarker> markers) {
         for (DespatMarker m : markers) {
 
             MarkerOptions marker = new MarkerOptions();
@@ -128,6 +132,11 @@ public class MapUtil {
 
             switch (m.type) {
                 case DespatMarker.TYPE_CORRESPONDING_POINT: {
+                    marker.icon(BitmapDescriptorFactory.fromBitmap(getBitmap(context, R.drawable.ic_marker_plus)));
+                    break;
+                }
+
+                case DespatMarker.TYPE_CORRESPONDING_POINT_NEW: {
                     marker.icon(BitmapDescriptorFactory.fromBitmap(getBitmap(context, R.drawable.ic_marker_plus)));
                     marker.draggable(true);
                     break;
@@ -149,10 +158,19 @@ public class MapUtil {
         }
     }
 
-    class DespatMarker {
+    public DespatMarker newMarker(int type, Location pos, String description) {
+        return new DespatMarker(type, new LatLng(pos.getLatitude(), pos.getLongitude()), description);
+    }
 
-        public static final int TYPE_CAMERA                 = 0x10;
-        public static final int TYPE_CORRESPONDING_POINT    = 0x20;
+    public DespatMarker newMarker(int type, LatLng pos, String description) {
+        return new DespatMarker(type, pos, description);
+    }
+
+    public class DespatMarker {
+
+        public static final int TYPE_CAMERA                     = 0x10;
+        public static final int TYPE_CORRESPONDING_POINT        = 0x20;
+        public static final int TYPE_CORRESPONDING_POINT_NEW    = 0x30;
 
         public int type;
         public LatLng pos;

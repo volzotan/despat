@@ -27,7 +27,7 @@ public class RecognitionService extends IntentService {
 
     private static final String TAG = RecognitionService.class.getSimpleName();
 
-    public static final String SESSION_ID = "SESSION_ID";
+    public static final String ARG_SESSION_ID = "ARG_SESSION_ID";
 
     private static float MIN_CONFIDENCE = 0.1f;
 
@@ -47,7 +47,7 @@ public class RecognitionService extends IntentService {
 //        }
 
         Bundle args = intent.getExtras();
-        Long sessionId = args.getLong(SESSION_ID);
+        Long sessionId = args.getLong(ARG_SESSION_ID);
 
         if (sessionId == null) {
             Log.e(TAG, "session id missing");
@@ -135,7 +135,7 @@ public class RecognitionService extends IntentService {
             // The detected position is not the center of the bounding box
             // but the approximate point where the object touches the ground
             pos.setX((loc.right - loc.left)/2f);
-            pos.setY((loc.bottom);
+            pos.setY((loc.bottom));
 
             pos.setType(rec.getTitle());
             pos.setRecognitionConfidence(rec.getConfidence());

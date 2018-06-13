@@ -30,7 +30,7 @@ public interface CaptureDao {
     void insert(Capture... captures);
 
     @Update
-    void update(Capture capture);
+    void update(Capture... captures);
 
     @Delete
     void delete(Capture capture);

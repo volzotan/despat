@@ -48,6 +48,7 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public static void purgeDatabase(Context context) {
+        AppDatabase.destroyInstance();
         AppDatabase db = AppDatabase.getAppDatabase(context);
 
         db.eventDao().dropTable();

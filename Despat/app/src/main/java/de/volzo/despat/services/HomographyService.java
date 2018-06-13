@@ -15,6 +15,7 @@ import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.support.HomographyCalculator;
 
 public class HomographyService extends IntentService {
 
@@ -72,6 +73,20 @@ public class HomographyService extends IntentService {
         }
 
         List<Session> sessions = sessionDao.getAll();
-        
+
+        try {
+            HomographyCalculator hcalc = new HomographyCalculator();
+            hcalc.loadPoints(points);
+            hcalc.convertPoints(positions);
+        } catch (Exception e) {
+            Log.e(TAG, "homography operation failed", e);
+            return;
+        }
+
+        for (Position p : positions) {
+            positionDao.update(p);
+        }
+
+        Log.d(TAG, "homography operation finished. positions updated: " + positions.size());
     }
 }

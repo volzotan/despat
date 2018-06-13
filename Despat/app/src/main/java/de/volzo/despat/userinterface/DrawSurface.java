@@ -19,9 +19,9 @@ import android.view.SurfaceView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrawSurface extends SurfaceView {
+public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
-    private static final String TAG = SurfaceView.class.getSimpleName();
+    private static final String TAG = DrawSurface.class.getSimpleName();
 
     public Paint paintBlack         = null;
     public Paint paintGreen         = null;
@@ -57,7 +57,9 @@ public class DrawSurface extends SurfaceView {
     }
 
     private void init() {
+
         holder = getHolder();
+        holder.addCallback(this);
         holder.setFormat(PixelFormat.TRANSPARENT);
 
         this.setZOrderOnTop(true);
@@ -243,5 +245,20 @@ public class DrawSurface extends SurfaceView {
         }
 
         return false;
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+
     }
 }

@@ -111,12 +111,7 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
-    public void display(DrawSurface surface, List<Detector.Recognition> results) {
-        List<RectF> rectangles = new ArrayList<RectF>();
-        for (Detector.Recognition result : results) {
-            rectangles.add(result.getLocation());
-        }
-
+    public void display(DrawSurface surface, List<RectF> rectangles) {
         try {
             surface.clearCanvas();
             surface.addBoxes(imageSize, rectangles, surface.paintGreen);

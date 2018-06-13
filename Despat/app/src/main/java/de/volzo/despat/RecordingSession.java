@@ -104,6 +104,11 @@ public class RecordingSession {
 
         Log.d(TAG, "init new RecordingSession [" + sessionName + "]");
 
+        Intent heartbeatIntent = new Intent(context, Orchestrator.class);
+        heartbeatIntent.putExtra(Orchestrator.SERVICE, Broadcast.HEARTBEAT_SERVICE);
+        heartbeatIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
+        context.sendBroadcast(heartbeatIntent);
+
         Despat despat = Util.getDespat(context);
 
         session = new Session();
@@ -186,6 +191,11 @@ public class RecordingSession {
 
         Log.i(TAG, "resume RecordingSession [" + session.getSessionName() + "]");
 
+        Intent heartbeatIntent = new Intent(context, Orchestrator.class);
+        heartbeatIntent.putExtra(Orchestrator.SERVICE, Broadcast.HEARTBEAT_SERVICE);
+        heartbeatIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
+        context.sendBroadcast(heartbeatIntent);
+
         Intent shutterIntent = new Intent(context, Orchestrator.class);
         shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
         shutterIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
@@ -203,6 +213,11 @@ public class RecordingSession {
         if (!isActive()) throw new NotRecordingException();
 
         Log.d(TAG, "stop RecordingSession [" + session.getSessionName() + "]");
+
+        Intent heartbeatIntent = new Intent(context, Orchestrator.class);
+        heartbeatIntent.putExtra(Orchestrator.SERVICE, Broadcast.HEARTBEAT_SERVICE);
+        heartbeatIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
+        context.sendBroadcast(heartbeatIntent);
 
         Intent shutterIntent = new Intent(context, Orchestrator.class);
         shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
@@ -313,7 +328,27 @@ public class RecordingSession {
         return numberErrors;
     }
 
-    public static boolean checkForIntegrity(Context context, Session session) {
+    public static void checkAllForIntegrity(Context context) {
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = db.sessionDao();
+        List<Session> sessions = sessionDao.getAll();
+
+        for (Session session : sessions) {
+            String res = RecordingSession.checkForIntegrity(context, session);
+            boolean noGlitch = true;
+
+            if (res != null && res.length() > 0) noGlitch = false;
+
+            if (noGlitch) {
+                Log.i(TAG, "session " + session.toString() + " has no glitch");
+            } else {
+                Log.i(TAG, res);
+                Log.i(TAG, "session " + session.toString() + " has glitches");
+            }
+        }
+    }
+
+    public static String checkForIntegrity(Context context, Session session) {
 
         // check the DB if shutter events have occurred at the timed interval
         // or if android suppressed the alarm manager
@@ -344,9 +379,9 @@ public class RecordingSession {
             comp = captures.get(i).getRecordingTime();
         }
 
-        System.out.println(sb.toString());
+//        System.out.println(sb.toString());
 
-        return result;
+        return sb.toString();
     }
 
     public long getSessionId() throws NotRecordingException {

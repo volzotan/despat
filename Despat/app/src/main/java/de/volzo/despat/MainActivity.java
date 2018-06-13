@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 
 import java.io.File;
 import java.util.Calendar;
@@ -47,22 +48,18 @@ import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
-import de.volzo.despat.persistence.HomographyPoint;
-import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
-import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
-import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.DrawSurface;
+import de.volzo.despat.userinterface.PointActivity;
 import de.volzo.despat.userinterface.SessionListActivity;
 import de.volzo.despat.userinterface.SettingsActivity2;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
@@ -118,55 +115,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 
-//        Button btConfigure = (Button) findViewById(R.id.bt_configure);
-//        btConfigure.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(activity, ConfigureActivity.class);
-//                startActivity(intent);
-//            }
-//        });
-//        final ToggleButton btStartStopCapturing = findViewById(R.id.bt_startStopCapturing);
-//        btStartStopCapturing.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (!RecordingSession.getInstance(activity).isActive()) { // if (!Util.isServiceRunning(activity, ShutterService.class)) {
-//                    Log.d(TAG, "startCapturing");
-//
-//                    Despat despat = Util.getDespat(activity);
-//                    despat.closeCamera();
-//
-//                    final Handler handler = new Handler();
-//                    handler.postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            RecordingSession session = RecordingSession.getInstance(activity);
-//                            session.startRecordingSession(null);
-//                        }
-//                    }, 1000);
-//                    startProgressBarUpdate();
-//                    btStartStopCapturing.setChecked(true);
-//                } else {
-//                    Log.d(TAG, "stopCapturing");
-//                    RecordingSession session = RecordingSession.getInstance(activity);
-//                    try {
-//                        session.stopRecordingSession();
-//                    } catch (RecordingSession.NotRecordingException e) {
-//                        Log.e(TAG, "stopping Recording Session failed", e);
-//                    }
-//                    stopProgressBarUpdate();
-//                    btStartStopCapturing.setChecked(false);
-//                }
-//            }
-//        });
-//        if (!RecordingSession.getInstance(activity).isActive()) {
-//            btStartStopCapturing.setText("Start Capturing");
-//            btStartStopCapturing.setChecked(false);
-//        } else {
-//            btStartStopCapturing.setText("Stop Capturing");
-//            btStartStopCapturing.setChecked(true);
-//        }
-
 //        Button btToggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
 //        btToggleCamera.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -185,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            }
 //        });
 
-        Button btSessions = (Button) findViewById(R.id.bt_sessions);
+        final Button btSessions = (Button) findViewById(R.id.bt_sessions);
         btSessions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -193,14 +141,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-//        Button btRunRec = (Button) findViewById(R.id.bt_runRecognizer);
-//        btRunRec.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                activity.runRecognizer();
-//            }
-//        });
-//
+        Button btRunRec = (Button) findViewById(R.id.bt_runRecognizer);
+        btRunRec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.runRecognizer();
+            }
+        });
+
 //        Button btKill = (Button) findViewById(R.id.bt_kill);
 //        btKill.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -222,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            }
 //        });
 
-        Button btSettings = (Button) findViewById(R.id.bt_settings);
+        final Button btSettings = (Button) findViewById(R.id.bt_settings);
         btSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -231,17 +179,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
+        setButtonStates();
         final FloatingActionButton fabRec = findViewById(R.id.fabRec);
         final TextView tvFapRec = findViewById(R.id.tvFapRec);
         fabRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Sync.run(activity, MainActivity.class, true);
-
-                if (!RecordingSession.getInstance(activity).isActive()) { // if (!Util.isServiceRunning(activity, ShutterService.class)) {
+                if (!RecordingSession.getInstance(activity).isActive()) {
                     Log.d(TAG, "startCapturing");
-
-                    tvFapRec.setText("BUSY");
 
                     Despat despat = Util.getDespat(activity);
                     despat.closeCamera();
@@ -274,36 +219,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     }
                     stopProgressBarUpdate();
 //                    btStartStopCapturing.setChecked(false);
-
-                    tvFapRec.setText("REC");
-
-                    findViewById(R.id.block_general).setVisibility(View.VISIBLE);
-                    findViewById(R.id.block_session).setVisibility(View.GONE);
-                    findViewById(R.id.block_duration).setVisibility(View.GONE);
-                    findViewById(R.id.block_numberofimages).setVisibility(View.GONE);
-                    findViewById(R.id.block_errors).setVisibility(View.GONE);
                 }
+
+                setButtonStates();
             }
         });
 
         LinearLayout llBlockGeneral = (LinearLayout) findViewById(R.id.block_general);
-//        llBlockGeneral.setClickable(true);
-//        llBlockGeneral.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.wtf(TAG, "click");
-//            }
-//        });
-//        llBlockGeneral.setFocusable(true);
-//        llBlockGeneral.setHovered(true);
-//        llBlockGeneral.setOnHoverListener(new View.OnHoverListener() {
-//            @Override
-//            public boolean onHover(View v, MotionEvent event) {
-//                Log.wtf(TAG, "hover");
-//                return false;
-//            }
-//        });
-
         llBlockGeneral.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -314,8 +236,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.wtf(TAG, "motion event: " + event);
-
                 LinearLayout tvSysinfo = (LinearLayout) findViewById(R.id.sysinfo);
 
                 switch (event.getAction()) {
@@ -344,11 +264,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         registerAllReceivers();
 
-        Intent heartbeatIntent = new Intent(activity, Orchestrator.class);
-        heartbeatIntent.putExtra(Orchestrator.SERVICE, Broadcast.HEARTBEAT_SERVICE);
-        heartbeatIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
-        sendBroadcast(heartbeatIntent);
-
         if (Config.getPhoneHome(this)) {
             Intent uploadIntent = new Intent(activity, Orchestrator.class);
             uploadIntent.putExtra(Orchestrator.SERVICE, Broadcast.UPLOAD_SERVICE);
@@ -362,61 +277,67 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         startProgressBarUpdate();
         updatePreviewImage();
 
-//        btSettings.callOnClick();
+        RecordingSession.checkAllForIntegrity(this);
+
+        AppDatabase db = AppDatabase.getAppDatabase(this);
+        SessionDao sessionDao = db.sessionDao();
+        Session lastSession = sessionDao.getLast();
+//        if (lastSession != null) {
+//            Intent detectorIntent = new Intent(this, RecognitionService.class);
+//            detectorIntent.putExtra(RecognitionService.SESSION_ID, lastSession.getId());
+//            startService(detectorIntent);
+//        }
+        Intent compressorIntent = new Intent(this, CompressorService.class);
+        startService(compressorIntent);
+
+        if (lastSession != null) {
+            Intent pointIntent = new Intent(activity, PointActivity.class);
+            pointIntent.putExtra(PointActivity.ARG_SESSION_ID, lastSession.getId());
+            startActivityForResult(pointIntent, 0x1234);
+        }
+
+//        btSessions.callOnClick();
+
+//        HomographyPointDao homographyPointDao = db.homographyPointDao();
+//
+//        HomographyPoint point = new HomographyPoint();
+//        Session s = sessionDao.getLast();
+//        if (s != null){
+//            point.setSessionId(s.getId());
+//            homographyPointDao.insert(point);
+//            Util.saveErrorEvent(this, s.getId(), "test", new Exception("testexception"));
+//        } else {
+//            Log.wtf(TAG, "session missing");
+//        }
+//
+//        HomographyCalculator hcalc = new HomographyCalculator();
+//        hcalc.test();
+
+        //        btSettings.callOnClick();
 
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();
 
 //        Util.printCameraParameters(this);
 
-//        ImageRollover imgroll = new ImageRollover(activity, ".jpg");
-//        Compressor compressor = new Compressor();
-//        File img = imgroll.getNewestImage();
-//        Bitmap bitmap = BitmapFactory.decodeFile(img.getAbsolutePath());
-//        compressor.init(bitmap.getWidth(), bitmap.getHeight());
-//        compressor.add(imgroll.getNewestImage());
-//        compressor.toJpeg(new File(Environment.getExternalStorageDirectory(), ("despat/foo.jpg")));
+//        if (lastSession != null) {
+//            PositionDao positionDao = db.positionDao();
+//            CaptureDao captureDao = db.captureDao();
+//            List<Position> positions = positionDao.getAllBySession(lastSession.getId());
+//            try {
+//                Detector detector = new DetectorSSD(this);
+//                detector.init();
+//                detector.load(captureDao.getLastFromSession(lastSession.getId()).getImage().getAbsoluteFile());
+//                detector.display((DrawSurface) findViewById(R.id.drawSurface), detector.positionsToRectangles(positions));
+//            } catch (Exception e) {
+//                Log.e(TAG, "drawing results failed", e);
+//            }
+//        }
+    }
 
-        AppDatabase db = AppDatabase.getAppDatabase(this);
-        SessionDao sessionDao = db.sessionDao();
-        List<Session> sessions = sessionDao.getAll();
-
-        for (Session session : sessions) {
-            boolean noGlitch = RecordingSession.checkForIntegrity(this, session);
-
-            if (noGlitch) {
-                Log.i(TAG, "session " + session.toString() + " has no glitch");
-            } else {
-                Log.i(TAG, "session " + session.toString() + " has glitches");
-            }
-        }
-
-        Session lastSession = sessionDao.getLast();
-        if (lastSession != null) {
-            Intent detectorIntent = new Intent(this, RecognitionService.class);
-            detectorIntent.putExtra(RecognitionService.SESSION_ID, lastSession.getId());
-            startService(detectorIntent);
-        }
-        Intent compressorIntent = new Intent(this, CompressorService.class);
-        compressorIntent.setAction("foo");
-        startService(compressorIntent);
-
-//        btSessions.callOnClick();
-
-        HomographyPointDao homographyPointDao = db.homographyPointDao();
-
-        HomographyPoint point = new HomographyPoint();
-        Session s = sessionDao.getLast();
-        if (s != null){
-            point.setSessionId(s.getId());
-            homographyPointDao.insert(point);
-            Util.saveErrorEvent(this, s.getId(), "test", new Exception("testexception"));
-        } else {
-            Log.wtf(TAG, "session missing");
-        }
-
-        HomographyCalculator hcalc = new HomographyCalculator();
-        hcalc.test();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult");
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -474,6 +395,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         registerAllReceivers();
         startProgressBarUpdate();
         updatePreviewImage();
+
+        setButtonStates();
     }
 
     @Override
@@ -495,6 +418,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
             if (checkPermissionsAreGiven()) {
                 startCamera();
+            } else {
+                Toast.makeText(this, "camera inactive : permissions are missing", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -538,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         stopProgressBarUpdate();
 
         if (photoViewAttacher != null) {
-            photoViewAttacher.cleanup();
+//            photoViewAttacher.cleanup();
         }
 
         if (powerbrain != null) {
@@ -549,6 +474,29 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         despat.closeCamera();
 
         unregisterAllReceivers();
+    }
+
+    private void setButtonStates() {
+        final TextView tvFapRec = findViewById(R.id.tvFapRec);
+
+        if (RecordingSession.getInstance(activity).isActive()) {
+            findViewById(R.id.layout_buttons).setVisibility(View.GONE);
+            tvFapRec.setText("STOP");
+
+            findViewById(R.id.block_general).setVisibility(View.GONE);
+            findViewById(R.id.block_session).setVisibility(View.VISIBLE);
+            findViewById(R.id.block_duration).setVisibility(View.VISIBLE);
+            findViewById(R.id.block_numberofimages).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.layout_buttons).setVisibility(View.VISIBLE);
+            tvFapRec.setText("REC");
+
+            findViewById(R.id.block_general).setVisibility(View.VISIBLE);
+            findViewById(R.id.block_session).setVisibility(View.GONE);
+            findViewById(R.id.block_duration).setVisibility(View.GONE);
+            findViewById(R.id.block_numberofimages).setVisibility(View.GONE);
+            findViewById(R.id.block_errors).setVisibility(View.GONE);
+        }
     }
 
     public void startCamera() {
@@ -623,7 +571,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         camera.openCamera();
                     } catch (Exception e) {
                         Log.e(TAG, "starting camera failed", e);
-                        Toast.makeText(activity, "starting camera failed: " + e.getMessage(), Toast.LENGTH_SHORT);
+                        Toast.makeText(activity, "starting camera failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     try {
@@ -640,16 +588,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         Context context = activity;
         RecordingSession session = RecordingSession.getInstance(context);
 
-        View blockGeneral = findViewById(R.id.block_general);
+        setButtonStates();
+
         TextView tvGeneral = findViewById(R.id.tv_block_general);
-
-        View blockSession = findViewById(R.id.block_session);
         TextView tvSession = findViewById(R.id.tv_block_session);
-
-        View blockDuration = findViewById(R.id.block_duration);
         TextView tvDuration = findViewById(R.id.tv_block_duration);
-
-        View blockNumberOfImages = findViewById(R.id.block_numberofimages);
         TextView tvNumberOfImages = findViewById(R.id.tv_block_numberofimages);
 
         View blockErrors = findViewById(R.id.block_errors);
@@ -660,15 +603,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             if (session.isActive()) {
                 activeSession = true;
 
-                blockGeneral.setVisibility(View.GONE);
-
-                blockSession.setVisibility(View.VISIBLE);
                 tvSession.setText(session.getSessionName());
-
-                blockDuration.setVisibility(View.VISIBLE);
                 tvDuration.setText(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), true));
-
-                blockNumberOfImages.setVisibility(View.VISIBLE);
                 tvNumberOfImages.setText(Integer.toString(session.getImagesTaken()));
 
                 int errors = session.getErrors();
@@ -676,7 +612,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     blockErrors.setVisibility(View.VISIBLE);
                     tvErrors.setText(Integer.toString(errors));
                 } else {
-
+                    blockErrors.setVisibility(View.GONE);
                 }
             } else {
                 activeSession = false;
@@ -692,12 +628,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             sb.append("free space on device: ");
             sb.append(String.format(Locale.ENGLISH, "%.0fmb", Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity))));
             tvGeneral.setText(sb.toString());
-
-            blockGeneral.setVisibility(View.VISIBLE);
-            blockSession.setVisibility(View.GONE);
-            blockDuration.setVisibility(View.GONE);
-            blockNumberOfImages.setVisibility(View.GONE);
-            blockErrors.setVisibility(View.GONE);
         }
 
         if (activeSession) {
@@ -789,7 +719,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             detector.init();
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
             List<Detector.Recognition> detections = detector.run();
-            detector.display((DrawSurface) findViewById(R.id.drawSurface), detections);
+            detector.display((DrawSurface) findViewById(R.id.drawSurface), detector.recognitionsToRectangles(detections));
         } catch (Exception e) {
             Log.wtf(TAG, "detector failed", e);
         }
@@ -870,6 +800,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             case PERMISSION_REQUEST_CODE: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.w(TAG, "permissions are granted by user");
                     init();
                 } else {
                     Log.w(TAG, "permissions denied by user");

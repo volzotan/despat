@@ -29,7 +29,6 @@ public class DetectorSSD extends Detector {
     private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_android_demo.pb";
 
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco_labels_list.txt";
-    private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
 
     private TileManager tileManager = null;
 
@@ -75,9 +74,6 @@ public class DetectorSSD extends Detector {
 
     @Override
     public void load(File fullFilename) {
-//        Bitmap bitmap = BitmapFactory.decodeFile(fullFilename.getAbsolutePath());
-//        croppedBitmap = bitmap;
-
         stopwatch.start("tileManager init");
         tileManager = new TileManager(fullFilename);
         stopwatch.stop("tileManager init");
@@ -134,16 +130,7 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
-    public void display(DrawSurface surface, List<Detector.Recognition> results) {
-
-        List<RectF> rectangles = new ArrayList<RectF>();
-        for (Detector.Recognition result : results) {
-            if (result.getConfidence() < MINIMUM_CONFIDENCE_TF_OD_API) {
-                continue;
-            }
-            rectangles.add(result.getLocation());
-        }
-
+    public void display(DrawSurface surface, List<RectF> rectangles) {
         try {
             surface.clearCanvas();
             surface.addBoxes(tileManager.getImageSize(), tileManager.getTileBoxes(), surface.paintBlack);

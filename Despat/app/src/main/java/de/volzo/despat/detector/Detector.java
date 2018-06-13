@@ -4,17 +4,44 @@ package de.volzo.despat.detector;
 import android.graphics.RectF;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import de.volzo.despat.persistence.Position;
 import de.volzo.despat.userinterface.DrawSurface;
 
 public abstract class Detector {
+
+    float CONFIDENCE_THRESHOLD = 0.5f;
 
     public abstract void init() throws Exception;
     public abstract void load(File fullFilename);
     public abstract List<Recognition> run() throws Exception;
     public abstract void save() throws Exception;
-    public abstract void display(DrawSurface surface, List<Recognition> results);
+    public abstract void display(DrawSurface surface, List<RectF> rectangles);
+
+    public List<RectF> positionsToRectangles(List<Position> results) {
+
+        List<RectF> rectangles = new ArrayList<RectF>();
+        for (Position result : results) {
+            if (result.getRecognitionConfidence() < CONFIDENCE_THRESHOLD) {
+                continue;
+            }
+            rectangles.add(new RectF(result.getMinx(), result.getMiny(), result.getMaxx(), result.getMaxy()));
+        }
+        return rectangles;
+    }
+
+    public List<RectF> recognitionsToRectangles(List<Detector.Recognition> results) {
+        List<RectF> rectangles = new ArrayList<RectF>();
+        for (Detector.Recognition result : results) {
+            if (result.getConfidence() < CONFIDENCE_THRESHOLD) {
+                continue;
+            }
+            rectangles.add(result.getLocation());
+        }
+        return rectangles;
+    }
 
     public static class Recognition {
 

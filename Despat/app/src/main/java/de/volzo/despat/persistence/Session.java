@@ -37,6 +37,12 @@ public class Session {
     @ColumnInfo(name = "longitude")
     private Double longitude;
 
+    @ColumnInfo(name = "image_width")
+    private int imageWidth;
+
+    @ColumnInfo(name = "image_height")
+    private int imageHeight;
+
     @ColumnInfo(name = "exclusion_image", typeAffinity = ColumnInfo.BLOB)
     private byte[] exclusionImage;
 
@@ -120,6 +126,22 @@ public class Session {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    public void setImageWidth(int imageWidth) {
+        this.imageWidth = imageWidth;
+    }
+
+    public int getImageHeight() {
+        return imageHeight;
+    }
+
+    public void setImageHeight(int imageHeight) {
+        this.imageHeight = imageHeight;
     }
 
     public byte[] getExclusionImage() {

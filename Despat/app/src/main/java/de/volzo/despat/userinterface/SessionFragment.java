@@ -24,10 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.volzo.despat.R;
+import de.volzo.despat.RecordingSession;
+import de.volzo.despat.detector.Detector;
+import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.HomographyPoint;
+import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
@@ -82,6 +86,7 @@ public class SessionFragment extends Fragment {
         TextView tvDuration = (TextView) view.findViewById(R.id.duration);
         TextView tvNumberOfCaptures = (TextView) view.findViewById(R.id.numberOfCaptures);
         TextView tvNumberOfDetections = (TextView) view.findViewById(R.id.numberofDetections);
+        TextView tvGlitches = (TextView) view.findViewById(R.id.tv_glitches);
 
         try {
             File f = session.getCompressedImage();
@@ -91,6 +96,17 @@ public class SessionFragment extends Fragment {
             Log.w(TAG, "compressed preview for session " + session.toString() + "could not be loaded");
             Glide.with(context).load(R.drawable.missing_img).into(ivCompressedPreview);
         }
+
+//        DrawSurface drawSurface = view.findViewById(R.id.drawSurface_session);
+//        List<Position> positions = positionDao.getAllBySession(session.getId());
+//        try {
+//            Detector detector = new DetectorSSD(context);
+//            detector.init();
+//            detector.load(captureDao.getLastFromSession(session.getId()).getImage().getAbsoluteFile());
+//            detector.display(drawSurface, detector.positionsToRectangles(positions));
+//        } catch (Exception e) {
+//            Log.e(TAG, "drawing results failed", e);
+//        }
 
         tvName.setText(session.getSessionName());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));
@@ -105,6 +121,8 @@ public class SessionFragment extends Fragment {
 
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
         tvNumberOfDetections.setText(Integer.toString(positionDao.getCountBySession(session.getId())));
+
+        tvGlitches.setText(RecordingSession.checkForIntegrity(getContext(), session));
 
         view.findViewById(R.id.bt_export).setOnClickListener(new View.OnClickListener() {
             @Override
