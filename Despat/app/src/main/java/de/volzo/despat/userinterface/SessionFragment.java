@@ -85,7 +85,7 @@ public class SessionFragment extends Fragment {
         TextView tvEnd = (TextView) view.findViewById(R.id.end);
         TextView tvDuration = (TextView) view.findViewById(R.id.duration);
         TextView tvNumberOfCaptures = (TextView) view.findViewById(R.id.numberOfCaptures);
-        TextView tvNumberOfDetections = (TextView) view.findViewById(R.id.numberofDetections);
+        TextView tvNumberOfDetections = (TextView) view.findViewById(R.id.numberOfDetections);
         TextView tvGlitches = (TextView) view.findViewById(R.id.tv_glitches);
 
         try {
@@ -97,16 +97,16 @@ public class SessionFragment extends Fragment {
             Glide.with(context).load(R.drawable.missing_img).into(ivCompressedPreview);
         }
 
-//        DrawSurface drawSurface = view.findViewById(R.id.drawSurface_session);
-//        List<Position> positions = positionDao.getAllBySession(session.getId());
-//        try {
-//            Detector detector = new DetectorSSD(context);
-//            detector.init();
-//            detector.load(captureDao.getLastFromSession(session.getId()).getImage().getAbsoluteFile());
-//            detector.display(drawSurface, detector.positionsToRectangles(positions));
-//        } catch (Exception e) {
-//            Log.e(TAG, "drawing results failed", e);
-//        }
+        DrawSurface drawSurface = view.findViewById(R.id.drawSurface_session);
+        List<Position> positions = positionDao.getAllBySession(session.getId());
+        try {
+            Detector detector = new DetectorSSD(context);
+            detector.init();
+            detector.load(captureDao.getLastFromSession(session.getId()).getImage().getAbsoluteFile());
+            detector.display(drawSurface, detector.positionsToRectangles(positions));
+        } catch (Exception e) {
+            Log.e(TAG, "drawing results failed", e);
+        }
 
         tvName.setText(session.getSessionName());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));

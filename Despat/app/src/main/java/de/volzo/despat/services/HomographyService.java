@@ -21,7 +21,7 @@ public class HomographyService extends IntentService {
 
     private static final String TAG = HomographyService.class.getSimpleName();
 
-    public static final String SESSION_ID = "SESSION_ID";
+    public static final String ARG_SESSION_ID = "ARG_SESSION_ID";
 
     public HomographyService() {
         super("HomographyService");
@@ -39,7 +39,7 @@ public class HomographyService extends IntentService {
 //        }
 
         Bundle args = intent.getExtras();
-        Long sessionId = args.getLong(SESSION_ID);
+        Long sessionId = args.getLong(ARG_SESSION_ID);
 
         if (sessionId == null) {
             Log.e(TAG, "session id missing");

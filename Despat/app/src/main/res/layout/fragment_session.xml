@@ -40,6 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_row="0"
+                android:layout_margin="3dp"
                 android:text="session name:" />
 
             <TextView
@@ -48,6 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_row="0"
+                android:layout_margin="3dp"
                 android:text="undef." />
 
             <TextView
@@ -56,6 +58,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_row="1"
+                android:layout_margin="3dp"
                 android:text="start:" />
 
             <TextView
@@ -64,6 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_row="1"
+                android:layout_margin="3dp"
                 android:text="undef." />
 
             <TextView
@@ -72,6 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_row="2"
+                android:layout_margin="3dp"
                 android:text="end:" />
 
             <TextView
@@ -80,6 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_row="2"
+                android:layout_margin="3dp"
                 android:text="undef." />
 
             <TextView
@@ -88,6 +94,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_row="3"
+                android:layout_margin="3dp"
                 android:text="duration:" />
 
             <TextView
@@ -96,6 +103,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_row="3"
+                android:layout_margin="3dp"
                 android:text="undef." />
 
             <TextView
@@ -104,6 +112,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_row="4"
+                android:layout_margin="3dp"
                 android:text="captures" />
 
             <TextView
@@ -112,22 +121,25 @@
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_row="4"
+                android:layout_margin="3dp"
                 android:text="-1" />
 
             <TextView
-                android:id="@+id/label_numberofDetections"
+                android:id="@+id/label_numberOfDetections"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_row="5"
+                android:layout_margin="3dp"
                 android:text="objects:" />
 
             <TextView
-                android:id="@+id/numberofDetections"
+                android:id="@+id/numberOfDetections"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_row="5"
+                android:layout_margin="3dp"
                 android:text="-1" />
 
         </GridLayout>

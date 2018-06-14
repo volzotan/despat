@@ -19,6 +19,7 @@ import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
@@ -226,6 +227,8 @@ public class RecordingSession {
             shutterIntent.putExtra(Orchestrator.REASON, reason);
         }
         context.sendBroadcast(shutterIntent);
+
+        Orchestrator.runCompressorService(context);
 
         session.setEnd(Calendar.getInstance().getTime());
 

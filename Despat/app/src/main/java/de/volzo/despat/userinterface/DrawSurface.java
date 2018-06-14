@@ -23,20 +23,23 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     private static final String TAG = DrawSurface.class.getSimpleName();
 
-    public Paint paintBlack         = null;
-    public Paint paintGreen         = null;
-    public Paint paintRed           = null;
-    private SurfaceHolder holder    = null;
+    private DrawSurfaceCallback onReadyCallback;
+    private boolean interactive = false;
+
+    public Paint paintBlack = null;
+    public Paint paintGreen = null;
+    public Paint paintRed = null;
+    private SurfaceHolder holder = null;
     private final Context context;
 
-    List<RectF> rectanglesBlack     = new ArrayList<RectF>();
-    List<RectF> rectanglesGreen     = new ArrayList<RectF>();
-    List<RectF> rectanglesRed       = new ArrayList<RectF>();
+    List<RectF> rectanglesBlack = new ArrayList<RectF>();
+    List<RectF> rectanglesGreen = new ArrayList<RectF>();
+    List<RectF> rectanglesRed = new ArrayList<RectF>();
 
-    private float startX  = 0;
-    private float startY  = 0;
-    private float stopX   = 0;
-    private float stopY   = 0;
+    private float startX = 0;
+    private float startY = 0;
+    private float stopX = 0;
+    private float stopY = 0;
 
     public DrawSurface(Context context) {
         super(context);
@@ -81,6 +84,14 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
         paintRed.setStrokeWidth(2.0f);
     }
 
+    public void setCallback(DrawSurfaceCallback onReadyCallback) {
+        this.onReadyCallback = onReadyCallback;
+    }
+
+    public void setInteractive(boolean interative) {
+        this.interactive = interative;
+    }
+
     public void clearCanvas() throws Exception {
         if (!holder.getSurface().isValid()) {
             throw new Exception("surface not valid");
@@ -103,7 +114,6 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     /**
      * Beware: modifies rectangles coords in place
-     *
      */
     public void addBoxes(Size referenceFrame, List<RectF> rectangles, Paint paint) throws Exception {
 
@@ -140,48 +150,6 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
         invalidate();
     }
 
-//
-//    public void drawBoxes(Size referenceFrame, List<RectF> rectangles, boolean clearBeforeDraw) throws Exception {
-//        drawBoxes(referenceFrame, rectangles, paintGreen, clearBeforeDraw);
-//    }
-//
-//    public void drawBoxes(Size referenceFrame, List<RectF> rectangles, Paint paint, boolean clearBeforeDraw) throws Exception {
-//
-//        invalidate();
-//
-//        if (!holder.getSurface().isValid()) {
-//            throw new Exception("surface not valid");
-//        }
-//
-//        Canvas canvas = holder.lockCanvas();
-//
-//        if (canvas == null) {
-//            throw new Exception("canvas not valid");
-//        }
-//
-//        Log.i(TAG, "canvas size: " + canvas.getWidth() + " x " + canvas.getHeight());
-//
-//        Matrix mat = new Matrix();
-//        mat.setScale((float) canvas.getWidth() / (float) referenceFrame.getWidth(), (float) canvas.getHeight() / (float) referenceFrame.getHeight());
-//
-//        if (canvas == null) {
-//            throw new Exception("canvas not valid");
-//        }
-//
-//        if (clearBeforeDraw) {
-//            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-//        }
-//
-//        for (RectF rect : rectangles) {
-//            mat.mapRect(rect);
-//            canvas.drawRect(rect, paint);
-//        }
-//
-//        holder.unlockCanvasAndPost(canvas);
-//
-//        invalidate();
-//    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -201,6 +169,10 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!interactive) {
+            return false;
+        }
+
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
 //            invalidate();
             if (holder.getSurface().isValid()) {
@@ -249,7 +221,9 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-
+        if (onReadyCallback != null) {
+            onReadyCallback.onSurfaceReady(this);
+        }
     }
 
     @Override
@@ -260,5 +234,15 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 
+    }
+
+    public static class DrawSurfaceCallback {
+
+        public DrawSurfaceCallback() {
+        }
+
+        public void onSurfaceReady(DrawSurface surface) {
+
+        }
     }
 }

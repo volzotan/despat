@@ -35,8 +35,6 @@ public class MapUtil {
     LatLng position;
     float zoom = 19;
 
-    ArrayList<DespatMarker> markers = new ArrayList<DespatMarker>();
-
     public MapUtil(Context context) {
         this.context = context;
     }
@@ -50,7 +48,9 @@ public class MapUtil {
         this.map = map;
     }
 
-    public void parseArguments(Bundle args) {
+    public List<DespatMarker> parseArguments(Bundle args) {
+
+        List<DespatMarker> markers = new ArrayList<DespatMarker>();
 
         try {
             position = parseLatLng(args.getString("MAP_POSITION"));
@@ -65,6 +65,8 @@ public class MapUtil {
         } catch (Exception e) {
             Log.w(TAG, "maps started without information: ", e);
         }
+
+        return markers;
     }
 
     private LatLng parseLatLng(String data) throws Exception {
@@ -108,6 +110,7 @@ public class MapUtil {
     }
 
     public void moveCamera(Location loc, float z) {
+        this.zoom = z;
         moveCamera(new LatLng(loc.getLatitude(), loc.getLongitude()), this.zoom);
     }
 
@@ -158,11 +161,11 @@ public class MapUtil {
         }
     }
 
-    public DespatMarker newMarker(int type, Location pos, String description) {
+    public DespatMarker createMarker(int type, Location pos, String description) {
         return new DespatMarker(type, new LatLng(pos.getLatitude(), pos.getLongitude()), description);
     }
 
-    public DespatMarker newMarker(int type, LatLng pos, String description) {
+    public DespatMarker createMarker(int type, LatLng pos, String description) {
         return new DespatMarker(type, pos, description);
     }
 

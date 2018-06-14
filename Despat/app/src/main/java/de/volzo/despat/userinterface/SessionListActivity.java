@@ -275,8 +275,6 @@ public class SessionListActivity extends AppCompatActivity {
 
     public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
-        public static final float ALPHA_FULL = 1.0f;
-
         private final SessionListActivity activity;
         private final ItemTouchHelperAdapter adapter;
 
@@ -366,7 +364,7 @@ public class SessionListActivity extends AppCompatActivity {
             snackbar.setActionTextColor(getResources().getColor(R.color.colorAccent));
             snackbar.show();
 
-            ((SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground.setTranslationX(0);
+            ((SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground.setTranslationX(100);
 
             adapter.onItemDismiss(viewHolder.getAdapterPosition());
         }
@@ -374,8 +372,6 @@ public class SessionListActivity extends AppCompatActivity {
         @Override
         public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
             if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                final float alpha = ALPHA_FULL - Math.abs(dX) / (float) viewHolder.itemView.getWidth();
-//                viewHolder.itemView.setAlpha(alpha);
                 ((SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground.setTranslationX(dX);
             } else {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
@@ -397,9 +393,6 @@ public class SessionListActivity extends AppCompatActivity {
         @Override
         public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
-
-            viewHolder.itemView.setAlpha(ALPHA_FULL);
-
             if (viewHolder instanceof ItemTouchHelperViewHolder) {
                 ItemTouchHelperViewHolder itemViewHolder = (SessionRecyclerViewAdapter.ViewHolder) viewHolder;
                 itemViewHolder.onItemClear();

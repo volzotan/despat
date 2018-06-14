@@ -131,13 +131,18 @@ public class DetectorSSD extends Detector {
 
     @Override
     public void display(DrawSurface surface, List<RectF> rectangles) {
-        try {
-            surface.clearCanvas();
-            surface.addBoxes(tileManager.getImageSize(), tileManager.getTileBoxes(), surface.paintBlack);
-            surface.addBoxes(tileManager.getImageSize(), rectangles, surface.paintGreen);
-        } catch (Exception e) {
-            Log.e(TAG, "displaying results failed. unable to draw on canvas", e);
-        }
+        final List<RectF> rects = rectangles;
+        surface.setCallback(new DrawSurface.DrawSurfaceCallback() {
+            @Override
+            public void onSurfaceReady(DrawSurface surface) {
+                try {
+                    surface.clearCanvas();
+                    surface.addBoxes(tileManager.getImageSize(), tileManager.getTileBoxes(), surface.paintBlack);
+                    surface.addBoxes(tileManager.getImageSize(), rects, surface.paintGreen);
+                } catch (Exception e) {
+                    Log.e(TAG, "displaying results failed. unable to draw on canvas", e);
+                }
+            }
+        });
     }
-
 }

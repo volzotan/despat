@@ -1,6 +1,8 @@
 package de.volzo.despat.userinterface;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -41,7 +43,10 @@ public class PointActivity extends AppCompatActivity implements
 
     private static final String TAG = PointActivity.class.getSimpleName();
 
-    public static final String ARG_SESSION_ID = "ARG_SESSION_ID";
+    public static final String ARG_SESSION_ID           = "ARG_SESSION_ID";
+    public static final String DATA_IMAGE_COORDINATES   = "DATA_IMAGE_COORDINATES";
+    public static final String DATA_MAP_COORDINATES     = "DATA_MAP_COORDINATES";
+    public static final int REQUEST_CODE                = 0x500;
 
     Session session;
 
@@ -113,8 +118,22 @@ public class PointActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 Log.d(TAG, "btn done");
 
+                Intent resultIntent = new Intent();
+
+                Point imagePos = magnifierSurface.getPosition();
+                double[] imageCoordinates = new double[2];
+                imageCoordinates[0] = (double) imagePos.x;
+                imageCoordinates[1] = (double) imagePos.y;
+                resultIntent.putExtra(DATA_IMAGE_COORDINATES, imageCoordinates);
+
+                LatLng mapPos = newMarker.pos;
+                double[] mapCoordinates = new double[2];
+                mapCoordinates[0] = mapPos.latitude;
+                mapCoordinates[1] = mapPos.longitude;
+                resultIntent.putExtra(DATA_MAP_COORDINATES, mapCoordinates);
+
                 if (newMarker != null) {
-                    setResult(RESULT_OK);
+                    setResult(RESULT_OK, resultIntent);
                     finish();
                 }
             }
@@ -159,7 +178,7 @@ public class PointActivity extends AppCompatActivity implements
         if (session.getLocation() != null) {
             mapUtil.moveCamera(session.getLocation());
 
-            markers.add(mapUtil.newMarker(MapUtil.DespatMarker.TYPE_CAMERA, session.getLocation(), "camera position"));
+            markers.add(mapUtil.createMarker(MapUtil.DespatMarker.TYPE_CAMERA, session.getLocation(), "camera position"));
             mapUtil.placeMarkersOnMap(markers);
         } else {
             Snackbar.make(findViewById(android.R.id.content),
@@ -186,7 +205,7 @@ public class PointActivity extends AppCompatActivity implements
             markers.remove(newMarker);
         }
 
-        newMarker = mapUtil.newMarker(MapUtil.DespatMarker.TYPE_CORRESPONDING_POINT_NEW, latLng, "new point");
+        newMarker = mapUtil.createMarker(MapUtil.DespatMarker.TYPE_CORRESPONDING_POINT_NEW, latLng, "new point");
         markers.add(newMarker);
 
         mapUtil.clearAllMarkersOnMap();

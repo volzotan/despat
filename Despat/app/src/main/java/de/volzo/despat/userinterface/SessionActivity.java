@@ -21,19 +21,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.ErrorEvent;
 import de.volzo.despat.persistence.HomographyPoint;
+import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.SessionExporter;
 
 public class SessionActivity extends AppCompatActivity implements
         SessionFragment.OnSessionActionSelectionListener,
-        HomographyPointListFragment.OnHomographyPointListSelectionListener,
-        HomographyPointListFragment.OnHomographyPointAddListener,
         ErrorEventListFragment.OnErrorEventListSelectionListener {
 
     private static final String TAG = SessionActivity.class.getSimpleName();
@@ -42,6 +42,8 @@ public class SessionActivity extends AppCompatActivity implements
 
     Activity activity;
     ActionBar bar;
+
+    Session session;
 
     private String[] tabtitles = {"Info", "Points", "Errors"};
     private Fragment[] tabfragments = {
@@ -69,7 +71,7 @@ public class SessionActivity extends AppCompatActivity implements
 
         AppDatabase db = AppDatabase.getAppDatabase(this);
         SessionDao sessionDao = db.sessionDao();
-        Session session = sessionDao.getById(sessionId);
+        session = sessionDao.getById(sessionId);
 
         if (session == null) {
             Log.e(TAG, "no session found for id: " + sessionId);
@@ -115,16 +117,6 @@ public class SessionActivity extends AppCompatActivity implements
 //            snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();
         }
-    }
-
-    @Override
-    public void onHomographyPointListSelectionListener(HomographyPoint homographyPoint) {
-
-    }
-
-    @Override
-    public void onHomographyPointAddListener(Session session) {
-        Log.d(TAG, "homography point add: " + session);
     }
 
     @Override

@@ -240,6 +240,19 @@ public class Orchestrator extends BroadcastReceiver {
         }
     }
 
+    public static void runCompressorService(Context context) {
+        Log.d(TAG, "CompressorService started");
+        Intent compressorIntent = new Intent(context, CompressorService.class);
+        context.startService(compressorIntent);
+    }
+
+    public static void runHomographyService(Context context, long sessionId) {
+        Log.d(TAG, "HomographyService started");
+        Intent homographyIntent = new Intent(context, HomographyService.class);
+        homographyIntent.putExtra(HomographyService.ARG_SESSION_ID, sessionId);
+        context.startService(homographyIntent);
+    }
+
     // ----------------------------------------------------------------------------------------------------
 
     private void shutterServiceStart() {

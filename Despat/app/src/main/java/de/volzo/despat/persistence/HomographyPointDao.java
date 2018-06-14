@@ -24,7 +24,7 @@ public interface HomographyPointDao {
     HomographyPoint getLastFromSession(long sessionId);
 
     @Insert
-    void insert(HomographyPoint... homographypoints);
+    List<Long> insert(HomographyPoint... homographypoints);
 
     @Update
     void update(HomographyPoint... homographypoints);

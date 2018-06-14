@@ -49,6 +49,9 @@ public class Session {
     @ColumnInfo(name = "compressed_image")
     private File compressedImage;
 
+//    @ColumnInfo(name = "homography_matrix")
+//    private Mat homographyMatrix;
+
     @ColumnInfo(name = "resumed")
     private boolean resumed = false;
 

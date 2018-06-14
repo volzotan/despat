@@ -1,8 +1,10 @@
 package de.volzo.despat.userinterface;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -23,7 +25,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
@@ -32,17 +38,22 @@ import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.Util;
 
-public class HomographyPointListFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class HomographyPointListFragment extends Fragment implements
+        OnMapReadyCallback,
+        GoogleMap.OnMarkerClickListener {
 
     private static final String TAG = HomographyPointListFragment.class.getSimpleName();
 
-    private OnHomographyPointListSelectionListener selectionListener;
-    private OnHomographyPointAddListener addListener;
-
     private Session session;
+    private List<HomographyPoint> points;
+
+    private RecyclerView recyclerView;
+
     private MapUtil mapUtil;
     private GoogleMap map;
+    private List<MapUtil.DespatMarker> markerList = new ArrayList<MapUtil.DespatMarker>();
 
     public HomographyPointListFragment() {
 
@@ -73,10 +84,17 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         TextView tooltip_homography = view.findViewById(R.id.tooltip_homography);
         if (!Config.getShowTooltips(getContext())) tooltip_homography.setVisibility(View.INVISIBLE);
 
-        RecyclerView recyclerView = view.findViewById(R.id.rv_homographypoint_list);
+        AppDatabase db = AppDatabase.getAppDatabase(getContext());
+        HomographyPointDao homographyPointDao = db.homographyPointDao();
+
+        if (session != null) {
+            points = homographyPointDao.getAllBySession(session.getId());
+        }
+
+        recyclerView = view.findViewById(R.id.rv_homographypoint_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(new HomographyPointRecyclerViewAdapter(getActivity(), selectionListener));
+        recyclerView.setAdapter(new HomographyPointRecyclerViewAdapter(getActivity(), points, this));
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), layoutManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
@@ -91,11 +109,11 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         view.findViewById(R.id.bt_addHomographyPoint).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (addListener != null) {
-                    addListener.onHomographyPointAddListener(session);
-                }
+                onHomographyPointAddListener(session);
             }
         });
+
+        recyclerView.getAdapter().notifyDataSetChanged();
 
         return view;
     }
@@ -135,17 +153,17 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof OnHomographyPointListSelectionListener) {
-            selectionListener = (OnHomographyPointListSelectionListener) context;
-        } else {
-            throw new RuntimeException(context.toString() + " must implement selection listener");
-        }
-
-        if (context instanceof OnHomographyPointAddListener) {
-            addListener = (OnHomographyPointAddListener) context;
-        } else {
-            throw new RuntimeException(context.toString() + " must implement add listener");
-        }
+//        if (context instanceof OnHomographyPointListSelectionListener) {
+//            selectionListener = (OnHomographyPointListSelectionListener) context;
+//        } else {
+//            throw new RuntimeException(context.toString() + " must implement selection listener");
+//        }
+//
+//        if (context instanceof OnHomographyPointAddListener) {
+//            addListener = (OnHomographyPointAddListener) context;
+//        } else {
+//            throw new RuntimeException(context.toString() + " must implement add listener");
+//        }
     }
 
     @Override
@@ -159,18 +177,22 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.setMapType(map.MAP_TYPE_SATELLITE);
-        // map.setMapType(map.MAP_TYPE_HYBRID);
-
         mapUtil = new MapUtil(getContext(), map);
 
-//        mapUtil.moveCamera(map);
-//
-////        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, zoom));
-//        placeMarkersOnMap(map, markers);
+        AppDatabase db = AppDatabase.getAppDatabase(getContext());
+        SessionDao sessionDao = db.sessionDao();
+        HomographyPointDao homographyPointDao = db.homographyPointDao();
 
         if (session.getLocation() != null) {
-            mapUtil.moveCamera(session.getLocation());
+            mapUtil.moveCamera(session.getLocation(), 18);
+
+            markerList.add(mapUtil.createMarker(MapUtil.DespatMarker.TYPE_CAMERA, session.getLocation(), "camera position"));
+            List<HomographyPoint> homographyPoints = homographyPointDao.getAllBySession(session.getId());
+            for (HomographyPoint point : homographyPoints) {
+                markerList.add(mapUtil.createMarker(MapUtil.DespatMarker.TYPE_CORRESPONDING_POINT, point.getLocation(), "corresponding point " + point.getId()));
+            }
         }
+        mapUtil.placeMarkersOnMap(markerList);
         mapUtil.disableGestures(true);
 
         map.setOnMarkerClickListener(this);
@@ -178,20 +200,67 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-
         Integer tag = (Integer) marker.getTag();
-
         return false;
     }
 
     // Fragment
 
-    public interface OnHomographyPointListSelectionListener {
-        void onHomographyPointListSelectionListener(HomographyPoint homographyPoint);
+    public void onHomographyPointListSelectionListener(HomographyPoint homographyPoint) {
+
     }
 
-    public interface OnHomographyPointAddListener {
-        void onHomographyPointAddListener(Session session);
+    public void onHomographyPointAddListener(Session session) {
+        Log.d(TAG, "homography point add: " + session);
+
+        Intent pointIntent = new Intent(getContext(), PointActivity.class);
+        pointIntent.putExtra(PointActivity.ARG_SESSION_ID, session.getId());
+        startActivityForResult(pointIntent, PointActivity.REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != getActivity().RESULT_OK) {
+            Log.e(TAG, "onActivityResult non OK result");
+            return;
+        }
+
+        if (requestCode != PointActivity.REQUEST_CODE) {
+            Log.wtf(TAG, "unknown onActivityResult");
+            return;
+        }
+
+        Log.d(TAG, "PointActivity successful");
+
+        if (session == null) {
+            Log.e(TAG, "session information missing");
+            return;
+        }
+
+        double[] imageCoordinates = data.getDoubleArrayExtra(PointActivity.DATA_IMAGE_COORDINATES);
+        double[] mapCoordinates = data.getDoubleArrayExtra(PointActivity.DATA_MAP_COORDINATES);
+
+        AppDatabase db = AppDatabase.getAppDatabase(getContext());
+        HomographyPointDao homographyPointDao = db.homographyPointDao();
+
+        HomographyPoint newPoint = new HomographyPoint();
+        newPoint.setSessionId(session.getId());
+        newPoint.setX(imageCoordinates[0]);
+        newPoint.setY(imageCoordinates[1]);
+        newPoint.setLatitude(mapCoordinates[0]);
+        newPoint.setLongitude(mapCoordinates[1]);
+        newPoint.setModificationTime(Calendar.getInstance().getTime());
+
+        List<Long> newPointIds = homographyPointDao.insert(newPoint);
+
+        newPoint.setId(newPointIds.get(0));
+        points.add(newPoint);
+
+        recyclerView.getAdapter().notifyDataSetChanged();
+
+        markerList.add(mapUtil.createMarker(MapUtil.DespatMarker.TYPE_CORRESPONDING_POINT, newPoint.getLocation(), "corresponding point " + newPoint.getId()));
+        mapUtil.clearAllMarkersOnMap();
+        mapUtil.placeMarkersOnMap(markerList);
     }
 
     class HomographyPointRecyclerViewAdapter extends RecyclerView.Adapter<HomographyPointRecyclerViewAdapter.ViewHolder> {
@@ -199,20 +268,13 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
         public final String TAG = HomographyPointRecyclerViewAdapter.class.getSimpleName();
 
         private Context context;
-        private final OnHomographyPointListSelectionListener listener;
-        private List<HomographyPoint> points;
+        private final HomographyPointListFragment listener;
+        private List<HomographyPoint> data;
 
-        public HomographyPointRecyclerViewAdapter(Context context, OnHomographyPointListSelectionListener listener) {
-
+        public HomographyPointRecyclerViewAdapter(Context context, List<HomographyPoint> data, HomographyPointListFragment listener) {
             this.context = context;
             this.listener = listener;
-
-            AppDatabase db = AppDatabase.getAppDatabase(context);
-            HomographyPointDao homographyPointDao = db.homographyPointDao();
-
-            if (session != null) {
-                points = homographyPointDao.getAllBySession(session.getId());
-            }
+            this.data = data;
         }
 
         @Override
@@ -224,10 +286,12 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            HomographyPoint point = points.get(position);
+            HomographyPoint point = data.get(position);
             holder.point = point;
 
-            holder.idNumber.setText(Long.toString(point.getId()));
+            float dist = Util.distanceBetweenCoordinates(session.getLatitude(), session.getLongitude(), point.getLatitude(), point.getLongitude());
+
+            holder.desc.setText(String.format("distance to camera: %-4.2fm", dist));
 
 //            holder.view.setOnClickListener(new View.OnClickListener() {
 //                @Override
@@ -249,14 +313,14 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
 
         @Override
         public int getItemCount() {
-            return points.size();
+            return data.size();
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
             public final View view;
 
-            public TextView idNumber;
+            public TextView desc;
 
             public HomographyPoint point;
 
@@ -264,12 +328,12 @@ public class HomographyPointListFragment extends Fragment implements OnMapReadyC
                 super(view);
                 this.view = view;
 
-                idNumber = (TextView) view.findViewById(R.id.idNumber);
+                desc = (TextView) view.findViewById(R.id.idNumber);
             }
 
             @Override
             public String toString() {
-                return super.toString() + " '" + idNumber.getText() + "'";
+                return super.toString() + " '" + desc.getText() + "'";
             }
         }
     }

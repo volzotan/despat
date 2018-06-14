@@ -5,6 +5,8 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.File;
 import java.util.Date;
 
@@ -103,5 +105,9 @@ public class HomographyPoint {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public LatLng getLocation() {
+        return new LatLng(getLatitude(), getLongitude());
     }
 }
