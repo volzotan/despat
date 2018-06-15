@@ -31,3 +31,4 @@ despat.sqlite
 corodiak.db
 
 *.pickle
+Gemfile.lock
