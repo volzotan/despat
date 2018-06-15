@@ -14,10 +14,6 @@ import java.util.Locale;
 
 import de.volzo.despat.preferences.Config;
 
-/**
- * Created by christophergetschmann on 18.01.18.
- */
-
 public class RoomConverter {
 
     @TypeConverter

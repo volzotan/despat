@@ -11,10 +11,6 @@ import android.location.Location;
 import java.io.File;
 import java.util.Date;
 
-/**
- * Created by christophergetschmann on 24.11.17.
- */
-
 @Entity
 
 public class Session {

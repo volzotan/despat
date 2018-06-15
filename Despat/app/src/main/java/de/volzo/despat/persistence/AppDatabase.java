@@ -6,10 +6,6 @@ import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
-/**
- * Created by christophergetschmann on 24.11.17.
- */
-
 @Database(entities = {  Status.class,
                         Session.class,
                         Capture.class,

@@ -7,10 +7,6 @@ import android.arch.persistence.room.Query;
 
 import java.util.List;
 
-/**
- * Created by christophergetschmann on 24.11.17.
- */
-
 @Dao
 public interface EventDao {
 

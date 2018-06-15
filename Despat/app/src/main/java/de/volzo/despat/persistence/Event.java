@@ -6,10 +6,6 @@ import android.arch.persistence.room.PrimaryKey;
 
 import java.util.Date;
 
-/**
- * Created by christophergetschmann on 24.11.17.
- */
-
 @Entity
 public class Event {
 

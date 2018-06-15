@@ -7,10 +7,6 @@ import android.arch.persistence.room.TypeConverters;
 
 import java.util.Date;
 
-/**
- * Created by christophergetschmann on 24.11.17.
- */
-
 @Entity
 public class Status {
 
