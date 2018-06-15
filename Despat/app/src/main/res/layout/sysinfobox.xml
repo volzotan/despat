@@ -82,6 +82,12 @@
             android:layout_height="wrap_content" />
 
         <Button
+            android:id="@+id/bt_toggleCamera"
+            android:text="toggle camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
             android:id="@+id/bt_sync"
             android:text="force sync"
             android:layout_width="wrap_content"

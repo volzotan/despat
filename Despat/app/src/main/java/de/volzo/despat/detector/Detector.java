@@ -2,12 +2,14 @@ package de.volzo.despat.detector;
 
 
 import android.graphics.RectF;
+import android.util.Size;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.volzo.despat.persistence.Position;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.userinterface.DrawSurface;
 
 public abstract class Detector {
@@ -18,7 +20,7 @@ public abstract class Detector {
     public abstract void load(File fullFilename);
     public abstract List<Recognition> run() throws Exception;
     public abstract void save() throws Exception;
-    public abstract void display(DrawSurface surface, List<RectF> rectangles);
+    public abstract void display(DrawSurface surface, Size imageSize, List<RectF> rectangles);
 
     public List<RectF> positionsToRectangles(List<Position> results) {
 

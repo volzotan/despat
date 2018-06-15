@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +21,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import de.volzo.despat.R;
 import de.volzo.despat.RecordingSession;
@@ -35,6 +39,8 @@ import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.persistence.Status;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
 
@@ -85,6 +91,7 @@ public class SessionFragment extends Fragment {
         TextView tvEnd = (TextView) view.findViewById(R.id.end);
         TextView tvDuration = (TextView) view.findViewById(R.id.duration);
         TextView tvNumberOfCaptures = (TextView) view.findViewById(R.id.numberOfCaptures);
+        TextView tvMaxTemperature = (TextView) view.findViewById(R.id.maxTemperature);
         TextView tvNumberOfDetections = (TextView) view.findViewById(R.id.numberOfDetections);
         TextView tvGlitches = (TextView) view.findViewById(R.id.tv_glitches);
 
@@ -101,9 +108,8 @@ public class SessionFragment extends Fragment {
         List<Position> positions = positionDao.getAllBySession(session.getId());
         try {
             Detector detector = new DetectorSSD(context);
-            detector.init();
-            detector.load(captureDao.getLastFromSession(session.getId()).getImage().getAbsoluteFile());
-            detector.display(drawSurface, detector.positionsToRectangles(positions));
+            Size imageSize = session.getImageSize();
+            detector.display(drawSurface, imageSize, detector.positionsToRectangles(positions));
         } catch (Exception e) {
             Log.e(TAG, "drawing results failed", e);
         }
@@ -120,6 +126,21 @@ public class SessionFragment extends Fragment {
         }
 
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
+        try {
+            Status maxTempStatus = RecordingSession.getMaxTemperatureDuringSession(context, session);
+
+            if (maxTempStatus != null) {
+                DateFormat df = new SimpleDateFormat(Config.DATEFORMAT);
+                tvMaxTemperature.setText(
+                        String.format(Config.LOCALE, "%2.2f°C (at %s)",
+                            maxTempStatus.getTemperatureBattery(),
+                            df.format(maxTempStatus.getTimestamp())
+                        )
+                );
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "getting maximum temperature failed", e);
+        }
         tvNumberOfDetections.setText(Integer.toString(positionDao.getCountBySession(session.getId())));
 
         tvGlitches.setText(RecordingSession.checkForIntegrity(getContext(), session));

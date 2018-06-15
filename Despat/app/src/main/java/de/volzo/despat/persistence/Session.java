@@ -7,6 +7,7 @@ import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.util.Size;
 
 import java.io.File;
 import java.util.Date;
@@ -62,6 +63,8 @@ public class Session {
     @ColumnInfo(name = "exposure_compensation")
     private Double exposureCompensation;
 
+    // --- non standard getter and setter --- //
+
     public Location getLocation() {
 
         if (getLatitude() == null || getLongitude() == null) return null;
@@ -78,6 +81,17 @@ public class Session {
         setLatitude(location.getLatitude());
         setLongitude(location.getLongitude());
     }
+
+    public Size getImageSize() {
+        return new Size(imageWidth, imageHeight);
+    }
+
+    public void setImageSize(Size imageSize) {
+        imageWidth = imageSize.getWidth();
+        imageHeight = imageSize.getHeight();
+    }
+
+    // ---------------------------------------------------------------------------------------------
 
     public long getId() {
         return id;

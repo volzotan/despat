@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.os.PowerManager;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.TextureView;
 import android.widget.Toast;
@@ -84,6 +85,8 @@ public class Despat extends Application {
                 Util.backupLogcat(null);
 
                 // TODO: how to proceed? restart?
+
+//                Toast.makeText(context, "Global Error: " + name + " | " + message, Toast.LENGTH_LONG).show(); // not visible in different process
             }
         });
 

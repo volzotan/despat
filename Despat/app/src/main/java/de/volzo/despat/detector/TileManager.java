@@ -36,13 +36,27 @@ public class TileManager {
         int imagewidth = image.getWidth();
         int imageheight = image.getHeight();
 
+        init(new Size(imagewidth, imageheight));
+    }
+
+    /*
+     * Initializes an empty TileManager which should _not_ be used to try to access image tile
+     * contents. Only usecase is to obtain information about the placement and size of the
+     * tiling for an overlay on the compressed image during visualization.
+     *
+     */
+    public TileManager(Size imageSize) {
+        init(imageSize);
+    }
+
+    private void init(Size imageSize) {
         if (this.centered) {
-            xoffset = (imagewidth % tilesize) / 2;
-            yoffset = (imageheight % tilesize) / 2;
+            xoffset = (imageSize.getWidth() % tilesize) / 2;
+            yoffset = (imageSize.getHeight() % tilesize) / 2;
         }
 
-        int xTiles = imagewidth / tilesize;
-        int yTiles = imageheight / tilesize;
+        int xTiles = imageSize.getWidth() / tilesize;
+        int yTiles = imageSize.getHeight() / tilesize;
 
         for (int y=0; y < yTiles; y++) {
             for (int x=0; x < xTiles; x++) {

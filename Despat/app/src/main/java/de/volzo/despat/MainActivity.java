@@ -117,24 +117,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 
-//        Button btToggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
-//        btToggleCamera.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//                ImageView iv = (ImageView) findViewById(R.id.imageView);
-//                iv.setImageDrawable(null);
-//
-//                CameraController camera = despat.getCamera();
-//
-//                if (camera == null || camera.isDead()) {
-//                    activity.startCamera();
-//                } else {
-//                    despat.closeCamera();
-//                }
-//            }
-//        });
-
         final Button btSessions = (Button) findViewById(R.id.bt_sessions);
         btSessions.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,11 +125,38 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
+        final Button btSettings = (Button) findViewById(R.id.bt_settings);
+        btSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(activity, SettingsActivity2.class);
+                startActivity(intent);
+            }
+        });
+
         Button btRunRec = (Button) findViewById(R.id.bt_runRecognizer);
         btRunRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 activity.runRecognizer();
+            }
+        });
+
+        Button btToggleCamera = (Button) findViewById(R.id.bt_toggleCamera);
+        btToggleCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                ImageView iv = (ImageView) findViewById(R.id.imageView);
+                iv.setImageDrawable(null);
+
+                CameraController camera = despat.getCamera();
+
+                if (camera == null || camera.isDead()) {
+                    activity.startCamera();
+                } else {
+                    despat.closeCamera();
+                }
             }
         });
 
@@ -182,16 +191,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        final Button btSettings = (Button) findViewById(R.id.bt_settings);
-        btSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(activity, SettingsActivity2.class);
-                startActivity(intent);
-            }
-        });
-
         setButtonStates();
+
         final FloatingActionButton fabRec = findViewById(R.id.fabRec);
         final TextView tvFapRec = findViewById(R.id.tvFapRec);
         fabRec.setOnClickListener(new View.OnClickListener() {
@@ -274,8 +275,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        registerAllReceivers();
-
         if (Config.getPhoneHome(this)) {
             Intent uploadIntent = new Intent(activity, Orchestrator.class);
             uploadIntent.putExtra(Orchestrator.SERVICE, Broadcast.UPLOAD_SERVICE);
@@ -289,7 +288,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         startProgressBarUpdate();
         updatePreviewImage();
 
-        RecordingSession.checkAllForIntegrity(this);
+        runTestCode();
+    }
+
+    private void runTestCode() {
 
         AppDatabase db = AppDatabase.getAppDatabase(this);
         SessionDao sessionDao = db.sessionDao();

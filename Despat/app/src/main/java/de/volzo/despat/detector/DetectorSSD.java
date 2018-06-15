@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.util.Log;
+import android.util.Size;
 
 import java.io.File;
 import java.io.IOException;
@@ -130,15 +131,17 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
-    public void display(DrawSurface surface, List<RectF> rectangles) {
+    public void display(DrawSurface surface, final Size imageSize, List<RectF> rectangles) {
         final List<RectF> rects = rectangles;
         surface.setCallback(new DrawSurface.DrawSurfaceCallback() {
             @Override
             public void onSurfaceReady(DrawSurface surface) {
                 try {
                     surface.clearCanvas();
-                    surface.addBoxes(tileManager.getImageSize(), tileManager.getTileBoxes(), surface.paintBlack);
-                    surface.addBoxes(tileManager.getImageSize(), rects, surface.paintGreen);
+
+                    if (tileManager == null) tileManager = new TileManager(imageSize);
+                    surface.addBoxes(imageSize, tileManager.getTileBoxes(), surface.paintBlack);
+                    surface.addBoxes(imageSize, rects, surface.paintGreen);
                 } catch (Exception e) {
                     Log.e(TAG, "displaying results failed. unable to draw on canvas", e);
                 }
