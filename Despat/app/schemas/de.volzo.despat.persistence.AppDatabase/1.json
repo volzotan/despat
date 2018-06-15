@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "415ad32a63c4cd50d4f717b046b3ceca",
+    "identityHash": "5b27c823969178cdc77f70355964b92b",
     "entities": [
       {
         "tableName": "Status",
@@ -86,7 +86,7 @@
       },
       {
         "tableName": "Session",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `image_width` INTEGER NOT NULL, `image_height` INTEGER NOT NULL, `exclusion_image` BLOB, `compressed_image` TEXT, `resumed` INTEGER NOT NULL, `shutter_interval` INTEGER, `exposure_threshold` REAL, `exposure_compensation` REAL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `image_width` INTEGER NOT NULL, `image_height` INTEGER NOT NULL, `exclusion_image` BLOB, `compressed_image` TEXT, `homography_matrix` TEXT, `resumed` INTEGER NOT NULL, `shutter_interval` INTEGER, `exposure_threshold` REAL, `exposure_compensation` REAL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -145,6 +145,12 @@
           {
             "fieldPath": "compressedImage",
             "columnName": "compressed_image",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "homographyMatrix",
+            "columnName": "homography_matrix",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -519,7 +525,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"415ad32a63c4cd50d4f717b046b3ceca\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"5b27c823969178cdc77f70355964b92b\")"
     ]
   }
 }
