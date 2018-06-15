@@ -320,7 +320,7 @@ public class ServerConnector {
             @Override
             public void onErrorResponse(VolleyError error) {
 
-                Log.e(TAG, String.format("sending data to server failed: %s", error)); //%d", error.networkResponse.statusCode));
+                Log.e(TAG, String.format(Config.LOCALE, "sending data to server failed: %s", error)); //%d", error.networkResponse.statusCode));
 
                 // TODO: fire toast
 
@@ -354,11 +354,11 @@ public class ServerConnector {
             @Override
             public void onResponse(JSONArray response) {
                 if (response == null) {
-                    Log.d(TAG, String.format("Success. Response null"));
+                    Log.d(TAG, String.format(Config.LOCALE, "Success. Response null"));
                 } else if (response.toString().equals("{}") || response.toString().equals("[]") ) {
-                    Log.d(TAG, String.format("Success Response empty"));
+                    Log.d(TAG, String.format(Config.LOCALE, "Success Response empty"));
                 } else {
-                    Log.d(TAG, String.format("Success Response: %s", response.toString()));
+                    Log.d(TAG, String.format(Config.LOCALE, "Success Response: %s", response.toString()));
                 }
 
                 if (successCallback != null) successCallback.success(response);

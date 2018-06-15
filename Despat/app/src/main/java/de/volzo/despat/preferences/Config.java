@@ -34,6 +34,8 @@ public class Config {
     public static final String SYNC_ACCOUNT_TYPE                    = "de.volzo.despat.servpat";
     public static final String SYNC_ACCOUNT                         = "despatSync";
 
+    public static final Locale LOCALE                               = Locale.UK;
+
     // ---------------------------------------------------------------------------------------------
 
     // jpegs and/or raw | v2 only

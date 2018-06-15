@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.volzo.despat.R;
+import de.volzo.despat.preferences.Config;
 
 /**
  * Created by christophergetschmann on 05.10.17.
@@ -90,7 +91,7 @@ public class JSONArrayRequest extends Request<JSONArray> {
     @Override
     protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
 
-        Log.d(TAG, String.format("HTTP response: %d", response.statusCode));
+        Log.d(TAG, String.format(Config.LOCALE, "HTTP response: %d", response.statusCode));
 
         try {
             String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));

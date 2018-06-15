@@ -161,7 +161,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference instanceof NumberPickerPreference) {
-            s = String.format(s, sharedPrefs.getInt(key, 0));
+            s = String.format(Config.LOCALE, s, sharedPrefs.getInt(key, 0));
             preference.setSummary(s);
             return;
         }
@@ -170,7 +170,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             return;
         }
 
-        s = String.format(s, sharedPrefs.getString(key, "Default"));
+        s = String.format(Config.LOCALE, s, sharedPrefs.getString(key, "Default"));
         preference.setSummary(s);
     }
 }

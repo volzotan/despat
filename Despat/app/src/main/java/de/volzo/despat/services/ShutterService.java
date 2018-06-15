@@ -267,7 +267,7 @@ public class ShutterService extends Service {
             restartCamera();
 
         } else {
-            Log.w(TAG, String.format("camera restart after malfunction aborted. " +
+            Log.w(TAG, String.format(Config.LOCALE, "camera restart after malfunction aborted. " +
                     "%d restarts happened in the last %dms", cameraRestarts.size(), cameraRestarts.get(cameraRestarts.size()-1)));
 
             // TODO: critical error?

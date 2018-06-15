@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import de.volzo.despat.preferences.Config;
+
 public class Stopwatch {
 
     private static final String TAG = Stopwatch.class.getSimpleName();
@@ -153,23 +155,23 @@ public class Stopwatch {
         sb.append("\n");
 
         for (String key : runtime.keySet()) {
-            sb.append(String.format("%-40s | ", key));
+            sb.append(String.format(Config.LOCALE, "%-40s | ", key));
 
             List<Double> values = getLast(key, 5);
 
             for (Double val : values) {
-                sb.append(String.format(Locale.ENGLISH, "%6.0f ", val));
+                sb.append(String.format(Config.LOCALE, "%6.0f ", val));
             }
 
             for (int i=0; i<(10-values.size()); i++) {
                 sb.append("       ");
             }
 
-            sb.append(String.format(Locale.ENGLISH,"| cnt: %-5d", getCount(key)));
-            sb.append(String.format(Locale.ENGLISH,"| avg: %-5.0f", getAverage(key)));
-            sb.append(String.format(Locale.ENGLISH,"| min: %-5.0f", getMin(key)));
-            sb.append(String.format(Locale.ENGLISH,"| max: %-5.0f", getMax(key)));
-            sb.append(String.format(Locale.ENGLISH,"| sum: %-5.0f ms", getSum(key)));
+            sb.append(String.format(Config.LOCALE,"| cnt: %-5d", getCount(key)));
+            sb.append(String.format(Config.LOCALE,"| avg: %-5.0f", getAverage(key)));
+            sb.append(String.format(Config.LOCALE,"| min: %-5.0f", getMin(key)));
+            sb.append(String.format(Config.LOCALE,"| max: %-5.0f", getMax(key)));
+            sb.append(String.format(Config.LOCALE,"| sum: %-5.0f ms", getSum(key)));
             sb.append("\n");
         }
 

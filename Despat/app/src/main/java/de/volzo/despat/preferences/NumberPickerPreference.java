@@ -50,7 +50,7 @@ public class NumberPickerPreference extends DialogPreference {
 
 //        NumberPicker.Formatter formatter = new NumberPicker.Formatter() {
 //            @Override
-//            public String format(int value) {
+//            public String.format(Config.LOCALE, (int value) {
 //                return Integer.toString(value / stepSize);
 //            }
 //        };

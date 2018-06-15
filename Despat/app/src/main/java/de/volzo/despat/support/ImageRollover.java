@@ -145,10 +145,10 @@ public class ImageRollover {
         float diffMB = diff / (1024.f * 1024.f);
 
         if (diff < 0) {
-            Log.d(TAG, String.format("rollover: no deletions necessary. free space: %.2f MB | difference: %.2f MB", freeSpaceMB, diffMB));
+            Log.d(TAG, String.format(Config.LOCALE, "rollover: no deletions necessary. free space: %.2f MB | difference: %.2f MB", freeSpaceMB, diffMB));
             return;
         } else {
-            Log.d(TAG, String.format("deletion needed. free space: %.2f | difference: %.2f MB", freeSpaceMB, diffMB));
+            Log.d(TAG, String.format(Config.LOCALE, "deletion needed. free space: %.2f | difference: %.2f MB", freeSpaceMB, diffMB));
         }
 
         File[] filesInDir = dir.listFiles();
@@ -210,7 +210,7 @@ public class ImageRollover {
             }
         }
 
-        Log.i(TAG, String.format("deleted %d images (%d bytes)", deleteCounter, deletedBytes));
+        Log.i(TAG, String.format(Config.LOCALE, "deleted %d images (%d bytes)", deleteCounter, deletedBytes));
 
         if (deleteCounter > 3) {
             Util.saveEvent(context, Event.EventType.INFO, "deleted images: " + deleteCounter);

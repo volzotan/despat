@@ -638,7 +638,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             sb.append("no active recording session");
             sb.append("\n\n");
             sb.append("free space on device: ");
-            sb.append(String.format(Locale.ENGLISH, "%.0fmb", Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity))));
+            sb.append(String.format(Config.LOCALE, "%.0fmb", Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity))));
             tvGeneral.setText(sb.toString());
         }
 
@@ -731,7 +731,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             detector.init();
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
             List<Detector.Recognition> detections = detector.run();
-            detector.display((DrawSurface) findViewById(R.id.drawSurface), detector.recognitionsToRectangles(detections));
+            detector.display((DrawSurface) findViewById(R.id.drawSurface), null, detector.recognitionsToRectangles(detections));
         } catch (Exception e) {
             Log.wtf(TAG, "detector failed", e);
         }

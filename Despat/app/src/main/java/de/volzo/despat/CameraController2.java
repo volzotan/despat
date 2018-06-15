@@ -1205,7 +1205,7 @@ public class CameraController2 extends CameraController {
 
         if (exposureTime != null) exposureTime /= (1000 * 1000);
 
-        Log.d(TAG, String.format("f/: %.1f | t: %dms | iso: %d",
+        Log.d(TAG, String.format(Config.LOCALE, "f/: %.1f | t: %dms | iso: %d",
                 lensAperture,
                 exposureTime,
                 sensitivity

@@ -376,7 +376,7 @@ public class RecordingSession {
 
             if (diff > maxTimeDiff) {
                 result = false;
-                sb.append(String.format("%s | schedule glitch at capture %d (diff: %d)\n", df.format(captures.get(i).getRecordingTime().getTime()), i, diff));
+                sb.append(String.format(Config.LOCALE, "%s | schedule glitch at capture %d (diff: %d)\n", df.format(captures.get(i).getRecordingTime().getTime()), i, diff));
             }
 
             comp = captures.get(i).getRecordingTime();

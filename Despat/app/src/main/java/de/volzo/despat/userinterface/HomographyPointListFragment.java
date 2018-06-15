@@ -291,7 +291,7 @@ public class HomographyPointListFragment extends Fragment implements
 
             float dist = Util.distanceBetweenCoordinates(session.getLatitude(), session.getLongitude(), point.getLatitude(), point.getLongitude());
 
-            holder.desc.setText(String.format("distance to camera: %-4.2fm", dist));
+            holder.desc.setText(String.format(Config.LOCALE, "distance to camera: %-4.2fm", dist));
 
 //            holder.view.setOnClickListener(new View.OnClickListener() {
 //                @Override
