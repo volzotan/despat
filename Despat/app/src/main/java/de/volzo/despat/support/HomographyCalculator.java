@@ -1,5 +1,6 @@
 package de.volzo.despat.support;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.opencv.calib3d.Calib3d;
@@ -13,8 +14,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.Position;
+import de.volzo.despat.persistence.Session;
+import de.volzo.despat.persistence.SessionDao;
 
 public class HomographyCalculator {
 
@@ -26,7 +30,7 @@ public class HomographyCalculator {
         System.loadLibrary("opencv_java3");
     }
 
-    public void test() {
+    public void test(Context context) {
         try {
             List<HomographyPoint> points = new ArrayList<>();
 
@@ -47,10 +51,24 @@ public class HomographyCalculator {
 
             convertPoints(positions);
 
-            for (double[] row : getHomographyMatrix()) {
+            for (Double[] row : getHomographyMatrix()) {
                 Log.wtf(TAG, Arrays.toString(row));
             }
 
+//            AppDatabase db = AppDatabase.getAppDatabase(context);
+//            SessionDao sessionDao = db.sessionDao();
+//            Session session = sessionDao.getLast();
+//
+//            if (session != null) {
+//                session.setHomographyMatrix(getHomographyMatrix());
+//                sessionDao.update(session);
+//                session = sessionDao.getLast();
+//
+//                for (Double[] row : session.getHomographyMatrix()) {
+//                    Log.wtf(TAG, Arrays.toString(row));
+//                }
+//
+//            }
         } catch (Exception e) {
             Log.e(TAG, "fail", e);
         }
@@ -77,8 +95,8 @@ public class HomographyCalculator {
 //        Log.d(TAG, h.dump());
     }
 
-    public double[][] getHomographyMatrix() {
-        double[][] ret = new double[h.rows()][h.cols()];
+    public Double[][] getHomographyMatrix() {
+        Double[][] ret = new Double[h.rows()][h.cols()];
 
         for (int rows = 0; rows<h.rows(); rows++) {
             for (int cols = 0; cols < h.cols(); cols++) {

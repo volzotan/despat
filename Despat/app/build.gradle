@@ -49,7 +49,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 
     // openCV for HOG and the compressor
     implementation project(':openCVLibrary310')
@@ -59,7 +59,7 @@ dependencies {
     // implementation 'org.tensorflow:tensorflow-lite:+'
 
     // Photoview to preview pitch-zoomable images
-    implementation 'com.github.chrisbanes:PhotoView:1.3.1'
+    implementation 'com.github.chrisbanes:PhotoView:2.0.0'
 
     // UsbSerial for Powerbrain
     implementation 'com.github.felHR85:UsbSerial:4.5'

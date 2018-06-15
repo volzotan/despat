@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        }
 //
         HomographyCalculator hcalc = new HomographyCalculator();
-        hcalc.test();
+        hcalc.test(this);
 
         //        btSettings.callOnClick();
 

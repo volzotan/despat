@@ -75,7 +75,7 @@ public class RoomConverter {
             }
         }
 
-        return null;
+        return ret;
     }
 
     @TypeConverter
@@ -83,7 +83,6 @@ public class RoomConverter {
         if (array == null) return null;
 
         StringBuilder sb = new StringBuilder();
-//        sb.append("[" + array.length + "," + array[0].length + "]");
         for (int rows = 0; rows<array.length; rows++) {
             for (int cols = 0; cols<array[0].length; cols++) {
                 sb.append(Double.toString(array[rows][cols]));
