@@ -477,6 +477,9 @@ def eventtype_filter(e):
 
         70: "SYNC",
 
+        80: "LOW BATTERY STOP",
+        81: "LOW MEMORY STOP",
+
         90: "WAKELOCK ACQUIRE",
         91: "WAKELOCK RELEASE",
     }

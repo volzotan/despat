@@ -8,8 +8,8 @@ var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
 graph_status.forEach(function(entry) {
     var date = entry[4].substr(0, entry[4].length-7);
     data.push({"date": parseTime(date), "value": entry[arrayOffset]});
-    console.log(date);
-    console.log(parseTime(date));
+    // console.log(date);
+    // console.log(parseTime(date));
 });
 
 var svg = d3.select(classname),
@@ -71,3 +71,4 @@ var line = d3.line()
 
 draw(".graph-battery", "battery [%]", [0.0, 100.0], 10);
 draw(".graph-memory", "free space [MB]", [0, null], 8);
+draw(".graph-temperature", "temperature [°C]", [-10, 70], 14);
