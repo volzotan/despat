@@ -530,7 +530,7 @@ public class ShutterService extends Service {
 
             if (batteryLevel <= Config.STOP_SESSION_AT_LOW_BATT_THRESHOLD) {
                 Log.w(TAG, "battery level below threshold! recording session stop");
-                Util.saveEvent(context, Event.EventType.INFO, "session stop due to low battery");
+                Util.saveEvent(context, Event.EventType.LOW_BATTERY_STOP, "session stop due to low battery");
 
                 try {
                     session.stopRecordingSession("low battery");

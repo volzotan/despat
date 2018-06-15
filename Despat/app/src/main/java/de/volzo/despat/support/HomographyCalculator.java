@@ -10,6 +10,7 @@ import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import de.volzo.despat.persistence.HomographyPoint;
@@ -46,6 +47,10 @@ public class HomographyCalculator {
 
             convertPoints(positions);
 
+            for (double[] row : getHomographyMatrix()) {
+                Log.wtf(TAG, Arrays.toString(row));
+            }
+
         } catch (Exception e) {
             Log.e(TAG, "fail", e);
         }
@@ -69,7 +74,20 @@ public class HomographyCalculator {
 
         h = Calib3d.findHomography(src, dst);
 
-        Log.d(TAG, h.dump());
+//        Log.d(TAG, h.dump());
+    }
+
+    public double[][] getHomographyMatrix() {
+        double[][] ret = new double[h.rows()][h.cols()];
+
+        for (int rows = 0; rows<h.rows(); rows++) {
+            for (int cols = 0; cols < h.cols(); cols++) {
+                double[] field = h.get(rows, cols);
+                ret[rows][cols] = field[0];
+            }
+        }
+
+        return ret;
     }
 
     public void convertPoints(List<Position> positions) throws Exception {

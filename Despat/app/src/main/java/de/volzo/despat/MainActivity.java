@@ -54,12 +54,14 @@ import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.userinterface.PointActivity;
 import de.volzo.despat.userinterface.SessionListActivity;
 import de.volzo.despat.userinterface.SettingsActivity2;
+import de.volzo.despat.web.Sync;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
@@ -149,26 +151,36 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-//        Button btKill = (Button) findViewById(R.id.bt_kill);
-//        btKill.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//                Intent killIntent = new Intent(activity, Orchestrator.class);
-//                killIntent.putExtra(Orchestrator.SERVICE, Broadcast.ALL_SERVICES);
-//                killIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
-//                sendBroadcast(killIntent);
-//
-//                AppDatabase.purgeDatabase(activity);
-//                Config.reset(activity);
-//
-//                Log.i(TAG, "KILL: db purged. now attempting reboot!");
-//
-//                Despat despat = Util.getDespat(activity);
-//                SystemController systemController = despat.getSystemController();
-//                systemController.reboot();
-//            }
-//        });
+        Button btSync = (Button) findViewById(R.id.bt_sync);
+        btSync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Sync.run(activity, MainActivity.class, true);
+            }
+        });
+
+        Button btKill = (Button) findViewById(R.id.bt_reset);
+        btKill.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent killIntent = new Intent(activity, Orchestrator.class);
+                killIntent.putExtra(Orchestrator.SERVICE, Broadcast.ALL_SERVICES);
+                killIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
+                sendBroadcast(killIntent);
+
+                AppDatabase.purgeDatabase(activity);
+                Config.reset(activity);
+
+                // TODO: delete despat folder
+
+                Log.i(TAG, "KILL: db purged. now attempting reboot!");
+
+                Despat despat = Util.getDespat(activity);
+                SystemController systemController = despat.getSystemController();
+                systemController.reboot();
+            }
+        });
 
         final Button btSettings = (Button) findViewById(R.id.bt_settings);
         btSettings.setOnClickListener(new View.OnClickListener() {
@@ -290,11 +302,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         Intent compressorIntent = new Intent(this, CompressorService.class);
         startService(compressorIntent);
 
-        if (lastSession != null) {
-            Intent pointIntent = new Intent(activity, PointActivity.class);
-            pointIntent.putExtra(PointActivity.ARG_SESSION_ID, lastSession.getId());
-            startActivityForResult(pointIntent, 0x1234);
-        }
+//        if (lastSession != null) {
+//            Intent pointIntent = new Intent(activity, PointActivity.class);
+//            pointIntent.putExtra(PointActivity.ARG_SESSION_ID, lastSession.getId());
+//            startActivityForResult(pointIntent, 0x1234);
+//        }
 
 //        btSessions.callOnClick();
 
@@ -310,8 +322,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            Log.wtf(TAG, "session missing");
 //        }
 //
-//        HomographyCalculator hcalc = new HomographyCalculator();
-//        hcalc.test();
+        HomographyCalculator hcalc = new HomographyCalculator();
+        hcalc.test();
 
         //        btSettings.callOnClick();
 

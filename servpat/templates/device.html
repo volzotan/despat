@@ -25,6 +25,8 @@
       <th class="text-right">free space</br>ext</th>
       <th class="text-right">battery</br>int</th>
       <!-- <th>battery</br>ext</th> -->
+      <th class="text-right">temperature</br>device</th>
+      <th class="text-right">temperature</br>battery</th>
       <th class="text-right">state</br>charging</th>
     </tr>
   </thead>
@@ -40,6 +42,8 @@
       <td class="col-md-1 text-right {% if msg.freeSpaceInternal < 100 %} bg-danger {% endif %}">{{ msg.freeSpaceInternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right">{{ msg.freeSpaceExternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right {% if msg.batteryInternal < 20 %} bg-danger {% endif %}">{{ msg.batteryInternal | round | int | suppressnegative }}</td>
+      <td class="col-md-1 text-right">{{ msg.temperatureDevice | round | suppressnegative }}</td>
+      <td class="col-md-1 text-right">{{ msg.temperatureBattery | round | suppressnegative }}</td>
       <!-- <td class="col-md-1 text-right">{{ msg.batteryExternal | round | int | suppressnegative }}</td> -->
       <td class="col-md-1 text-center {% if msg.stateCharging < 1 %} bg-danger {% else %} bg-success {% endif %}">{{ msg.stateCharging | bool }}</td>
     </tr>
@@ -48,6 +52,8 @@
       <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
       <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-1"> - </td>
       <td class="col-md-1"> - </td>
       <td class="col-md-1"> - </td>
       <td class="col-md-1"> - </td>

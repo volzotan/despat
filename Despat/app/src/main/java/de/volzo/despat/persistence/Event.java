@@ -84,6 +84,10 @@ public class Event {
         // sync
         public static final int SYNC                = 70;
 
+        // warning
+        public static final int LOW_BATTERY_STOP    = 80;
+        public static final int LOW_MEMORY_STOP     = 81;
+
         // wakelock
         public static final int WAKELOCK_ACQUIRE    = 90;
         public static final int WAKELOCK_RELEASE    = 91;

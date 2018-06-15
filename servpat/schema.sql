@@ -1,3 +1,4 @@
+
 drop table if exists status;
 drop table if exists session;
 drop table if exists capture;
@@ -22,7 +23,10 @@ create table status (
   batteryInternal real,
   batteryExternal real,
 
-  stateCharging integer
+  stateCharging integer,
+
+  temperatureDevice real,
+  temperatureBattery real
 );
 
 create table session (
@@ -37,10 +41,16 @@ create table session (
   latitude real,
   longitude real,
 
+  homographyMatrix text,
+
   -- exclusion_image
   -- compressed_image
 
-  resumed integer
+  resumed integer,
+
+  shutterInterval integer,
+  exposureThreshold real,
+  exposureCompensation real
 );
 
 create table capture (

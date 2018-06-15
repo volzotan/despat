@@ -49,8 +49,8 @@ public class Session {
     @ColumnInfo(name = "compressed_image")
     private File compressedImage;
 
-//    @ColumnInfo(name = "homography_matrix")
-//    private Mat homographyMatrix;
+    @ColumnInfo(name = "homography_matrix")
+    private Double[][] homographyMatrix;
 
     @ColumnInfo(name = "resumed")
     private boolean resumed = false;
@@ -161,6 +161,14 @@ public class Session {
 
     public void setCompressedImage(File compressedImage) {
         this.compressedImage = compressedImage;
+    }
+
+    public Double[][] getHomographyMatrix() {
+        return homographyMatrix;
+    }
+
+    public void setHomographyMatrix(Double[][] homographyMatrix) {
+        this.homographyMatrix = homographyMatrix;
     }
 
     public boolean isResumed() {

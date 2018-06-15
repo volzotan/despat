@@ -232,17 +232,25 @@ public class ServerConnector {
                 JSONObject o = new JSONObject();
 
                 o.put("deviceId", Config.getUniqueDeviceId(context));
-
                 o.put("sessionId", session.getId());
-                o.put("start", dateFormat.format(session.getStart()));
 
+                o.put("start", dateFormat.format(session.getStart()));
                 String end = session.getEnd() == null ? null : dateFormat.format(session.getEnd());
                 o.put("end", allowNull(end));
 
                 o.put("latitude", allowNull(session.getLatitude()));
                 o.put("longitude", allowNull(session.getLongitude()));
 
+                o.put("imageWidth", allowNull(session.getImageWidth()));
+                o.put("imageHeight", allowNull(session.getImageHeight()));
+
+                o.put("homographyMatrix", allowNull(session.getHomographyMatrix()));
+
                 o.put("resumed", allowNull(session.isResumed()));
+
+                o.put("shutterInterval", allowNull(session.getShutterInterval()));
+                o.put("exposureThreshold", allowNull(session.getExposureThreshold()));
+                o.put("exposureCompensation", allowNull(session.getExposureCompensation()));
 
                 arr.put(o);
             }

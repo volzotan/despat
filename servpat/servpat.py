@@ -156,7 +156,11 @@ def status():
 	                s["batteryInternal"],
 	                s["batteryExternal"],
 
-	                s["stateCharging"]]
+	                s["stateCharging"],
+
+                    s["temperatureDevice"],
+                    s["temperatureBattery"]
+                ]
 
 	    db = get_db()
 	    db.execute("""
@@ -171,8 +175,10 @@ def status():
 	    						freeSpaceExternal, 
 	    						batteryInternal, 
 	    						batteryExternal, 
-	    						stateCharging
-	    	) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
+	    						stateCharging,
+                                temperatureDevice,
+                                temperatureBattery
+	    	) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
 	    db.commit()
 
     return ("", 204)
@@ -193,7 +199,7 @@ def session():
 
         end = s["end"]
         if end is not None:
-            end = (datetime.strptime(end, DATEFORMAT_INPUT)).strftime(DATEFORMAT_STORE)
+            end = time_to_store(s["end"])
         else:
             end = None
 
@@ -208,7 +214,14 @@ def session():
                     s["latitude"],
                     s["longitude"],
 
-                    s["resumed"]]
+                    s["homographyMatrix"],
+
+                    s["resumed"],
+
+                    s["shutterInterval"],
+                    s["exposureThreshold"],
+                    s["exposureCompensation"]
+                ]
 
         db = get_db()
         db.execute("""
@@ -218,9 +231,13 @@ def session():
                                     start, 
                                     end, 
                                     latitude, 
-                                    longitude, 
-                                    resumed
-            ) values (?, ?, ?, ?, ?, ?, ?, ?)""", values)
+                                    longitude,
+                                    homographyMatrix, 
+                                    resumed,
+                                    shutterInterval,
+                                    exposureThreshold,
+                                    exposureCompensation
+            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
         db.commit()
 
     return ("", 204)
