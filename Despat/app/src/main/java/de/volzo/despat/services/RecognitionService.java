@@ -18,6 +18,7 @@ import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.support.NotificationUtil;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -28,6 +29,8 @@ public class RecognitionService extends IntentService {
     private static final String TAG = RecognitionService.class.getSimpleName();
 
     public static final String ARG_SESSION_ID = "ARG_SESSION_ID";
+    private static final String NOTIFICATION_CHANNEL_ID  = "de.volzo.despat.notificationchannel.RecognitionService";
+    private static final int NOTIFICATION_ID = 0x500;
 
     private static float MIN_CONFIDENCE = 0.1f;
 
@@ -84,6 +87,8 @@ public class RecognitionService extends IntentService {
 
         Log.d(TAG, "skipped " + skipcounter + " captures, " + errorcounter + " errors, queued: " + queue.size());
 
+        NotificationUtil.showProgressNotification(this, 0, 0, "RecognitionService", "started", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID);
+
         // TODO
 
         Detector detector;
@@ -96,8 +101,10 @@ public class RecognitionService extends IntentService {
             return;
         }
 
-        for (Capture c : queue) {
+        for (int i=0; i<queue.size(); i++) {
             try {
+                Capture c = queue.get(i);
+                NotificationUtil.showProgressNotification(this, i, queue.size(), "RecognitionService", "processing (" + i + "/" + queue.size() + ")", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID);
                 detector.load(c.getImage());
                 List<Detector.Recognition> detections = detector.run();
                 saveDetections(c, detections);
@@ -107,6 +114,8 @@ public class RecognitionService extends IntentService {
                 Log.e(TAG, "detector run failed", e);
             }
         }
+
+        NotificationUtil.showProgressNotification(this, 100, 100, "RecognitionService", "finished", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID);
 
 //        detector.display((DrawSurface) findViewById(R.id.drawSurface), detections);
     }

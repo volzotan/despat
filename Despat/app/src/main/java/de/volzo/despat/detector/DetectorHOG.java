@@ -111,13 +111,14 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
-    public void display(DrawSurface surface, List<RectF> rectangles) {
+    public void display(DrawSurface surface, final Size imageSize, List<RectF> rectangles) {
         final List<RectF> rects = rectangles;
         surface.setCallback(new DrawSurface.DrawSurfaceCallback() {
             @Override
             public void onSurfaceReady(DrawSurface surface) {
                 try {
                     surface.clearCanvas();
+                    // imageSize from method, not from class instance
                     surface.addBoxes(imageSize, rects, surface.paintGreen);
                 } catch (Exception e) {
                     Log.e(TAG, "displaying results failed. unable to draw on canvas", e);
@@ -125,5 +126,4 @@ public class DetectorHOG extends Detector {
             }
         });
     }
-
 }

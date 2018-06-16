@@ -3,6 +3,7 @@ package de.volzo.despat.persistence;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -44,6 +45,7 @@ public class HomographyPoint {
 
     public HomographyPoint() {}
 
+    @Ignore
     public HomographyPoint(Double x, Double y, Double latitude, Double longitude) {
         this.x = x;
         this.y = y;

@@ -26,6 +26,7 @@ import de.volzo.despat.SystemController;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
 
 /**
@@ -162,12 +163,7 @@ public class ShutterService extends Service {
             }
         });
 
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Util.setUpShutterNotificationChannel(context);
-        }
-
-        startForeground(FOREGROUND_NOTIFICATION_ID, Util.getShutterNotification(context, 0, 0, null));
+        startForeground(FOREGROUND_NOTIFICATION_ID, NotificationUtil.getShutterNotification(context, 0, 0, null));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.SHUTTER_SERVICE_TRIGGER);
@@ -313,7 +309,7 @@ public class ShutterService extends Service {
 
         ArrayList<String> addInfo = new ArrayList<String>();
         addInfo.add("ShutterService aborted after restarting failed");
-        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, 0, 1, addInfo);
+        NotificationUtil.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, 0, 1, addInfo);
 
         if (Config.getPersistentCamera(context)) {
             handler.removeCallbacksAndMessages(null);
@@ -409,7 +405,7 @@ public class ShutterService extends Service {
 
         ArrayList<String> addInfo = new ArrayList<String>();
         addInfo.add("ShutterService crashed");
-        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, 0, 1, addInfo);
+        NotificationUtil.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, 0, 1, addInfo);
     }
 
     private void eventMalfunction(String message) {

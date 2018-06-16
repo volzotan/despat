@@ -22,6 +22,7 @@ import de.volzo.despat.RecordingSession;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.Sync;
 
@@ -86,7 +87,7 @@ public class Orchestrator extends BroadcastReceiver {
                         RecordingSession session = RecordingSession.getInstance(context);
                         try {
                             session.resumeRecordingSession();
-                            Util.addStandardNotification(context, "resumed session: " + session.getSessionName());
+                            NotificationUtil.showStandardNotification(context, "resumed session: " + session.getSessionName());
                         } catch (Exception e) {
                             Log.i(TAG, "session not resumed: " + e.getMessage());
                         }
@@ -118,7 +119,7 @@ public class Orchestrator extends BroadcastReceiver {
 
                         ArrayList<String> addInfo = new ArrayList<>();
                         addInfo.add(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), false));
-                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), addInfo);
+                        NotificationUtil.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), addInfo);
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
@@ -155,7 +156,7 @@ public class Orchestrator extends BroadcastReceiver {
                         // log
                         Log.e(TAG, "error occured: " + desc, e);
 
-                        Util.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), null);
+                        NotificationUtil.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), null);
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
@@ -251,6 +252,13 @@ public class Orchestrator extends BroadcastReceiver {
         Intent homographyIntent = new Intent(context, HomographyService.class);
         homographyIntent.putExtra(HomographyService.ARG_SESSION_ID, sessionId);
         context.startService(homographyIntent);
+    }
+
+    public static void runRecognitionService(Context context, long sessionId) {
+        Log.d(TAG, "RecognitionService started");
+        Intent recognitionIntent = new Intent(context, RecognitionService.class);
+        recognitionIntent.putExtra(RecognitionService.ARG_SESSION_ID, sessionId);
+        context.startService(recognitionIntent);
     }
 
     // ----------------------------------------------------------------------------------------------------

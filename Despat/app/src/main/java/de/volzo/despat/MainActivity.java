@@ -56,6 +56,7 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
+import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.userinterface.PointActivity;
@@ -165,6 +166,27 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onClick(View view) {
                 Sync.run(activity, MainActivity.class, true);
+            }
+        });
+
+        Button btCompressor = (Button) findViewById(R.id.bt_compressorServiceStart);
+        btCompressor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Orchestrator.runCompressorService(activity);
+            }
+        });
+
+        Button btHomography = (Button) findViewById(R.id.bt_homographyServiceStart);
+        btHomography.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AppDatabase db = AppDatabase.getAppDatabase(activity);
+                SessionDao sessionDao = db.sessionDao();
+                Session session = sessionDao.getLast();
+                if (session != null) {
+                    Orchestrator.runHomographyService(activity, session.getId());
+                }
             }
         });
 
@@ -293,14 +315,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void runTestCode() {
 
+        Util.printCameraParameters(this);
+
         AppDatabase db = AppDatabase.getAppDatabase(this);
         SessionDao sessionDao = db.sessionDao();
         Session lastSession = sessionDao.getLast();
-//        if (lastSession != null) {
-//            Intent detectorIntent = new Intent(this, RecognitionService.class);
-//            detectorIntent.putExtra(RecognitionService.SESSION_ID, lastSession.getId());
-//            startService(detectorIntent);
-//        }
+        if (lastSession != null) {
+//            Orchestrator.runRecognitionService(this, lastSession.getId());
+        };
         Intent compressorIntent = new Intent(this, CompressorService.class);
         startService(compressorIntent);
 
