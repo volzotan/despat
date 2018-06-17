@@ -17,11 +17,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import de.volzo.despat.CameraController;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
@@ -29,6 +31,7 @@ import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
+import de.volzo.despat.persistence.RoomConverter;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
@@ -42,6 +45,7 @@ public class SessionExporter {
     private static final String del = "|";
     private static final DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
 
+    private static final String HEADER_POSITION         = "timestamp"+del+"minx"+del+"miny"+del+"maxx"+del+"maxy"+del+"state_charging"+del+"temperature_device"+del+"temperature_battery";
     private static final String HEADER_STATUS           = "timestamp"+del+"free_space_internal"+del+"free_space_external"+del+"battery_internal"+del+"battery_external"+del+"state_charging"+del+"temperature_device"+del+"temperature_battery";
     private static final String HEADER_HOMOGRAPHYPOINT  = "modification_time"+del+"x"+del+"y"+del+"latitude"+del+"longitude";
 
@@ -86,8 +90,6 @@ public class SessionExporter {
             throw new Exception("session missing or invalid");
         }
 
-        List<Capture> captures = captureDao.getAllBySession(session.getId());
-
         if (session.getEnd() == null) {
             Log.w(TAG, "session is missing end date. substituting with last capture");
             Capture lastCapture = captureDao.getLastFromSession(session.getId());
@@ -121,6 +123,22 @@ public class SessionExporter {
             files.add(exportFile);
 
             Log.d(TAG, "copied compressed image file: " + session.getCompressedImage().getName());
+        }
+
+        // positions
+        List<Position> positions = positionDao.getAllBySession(session.getId());
+        List<Capture> captures = captureDao.getAllBySession(session.getId());
+        HashMap<Long, Date> captureTimestamps = new HashMap<>();
+        for (Capture c : captures) {
+            captureTimestamps.put(c.getId(), c.getRecordingTime());
+        }
+        try {
+            File exportFile = new File(tmpdir, "detections.csv");
+            writePositionsToFile(exportFile, positions, captureTimestamps);
+            files.add(exportFile);
+        } catch (Exception e) {
+            Log.e(TAG, "writing detections.csv failed", e);
+            throw new Exception("writing detections.csv failed");
         }
 
         // status
@@ -171,12 +189,45 @@ public class SessionExporter {
         o.put("end", session.getEnd());
         o.put("lat", session.getLatitude());
         o.put("lon", session.getLongitude());
+        o.put("homograhpyMatrix", RoomConverter.to2dDoubleArrayString(session.getHomographyMatrix()));
+        o.put("resumed", session.isResumed());
 
         try {
             FileOutputStream fos = new FileOutputStream(f);
             OutputStreamWriter osw = new OutputStreamWriter(fos);
             osw.write(o.toString());
         } catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+            throw e;
+        }
+    }
+
+    private void writePositionsToFile(File f, List<Position> data, HashMap<Long, Date> captureTimestamps) throws Exception {
+        try {
+            FileOutputStream fos = new FileOutputStream(f);
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+            osw.write(HEADER_POSITION);
+            osw.write("\n");
+
+            for (Position p : data) {
+                write(osw, captureTimestamps.get(p.getCaptureId()));
+                write(osw, p.getMinx());
+                write(osw, p.getMiny());
+                write(osw, p.getMaxx());
+                write(osw, p.getMaxy());
+                write(osw, p.getX());
+                write(osw, p.getY());
+                write(osw, p.getLatitude());
+                write(osw, p.getLongitude());
+                write(osw, p.getType());
+                write(osw, p.getRecognitionConfidence());
+                write(osw, p.getPositionConfidence());
+                osw.write("\n");
+            }
+
+            osw.close();
+        }
+        catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
             throw e;
         }
@@ -235,32 +286,56 @@ public class SessionExporter {
     }
 
     public void write(OutputStreamWriter osw, String str) throws IOException {
-        osw.write(str);
+        if (str == null) {
+            osw.write("null");
+        } else {
+            osw.write(str);
+        }
         osw.write(del);
     }
 
     public void write(OutputStreamWriter osw, Integer i) throws IOException {
-        osw.write(Integer.toString(i));
+        if (i == null) {
+            osw.write("null");
+        } else {
+            osw.write(Integer.toString(i));
+        }
         osw.write(del);
     }
 
     public void write(OutputStreamWriter osw, Float f) throws IOException {
-        osw.write(Float.toString(f));
+        if (f == null) {
+            osw.write("null");
+        } else {
+            osw.write(Float.toString(f));
+        }
         osw.write(del);
     }
 
     public void write(OutputStreamWriter osw, Double d) throws IOException {
-        osw.write(Double.toString(d));
+        if (d == null) {
+            osw.write("null");
+        } else {
+            osw.write(Double.toString(d));
+        }
         osw.write(del);
     }
 
     public void write(OutputStreamWriter osw, Boolean b) throws IOException {
-        osw.write(b ? "1" : "0");
+        if (b == null) {
+            osw.write("null");
+        } else {
+            osw.write(b ? "1" : "0");
+        }
         osw.write(del);
     }
 
     public void write(OutputStreamWriter osw, Date d) throws IOException {
-        osw.write(dateFormat.format(d));
+        if (d == null) {
+            osw.write("null");
+        } else {
+            osw.write(dateFormat.format(d));
+        }
         osw.write(del);
     }
 

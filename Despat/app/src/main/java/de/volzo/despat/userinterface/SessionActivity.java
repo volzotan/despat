@@ -97,6 +97,9 @@ public class SessionActivity extends AppCompatActivity implements
 
     @Override
     public void onSessionActionSelection(long sessionId, String action) {
+
+        // TODO: check if homography operation is already done!
+
         SessionExporter exporter = new SessionExporter(this, sessionId);
 
         try {
