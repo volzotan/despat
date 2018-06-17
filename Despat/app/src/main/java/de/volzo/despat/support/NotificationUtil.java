@@ -33,6 +33,7 @@ public class NotificationUtil {
                 "ShutterServiceNotification",
                 NotificationManager.IMPORTANCE_DEFAULT);
 
+        channel.setSound(null, null);
         notificationManager.createNotificationChannel(channel);
     }
 
@@ -128,6 +129,7 @@ public class NotificationUtil {
                 notificationChannelId,
                 channelName,
                 NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setSound(null, null);
         notificationManager.createNotificationChannel(channel);
     }
 
