@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
+import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.SystemController;
@@ -49,6 +51,9 @@ public class ShutterService extends Service {
      */
 
     private static final String TAG = ShutterService.class.getSimpleName();
+
+    public static final String ARG_CAMERA_CONFIG        = "ARG_CAMERA_CONFIG";
+
     public static final int REQUEST_CODE                = 0x0100;
     public static final int FOREGROUND_NOTIFICATION_ID  = 0x0200;
     public static final String NOTIFICATION_CHANNEL_ID  = "de.volzo.despat.notificationchannel.ShutterService";
@@ -62,6 +67,7 @@ public class ShutterService extends Service {
 
     Context context;
     Handler handler;
+    CameraConfig camconfig;
 
     CameraController camera;
 
@@ -84,9 +90,7 @@ public class ShutterService extends Service {
 
             if (Config.getPersistentCamera(context)) {
                 // TODO: reschedule new shutterRelease? restart camera?
-
                 // TODO: has a new picture been taken? is everything in its orderly fashion?
-
             } else {
 
                 // on calling the watchdog the camera is still alive
@@ -125,6 +129,13 @@ public class ShutterService extends Service {
 
         this.context = this;
         this.handler = new Handler();
+
+        Bundle args = intent.getExtras();
+        try {
+            this.camconfig = (CameraConfig) args.getSerializable(ARG_CAMERA_CONFIG);
+        } catch (Exception e) {
+            Log.e(TAG, "Camera Config missing");
+        }
 
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 
@@ -219,7 +230,7 @@ public class ShutterService extends Service {
         try {
             if (camera == null || camera.isDead()) {
                 Log.d(TAG, "CamController created");
-                camera = despat.initCamera(this, cameraCallback, null);
+                camera = despat.initCamera(this, cameraCallback, null, camconfig);
                 camera.openCamera();
             } else {
                 Log.d(TAG, "CamController already up and running");

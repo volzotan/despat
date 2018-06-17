@@ -7,9 +7,11 @@ import android.util.Log;
 import android.view.TextureView;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
 
 /**
@@ -86,5 +88,4 @@ public abstract class CameraController {
         // the image is not guaranteed to be written to disk at calling time
         public void captureComplete() {}
     }
-
 }

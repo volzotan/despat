@@ -50,6 +50,7 @@ import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
@@ -58,6 +59,7 @@ import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
+import de.volzo.despat.userinterface.ConfigureActivity;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.userinterface.PointActivity;
 import de.volzo.despat.userinterface.SessionListActivity;
@@ -154,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 CameraController camera = despat.getCamera();
 
                 if (camera == null || camera.isDead()) {
-                    activity.startCamera();
+                    activity.startCamera(new CameraConfig(activity));
                 } else {
                     despat.closeCamera();
                 }
@@ -177,6 +179,21 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
+        Button btRecognition = (Button) findViewById(R.id.bt_recognitionServiceStart);
+        btRecognition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AppDatabase db = AppDatabase.getAppDatabase(activity);
+                SessionDao sessionDao = db.sessionDao();
+                Session session = sessionDao.getLast();
+                if (session != null) {
+                    Orchestrator.runRecognitionService(activity, session.getId());
+                } else {
+                    Log.w(TAG, "no session found");
+                }
+            }
+        });
+
         Button btHomography = (Button) findViewById(R.id.bt_homographyServiceStart);
         btHomography.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 Session session = sessionDao.getLast();
                 if (session != null) {
                     Orchestrator.runHomographyService(activity, session.getId());
+                } else {
+                    Log.w(TAG, "no session found");
                 }
             }
         });
@@ -226,21 +245,25 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     Despat despat = Util.getDespat(activity);
                     despat.closeCamera();
 
-                    final TextureView textureView = findViewById(R.id.textureView);
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            Util.clearTextureView(textureView);
-                            Util.drawTextOnTextureView(textureView, "foo");
-                            RecordingSession session = RecordingSession.getInstance(activity);
-                            session.startRecordingSession(null);
+                    Intent configureIntent = new Intent(activity, ConfigureActivity.class);
+                    configureIntent.setAction(ConfigureActivity.TRACKING_SESSION);
+                    startActivityForResult(configureIntent, 0x123);
 
-                            updatePreviewImage();
-                        }
-                    }, 1000);
-                    startProgressBarUpdate();
-//                    btStartStopCapturing.setChecked(true);
+//                    final TextureView textureView = findViewById(R.id.textureView);
+//                    final Handler handler = new Handler();
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Util.clearTextureView(textureView);
+//                            Util.drawTextOnTextureView(textureView, "foo");
+//                            RecordingSession session = RecordingSession.getInstance(activity);
+//                            session.startRecordingSession(null);
+//
+//                            updatePreviewImage();
+//                        }
+//                    }, 1000);
+//                    startProgressBarUpdate();
+////                    btStartStopCapturing.setChecked(true);
 
                     tvFapRec.setText("STOP");
                 } else {
@@ -374,6 +397,28 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult");
+
+        if (resultCode != RESULT_OK) {
+            Log.e(TAG, "activity result not OK");
+            return;
+        }
+
+        CameraConfig cameraConfig = (CameraConfig) data.getSerializableExtra(ConfigureActivity.DATA_CAMERA_CONFIG);
+
+        final TextureView textureView = findViewById(R.id.textureView);
+//        final Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+                Util.clearTextureView(textureView);
+                Util.drawTextOnTextureView(textureView, "foo");
+                RecordingSession session = RecordingSession.getInstance(activity);
+                session.startRecordingSession(null, cameraConfig);
+
+                updatePreviewImage();
+//            }
+//        }, 1000);
+        startProgressBarUpdate();
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -402,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     }
 
                     Snackbar.make(
-                            activity.findViewById(android.R.id.content),
+                            activity.findViewById(R.id.snackbarLayout),
                             sb.toString(),
                             Snackbar.LENGTH_LONG
                     ).show();
@@ -453,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
             if (checkPermissionsAreGiven()) {
-                startCamera();
+                startCamera(new CameraConfig(activity));
             } else {
                 Toast.makeText(this, "camera inactive : permissions are missing", Toast.LENGTH_LONG).show();
             }
@@ -535,7 +580,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
     }
 
-    public void startCamera() {
+    public void startCamera(CameraConfig cameraConfig) {
 
         if (RecordingSession.getInstance(activity).isActive()) {
             Log.i(TAG, "no preview while recordingSession is active");
@@ -544,7 +589,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         despat.closeCamera();
         try {
-            CameraController camera = despat.initCamera(this, null, textureView);
+            CameraController camera = despat.initCamera(this, null, textureView, cameraConfig);
             camera.openCamera();
         } catch (Exception cae) {
             Log.e(TAG, "starting Camera failed", cae);
@@ -603,7 +648,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 CameraController camera = despat.getCamera();
                 if (camera == null || camera.isDead()) {
                     try {
-                        camera = despat.initCamera(context, callback, null);
+                        camera = despat.initCamera(context, callback, null, new CameraConfig(activity));
                         camera.openCamera();
                     } catch (Exception e) {
                         Log.e(TAG, "starting camera failed", e);

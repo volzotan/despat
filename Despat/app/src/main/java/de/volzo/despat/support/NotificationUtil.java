@@ -131,9 +131,13 @@ public class NotificationUtil {
         notificationManager.createNotificationChannel(channel);
     }
 
-    public static void showProgressNotification(Context context, int pos, int total, String title, String content, int notificationId, String notificationChannelId) {
+    public static void showProgressNotification(Context context, int pos, int total, String title, String content, int notificationId, String notificationChannelId, String notificationChannelName) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setUpServiceProgressNotificationChannel(context, notificationChannelId, notificationChannelName);
+        }
 
         Notification.Builder builder =  new Notification.Builder(context.getApplicationContext())
                 .setContentTitle(title)

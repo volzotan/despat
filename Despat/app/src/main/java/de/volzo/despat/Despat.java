@@ -15,6 +15,7 @@ import org.acra.annotation.AcraCore;
 
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
+import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
@@ -191,16 +192,16 @@ public class Despat extends Application {
     }
 
     public CameraController initCamera(Context context) throws Exception {
-        return initCamera(context, null, null);
+        return initCamera(context, null, null, new CameraConfig(this));
     }
 
-    public CameraController initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView) throws Exception {
+    public CameraController initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView, CameraConfig cameraConfig) throws Exception {
         if (Config.getLegacyCameraController(context)) {
             Log.d(TAG, "initializing camera controller 1");
             this.camera = new CameraController1(context, controllerCallback, textureView);
         } else {
             Log.d(TAG, "initializing camera controller 2");
-            this.camera = new CameraController2(context, controllerCallback, textureView);
+            this.camera = new CameraController2(context, controllerCallback, textureView, cameraConfig);
         }
 
         return this.camera;

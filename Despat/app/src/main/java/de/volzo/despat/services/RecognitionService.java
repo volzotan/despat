@@ -28,9 +28,10 @@ public class RecognitionService extends IntentService {
 
     private static final String TAG = RecognitionService.class.getSimpleName();
 
-    public static final String ARG_SESSION_ID = "ARG_SESSION_ID";
-    private static final String NOTIFICATION_CHANNEL_ID  = "de.volzo.despat.notificationchannel.RecognitionService";
-    private static final int NOTIFICATION_ID = 0x500;
+    public static final String ARG_SESSION_ID               = "ARG_SESSION_ID";
+    private static final String NOTIFICATION_CHANNEL_ID     = "de.volzo.despat.notificationchannel.RecognitionService";
+    private static final String NOTIFICATION_CHANNEL_NAME   = "Background Work Services";
+    private static final int NOTIFICATION_ID                = 0x500;
 
     private static float MIN_CONFIDENCE = 0.1f;
 
@@ -87,7 +88,7 @@ public class RecognitionService extends IntentService {
 
         Log.d(TAG, "skipped " + skipcounter + " captures, " + errorcounter + " errors, queued: " + queue.size());
 
-        NotificationUtil.showProgressNotification(this, 0, 0, "RecognitionService", "started", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID);
+        NotificationUtil.showProgressNotification(this, 0, 0, "RecognitionService", "started", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME);
 
         // TODO
 
@@ -104,7 +105,7 @@ public class RecognitionService extends IntentService {
         for (int i=0; i<queue.size(); i++) {
             try {
                 Capture c = queue.get(i);
-                NotificationUtil.showProgressNotification(this, i, queue.size(), "RecognitionService", "processing (" + i + "/" + queue.size() + ")", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID);
+                NotificationUtil.showProgressNotification(this, i, queue.size(), "RecognitionService", "processing (" + i + "/" + queue.size() + ")", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME);
                 detector.load(c.getImage());
                 List<Detector.Recognition> detections = detector.run();
                 saveDetections(c, detections);
@@ -115,7 +116,7 @@ public class RecognitionService extends IntentService {
             }
         }
 
-        NotificationUtil.showProgressNotification(this, 100, 100, "RecognitionService", "finished", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID);
+        NotificationUtil.showProgressNotification(this, 100, 100, "RecognitionService", "finished", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME);
 
 //        detector.display((DrawSurface) findViewById(R.id.drawSurface), detections);
     }

@@ -9,19 +9,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.RatingBar;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import de.volzo.despat.CameraController;
 import de.volzo.despat.RecordingSession;
 import de.volzo.despat.persistence.Event;
-import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.Sync;
@@ -42,8 +44,10 @@ public class Orchestrator extends BroadcastReceiver {
     public static final int OPERATION_STOP      = 2;
     public static final int OPERATION_ONCE      = 3;
 
-    private Context context;
+    public static final String DATA_CAMERA_CONFIG = "DATA_CAMERA_CONFIG";
 
+    private Context context;
+    private CameraConfig cameraConfig;
     private String reason;
 
     @Override
@@ -195,6 +199,15 @@ public class Orchestrator extends BroadcastReceiver {
                 break;
 
             case Broadcast.SHUTTER_SERVICE:
+
+                try {
+                    this.cameraConfig = (CameraConfig) intent.getSerializableExtra(DATA_CAMERA_CONFIG);
+                    if (this.cameraConfig == null) throw new NullPointerException();
+                } catch (Exception e) {
+                    Log.w(TAG, "camera config missing. initialized with default values");
+                    this.cameraConfig = new CameraConfig(context);
+                }
+
                 if (operation == OPERATION_START) {
                     shutterServiceStart();
                 } else if (operation == OPERATION_STOP) {
@@ -268,6 +281,9 @@ public class Orchestrator extends BroadcastReceiver {
         // start the Shutter Service
         if (!Util.isServiceRunning(context, ShutterService.class)) {
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
+            Bundle args = new Bundle();
+            args.putSerializable(ShutterService.ARG_CAMERA_CONFIG, cameraConfig);
+            shutterServiceIntent.putExtras(args);
 
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -295,7 +311,7 @@ public class Orchestrator extends BroadcastReceiver {
         Sync.run(context, ShutterService.class, false);
         // TODO: this should be done in its own thread with its own wakelock
 
-        if (!Config.getPersistentCamera(context)) {
+        if (!cameraConfig.getPersistentCamera()) {
 
             // trigger the next invocation
             long now = System.currentTimeMillis(); // alarm is set right away
@@ -308,7 +324,7 @@ public class Orchestrator extends BroadcastReceiver {
                     ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-            long nextExecution = now + Config.getShutterInterval(context);
+            long nextExecution = now + cameraConfig.getShutterInterval();
             nextExecution -= nextExecution % 1000;
 
             // save the time of the next invocation for the progressBar in the UI
@@ -336,7 +352,7 @@ public class Orchestrator extends BroadcastReceiver {
     }
 
     private void shutterServiceStop() {
-        if (Config.getPersistentCamera(context)) {
+        if (cameraConfig.getPersistentCamera()) {
 
         } else {
             // alarm Manager

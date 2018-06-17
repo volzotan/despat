@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.location.Location;
 import android.media.Image;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
 
@@ -25,6 +27,7 @@ import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
+import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.services.RecognitionService;
@@ -95,7 +98,7 @@ public class RecordingSession {
 
     // --------------------------------------------------------------------------------------------------------------
 
-    public void startRecordingSession(String sessionName) {
+    public void startRecordingSession(String sessionName, CameraConfig cameraConfig) {
         if (session != null) {
             try {
                 stopRecordingSession();
@@ -133,6 +136,9 @@ public class RecordingSession {
         Intent shutterIntent = new Intent(context, Orchestrator.class);
         shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
         shutterIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
+        Bundle args = new Bundle();
+        args.putSerializable(Orchestrator.DATA_CAMERA_CONFIG, cameraConfig);
+        shutterIntent.putExtras(args);
         context.sendBroadcast(shutterIntent);
 
         SystemController systemController = despat.getSystemController();

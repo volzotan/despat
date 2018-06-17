@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import de.volzo.despat.persistence.Event;
+import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.DevicePositioner;
@@ -75,6 +76,7 @@ public class CameraController2 extends CameraController {
     private Context context;
     private TextureView textureView;
     private CameraController.ControllerCallback controllerCallback;
+    private CameraConfig camconfig;
 
     private final CameraController controller = this;
 
@@ -114,10 +116,11 @@ public class CameraController2 extends CameraController {
     private long captureTimer;
     private Future<Integer> devicePositionFuture;
 
-    public CameraController2(Context context, ControllerCallback controllerCallback, TextureView textureView) {
+    public CameraController2(Context context, ControllerCallback controllerCallback, TextureView textureView, CameraConfig camconfig) {
         this.context = context;
         this.controllerCallback = controllerCallback;
         this.textureView = textureView;
+        this.camconfig = camconfig;
 
 //        this.devicePositioner = new DevicePositioner(context);
 
@@ -142,7 +145,7 @@ public class CameraController2 extends CameraController {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
 
-            if (Config.FORMAT_RAW && !contains(
+            if (camconfig.isFormatRaw() && !contains(
                     characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES),
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
                 throw new Exception("invalid configuration: camera supports no RAW format");
@@ -256,8 +259,8 @@ public class CameraController2 extends CameraController {
 
             // output surfaces
             List<Surface> outputSurfaces = new ArrayList<Surface>(3);
-            if (Config.FORMAT_JPG) outputSurfaces.add(imageReaderJpg.getSurface());
-            if (Config.FORMAT_RAW) outputSurfaces.add(imageReaderRaw.getSurface());
+            if (camconfig.isFormatJpg()) outputSurfaces.add(imageReaderJpg.getSurface());
+            if (camconfig.isFormatRaw()) outputSurfaces.add(imageReaderRaw.getSurface());
 
             // get empty dummy surface or surface with texture view
             surfaceTexture = getSurfaceTexture(textureView);
@@ -303,8 +306,8 @@ public class CameraController2 extends CameraController {
             previewRequestBuilder.addTarget(surface);
 
             stillRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-            if (Config.FORMAT_JPG) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
-            if (Config.FORMAT_RAW) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
+            if (camconfig.isFormatJpg()) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
+            if (camconfig.isFormatRaw()) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
 
 //            // TODO: (window?) rotation is wrong after service restart
 //
@@ -349,7 +352,7 @@ public class CameraController2 extends CameraController {
 //            Log.wtf(TAG, "photo orientation: " + photoOrientation);
 
             // JPEG Quality
-            stillRequestBuilder.set(CaptureRequest.JPEG_QUALITY, Config.JPEG_QUALITY);
+            stillRequestBuilder.set(CaptureRequest.JPEG_QUALITY, camconfig.getJpegQuality());
 
             // enable lens shading correction for the RAW output
             stillRequestBuilder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_HIGH_QUALITY);
@@ -483,7 +486,7 @@ public class CameraController2 extends CameraController {
                     }
 
                     long meteringTime = SystemClock.elapsedRealtime() - captureTimer;
-                    boolean meteringOvertime = meteringTime > Config.METERING_MAX_TIME;
+                    boolean meteringOvertime = meteringTime > camconfig.getMeteringMaxTime();
 
                     // If we haven't finished the pre-capture sequence but have hit our maximum
                     // wait timeout, too bad! Begin capture anyway.
@@ -576,7 +579,7 @@ public class CameraController2 extends CameraController {
         // clear ImageReader // hacky solution to clear the imageReader without closing and reinitializing
         int removeCounter = 0;
         try {
-            for(removeCounter=0; removeCounter<Config.NUMBER_OF_BURST_IMAGES*2+1; removeCounter++) imageReaderJpg.acquireNextImage().close();
+            for(removeCounter=0; removeCounter<camconfig.getNumberOfBurstImages()*2+1; removeCounter++) imageReaderJpg.acquireNextImage().close();
         } catch (Exception e) {
             // done
         } finally {
@@ -588,7 +591,7 @@ public class CameraController2 extends CameraController {
         }
         removeCounter = 0;
         try {
-            for(removeCounter=0; removeCounter<Config.NUMBER_OF_BURST_IMAGES*2+1; removeCounter++) imageReaderRaw.acquireNextImage().close();
+            for(removeCounter=0; removeCounter<camconfig.getNumberOfBurstImages()*2+1; removeCounter++) imageReaderRaw.acquireNextImage().close();
         } catch (Exception e) {
             // done
         } finally {
@@ -602,7 +605,7 @@ public class CameraController2 extends CameraController {
         // clear ResultQueue
         synchronized (queueRemoveLock) {
 
-            if (Config.FORMAT_JPG && jpgResultQueue != null && jpgResultQueue.size() > 0) {
+            if (camconfig.isFormatJpg() && jpgResultQueue != null && jpgResultQueue.size() > 0) {
 
                 String msg = "clearing " + jpgResultQueue.size() + " scheduled JPEG images from ImageSaver";
                 Log.w(TAG, msg);
@@ -614,7 +617,7 @@ public class CameraController2 extends CameraController {
                 jpgResultQueue.clear();
             }
 
-            if (Config.FORMAT_RAW && rawResultQueue != null && rawResultQueue.size() > 0) {
+            if (camconfig.isFormatRaw() && rawResultQueue != null && rawResultQueue.size() > 0) {
 
                 String msg = "clearing " + rawResultQueue.size() + " scheduled RAW images from ImageSaver";
                 Log.w(TAG, msg);
@@ -655,7 +658,7 @@ public class CameraController2 extends CameraController {
             purgeImageReaderAndSaver();
 
 
-            final int burstLength = Config.NUMBER_OF_BURST_IMAGES; // TODO: make burstLength a function parameter
+            final int burstLength = camconfig.getNumberOfBurstImages(); // TODO: make burstLength a function parameter
 
             CameraCaptureSession.CaptureCallback localCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
@@ -691,7 +694,7 @@ public class CameraController2 extends CameraController {
                     }
 
                     int n = (int) request.getTag();
-                    Log.i(TAG, "captured image [" + Integer.toString(n + 1) + "/" + Config.NUMBER_OF_BURST_IMAGES + "]");
+                    Log.i(TAG, "captured image [" + Integer.toString(n + 1) + "/" + camconfig.getNumberOfBurstImages() + "]");
 
                     String filename = null;
 
@@ -770,8 +773,8 @@ public class CameraController2 extends CameraController {
                 // attach the number of the picture in the burst sequence to the request
                 stillRequestBuilder.setTag(i);
 
-                ImageSaver jpgImageSaver = new ImageSaver(context, characteristics);
-                ImageSaver rawImageSaver = new ImageSaver(context, characteristics);
+                ImageSaver jpgImageSaver = new ImageSaver(context, characteristics, camconfig);
+                ImageSaver rawImageSaver = new ImageSaver(context, characteristics, camconfig);
 
                 jpgResultQueue.put(i, jpgImageSaver);
                 rawResultQueue.put(i, rawImageSaver);
@@ -795,7 +798,7 @@ public class CameraController2 extends CameraController {
         Log.d(TAG, "# unlockFocus");
 
         // evil hack for lineage on MOTO E
-        if (Config.END_CAPTURE_WITHOUT_UNLOCKING_FOCUS) {
+        if (camconfig.isEndCaptureWithoutUnlockingFocus()) {
             if (controllerCallback != null) {
                 controllerCallback.captureComplete();
             }
@@ -1051,25 +1054,25 @@ public class CameraController2 extends CameraController {
     }
 
     private void initializeImageReaders(CameraCharacteristics characteristics) {
-        if (Config.FORMAT_JPG) {
+        if (camconfig.isFormatJpg()) {
             Size[] jpgSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
             if (jpgSizes == null) {
                 Log.e(TAG, "no JPEG image size could be determined");
                 return;
             }
 
-            imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, Config.NUMBER_OF_BURST_IMAGES*2);
+            imageReaderJpg = ImageReader.newInstance(jpgSizes[0].getWidth(), jpgSizes[0].getHeight(), ImageFormat.JPEG, camconfig.getNumberOfBurstImages()*2);
             imageReaderJpg.setOnImageAvailableListener(readerListenerJpg, backgroundHandler);
         }
 
-        if (Config.FORMAT_RAW) {
+        if (camconfig.isFormatRaw()) {
             Size[] rawSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.RAW_SENSOR);
             if (rawSizes == null) {
                 Log.e(TAG, "no RAW image size could be determined");
                 return;
             }
 
-            imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, Config.NUMBER_OF_BURST_IMAGES*2);
+            imageReaderRaw = ImageReader.newInstance(rawSizes[0].getWidth(), rawSizes[0].getHeight(), ImageFormat.RAW_SENSOR, camconfig.getNumberOfBurstImages()*2);
             imageReaderRaw.setOnImageAvailableListener(readerListenerRaw, backgroundHandler);
         }
     }
@@ -1295,14 +1298,15 @@ public class CameraController2 extends CameraController {
     private static class ImageSaver implements Runnable {
         private Context context;
         private CameraCharacteristics characteristics;
+        private CameraConfig camconfig;
         CaptureResult captureResult;
         private File filename;
         Image image;
 
-        ImageSaver(Context context, CameraCharacteristics characteristics) {
+        ImageSaver(Context context, CameraCharacteristics characteristics, CameraConfig camconfig) {
             this.context = context;
             this.characteristics = characteristics;
-
+            this.camconfig = camconfig;
 //            Log.d(TAG, "# imageSaver created");
         }
 
@@ -1375,7 +1379,7 @@ public class CameraController2 extends CameraController {
                     return;
             }
 
-            if (Config.RUN_MEDIASCANNER_AFTER_CAPTURE) {
+            if (camconfig.isRunMediascannerAfterCapture()) {
                 MediaScannerConnection.scanFile(context, new String[]{filename.getPath()}, null, new MediaScannerConnection.MediaScannerConnectionClient() {
                     @Override
                     public void onMediaScannerConnected() {
