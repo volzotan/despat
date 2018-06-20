@@ -140,7 +140,7 @@ public class MapUtil {
                 }
 
                 case DespatMarker.TYPE_CORRESPONDING_POINT_NEW: {
-                    marker.icon(BitmapDescriptorFactory.fromBitmap(getBitmap(context, R.drawable.ic_marker_plus)));
+                    marker.icon(BitmapDescriptorFactory.fromBitmap(getBitmap(context, R.drawable.ic_marker_plus_new)));
                     marker.draggable(true);
                     break;
                 }

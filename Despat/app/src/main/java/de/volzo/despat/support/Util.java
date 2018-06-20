@@ -393,18 +393,30 @@ public class Util {
 
     public static void clearTextureView(TextureView tv) {
         Canvas canvas = tv.lockCanvas();
+        if (canvas == null) {
+            Log.e(TAG, "canvas unavailable");
+            return;
+        }
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         tv.unlockCanvasAndPost(canvas);
     }
 
     public static void darkenTextureView(TextureView tv) {
         Canvas canvas = tv.lockCanvas();
+        if (canvas == null) {
+            Log.e(TAG, "canvas unavailable");
+            return;
+        }
         canvas.drawColor(Color.argb(255/2, 0, 0, 0));
         tv.unlockCanvasAndPost(canvas);
     }
 
     public static void drawTextOnTextureView(TextureView tv, String text) {
         Canvas canvas = tv.lockCanvas();
+        if (canvas == null) {
+            Log.e(TAG, "canvas unavailable");
+            return;
+        }
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setTextSize(canvas.getHeight());

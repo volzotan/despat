@@ -164,6 +164,8 @@
                     android:layout_row="0"
                     android:id="@+id/bt_sessions" />
 
+                <!--android:background="@drawable/efab"-->
+
                 <Button
                     android:text="Settings"
                     android:drawableStart="@drawable/ic_settings_white_18dp"
@@ -285,5 +287,14 @@
             android:textColor="@android:color/white"
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </FrameLayout>
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/snackbarLayout"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+    </android.support.design.widget.CoordinatorLayout>
 
 </FrameLayout>

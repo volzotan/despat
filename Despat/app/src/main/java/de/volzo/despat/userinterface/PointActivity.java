@@ -211,7 +211,7 @@ public class PointActivity extends AppCompatActivity implements
         mapUtil.clearAllMarkersOnMap();
         mapUtil.placeMarkersOnMap(markers);
 
-        btDone.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+//        btDone.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         btDone.setEnabled(true);
     }
 

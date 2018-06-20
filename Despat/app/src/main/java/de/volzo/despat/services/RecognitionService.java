@@ -153,6 +153,6 @@ public class RecognitionService extends IntentService {
             positionDao.insert(pos);
         }
 
-        Log.d(TAG, "saved " + d.size() + " detections (skipped " + skipcounter + " below threshold)");
+        Log.d(TAG, String.format("saved %d/%d detections (skipped %d below threshold", d.size()-skipcounter, d.size(), skipcounter));
     }
 }

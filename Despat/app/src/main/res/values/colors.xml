@@ -10,7 +10,7 @@
     <!--<color name="windowBackground">#222</color>-->
     <!--<color name="navigationBarColor">#666</color>-->
 
-    <!--<color name="black">#000000</color>-->
+    <color name="black">#000000</color>
     <color name="opaqueBlack">#80000000</color>
 
     <color name="bg_list_item">#333</color>

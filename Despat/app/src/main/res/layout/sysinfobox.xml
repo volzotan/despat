@@ -70,48 +70,68 @@
         android:layout_width="wrap_content"
         android:text="doze whitelisted" />
 
-    <LinearLayout
+    <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:rowCount="2"
+        android:columnCount="4">
 
         <Button
             android:id="@+id/bt_runRecognizer"
             android:text="run detector"
+            android:layout_row="0"
+            android:layout_column="0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/bt_toggleCamera"
             android:text="toggle camera"
+            android:layout_row="0"
+            android:layout_column="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/bt_sync"
             android:text="force sync"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/bt_compressorServiceStart"
-            android:text="force compressorc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/bt_homographyServiceStart"
-            android:text="force homography"
+            android:layout_row="0"
+            android:layout_column="2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/bt_reset"
             android:text="reset all data"
+            android:layout_row="0"
+            android:layout_column="3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+        <Button
+            android:id="@+id/bt_compressorServiceStart"
+            android:text="force compressor"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/bt_homographyServiceStart"
+            android:text="force homography"
+            android:layout_row="1"
+            android:layout_column="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/bt_recognitionServiceStart"
+            android:text="force recognition"
+            android:layout_row="1"
+            android:layout_column="2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </GridLayout>
 
 </LinearLayout>

@@ -1,23 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     tools:context="de.volzo.despat.userinterface.ConfigureActivity">
 
-    <Button
-        android:text="set time"
-        android:textColor="@color/colorAccent"
-        android:layout_width="fill_parent"
+    <!--<Button-->
+        <!--android:text="set time"-->
+        <!--android:textColor="@color/colorAccent"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/bt_setTime" />-->
+
+    <TextView
+        android:id="@+id/tv_sessionName"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:text="dataset name:"/>
+
+    <TextView
+        android:id="@+id/tip_sessionName"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:textAlignment="viewEnd"
+        android:layout_toRightOf="@+id/tv_sessionName"
+        android:layout_marginLeft="10dp"
+        android:text="an easy to remember and descriptive name for this dataset"/>
+
+    <EditText
+        android:id="@+id/et_sessionName"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/bt_setTime" />
+        android:layout_below="@+id/tv_sessionName"/>
 
     <Button
         android:text="Start"
         android:textColor="@color/colorAccent"
+        android:layout_alignParentBottom="true"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/bt_start" />
 
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

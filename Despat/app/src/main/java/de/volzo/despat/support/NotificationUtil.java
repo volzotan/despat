@@ -53,8 +53,8 @@ public class NotificationUtil {
         Notification.Builder builder =  new Notification.Builder(context.getApplicationContext())
                 .setContentTitle("despat active")
                 .setContentText(contentText)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setSmallIcon(R.mipmap.despat_icon_notification)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.despat_icon))
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_DEFAULT);
 
@@ -109,8 +109,8 @@ public class NotificationUtil {
         Notification notification = new Notification.Builder(context.getApplicationContext())
                 .setContentTitle("despat")
                 .setContentText(message)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setSmallIcon(R.mipmap.despat_icon_notification)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.despat_icon))
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_DEFAULT)
                 .build();
@@ -145,8 +145,8 @@ public class NotificationUtil {
                 .setContentTitle(title)
                 .setContentText(content)
                 .setProgress(total, pos, false)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setSmallIcon(R.mipmap.despat_icon_notification)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.despat_icon))
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_DEFAULT);
 
