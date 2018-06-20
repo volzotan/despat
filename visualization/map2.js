@@ -289,6 +289,8 @@ function buildUI(dataset) {
 
     // set defaults
 
+    $("#toggleMapCached").click();
+
     $("li[data-type=layer][data-id=hbg]").click();
     $("li[data-type=layer][data-id=sca]").click();
     $("li[data-type=layer][data-id=sym]").click();
