@@ -338,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void runTestCode() {
 
-        Util.printCameraParameters(this);
+//        Util.printCameraParameters(this);
 
         AppDatabase db = AppDatabase.getAppDatabase(this);
         SessionDao sessionDao = db.sessionDao();

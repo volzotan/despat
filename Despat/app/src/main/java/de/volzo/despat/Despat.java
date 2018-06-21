@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.os.PowerManager;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.TextureView;
 import android.widget.Toast;
@@ -13,13 +12,12 @@ import com.facebook.stetho.Stetho;
 
 import org.acra.annotation.AcraCore;
 
-import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
-import de.volzo.despat.support.DevicePositioner;
+import de.volzo.despat.support.DeviceInfo;
 import de.volzo.despat.support.ProximitySensor;
 import de.volzo.despat.support.Util;
 
@@ -63,8 +61,6 @@ public class Despat extends Application {
             Log.e(TAG, "room db schema outdated", e);
             Toast.makeText(context, "Database outdated", Toast.LENGTH_LONG).show();
 
-//            AppDatabase.purgeDatabase(this);
-
             System.exit(0);
         }
 
@@ -92,8 +88,9 @@ public class Despat extends Application {
         });
 
         initOrchestrator();
-
         proximitySensor = new ProximitySensor(this);
+
+        printSysinfo();
     }
 
     private void initOrchestrator() {
@@ -117,6 +114,10 @@ public class Despat extends Application {
         f.addAction(Broadcast.ERROR_OCCURED);
 
         registerReceiver(o, f);
+    }
+
+    private void printSysinfo() {
+        Log.i(TAG, new DeviceInfo(context).toString());
     }
 
     @Override

@@ -60,6 +60,7 @@ import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
+import de.volzo.despat.support.DeviceInfo;
 import de.volzo.despat.support.DevicePositioner;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
@@ -891,60 +892,108 @@ public class CameraController2 extends CameraController {
     public static Size getImageSize(Context context) throws Exception {
         CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         String[] cameraIdList = cameraManager.getCameraIdList();
-        String cameraId = cameraIdList[0];
-        CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraId);
+        CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraIdList[0]);
         return characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG)[0];
     }
 
-    public HashMap<String, String> getCameraParameters() {
+    public static List<DeviceInfo.CameraInfo> getCameraInfo(Context context) throws Exception {
+        CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        String[] cameraIdList = cameraManager.getCameraIdList();
 
-        try {
-            CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-            CameraCharacteristics c = cameraManager.getCameraCharacteristics(cameraManager.getCameraIdList()[0]);
+        List<DeviceInfo.CameraInfo> infos = new ArrayList<>();
 
-            List<CameraCharacteristics.Key<?>> keys = c.getKeys();
-            List<CaptureRequest.Key<?>> reqKeys = c.getAvailableCaptureRequestKeys();
-            List<CaptureResult.Key<?>> resKeys = c.getAvailableCaptureResultKeys();
+        for (String id : cameraIdList) {
+            try {
+                CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(id);
 
-            HashMap<String, String> dict = new HashMap<String, String>();
-            HashMap<Object, String> reverseKeyMap = new HashMap<Object, String>();
+                Size resolution = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG)[0];
 
-            Class cl = CameraCharacteristics.class;
-            Field[] fields = cl.getDeclaredFields();
-            for (Field f : fields) {
-                if (f.getType() == CameraCharacteristics.Key.class) {
-                    try {
-                        reverseKeyMap.put(f.get(c), f.getName());
-                    } catch (IllegalAccessException iae) {
-                        Log.e(TAG, "ILLEGAL ACCESS");
+                String direction = "";
+                switch (characteristics.get(CameraCharacteristics.LENS_FACING)) {
+                    case CameraCharacteristics.LENS_FACING_BACK: {
+                        direction = "BACK";
+                        break;
+                    }
+                    case CameraCharacteristics.LENS_FACING_FRONT: {
+                        direction = "FRONT";
+                        break;
+                    }
+                    case CameraCharacteristics.LENS_FACING_EXTERNAL: {
+                        direction = "EXTERNAL";
+                        break;
+                    }
+                    default: {
+                        direction = "UNKNOWN";
+                        Log.w(TAG, "unknown camera direction: " +
+                                characteristics.get(CameraCharacteristics.LENS_FACING));
+                        break;
                     }
                 }
+
+                infos.add(new DeviceInfo.CameraInfo(id, direction, resolution, getCameraParametersInternal(context, id)));
+            } catch (Exception e) {}
+        }
+
+        return infos;
+    }
+
+    public HashMap<String, String> getCameraParameters() {
+        try {
+            CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+            return getCameraParametersInternal(context, cameraManager.getCameraIdList()[0]);
+        } catch (CameraAccessException cae) {
+            Log.e(TAG, "retrieving camera parameters failed", cae);
+            return null;
+        }
+    }
+
+    private static HashMap<String, String> getCameraParametersInternal(Context context, String cameraId) throws CameraAccessException {
+        CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        CameraCharacteristics c = cameraManager.getCameraCharacteristics(cameraId);
+
+        List<CameraCharacteristics.Key<?>> keys = c.getKeys();
+        List<CaptureRequest.Key<?>> reqKeys = c.getAvailableCaptureRequestKeys();
+        List<CaptureResult.Key<?>> resKeys = c.getAvailableCaptureResultKeys();
+
+        HashMap<String, String> dict = new HashMap<String, String>();
+        HashMap<Object, String> reverseKeyMap = new HashMap<Object, String>();
+
+        Class cl = CameraCharacteristics.class;
+        Field[] fields = cl.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getType() == CameraCharacteristics.Key.class) {
+                try {
+                    reverseKeyMap.put(f.get(c), f.getName());
+                } catch (IllegalAccessException iae) {
+                    Log.e(TAG, "ILLEGAL ACCESS");
+                }
             }
+        }
 
-            HashMap<String, HashMap<Integer, String>> interpretationMaps = new HashMap<>();
+        HashMap<String, HashMap<Integer, String>> interpretationMaps = new HashMap<>();
 
-            interpretationMaps.put("CONTROL_AVAILABLE_SCENE_MODES",                     buildInterpretationMap(c, "CONTROL_SCENE_MODE"));
-            interpretationMaps.put("CONTROL_AE_AVAILABLE_MODES",                        buildInterpretationMap(c, "AE_MODE"));
-            interpretationMaps.put("CONTROL_AE_AVAILABLE_ANTIBANDING_MODES",            buildInterpretationMap(c, "AE_ANTIBANDING_MODE"));
-            interpretationMaps.put("CONTROL_AVAILABLE_EFFECTS",                         buildInterpretationMap(c, "CONTROL_EFFECT_MODE"));
-            interpretationMaps.put("CONTROL_AF_AVAILABLE_MODES",                        buildInterpretationMap(c, "CONTROL_AF_MODE"));
-            interpretationMaps.put("NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES",   buildInterpretationMap(c, "NOISE_REDUCTION_MODE"));
-            interpretationMaps.put("CONTROL_AWB_AVAILABLE_MODES",                       buildInterpretationMap(c, "AWB_MODE"));
-            interpretationMaps.put("STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES",       buildInterpretationMap(c, "STATISTICS_FACE_DETECT_MODE"));
-            interpretationMaps.put("COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES",       buildInterpretationMap(c, "COLOR_CORRECTION_ABERRATION_MODE"));
-            interpretationMaps.put("INFO_SUPPORTED_HARDWARE_LEVEL",                     buildInterpretationMap(c, "INFO_SUPPORTED_HARDWARE_LEVEL"));
-            interpretationMaps.put("HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES",               buildInterpretationMap(c, "HOT_PIXEL_MODE"));
-            interpretationMaps.put("SENSOR_INFO_TIMESTAMP_SOURCE",                      buildInterpretationMap(c, "SENSOR_INFO_TIMESTAMP_SOURCE"));
-            interpretationMaps.put("SHADING_AVAILABLE_MODES",                           buildInterpretationMap(c, "SHADING_MODE"));
-            interpretationMaps.put("SENSOR_INFO_COLOR_FILTER_ARRANGEMENT",              buildInterpretationMap(c, "SENSOR_INFO_COLOR_FILTER_ARRANGEMENT"));
-            interpretationMaps.put("SENSOR_AVAILABLE_TEST_PATTERN_MODES",               buildInterpretationMap(c, "SENSOR_TEST_PATTERN_MODE"));
-            interpretationMaps.put("REQUEST_AVAILABLE_CAPABILITIES",                    buildInterpretationMap(c, "REQUEST_AVAILABLE_CAPABILITIES"));
-            interpretationMaps.put("CONTROL_AVAILABLE_MODES",                           buildInterpretationMap(c, "CONTROL_MODE"));
-            interpretationMaps.put("EDGE_AVAILABLE_EDGE_MODES",                         buildInterpretationMap(c, "EDGE_MODE"));
-            interpretationMaps.put("LENS_FACING",                                       buildInterpretationMap(c, "LENS_FACING"));
-            interpretationMaps.put("TONEMAP_AVAILABLE_TONE_MAP_MODES",                  buildInterpretationMap(c, "TONEMAP_MODE"));
-            interpretationMaps.put("LENS_INFO_FOCUS_DISTANCE_CALIBRATION",              buildInterpretationMap(c, "LENS_INFO_FOCUS_DISTANCE_CALIBRATION"));
-            interpretationMaps.put("STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES",  buildInterpretationMap(c, "STATISTICS_LENS_SHADING_MAP_MODE"));
+        interpretationMaps.put("CONTROL_AVAILABLE_SCENE_MODES", buildInterpretationMap(c, "CONTROL_SCENE_MODE"));
+        interpretationMaps.put("CONTROL_AE_AVAILABLE_MODES", buildInterpretationMap(c, "AE_MODE"));
+        interpretationMaps.put("CONTROL_AE_AVAILABLE_ANTIBANDING_MODES", buildInterpretationMap(c, "AE_ANTIBANDING_MODE"));
+        interpretationMaps.put("CONTROL_AVAILABLE_EFFECTS", buildInterpretationMap(c, "CONTROL_EFFECT_MODE"));
+        interpretationMaps.put("CONTROL_AF_AVAILABLE_MODES", buildInterpretationMap(c, "CONTROL_AF_MODE"));
+        interpretationMaps.put("NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES", buildInterpretationMap(c, "NOISE_REDUCTION_MODE"));
+        interpretationMaps.put("CONTROL_AWB_AVAILABLE_MODES", buildInterpretationMap(c, "AWB_MODE"));
+        interpretationMaps.put("STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES", buildInterpretationMap(c, "STATISTICS_FACE_DETECT_MODE"));
+        interpretationMaps.put("COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES", buildInterpretationMap(c, "COLOR_CORRECTION_ABERRATION_MODE"));
+        interpretationMaps.put("INFO_SUPPORTED_HARDWARE_LEVEL", buildInterpretationMap(c, "INFO_SUPPORTED_HARDWARE_LEVEL"));
+        interpretationMaps.put("HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES", buildInterpretationMap(c, "HOT_PIXEL_MODE"));
+        interpretationMaps.put("SENSOR_INFO_TIMESTAMP_SOURCE", buildInterpretationMap(c, "SENSOR_INFO_TIMESTAMP_SOURCE"));
+        interpretationMaps.put("SHADING_AVAILABLE_MODES", buildInterpretationMap(c, "SHADING_MODE"));
+        interpretationMaps.put("SENSOR_INFO_COLOR_FILTER_ARRANGEMENT", buildInterpretationMap(c, "SENSOR_INFO_COLOR_FILTER_ARRANGEMENT"));
+        interpretationMaps.put("SENSOR_AVAILABLE_TEST_PATTERN_MODES", buildInterpretationMap(c, "SENSOR_TEST_PATTERN_MODE"));
+        interpretationMaps.put("REQUEST_AVAILABLE_CAPABILITIES", buildInterpretationMap(c, "REQUEST_AVAILABLE_CAPABILITIES"));
+        interpretationMaps.put("CONTROL_AVAILABLE_MODES", buildInterpretationMap(c, "CONTROL_MODE"));
+        interpretationMaps.put("EDGE_AVAILABLE_EDGE_MODES", buildInterpretationMap(c, "EDGE_MODE"));
+        interpretationMaps.put("LENS_FACING", buildInterpretationMap(c, "LENS_FACING"));
+        interpretationMaps.put("TONEMAP_AVAILABLE_TONE_MAP_MODES", buildInterpretationMap(c, "TONEMAP_MODE"));
+        interpretationMaps.put("LENS_INFO_FOCUS_DISTANCE_CALIBRATION", buildInterpretationMap(c, "LENS_INFO_FOCUS_DISTANCE_CALIBRATION"));
+        interpretationMaps.put("STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES", buildInterpretationMap(c, "STATISTICS_LENS_SHADING_MAP_MODE"));
 
 //            for (Map.Entry<String, HashMap<Integer, String>> e : interpretationMaps.entrySet()) {
 //                System.out.println(e.getKey());
@@ -954,12 +1003,12 @@ public class CameraController2 extends CameraController {
 //                }
 //            }
 
-            for (CameraCharacteristics.Key<?> k : keys) {
-                Object o = c.get(k);
-                String fieldName = reverseKeyMap.get(k);
-                HashMap<Integer, String> interpretationMap = interpretationMaps.get(fieldName);
-                dict.put(fieldName, stringify(o, interpretationMap));
-            }
+        for (CameraCharacteristics.Key<?> k : keys) {
+            Object o = c.get(k);
+            String fieldName = reverseKeyMap.get(k);
+            HashMap<Integer, String> interpretationMap = interpretationMaps.get(fieldName);
+            dict.put(fieldName, stringify(o, interpretationMap));
+        }
 
 //            for (CaptureRequest.Key<?> k : reqKeys) {
 //                dict.put(k.getName(), k.toString());
@@ -969,15 +1018,10 @@ public class CameraController2 extends CameraController {
 //                dict.put(k.getName(), k.toString());
 //            }
 
-            return dict;
-
-        } catch (CameraAccessException cae) {
-            Log.e(TAG, "retrieving camera parameters failed", cae);
-            return null;
-        }
+        return dict;
     }
 
-    private HashMap<Integer, String> buildInterpretationMap(CameraCharacteristics c, String prefix) {
+    private static HashMap<Integer, String> buildInterpretationMap(CameraCharacteristics c, String prefix) {
         HashMap<Integer, String> map = new HashMap<>();
 
         Class cl = CameraMetadata.class;
@@ -995,11 +1039,11 @@ public class CameraController2 extends CameraController {
         return map;
     }
 
-    private String stringify(Object o) {
+    private static String stringify(Object o) {
         return stringify(o, null);
     }
 
-    private String stringify(Object o, HashMap<Integer, String> map) {
+    private static String stringify(Object o, HashMap<Integer, String> map) {
         if (o == null) return "";
 
         if (o.getClass().isArray()) {
