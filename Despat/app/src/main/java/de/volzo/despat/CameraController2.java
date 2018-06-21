@@ -888,6 +888,14 @@ public class CameraController2 extends CameraController {
         return cameraDevice == null;
     }
 
+    public static Size getImageSize(Context context) throws Exception {
+        CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        String[] cameraIdList = cameraManager.getCameraIdList();
+        String cameraId = cameraIdList[0];
+        CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraId);
+        return characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG)[0];
+    }
+
     public HashMap<String, String> getCameraParameters() {
 
         try {

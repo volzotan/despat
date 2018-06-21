@@ -84,7 +84,7 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
             return 180;
         }
 
-        return -1;
+        return null;
     }
 
     @Override
@@ -102,17 +102,19 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
                 SensorManager.getOrientation(R, data);
                 // data contains: azimuth, pitch and roll
                 orientation = calculateOrientation(data[0], data[1], data[2]);
-//                Log.wtf(TAG, "o: " + orientation);
                 close();
             }
-//            System.out.println("------- " + getRotationFromAccelerometerOnly(geomagnetic));
+            return;
+        }
+
+        if (gravity != null) {
+            orientation = getRotationFromAccelerometerOnly(gravity);
         }
     }
 
     public Integer getOrientation() {
         return orientation;
     }
-
 
 
     @Override

@@ -105,7 +105,7 @@ public class RecognitionService extends IntentService {
         for (int i=0; i<queue.size(); i++) {
             try {
                 Capture c = queue.get(i);
-                NotificationUtil.showProgressNotification(this, i, queue.size(), "RecognitionService", "processing (" + i + "/" + queue.size() + ")", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME);
+                NotificationUtil.showProgressNotification(this, i, queue.size(), "RecognitionService", "processing (" + (i+1) + "/" + queue.size() + ")", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME);
                 detector.load(c.getImage());
                 List<Detector.Recognition> detections = detector.run();
                 saveDetections(c, detections);

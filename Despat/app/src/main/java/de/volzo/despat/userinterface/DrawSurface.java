@@ -86,6 +86,8 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     public void setCallback(DrawSurfaceCallback onReadyCallback) {
         this.onReadyCallback = onReadyCallback;
+
+        if (holder.getSurface().isValid()) onReadyCallback.onSurfaceReady(this);
     }
 
     public void setInteractive(boolean interative) {
@@ -125,6 +127,10 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
         if (canvas == null) {
             throw new Exception("canvas not valid");
+        }
+
+        if (referenceFrame == null || referenceFrame.getHeight() == 0 || referenceFrame.getWidth() == 0) {
+            throw new Exception("reference frame not valid (either 0 or null");
         }
 
         Matrix mat = new Matrix();

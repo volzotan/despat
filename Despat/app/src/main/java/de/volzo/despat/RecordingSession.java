@@ -127,6 +127,11 @@ public class RecordingSession {
         session.setLocation(null);
 
         // TODO: add logic here for exclusion parts of the image and the resulting imageSize
+        try {
+            session.setImageSize(CameraController2.getImageSize(context));
+        } catch (Exception e) {
+            Log.w(TAG, "unable to set image size in session");
+        }
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
