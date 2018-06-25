@@ -159,6 +159,42 @@ def sanitize_coordinate_order(boxes_as_nparray):
 
     return boxes.tolist()
 
+def vocToBbox(filename):
+    res = {}
+    res["box"] = []
+    res["class"] = []
+    res["score"] = None
+
+    e = et.parse(filename).getroot()
+    for box in e.findall("object"):
+        bndbox = box.find("bndbox")
+
+        res["box"].append([
+            int(bndbox.find("xmin").text),
+            int(bndbox.find("ymin").text),
+            int(bndbox.find("xmax").text),
+            int(bndbox.find("ymax").text)
+        ])
+
+        res["class"].append(box.find("name").text)
+
+    return res
+
+
+def jsonToBbox(filename):
+    inp = json.load(open(filename, "r"))
+
+    res = {}
+
+    non_inv_boxes = []
+    for box in inp["detection_boxes"]:
+        non_inv_boxes.append([box[1], box[0], box[3], box[2]])
+
+    res["box"] = non_inv_boxes
+    res["class"] = inp["detection_classes"]
+    res["score"] = inp["detection_scores"]
+
+    return res
 
 if __name__ == "__main__":
 

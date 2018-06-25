@@ -1,47 +1,12 @@
-import xml.etree.ElementTree as et
-import json
-from drawhelper import Drawhelper
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.append('..')
+from util.drawhelper import Drawhelper
+from util.converter import vocToBbox, jsonToBbox
+
 IOU_THRESHOLD = 0.5
-
-def vocToBbox(filename):
-    res = {}
-    res["box"] = []
-    res["class"] = []
-    res["score"] = None
-
-    e = et.parse(filename).getroot()
-    for box in e.findall("object"):
-        bndbox = box.find("bndbox")
-
-        res["box"].append([
-            int(bndbox.find("xmin").text),
-            int(bndbox.find("ymin").text),
-            int(bndbox.find("xmax").text),
-            int(bndbox.find("ymax").text)
-        ])
-
-        res["class"].append(box.find("name").text)
-
-    return res
-
-
-def jsonToBbox(filename):
-    inp = json.load(open(filename, "r"))
-
-    res = {}
-
-    non_inv_boxes = []
-    for box in inp["detection_boxes"]:
-        non_inv_boxes.append([box[1], box[0], box[3], box[2]])
-
-    res["box"] = non_inv_boxes
-    res["class"] = inp["detection_classes"]
-    res["score"] = inp["detection_scores"]
-
-    return res
 
 
 def _split_by_class_and_filter(boxes, classes, score, classname, threshold):
@@ -150,11 +115,15 @@ def precision_recall_curve(gt, dt, name_of_class):
     return p, r
 
 
+def missrate_fppi_curve(gt, dt, name_of_class):
+    pass
+
+
 if __name__ == "__main__":
     # print(vocToBbox("output/1523266900504_0.xml"))
 
     gt = vocToBbox("pedestriancrossing_gt.xml")
-    dt = jsonToBbox("output/pedestriancrossing.json")
+    dt = jsonToBbox("pedestriancrossing.json")
 
     classes = ["person"]
 
@@ -167,13 +136,22 @@ if __name__ == "__main__":
 
     handles = []
 
+    average_precisions = []
+
     for c in classes:
         p, r = precision_recall_curve(gt, dt, c)
 
-        print("{} mAP: {}".format(c, np.average(p)))
+        # print(p)
+        # print(r)
+
+        average_precisions.append(p)
+
+        print("{} AP: {}".format(c, np.average(p)))
 
         handle = plt.plot(r, p, label=c)
         handles.append(handle)
+
+    print(average_precisions)
 
     plt.legend(classes)
     plt.show()
