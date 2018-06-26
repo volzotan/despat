@@ -118,6 +118,34 @@ def precision_recall_curve(gt, dt, name_of_class):
 def missrate_fppi_curve(gt, dt, name_of_class):
     pass
 
+# def map_for_single_image(gt_xml, dt_json, classes):
+#     gt = vocToBbox(gt_xml)
+#     dt = jsonToBbox(dt_json)
+
+#     plt.xlabel('recall')
+#     plt.ylabel('precision')
+
+#     axes = plt.gca()
+#     axes.set_xlim([0, 1.05])
+#     axes.set_ylim([0, 1.05])
+
+#     handles = []
+
+#     average_precisions = []
+
+#     for c in classes:
+#         p, r = precision_recall_curve(gt, dt, c)
+
+#         # print(p)
+#         # print(r)
+
+#         average_precisions.append(p)
+
+#         print("{} AP: {}".format(c, np.average(p)))
+
+#         handle = plt.plot(r, p, label=c)
+#         handles.append(handle)
+
 
 if __name__ == "__main__":
     # print(vocToBbox("output/1523266900504_0.xml"))
@@ -141,8 +169,8 @@ if __name__ == "__main__":
     for c in classes:
         p, r = precision_recall_curve(gt, dt, c)
 
-        # print(p)
-        # print(r)
+        print(p)
+        print(r)
 
         average_precisions.append(p)
 
