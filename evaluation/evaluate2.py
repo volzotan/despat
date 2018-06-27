@@ -223,8 +223,16 @@ def precision_recall_curve(gt, dt, name_of_class):
     return p, r
 
 
-def _area_under_curve(r, p):
-    pass
+def _area_under_curve(precision, recall):
+    area = 0
+
+    for i in range(0, len(precision)):
+        if i == 0:
+            area += precision[i] * recall[i]
+        else:
+            area += precision[i] * (recall[i]-recall[i-1])
+
+    return area
 
 if __name__ == "__main__":
     # print(vocToBbox("output/1523266900504_0.xml"))
@@ -251,6 +259,7 @@ if __name__ == "__main__":
     axes.set_xlim([0, 1.05])
     axes.set_ylim([0, 1.05])
 
+    plt.style.use('grayscale')
     handles = []
 
     combined_tp = []
@@ -279,8 +288,8 @@ if __name__ == "__main__":
         combined_positives = combined_tp + combined_fp
         combined_positives = sorted(combined_positives, key=lambda box: box["score"], reverse=True)
 
-        for item in combined_positives:
-            print(item)
+        # for item in combined_positives:
+        #     print(item)
 
         count_tp = 0
         count_fp = 0
@@ -310,5 +319,9 @@ if __name__ == "__main__":
         handle = plt.plot(recall, precision, label=c) #, linestyle='--', marker='o')
         handles.append(handle)
 
+        print("mAP: {}".format(_area_under_curve(precision, recall)))
+
     plt.legend(classes)
+    plt.tight_layout()
+    plt.savefig('evaluation_map_person.png')
     plt.show()

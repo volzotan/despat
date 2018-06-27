@@ -10,6 +10,7 @@
 import sys
 sys.path.append('..')
 from util.converter import vocToBbox, jsonToBbox
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -21,7 +22,23 @@ def calculate_size(box):
 
 if __name__ == "__main__":
 
-    gt = vocToBbox("pedestriancrossing_gt.xml")
+    INPUT_DIRS = [
+        "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/",
+        "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/",
+        "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation"
+    ]
+
+    images = []
+    for input_dir in INPUT_DIRS:
+        for root, dirs, files in os.walk(input_dir):
+            for f in files:
+                if (not f.endswith(".xml")):
+                   continue
+                images.append(os.path.join(root, f))
+
+    gts = []
+    for image in images:
+        gts.append(vocToBbox(image))
 
     classes = ["person"]
 
@@ -31,16 +48,17 @@ if __name__ == "__main__":
 
     skipcounter_class = 0
 
-    for i in range(0, len(gt["box"])):
-        if gt["class"][i] not in classes:
-            skipcounter_class += 1
-            continue
+    for gt in gts:
+        for i in range(0, len(gt["box"])):
+            if gt["class"][i] not in classes:
+                skipcounter_class += 1
+                continue
 
-        x, y, a = calculate_size(gt["box"][i])
+            x, y, a = calculate_size(gt["box"][i])
 
-        xs.append(x)
-        ys.append(y)
-        area.append(a)
+            xs.append(x)
+            ys.append(y)
+            area.append(a)
 
     print("{} bounding boxes. skipped {}/{} due class filtering".format(len(area), skipcounter_class, len(gt["box"])))
     print("x | min: {} | max: {} | mean: {}".format(np.min(xs), np.max(xs), np.mean(xs)))

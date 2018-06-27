@@ -84,7 +84,7 @@ def convert_to_json(folder_filename, image_filename, image_path, imagesize, bbox
     timestamp = image_filename.split("_")[0]
     timestamp = int(timestamp) / 1000.0
 
-    data["timestamp"]       = datetime.datetime.fromtimestamp(timestamp).strftime(DATEFORMAT_STORE) # TODO: use timestamp for json?
+    data["timestamp"]       = datetime.fromtimestamp(timestamp).strftime(DATEFORMAT_STORE) # TODO: use timestamp for json?
     data["path"]            = image_path
     data["folder_filename"] = folder_filename
     data["image_filename"]  = image_filename
