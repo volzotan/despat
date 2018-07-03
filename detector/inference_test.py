@@ -124,7 +124,7 @@ category_index = label_map_util.create_category_index(categories)
 
 SOURCE = args.images #"background_subtraction/scaled_2000"
 OUTPUT_FOLDER = args.output #"output"
-print(OUTPUT_FOLDER)
+print("OUTPUT_FOLDER: " + OUTPUT_FOLDER)
 
 if not os.path.exists(OUTPUT_FOLDER):
     try:
@@ -146,6 +146,9 @@ else:
            if (not f.endswith(".jpg")):
                continue
            images.append(os.path.join(root, f))                    
+
+
+images = sorted(images, key=lambda filename: os.path.splitext(os.path.basename(filename))[0])
 
 
 def run(sess, filename, tilesize, outputsize):

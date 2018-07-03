@@ -237,18 +237,43 @@ def _area_under_curve(precision, recall):
 if __name__ == "__main__":
     # print(vocToBbox("output/1523266900504_0.xml"))
 
-    INPUT_DIR_GT = "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation"
-    INPUT_DIR_DT = INPUT_DIR_GT
+    # (input_dir_gt, input_dir_data)
 
-    files_gt = []
-    for root, dirs, files in os.walk(INPUT_DIR_GT):
-        for f in files:
-            if (not f.endswith(".xml")):
-               continue
-            files_gt.append(os.path.join(root, f))
+    INPUT_DIRS = [
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/offline"),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/offline"),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/offline"),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation/offline")
+    ]
 
-    files_gt = sorted(files_gt, key=lambda filename: os.path.splitext(os.path.basename(filename))[0])
-    # files_gt = [files_gt[0]]
+    LIMIT = 20
+
+    filepairs = []
+    for input_dir in INPUT_DIRS:
+        counter = 0
+        for root, dirs, files in os.walk(input_dir[0]):
+            for f in files:
+                if not f.endswith(".xml"):
+                    continue
+
+                if LIMIT is not None and LIMIT != 0 and counter >= LIMIT:
+                    print("skipped due to limit: {}".format(filename))
+                    continue
+
+                full_filename_gt = os.path.join(root, f)
+                filename = os.path.splitext(os.path.basename(full_filename_gt))[0] + ".json"
+                full_filename_dt = os.path.join(input_dir[1], filename)
+
+                if not os.path.isfile(full_filename_dt):
+                    print("no detection data found for ground truth file: {}".format(full_filename_gt))
+                    continue
+
+                filepairs.append((full_filename_gt, full_filename_dt))
+                counter += 1
+
+    filepairs = sorted(filepairs, key=lambda filenames: os.path.splitext(os.path.basename(filenames[0]))[0])
+
+    print("filepairs: {}".format(len(filepairs)))
 
     classes = ["person"]
 
@@ -268,17 +293,10 @@ if __name__ == "__main__":
 
     for c in classes:
 
-        for file_gt in files_gt:
+        for file_gtdt in filepairs:
 
-            file_dt = os.path.splitext(os.path.basename(file_gt))[0] + ".json"
-            file_dt = os.path.join(INPUT_DIR_DT, file_dt)
-
-            if not os.path.isfile(file_dt):
-                print("no detection data found for ground truth file: {}".format(file_gt))
-                continue
-
-            gt = vocToBbox(file_gt)
-            dt = jsonToBbox(file_dt)
+            gt = vocToBbox(file_gtdt[0])
+            dt = jsonToBbox(file_gtdt[1])
 
             tp, fp, fn = evaluate_all(gt, dt, c)
             combined_tp.extend(tp)
