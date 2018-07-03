@@ -1,7 +1,9 @@
 package de.volzo.despat.preferences;
 
 import android.content.Context;
+import android.graphics.Rect;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 public class CameraConfig implements Serializable {
@@ -12,6 +14,8 @@ public class CameraConfig implements Serializable {
 
     private boolean formatJpg;
     private boolean formatRaw;
+
+    private SerializableRect zoomRegion;
 
     private boolean endCaptureWithoutUnlockingFocus;
     private int numberOfBurstImages;
@@ -76,6 +80,22 @@ public class CameraConfig implements Serializable {
         this.formatRaw = formatRaw;
     }
 
+    public Rect getZoomRegion() {
+        if (zoomRegion != null) {
+            return zoomRegion.getRect();
+        } else {
+            return null;
+        }
+    }
+
+    public void setZoomRegion(SerializableRect zoomRegion) {
+        this.zoomRegion = zoomRegion;
+    }
+
+    public void setZoomRegion(Rect zoomRegion) {
+        this.zoomRegion = new SerializableRect(zoomRegion);
+    }
+
     public boolean isEndCaptureWithoutUnlockingFocus() {
         return endCaptureWithoutUnlockingFocus;
     }
@@ -114,5 +134,42 @@ public class CameraConfig implements Serializable {
 
     public void setRunMediascannerAfterCapture(boolean runMediascannerAfterCapture) {
         this.runMediascannerAfterCapture = runMediascannerAfterCapture;
+    }
+
+    static class SerializableRect implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        private Rect mRect;
+
+        public SerializableRect(Rect rect) {
+            mRect = rect;
+        }
+
+        public Rect getRect() {
+            return mRect;
+        }
+
+        private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+            int left = mRect.left;
+            int top = mRect.top;
+            int right = mRect.right;
+            int bottom = mRect.bottom;
+
+            out.writeInt(left);
+            out.writeInt(top);
+            out.writeInt(right);
+            out.writeInt(bottom);
+        }
+
+        private void readObject(java.io.ObjectInputStream in) throws IOException,
+                ClassNotFoundException {
+            int left = in.readInt();
+            int top = in.readInt();
+            int right = in.readInt();
+            int bottom = in.readInt();
+
+            mRect = new Rect(left, top, right, bottom);
+        }
     }
 }

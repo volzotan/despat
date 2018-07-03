@@ -2,6 +2,7 @@ package de.volzo.despat.userinterface;
 
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -52,7 +53,13 @@ public class ConfigureActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra(DATA_CAMERA_CONFIG, new CameraConfig(activity));
+
+                CameraConfig cameraConfig = new CameraConfig(activity);
+
+                // TODO:
+                cameraConfig.setZoomRegion(new Rect(300, 300, 1000, 1000));
+
+                resultIntent.putExtra(DATA_CAMERA_CONFIG, cameraConfig);
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }

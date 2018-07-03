@@ -310,26 +310,6 @@ public class CameraController2 extends CameraController {
             if (camconfig.isFormatJpg()) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
             if (camconfig.isFormatRaw()) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
 
-//            // TODO: (window?) rotation is wrong after service restart
-//
-//            // image rotation
-//            int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) * -1;
-//            int deviceOrientationInDegree;
-//
-//            if (currentRotation == Surface.ROTATION_0) {
-//                deviceOrientationInDegree = 0;
-//            } else if (currentRotation == Surface.ROTATION_90) {
-//                deviceOrientationInDegree = 90;
-//            } else if (currentRotation == Surface.ROTATION_180) {
-//                deviceOrientationInDegree = 180;
-//            } else if (currentRotation == Surface.ROTATION_270) {
-//                deviceOrientationInDegree = 270;
-//            } else {
-//               throw new Exception("unexpected device orientation");
-//            }
-//
-//            int photoOrientation = (sensorOrientation + deviceOrientationInDegree + 360) % 360;
-
             int photoOrientation = 0;
             try {
                 Integer result = devicePositionFuture.get(500, TimeUnit.MILLISECONDS);
@@ -345,12 +325,11 @@ public class CameraController2 extends CameraController {
             }
             stillRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, photoOrientation);
 
-//            Log.wtf(TAG, "sensor orientation 1: " + characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION));
-//            Log.wtf(TAG, "sensor orientation 2: " + sensorOrientation);
-//            Log.wtf(TAG, "window rotation: " + windowService.getDefaultDisplay().getRotation());
-//            Log.wtf(TAG, "compass orientation: " + context.getResources().getConfiguration().orientation);
-//            Log.wtf(TAG, "device positioner: " + result);
-//            Log.wtf(TAG, "photo orientation: " + photoOrientation);
+            // Zoom
+            if (camconfig.getZoomRegion() != null) {
+                // TODO: check for maximum possible zoom via SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
+                stillRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, camconfig.getZoomRegion());
+            }
 
             // JPEG Quality
             stillRequestBuilder.set(CaptureRequest.JPEG_QUALITY, camconfig.getJpegQuality());
