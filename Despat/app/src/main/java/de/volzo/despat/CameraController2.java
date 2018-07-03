@@ -66,10 +66,6 @@ import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
 
 
-/**
- * Created by volzotan on 19.12.16.
- */
-
 public class CameraController2 extends CameraController {
 
     private static final String TAG = CameraController.class.getSimpleName();
@@ -337,10 +333,8 @@ public class CameraController2 extends CameraController {
             // enable lens shading correction for the RAW output
             stillRequestBuilder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_HIGH_QUALITY);
 
-            // TODO: does the stillRequestBuilder really need
-            // the 3A controls? metering and focusing should
-            // be done by the previewRequest
-
+            // TODO: does the stillRequestBuilder really need the 3A controls?
+            // metering and focusing should be done by the previewRequest
             setup3AControls(stillRequestBuilder);
 
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
@@ -951,28 +945,28 @@ public class CameraController2 extends CameraController {
 
         HashMap<String, HashMap<Integer, String>> interpretationMaps = new HashMap<>();
 
-        interpretationMaps.put("CONTROL_AVAILABLE_SCENE_MODES", buildInterpretationMap(c, "CONTROL_SCENE_MODE"));
-        interpretationMaps.put("CONTROL_AE_AVAILABLE_MODES", buildInterpretationMap(c, "AE_MODE"));
-        interpretationMaps.put("CONTROL_AE_AVAILABLE_ANTIBANDING_MODES", buildInterpretationMap(c, "AE_ANTIBANDING_MODE"));
-        interpretationMaps.put("CONTROL_AVAILABLE_EFFECTS", buildInterpretationMap(c, "CONTROL_EFFECT_MODE"));
-        interpretationMaps.put("CONTROL_AF_AVAILABLE_MODES", buildInterpretationMap(c, "CONTROL_AF_MODE"));
-        interpretationMaps.put("NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES", buildInterpretationMap(c, "NOISE_REDUCTION_MODE"));
-        interpretationMaps.put("CONTROL_AWB_AVAILABLE_MODES", buildInterpretationMap(c, "AWB_MODE"));
-        interpretationMaps.put("STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES", buildInterpretationMap(c, "STATISTICS_FACE_DETECT_MODE"));
-        interpretationMaps.put("COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES", buildInterpretationMap(c, "COLOR_CORRECTION_ABERRATION_MODE"));
-        interpretationMaps.put("INFO_SUPPORTED_HARDWARE_LEVEL", buildInterpretationMap(c, "INFO_SUPPORTED_HARDWARE_LEVEL"));
-        interpretationMaps.put("HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES", buildInterpretationMap(c, "HOT_PIXEL_MODE"));
-        interpretationMaps.put("SENSOR_INFO_TIMESTAMP_SOURCE", buildInterpretationMap(c, "SENSOR_INFO_TIMESTAMP_SOURCE"));
-        interpretationMaps.put("SHADING_AVAILABLE_MODES", buildInterpretationMap(c, "SHADING_MODE"));
-        interpretationMaps.put("SENSOR_INFO_COLOR_FILTER_ARRANGEMENT", buildInterpretationMap(c, "SENSOR_INFO_COLOR_FILTER_ARRANGEMENT"));
-        interpretationMaps.put("SENSOR_AVAILABLE_TEST_PATTERN_MODES", buildInterpretationMap(c, "SENSOR_TEST_PATTERN_MODE"));
-        interpretationMaps.put("REQUEST_AVAILABLE_CAPABILITIES", buildInterpretationMap(c, "REQUEST_AVAILABLE_CAPABILITIES"));
-        interpretationMaps.put("CONTROL_AVAILABLE_MODES", buildInterpretationMap(c, "CONTROL_MODE"));
-        interpretationMaps.put("EDGE_AVAILABLE_EDGE_MODES", buildInterpretationMap(c, "EDGE_MODE"));
-        interpretationMaps.put("LENS_FACING", buildInterpretationMap(c, "LENS_FACING"));
-        interpretationMaps.put("TONEMAP_AVAILABLE_TONE_MAP_MODES", buildInterpretationMap(c, "TONEMAP_MODE"));
-        interpretationMaps.put("LENS_INFO_FOCUS_DISTANCE_CALIBRATION", buildInterpretationMap(c, "LENS_INFO_FOCUS_DISTANCE_CALIBRATION"));
-        interpretationMaps.put("STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES", buildInterpretationMap(c, "STATISTICS_LENS_SHADING_MAP_MODE"));
+        interpretationMaps.put("CONTROL_AVAILABLE_SCENE_MODES",                     buildInterpretationMap(c, "CONTROL_SCENE_MODE"));
+        interpretationMaps.put("CONTROL_AE_AVAILABLE_MODES",                        buildInterpretationMap(c, "AE_MODE"));
+        interpretationMaps.put("CONTROL_AE_AVAILABLE_ANTIBANDING_MODES",            buildInterpretationMap(c, "AE_ANTIBANDING_MODE"));
+        interpretationMaps.put("CONTROL_AVAILABLE_EFFECTS",                         buildInterpretationMap(c, "CONTROL_EFFECT_MODE"));
+        interpretationMaps.put("CONTROL_AF_AVAILABLE_MODES",                        buildInterpretationMap(c, "CONTROL_AF_MODE"));
+        interpretationMaps.put("NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES",   buildInterpretationMap(c, "NOISE_REDUCTION_MODE"));
+        interpretationMaps.put("CONTROL_AWB_AVAILABLE_MODES",                       buildInterpretationMap(c, "AWB_MODE"));
+        interpretationMaps.put("STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES",       buildInterpretationMap(c, "STATISTICS_FACE_DETECT_MODE"));
+        interpretationMaps.put("COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES",       buildInterpretationMap(c, "COLOR_CORRECTION_ABERRATION_MODE"));
+        interpretationMaps.put("INFO_SUPPORTED_HARDWARE_LEVEL",                     buildInterpretationMap(c, "INFO_SUPPORTED_HARDWARE_LEVEL"));
+        interpretationMaps.put("HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES",               buildInterpretationMap(c, "HOT_PIXEL_MODE"));
+        interpretationMaps.put("SENSOR_INFO_TIMESTAMP_SOURCE",                      buildInterpretationMap(c, "SENSOR_INFO_TIMESTAMP_SOURCE"));
+        interpretationMaps.put("SHADING_AVAILABLE_MODES",                           buildInterpretationMap(c, "SHADING_MODE"));
+        interpretationMaps.put("SENSOR_INFO_COLOR_FILTER_ARRANGEMENT",              buildInterpretationMap(c, "SENSOR_INFO_COLOR_FILTER_ARRANGEMENT"));
+        interpretationMaps.put("SENSOR_AVAILABLE_TEST_PATTERN_MODES",               buildInterpretationMap(c, "SENSOR_TEST_PATTERN_MODE"));
+        interpretationMaps.put("REQUEST_AVAILABLE_CAPABILITIES",                    buildInterpretationMap(c, "REQUEST_AVAILABLE_CAPABILITIES"));
+        interpretationMaps.put("CONTROL_AVAILABLE_MODES",                           buildInterpretationMap(c, "CONTROL_MODE"));
+        interpretationMaps.put("EDGE_AVAILABLE_EDGE_MODES",                         buildInterpretationMap(c, "EDGE_MODE"));
+        interpretationMaps.put("LENS_FACING",                                       buildInterpretationMap(c, "LENS_FACING"));
+        interpretationMaps.put("TONEMAP_AVAILABLE_TONE_MAP_MODES",                  buildInterpretationMap(c, "TONEMAP_MODE"));
+        interpretationMaps.put("LENS_INFO_FOCUS_DISTANCE_CALIBRATION",              buildInterpretationMap(c, "LENS_INFO_FOCUS_DISTANCE_CALIBRATION"));
+        interpretationMaps.put("STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES",  buildInterpretationMap(c, "STATISTICS_LENS_SHADING_MAP_MODE"));
 
 //            for (Map.Entry<String, HashMap<Integer, String>> e : interpretationMaps.entrySet()) {
 //                System.out.println(e.getKey());
