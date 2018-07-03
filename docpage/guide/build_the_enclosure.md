@@ -8,26 +8,39 @@ permalink: build-the-enclosure
 
 Recommended settings for printing: 
 
-PETG filament, 15% infill, 0.3mm layer height, 3 shells, no brim
+PETG filament, 15%-25% infill, 0.3mm layer height, 3 shells, no brim.
 
-## Required fasteners
+## fasteners
 
-Part                              | DIN number           | Amount |  
---------------------------------- | -------------------: | -----: | 
-Screw M3 20mm                     | 912                  |      3 |
-Nyloc Nut M3                      |                      |     23 |
-1/4" Imperial Nut                 |                      |      1 |
-M3 heat insert                    | n/a[^heat_insert]    |      4 |
+| Part                              | DIN number           | Amount |  
+| --------------------------------- | -------------------: | -----: | 
+| Screw M3 20mm                     | 912                  |      3 |
+| Nyloc Nut M3                      |                      |     23 |
+| 1/4" Imperial Nut                 |                      |      1 |
+| M3 heat insert                    | n/a[^heat_insert]    |      4 |
 
-## Other materials
+## other materials
 
-Part                              |     Amount     |  
---------------------------------- | -------------: | 
-PETG filament                     |          ~123g |
-Semiflex filament                 |           ~10g |
-1mm thick rubber                  |        20x10cm |
-1/4" Imperial Nut                 |              1 |
-(optional) sanding paper          |                |
+| Part                              |       Amount      |  
+| --------------------------------- | ----------------: | 
+| PETG filament                     |             ~123g |
+| Semiflex filament                 |              ~10g |
+| 1mm thick rubber                  |           20x10cm |
+| UV filter, diameter 37mm          |                 1 |
+| 1/4" Imperial Nut                 |                 1 |
+| superglue or epoxy glue           |            1 tube |
+| (optional) sanding paper          | 1 sheet, type 400 |
+| (optional) primer                 |             1 can |
+| (optional) acrylic paint          |             1 can |
 
+## printed parts
 
-[^heat_insert]: These are not exactly standard parts and can be ordered from [McMaster-Carr ](https://www.mcmaster.com/#inserts/=1dammlf) or via resellers directly from China. If bought from China, these inserts are usually designed for injection molding and not 3d printing, but will still work.
+| Part                              |       Amount      |  
+| --------------------------------- | ----------------: | 
+| Base                              |                 1 |
+| Top                               |                 1 |
+| Hinge                             |                 2 |
+| Latch upper part (left or right)  |                 2 |
+| Latch lower part                  |                 2 |
+
+[^heat_insert]: These is not exactly a standard part and can be ordered from [McMaster-Carr ](https://www.mcmaster.com/#inserts/=1dammlf) or via resellers directly from China. If buying in China, the inserts available are usually designed for injection molding and not 3d printing, but will still work.
