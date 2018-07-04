@@ -87,5 +87,6 @@ public abstract class CameraController {
         // called after completing the capture (in burst mode after the last image)
         // the image is not guaranteed to be written to disk at calling time
         public void captureComplete() {}
+
     }
 }

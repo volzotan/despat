@@ -3,11 +3,15 @@ package de.volzo.despat.support;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.util.Size;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import de.volzo.despat.BuildConfig;
 import de.volzo.despat.CameraController2;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.preferences.Config;
@@ -17,7 +21,10 @@ public class DeviceInfo {
     String vendor;
     String identifier;
     String id;
+    String version;
     String name;
+    String despatVersion;
+    String despatBuildTime;
 
     List<CameraInfo> cameras;
 
@@ -29,7 +36,10 @@ public class DeviceInfo {
         vendor = android.os.Build.MANUFACTURER;
         identifier = android.os.Build.MODEL;
         id = Config.getUniqueDeviceId(context);
+        version = Build.VERSION.RELEASE;
         name = Config.getDeviceName(context);
+        despatVersion = "";
+        despatBuildTime = (new SimpleDateFormat(Config.DATEFORMAT_SHORT, Config.LOCALE)).format(BuildConfig.buildTime);
 
         try {
             cameras = CameraController2.getCameraInfo(context);
@@ -50,6 +60,7 @@ public class DeviceInfo {
         StringBuilder sb = new StringBuilder();
         sb.append("SYSTEM INIT");
         sb.append("\n");
+        sb.append("----------------------------------------\n");
 
         sb.append(String.format("%-20s", "Device vendor:"));
         sb.append(String.format("%20s",  vendor));
@@ -63,14 +74,26 @@ public class DeviceInfo {
         sb.append(String.format("%20s",  id));
         sb.append("\n");
 
+        sb.append(String.format("%-20s", "Device version:"));
+        sb.append(String.format("%20s",  version));
+        sb.append("\n");
+
         sb.append(String.format("%-20s", "Device name:"));
         sb.append(String.format("%20s",  name));
+        sb.append("\n");
+
+        sb.append(String.format("%-20s", "Despat version:"));
+        sb.append(String.format("%20s",  despatVersion));
+        sb.append("\n");
+
+        sb.append(String.format("%-20s", "Despat buildTime:"));
+        sb.append(String.format("%20s",  despatBuildTime));
         sb.append("\n");
 
         sb.append("----------------------------------------\n");
         for (CameraInfo c : cameras) {
             sb.append(c.toString());
-            sb.append("\n----------------------------------------\n");
+            sb.append("----------------------------------------\n");
         }
 
         sb.append(String.format("%-20s", "free space [mb]:"));
@@ -83,8 +106,9 @@ public class DeviceInfo {
 
         sb.append(String.format("%-20s", "gyro:"));
         sb.append(String.format("%20s",  gyro));
-
         sb.append("\n");
+
+        sb.append("----------------------------------------\n");
 
         return sb.toString();
     }
@@ -104,8 +128,16 @@ public class DeviceInfo {
             this.parameters = parameters;
         }
 
+        private String checkForNullString(String info) {
+            if (info == null || info.equals("null")) {
+                return "---";
+            }
+            return info;
+        }
+
         public String toString() {
             StringBuilder sb = new StringBuilder();
+            String info;
 
             sb.append(String.format("%-20s", "camera id:"));
             sb.append(String.format("%20s", id));
@@ -125,6 +157,49 @@ public class DeviceInfo {
 
             sb.append(String.format("%-20s", "parameters:"));
             sb.append(String.format("%20s", parameters.size()));
+            sb.append("\n");
+
+            sb.append(String.format("%-20s", "  info:"));
+            sb.append(String.format("%20s", parameters.get("INFO_VERSION")));
+            sb.append("\n");
+
+            sb.append(String.format("%-20s", "  max zoom:"));
+            sb.append(String.format("%20s", parameters.get("SCALER_AVAILABLE_MAX_DIGITAL_ZOOM")));
+            sb.append("\n");
+
+            sb.append(String.format("%-20s", "  sensor size:"));
+            info = "---";
+            try {
+                info = parameters.get("SENSOR_INFO_PHYSICAL_SIZE");
+                info = String.format(Config.LOCALE, "%2.1fx%2.1f", Float.parseFloat(info.split("x")[0]), Float.parseFloat(info.split("x")[1]));
+            } catch (Exception e) {}
+            sb.append(String.format("%20s", info));
+            sb.append("\n");
+
+            sb.append(String.format("%-20s", "  pixel array:"));
+            info = "---";
+            try {
+                info = parameters.get("SENSOR_INFO_PIXEL_ARRAY_SIZE");
+            } catch (Exception e) {}
+            sb.append(String.format("%20s", info));
+            sb.append("\n");
+
+            sb.append(String.format("%-20s", "  max iso:"));
+            sb.append(String.format("%20s", checkForNullString(parameters.get("SENSOR_MAX_ANALOG_SENSITIVITY"))));
+            sb.append("\n");
+
+            sb.append(String.format("%-20s", "  max exposure [ms]:"));
+            info = "---";
+            try {
+                info = Long.toString(TimeUnit.MILLISECONDS.convert(Long.parseLong(parameters.get("SENSOR_INFO_MAX_FRAME_DURATION")), TimeUnit.NANOSECONDS));
+            } catch (Exception e) {}
+            sb.append(String.format("%20s", info));
+            sb.append("\n");
+
+//            sb.append(String.format("%-20s", "  real pixel grid:"));
+//            sb.append(String.format("%20s", parameters.get("SENSOR_INFO_ACTIVE_ARRAY_SIZE")));
+//            sb.append("\n");
+
 
             return sb.toString();
         }

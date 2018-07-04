@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Handler;
@@ -498,7 +499,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
             if (checkPermissionsAreGiven()) {
-                startCamera(new CameraConfig(activity));
+
+                // TODO:
+                CameraConfig cameraConfig = new CameraConfig(activity);
+                cameraConfig.setZoomRegion(new Rect((4216/2)-(4216/4)/2, (3128/2)-(3128/4)/2, (4216/2)+(4216/4)/2, (3128/2)+(3128/4)/2));
+
+                startCamera(cameraConfig);
             } else {
                 Toast.makeText(this, "camera inactive : permissions are missing", Toast.LENGTH_LONG).show();
             }

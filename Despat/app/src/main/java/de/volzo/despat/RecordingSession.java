@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Camera;
+import android.graphics.Rect;
 import android.location.Location;
 import android.media.Image;
 import android.os.AsyncTask;
@@ -35,10 +36,6 @@ import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
-
-/**
- * Created by volzotan on 12.01.18.
- */
 
 public class RecordingSession {
 
@@ -126,9 +123,14 @@ public class RecordingSession {
         session.setStart(Calendar.getInstance().getTime());
         session.setLocation(null);
 
-        // TODO: add logic here for exclusion parts of the image and the resulting imageSize
+        // TODO: add logic here for zoom, exclusion parts and the resulting imageSize
         try {
-            session.setImageSize(CameraController2.getImageSize(context));
+            Rect zoomRegion = cameraConfig.getZoomRegion();
+            if (zoomRegion != null) {
+                session.setImageSize(new Size(zoomRegion.width(), zoomRegion.height()));
+            } else {
+                session.setImageSize(CameraController2.getImageSize(context));
+            }
         } catch (Exception e) {
             Log.w(TAG, "unable to set image size in session");
         }
@@ -316,23 +318,23 @@ public class RecordingSession {
 
         // TODO: not the perfect location to actually run this code:
         // check if we find a captured image to load and extract the image dimensions
-        if (session.getImageSize() == null) {
-            Bitmap loadedImage = null;
-            if (image.exists()) {
-                loadedImage = BitmapFactory.decodeFile(image.getAbsolutePath());
-            } else {
-                Capture lastCapture = captureDao.getLastFromSession(session.getId());
-                if (lastCapture != null) {
-                    if (lastCapture.getImage() != null && lastCapture.getImage().exists()) {
-                        loadedImage = BitmapFactory.decodeFile(lastCapture.getImage().getAbsolutePath());
-                    }
-                }
-            }
-            if (loadedImage != null) {
-                session.setImageSize(new Size(loadedImage.getWidth(), loadedImage.getHeight()));
-                sessionDao.update(session);
-            }
-        }
+//        if (session.getImageSize() == null) {
+//            Bitmap loadedImage = null;
+//            if (image.exists()) {
+//                loadedImage = BitmapFactory.decodeFile(image.getAbsolutePath());
+//            } else {
+//                Capture lastCapture = captureDao.getLastFromSession(session.getId());
+//                if (lastCapture != null) {
+//                    if (lastCapture.getImage() != null && lastCapture.getImage().exists()) {
+//                        loadedImage = BitmapFactory.decodeFile(lastCapture.getImage().getAbsolutePath());
+//                    }
+//                }
+//            }
+//            if (loadedImage != null) {
+//                session.setImageSize(new Size(loadedImage.getWidth(), loadedImage.getHeight()));
+//                sessionDao.update(session);
+//            }
+//        }
 
         Capture capture = new Capture();
         capture.setSessionId(session.getId());

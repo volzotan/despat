@@ -88,7 +88,7 @@ public class Despat extends Application {
         });
 
         initOrchestrator();
-        proximitySensor = new ProximitySensor(this);
+//        proximitySensor = new ProximitySensor(this);
 
         printSysinfo();
     }

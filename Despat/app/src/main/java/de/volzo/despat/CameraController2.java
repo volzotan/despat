@@ -265,12 +265,23 @@ public class CameraController2 extends CameraController {
                 Log.w(TAG, "surface texture is null!");
                 throw new Exception("surface texture is null (textureView: " + textureView.toString());
             }
-            final int width = 640; //imageDimension.getWidth();   // TODO: drop hardcoded resolution
-            final int height = 480; //imageDimension.getHeight();
-            surfaceTexture.setDefaultBufferSize(width, height);
+
+            // TODO: drop hardcoded resolution
+
+            int width = 640;
+            int height = 480;
+
+            // Zoom
+            if (camconfig.getZoomRegion() != null) {
+                width = camconfig.getZoomRegion().width();
+                height = camconfig.getZoomRegion().height();
+            }
+
+            final int stream_width = width;
+            final int stream_height = height;
+            surfaceTexture.setDefaultBufferSize(stream_width, stream_height);
             surface = new Surface(surfaceTexture);
             outputSurfaces.add(surface);
-
             // TODO: window rotation
             // may return always Surface.ROTATION_0 if run from service with dead app
             WindowManager windowService = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -284,7 +295,7 @@ public class CameraController2 extends CameraController {
                     public void run() {
 
                         Matrix mat = new Matrix();
-                        mat.postScale(height / (float) width, width / (float) height);
+                        mat.postScale(stream_height / (float) stream_width, stream_width / (float) stream_height);
 
                         if (Surface.ROTATION_90 == currentRotation) {
                             mat.postRotate(-90);
@@ -324,6 +335,7 @@ public class CameraController2 extends CameraController {
             // Zoom
             if (camconfig.getZoomRegion() != null) {
                 // TODO: check for maximum possible zoom via SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
+                previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, camconfig.getZoomRegion());
                 stillRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, camconfig.getZoomRegion());
             }
 
@@ -630,7 +642,6 @@ public class CameraController2 extends CameraController {
 //            captureSession.abortCaptures();
 
             purgeImageReaderAndSaver();
-
 
             final int burstLength = camconfig.getNumberOfBurstImages(); // TODO: make burstLength a function parameter
 
