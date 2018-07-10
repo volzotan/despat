@@ -36,8 +36,8 @@ seal_flex       = false;
 
 //include<phone_NEXUS5.scad>;
 //include<phone_MOTOE2.scad>;
-//include<phone_MOTOZ1.scad>;
-include<phone_ZTEAXON7.scad>;
+include<phone_MOTOZ1.scad>;
+//include<phone_ZTEAXON7.scad>;
 //include<phone_GENERIC.scad>;
 
 
@@ -123,7 +123,7 @@ include<phone_ZTEAXON7.scad>;
 ////    latch();
 ////    translate([0, 14.5, 0]) latch_knob();
 ////}
-////
+//
 ////translate([sizeBot[0]-30, 0.1, 12]) rotate([90, 0, 0]) color("purple") {
 ////    latch();
 ////    translate([0, 14.5, 0]) latch_knob();
@@ -134,48 +134,115 @@ include<phone_ZTEAXON7.scad>;
 // --------------------------- TEST3 ---------------------------
 
 //bottom();
-//translate([0, 0, 50]) color("blue") phone();
+////translate([0, 0, 50]) color("blue") phone();
 //translate([0, sizeTopF[1], sizeBot[2] + sizeTopF[2] + 0.2]) rotate([180, 0, 0]) top_flat();
 //translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
 //
-//translate([20, -0.1, 12+13.2]) rotate([90, 180, 0]) color("purple") {
+//translate([20, -0.1, 12+13.2]) rotate([90, 180, 0]) {
 //   latch(distance=-1.3);
 //   translate([0, 14.5-1.3, 0]) latch_knob();
 //}
 //
-//translate([sizeBot[0]-20, -0.1, 12+13.2]) rotate([90, 180, 0]) color("purple") {
+//translate([sizeBot[0]-20, -0.1, 12+13.2]) rotate([90, 180, 0]) {
 //   latch(distance=-1.3);
 //   translate([0, 14.5-1.3, 0]) latch_knob();
 //}
-
+//
 //translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
 
 // --------------------------- PRINT ---------------------------
 
 //top();
-//top_flat();
-//bottom();
+//translate([0, 104]) top_flat();
+bottom();
 //
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal();
 //seal2D();
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal_cutout();
+//translate([sizeBot[0]/2, -2.1-08, 0]) socket_nut_wedge();
 //
-translate([0, 0]) {
-    latch(distance=-1.7); 
-    translate([0, 14.5-1.7, 0]) latch_knob();
-}
-translate([13, 0]) mirror([1, 0]) {
-    latch(distance=-1.7); 
-    translate([0, 14.5-1.7, 0]) latch_knob();
-}
-//translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
-//
-translate([33, 20, 5.5]) rotate([90, 180, 0]) mirror([0, 0]) hinge_bottom(screwed=true);
-translate([37, 48, 5.5]) rotate([90, 180, 0]) mirror([1, 0]) hinge_bottom(screwed=true);
+//translate([0, 0]) {
+//    latch(distance=-1.7); 
+//    translate([0, 14.5-1.7, 0]) latch_knob();
+//}
+//translate([13, 0]) mirror([1, 0]) {
+//    latch(distance=-1.7); 
+//    translate([0, 14.5-1.7, 0]) latch_knob();
+//}
+////translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
+////
+//translate([33, 20, 5.5]) rotate([90, 180, 0]) mirror([0, 0]) hinge_bottom(screwed=true);
+//translate([37, 48, 5.5]) rotate([90, 180, 0]) mirror([1, 0]) hinge_bottom(screwed=true);
 //
 //translate([20, 0, 0.3+12.5]) rotate([180, 0]) wedge();
-
+//
 //translate() rotate([0, 90, 0]) wedge_semiflex_motoZ();
+
+
+// --------------------------- THESIS --------------------------
+
+//bottom();
+//
+//translate([sizeBot[0]/2, 2.3, -13]) rotate([90, 30, 0]) M5nut();
+//translate([sizeBot[0]/2, -2.1, -23]) socket_nut_wedge();
+//
+////translate([0, 110, 60]) rotate([180-50, 0, 0]) top_flat();
+//
+//translate([0, 0, 30]) rotate([0, 0, 0]) seal();
+//
+//translate([20, -30, 12]) rotate([90, 0, 0]) knurled_insert();
+//translate([sizeBot[0]-20, -30, 12]) rotate([90, 0, 0]) knurled_insert();
+//
+//translate([20, -45, 12]) rotate([90, 0, 0]) latch_knob();
+//translate([sizeBot[0]-20, -45, 12]) rotate([90, 0, 0]) latch_knob();
+//
+//translate([20, -70, 12]) rotate([90, 0, 0]) M3_screw(length=10);
+//translate([sizeBot[0]-20, -70, 12]) rotate([90, 0, 0]) M3_screw(length=10);
+
+
+
+//translate([sizeBot[0], 0, 110]) rotate([0, 180, 0]) {
+//    translate([0, 93, 110]) rotate([180, 0, 0]) top_flat();
+//
+//    translate([20, -12, 105]) rotate([90, 0, 0]) knurled_insert();
+//    translate([sizeBot[0]-20, -12, 105]) rotate([90, 0, 0]) knurled_insert();
+//
+//    translate([20, -25, 105]) rotate([90, 0, 0]) M3_washer();
+//    translate([sizeBot[0]-20, -25, 105]) rotate([90, 0, 0]) M3_washer();
+//
+//    translate([20, -43, 105]) rotate([90, 180, 0]) latch(distance=-1.3);
+//    translate([sizeBot[0]-20, -43, 105]) mirror([1, 0])rotate([90, 180, 0]) latch(distance=-1.3);
+//
+//    translate([20, -60, 105]) rotate([90, 0, 0]) M3_washer();
+//    translate([sizeBot[0]-20, -60, 105]) rotate([90, 0, 0]) M3_washer();
+//
+//    translate([20, -80, 105]) rotate([90, 0, 0]) M3_screw(length=10);
+//    translate([sizeBot[0]-20, -80, 105]) rotate([90, 0, 0]) M3_screw(length=10);
+//}
+
+//translate([sizeBot[0], sizeBot[1], 0]) rotate([0, 0, 180]) {
+//    bottom();
+//
+//    translate([31, 150, 20]) rotate([90, 90, -90]) mirror([0, 0]) hinge_bottom(screwed=true);
+//    translate([136, 150, 20]) rotate([90, 270, 90]) mirror([1, 0]) hinge_bottom(screwed=true);
+//
+//    translate([10, 175, 11.5]) rotate([-90, 0, 0]) M3_screw(length=10);
+//    translate([36, 175, 11.5]) rotate([-90, 0, 0]) M3_screw(length=10);
+//    translate([sizeBot[0]-10, 175, 11.5]) rotate([-90, 0, 0]) M3_screw(length=10);
+//    translate([sizeBot[0]-36, 175, 11.5]) rotate([-90, 0, 0]) M3_screw(length=10);
+//
+//    translate([75, 150, 20.5]) rotate([-90, 0, -90]) M3_screw(length=25);
+//    translate([90, 150, 20.5]) rotate([-90, 0,  90]) M3_screw(length=25);
+//
+//    translate([170, 150, 20]) rotate([90, 270, 90]) mirror([1, 0]) M3nut();
+//    translate([-10, 150, 20]) rotate([90, 270, 90]) mirror([1, 0]) M3nut();
+//
+//    translate([10, 120, 11.5]) rotate([90, 0, 0]) knurled_insert();
+//    translate([36, 120, 11.5]) rotate([90, 0, 0]) knurled_insert();
+//    translate([sizeBot[0]-10, 120, 11.5]) rotate([90, 0, 0]) knurled_insert();
+//    translate([sizeBot[0]-36, 120, 11.5]) rotate([90, 0, 0]) knurled_insert();
+//}
+
 
 // ----------------------- add. elements -----------------------
 
@@ -429,7 +496,7 @@ module top_flat() {
     difference() {
         hull() {
             translate([0, 0, 0]) block2(sizeTopF[0], sizeTopF[1], 0.1, crad=crad, red=x);
-            translate([0, 0, a]) block2(sizeTopF[0], sizeTopF[1], 1.1, crad=crad);
+            translate([0, 0, 2.9]) block2(sizeTopF[0], sizeTopF[1], 1.1, crad=crad);
         }
         translate([0, sizeTopF[1]/2]) hex();
     }
@@ -695,7 +762,7 @@ module bottom() {
                     translate([20, w, 0]) cube([sizeBot[0]-20, sizeBot[1]-2*w, 20]); //20-1]);
                     
                     // CAVITY
-                    color("red") cavity(20);
+                    color([.3, .3, .3]) cavity(20);
                     
                     points = [[0, 0], [sizeBot[1], 0], [sizeBot[1], 20], [sizeBot[1]-20, 30], [20, 30], [0, 20]];
                     translate([0, sizeBot[1]]) rotate([0, 0, -90]) linear_extrude(height=30) polygon(points);
@@ -846,8 +913,8 @@ module bottom() {
     // hinges
 //    % translate([9+06, -5.5-0.1, 20])                                 rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=true);
 //    % translate([sizeBot[0]-25-06+16, -5.5-0.1, 20])   mirror([1, 0]) rotate([0, 90, 0]) color("purple") hinge_bottom(screwed=true);
-    % translate([25+6+0.2, sizeBot[1]+5.5+0.1, 20])                           rotate([0, 90, 180]) color("green") hinge_bottom(screwed=true);
-    % translate([sizeBot[0]-25-6-0.2, sizeBot[1]+5.5+0.1, 20]) mirror([1, 0]) rotate([0, 90, 180]) color("green") hinge_bottom(screwed=true);
+//    % translate([25+6+0.2, sizeBot[1]+5.5+0.1, 20])                           rotate([0, 90, 180]) color("green") hinge_bottom(screwed=true);
+//    % translate([sizeBot[0]-25-6-0.2, sizeBot[1]+5.5+0.1, 20]) mirror([1, 0]) rotate([0, 90, 180]) color("green") hinge_bottom(screwed=true);
     
     // nuts
     % translate([sizeBot[0]/2, sizeBot[1]-w-0.5, 11.5]) rotate([90, 0, 0]) { 
@@ -889,6 +956,13 @@ module M3nut() {
     }
 }
 
+module M3_washer() {
+    color("grey") difference() {
+        cylinder($fn=32, h=0.5, d=6.3);
+        translate([0, 0, -1]) cylinder($fn=32, d=3, h=10);
+    }
+}
+
 module DIN912screw(length) {
     % difference() {
         union() {
@@ -897,6 +971,27 @@ module DIN912screw(length) {
         }
         translate([0, 0, -1]) cylinder($fn=6, h=3, d=5);
     }
+}
+
+module M3_screw(length=10) {
+    % rotate([180, 0, 0]) color("grey") {
+        translate([]) cylinder($fn=32, d=3, h=length);
+        difference() {
+            translate([0, 0, -3]) cylinder($fn=32, d=5.5, h=3);
+            translate([0, 0, -4]) cylinder($fn=6, d=3.5, h=2);
+        }
+    }
+}
+
+module knurled_insert() {
+    color("grey") difference() {
+        union() {
+            translate([0, 0, 0]) cylinder($fn=32, h=4, d=3.8);
+            translate([0, 0, 0]) cylinder($fn=16, h=1, d=4.8);
+            translate([0, 0, 4]) cylinder($fn=16, h=1, d=4.8);
+        }
+        translate([0, 0, -1]) cylinder($fn=32, d=3, h=10);
+    } 
 }
 
 module anker() {
