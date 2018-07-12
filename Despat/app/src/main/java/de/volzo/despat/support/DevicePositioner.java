@@ -52,14 +52,14 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
         int rotation;
         if (inclination < 25 || inclination > 155) {
             // device is flat, return 0
-            rotation = 0;
+            return 0;
         } else {
             // device is not flat
             rotation = (int) Math.round(Math.toDegrees(Math.atan2(g[0], g[1])));
         }
 
         if (rotation > -45 && rotation <=45) {
-            return 90;
+            return 0; //return 90;
         }
 
         if (rotation > 45 && rotation <= 135) {
@@ -71,7 +71,7 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
         }
 
         if (rotation <= -135 && rotation > 135) {
-            return 270;
+            return 0; //return 270;
         }
 
         Log.wtf(TAG, "Accelerometer illegal state");
