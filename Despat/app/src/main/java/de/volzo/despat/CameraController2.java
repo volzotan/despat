@@ -282,10 +282,23 @@ public class CameraController2 extends CameraController {
             surfaceTexture.setDefaultBufferSize(stream_width, stream_height);
             surface = new Surface(surfaceTexture);
             outputSurfaces.add(surface);
-            // TODO: window rotation
-            // may return always Surface.ROTATION_0 if run from service with dead app
-            WindowManager windowService = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-            final int currentRotation = windowService.getDefaultDisplay().getRotation();
+
+            int photoOrientation = 0;
+            try {
+                Integer result = devicePositionFuture.get(500, TimeUnit.MILLISECONDS);
+                if (result != null) photoOrientation = result;
+            } catch (InterruptedException | ExecutionException e) {
+                Log.w(TAG, "device positioner interrupted");
+                Util.saveErrorEvent(context, "device positioner interrupted", e);
+            } catch (TimeoutException e) {
+                Log.w(TAG, "device positioner timeout");
+                Util.saveErrorEvent(context, "device positioner timeout", null);
+            } finally {
+                devicePositionFuture.cancel(true);
+            }
+            final int position = photoOrientation;
+
+            Log.wtf(TAG, "ORIENTATION: " + photoOrientation);
 
             if (textureView != null) {
                 // Lowly camera API developers haven't deemed it necessary to integrate automatic screen rotation and aspect ratio
@@ -297,10 +310,10 @@ public class CameraController2 extends CameraController {
                         Matrix mat = new Matrix();
                         mat.postScale(stream_height / (float) stream_width, stream_width / (float) stream_height);
 
-                        if (Surface.ROTATION_90 == currentRotation) {
+                        if (position == 0) {
                             mat.postRotate(-90);
                             mat.postTranslate(0, textureView.getHeight());
-                        } else if (Surface.ROTATION_270 == currentRotation) {
+                        } else if (position == 180) {
                             mat.postRotate(90);
                             mat.postTranslate(textureView.getWidth(), 0);
                         }
@@ -317,19 +330,7 @@ public class CameraController2 extends CameraController {
             if (camconfig.isFormatJpg()) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
             if (camconfig.isFormatRaw()) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
 
-            int photoOrientation = 0;
-            try {
-                Integer result = devicePositionFuture.get(500, TimeUnit.MILLISECONDS);
-                if (result != null) photoOrientation = result;
-            } catch (InterruptedException | ExecutionException e) {
-                Log.w(TAG, "device positioner interrupted");
-                Util.saveErrorEvent(context, "device positioner interrupted", e);
-            } catch (TimeoutException e) {
-                Log.w(TAG, "device positioner timeout");
-                Util.saveErrorEvent(context, "device positioner timeout", null);
-            } finally {
-                devicePositionFuture.cancel(true);
-            }
+            // Rotation
             stillRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, photoOrientation);
 
             // Zoom

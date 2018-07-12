@@ -6,11 +6,13 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TimePicker;
 
 import de.volzo.despat.CameraController;
+import de.volzo.despat.CameraController2;
 import de.volzo.despat.R;
 import de.volzo.despat.preferences.CameraConfig;
 
@@ -56,8 +58,13 @@ public class ConfigureActivity extends AppCompatActivity {
 
                 CameraConfig cameraConfig = new CameraConfig(activity);
 
-                // TODO:
-                cameraConfig.setZoomRegion(new Rect(300, 300, 1000, 1000));
+//                // TODO:
+//                try {
+//                    Size imageSize = CameraController2.getImageSize(activity);
+//                    cameraConfig.setZoomRegion(new Rect((imageSize.getWidth() / 2) - (imageSize.getWidth() / 4) / 2, (imageSize.getHeight() / 2) - (imageSize.getHeight() / 4) / 2, (imageSize.getWidth() / 2) + (imageSize.getWidth() / 4) / 2, (imageSize.getHeight() / 2) + (imageSize.getHeight() / 4) / 2));
+//                } catch (Exception e) {}
+//
+//                cameraConfig.setShutterInterval(1000);
 
                 resultIntent.putExtra(DATA_CAMERA_CONFIG, cameraConfig);
                 setResult(RESULT_OK, resultIntent);

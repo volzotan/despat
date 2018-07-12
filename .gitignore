@@ -32,3 +32,5 @@ corodiak.db
 
 *.pickle
 Gemfile.lock
+postprocessing/background_subtraction/scaled_*
+postprocessing/background_subtraction/output_*

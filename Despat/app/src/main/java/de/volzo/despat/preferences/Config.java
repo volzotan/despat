@@ -334,7 +334,17 @@ public class Config {
     // ---------------------------------------------------------------------------------------------
 
     public static void init(Context context) {
+        File imageFolder = Config.getImageFolder(context);
 
+        if(!imageFolder.isDirectory()) {
+            if(imageFolder.exists()) {
+                Log.wtf(TAG, "Image Folder " + imageFolder.getAbsoluteFile() + " exists but is no directory");
+                return;
+            }
+
+            imageFolder.mkdirs();
+            Log.i(TAG, "created directory: " + imageFolder.getAbsoluteFile());
+        }
     }
 
     public static void reset(Context context) {

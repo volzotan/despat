@@ -41,7 +41,7 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
         sensorManager.unregisterListener(this);
     }
 
-    // taken from: https://stackoverflow.com/questions/33101488/
+    // taken partly from: https://stackoverflow.com/questions/33101488/
     private int getRotationFromAccelerometerOnly(float[] g) {
         double normOfG = Math.sqrt(g[0] * g[0] + g[1] * g[1] + g[2] * g[2]);
         // Normalize the accelerometer vector
@@ -58,7 +58,24 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
             rotation = (int) Math.round(Math.toDegrees(Math.atan2(g[0], g[1])));
         }
 
-        return rotation;
+        if (rotation > -45 && rotation <=45) {
+            return 90;
+        }
+
+        if (rotation > 45 && rotation <= 135) {
+            return 0;
+        }
+
+        if (rotation > -135 && rotation <= -45) {
+            return 180;
+        }
+
+        if (rotation <= -135 && rotation > 135) {
+            return 270;
+        }
+
+        Log.wtf(TAG, "Accelerometer illegal state");
+        return 0;
     }
 
     private Integer calculateOrientation(float azimuth, float pitch, float roll) {
@@ -93,22 +110,24 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
             gravity = event.values;
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
             geomagnetic = event.values;
-        if (gravity != null && geomagnetic != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
-            boolean success = SensorManager.getRotationMatrix(R, I, gravity, geomagnetic);
-            if (success) {
-                float data[] = new float[3];
-                SensorManager.getOrientation(R, data);
-                // data contains: azimuth, pitch and roll
-                orientation = calculateOrientation(data[0], data[1], data[2]);
-                close();
-            }
-            return;
-        }
+//        if (gravity != null && geomagnetic != null) {
+//            float R[] = new float[9];
+//            float I[] = new float[9];
+//            boolean success = SensorManager.getRotationMatrix(R, I, gravity, geomagnetic);
+//            if (success) {
+//                float data[] = new float[3];
+//                SensorManager.getOrientation(R, data);
+//                // data contains: azimuth, pitch and roll
+//                orientation = calculateOrientation(data[0], data[1], data[2]);
+//                Log.d(TAG, "positioner running on gyro [" + orientation + "]");
+//                close();
+//            }
+//            return;
+//        }
 
         if (gravity != null) {
             orientation = getRotationFromAccelerometerOnly(gravity);
+            Log.d(TAG, "positioner running on accelerometer only [" + orientation + "]");
         }
     }
 
@@ -125,6 +144,7 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
     @Override
     public Integer call() throws Exception {
         while (orientation == null) {Thread.sleep(1);}
+        close();
         return orientation;
     }
 }

@@ -24,6 +24,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
@@ -42,7 +43,6 @@ import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import java.io.File;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
@@ -58,11 +58,9 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
-import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.ConfigureActivity;
 import de.volzo.despat.userinterface.DrawSurface;
-import de.volzo.despat.userinterface.PointActivity;
 import de.volzo.despat.userinterface.SessionListActivity;
 import de.volzo.despat.userinterface.SettingsActivity2;
 import de.volzo.despat.web.Sync;
@@ -474,6 +472,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 
+//        startCamera(new CameraConfig(activity));
+
         registerAllReceivers();
         startProgressBarUpdate();
         updatePreviewImage();
@@ -500,11 +500,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
             if (checkPermissionsAreGiven()) {
 
-                // TODO:
-                CameraConfig cameraConfig = new CameraConfig(activity);
-                cameraConfig.setZoomRegion(new Rect((4216/2)-(4216/4)/2, (3128/2)-(3128/4)/2, (4216/2)+(4216/4)/2, (3128/2)+(3128/4)/2));
+                try {
+                    Size imageSize = CameraController2.getImageSize(activity);
 
-                startCamera(cameraConfig);
+                    // TODO:
+                    CameraConfig cameraConfig = new CameraConfig(activity);
+                    // cameraConfig.setZoomRegion(new Rect((imageSize.getWidth() / 2) - (imageSize.getWidth() / 4) / 2, (imageSize.getHeight() / 2) - (imageSize.getHeight() / 4) / 2, (imageSize.getWidth() / 2) + (imageSize.getWidth() / 4) / 2, (imageSize.getHeight() / 2) + (imageSize.getHeight() / 4) / 2));
+
+                    startCamera(cameraConfig);
+                } catch (Exception e) {
+                    Log.e(TAG, "could not get image size", e);
+                }
             } else {
                 Toast.makeText(this, "camera inactive : permissions are missing", Toast.LENGTH_LONG).show();
             }
@@ -876,6 +882,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     private void requestPermissions() {
         ActivityCompat.requestPermissions(activity,
                 new String[]{Manifest.permission.CAMERA,
+                        Manifest.permission.RECORD_AUDIO,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.ACCESS_FINE_LOCATION},
                 PERMISSION_REQUEST_CODE);

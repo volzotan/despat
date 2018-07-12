@@ -49,7 +49,7 @@ public class DeviceInfo {
         SystemController systemController = new SystemController(context);
         batteryTemperature = systemController.getBatteryTemperature();
         SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        if(sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
             gyro = true;
         } else {
             gyro = false;
@@ -160,7 +160,7 @@ public class DeviceInfo {
             sb.append("\n");
 
             sb.append(String.format("%-20s", "  info:"));
-            sb.append(String.format("%20s", parameters.get("INFO_VERSION")));
+            sb.append(String.format("%20s", checkForNullString(parameters.get("INFO_VERSION"))));
             sb.append("\n");
 
             sb.append(String.format("%-20s", "  max zoom:"));
