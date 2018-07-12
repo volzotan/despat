@@ -9,18 +9,25 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
+import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.preference.TwoStatePreference;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import de.volzo.despat.R;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private static final String TAG = SettingsFragment.class.getSimpleName();
+
     Context context;
+
+    HashMap<Preference, Integer> preferenceSummaryMap = new HashMap<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,6 +40,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
         PreferenceCategory category;
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.registerOnSharedPreferenceChangeListener(this);
+
         // GENERAL ---------------------------------------------------------------------------------
 
         category = new PreferenceCategory(context);
@@ -40,11 +50,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         screen.addPreference(category);
 
         EditTextPreference prefDeviceName = new EditTextPreference(context);
-        prefDeviceName.setTitle(context.getString(R.string.pref_title_deviceName));
-        prefDeviceName.setSummary(context.getString(R.string.pref_summary_deviceName));
+        prefDeviceName.setTitle(R.string.pref_title_deviceName);
+        prefDeviceName.setSummary(R.string.pref_summary_deviceName);
         prefDeviceName.setDefaultValue(Config.DEFAULT_DEVICE_NAME);
         prefDeviceName.setKey(Config.KEY_DEVICE_NAME);
         category.addPreference(prefDeviceName);
+        preferenceSummaryMap.put(prefDeviceName, R.string.pref_summary_deviceName);
 
         SwitchPreference prefResumeAfterReboot = new SwitchPreference(context);
         prefResumeAfterReboot.setTitle(context.getString(R.string.pref_title_resumeAfterReboot));
@@ -94,14 +105,15 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         NumberPickerPreference prefShutterInterval = new NumberPickerPreference(context);
-        prefShutterInterval.setTitle(context.getString(R.string.pref_title_shutterInterval));
-        prefShutterInterval.setSummary(context.getString(R.string.pref_summary_shutterInterval));
+        prefShutterInterval.setTitle(R.string.pref_title_shutterInterval);
+        prefShutterInterval.setSummary(R.string.pref_summary_shutterInterval);
         prefShutterInterval.setMinValue(2);
         prefShutterInterval.setMaxValue(120);
         prefShutterInterval.setFactor(1000);
         prefShutterInterval.setDefaultValue(Config.DEFAULT_SHUTTER_INTERVAL);
         prefShutterInterval.setKey(Config.KEY_SHUTTER_INTERVAL);
         category.addPreference(prefShutterInterval);
+        preferenceSummaryMap.put(prefShutterInterval, R.string.pref_summary_shutterInterval);
 
         // SERVER ----------------------------------------------------------------------------------
 
@@ -122,6 +134,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         prefServerAddress.setDefaultValue(Config.DEFAULT_SERVER_ADDRESS);
         prefServerAddress.setKey(Config.KEY_SERVER_ADDRESS);
         category.addPreference(prefServerAddress);
+        preferenceSummaryMap.put(prefServerAddress, R.string.pref_summary_serverAddress);
 
         setPreferenceScreen(screen);
     }
@@ -152,7 +165,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         if (preference == null) return;
 
         SharedPreferences sharedPrefs = getPreferenceManager().getSharedPreferences();
-        String s = (String) preference.getSummary();
+        Integer summaryKey = preferenceSummaryMap.get(preference);
 
         if (preference instanceof ListPreference) {
             ListPreference listPreference = (ListPreference) preference;
@@ -161,8 +174,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference instanceof NumberPickerPreference) {
-            s = String.format(Config.LOCALE, s, sharedPrefs.getInt(key, 0));
-            preference.setSummary(s);
+            if (summaryKey != null) {
+                int newValue = sharedPrefs.getInt(key, 0);
+                preference.setSummary(String.format(Config.LOCALE, context.getString(summaryKey), newValue));
+            }
             return;
         }
 
@@ -170,7 +185,16 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             return;
         }
 
-        s = String.format(Config.LOCALE, s, sharedPrefs.getString(key, "Default"));
-        preference.setSummary(s);
+        if (summaryKey != null) {
+            String newValue = sharedPrefs.getString(key, "Default");
+            String newSummary = String.format(Config.LOCALE, context.getString(summaryKey), newValue);
+            preference.setSummary(newSummary);
+            return;
+        }
+
+        String oldSummary = (String) preference.getSummary();
+        if (oldSummary == null) {
+            preference.setSummary(sharedPrefs.getString(key, "Default"));
+        }
     }
 }
