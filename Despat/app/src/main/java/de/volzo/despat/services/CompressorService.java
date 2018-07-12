@@ -33,7 +33,11 @@ public class CompressorService extends IntentService {
 
         for (Session session : sessions) {
             Compressor compressor = new Compressor();
-            compressor.runForSession(this, session);
+            try {
+                compressor.runForSession(this, session);
+            } catch (Exception e) {
+                Log.w(TAG, "compressor failed for session: " + session);
+            }
         }
     }
 }

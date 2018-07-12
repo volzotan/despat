@@ -135,7 +135,7 @@ public class Compressor implements Callable<Integer> {
         System.out.println("toJpeg: " + time_toJpeg);
     }
 
-    public void runForSession(Context context, Session session) {
+    public void runForSession(Context context, Session session) throws Exception {
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
         CaptureDao captureDao = db.captureDao();
@@ -158,7 +158,12 @@ public class Compressor implements Callable<Integer> {
         }
 
         // load first image to get width and height for initialization
-        Bitmap bitmap = BitmapFactory.decodeFile(captures.get(0).getImage().getAbsolutePath());
+        File imageFile = captures.get(0).getImage();
+        if (imageFile == null || !imageFile.exists()) {
+            throw new Exception("first image file missing");
+        }
+
+        Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
         init(bitmap.getWidth(), bitmap.getHeight());
 
         captures = captures.subList(0, Math.min(captures.size(), 150));
