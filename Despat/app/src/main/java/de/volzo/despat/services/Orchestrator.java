@@ -82,6 +82,23 @@ public class Orchestrator extends BroadcastReceiver {
 
         log(action, service, operation, reason);
 
+        if (service != null && (service.equals(Broadcast.SHUTTER_SERVICE) || service.equals(Broadcast.ALL_SERVICES))) {
+            try {
+                this.cameraConfig = (CameraConfig) intent.getSerializableExtra(DATA_CAMERA_CONFIG);
+                if (this.cameraConfig == null) {
+                    Log.d(TAG, "camera config not stored in intent. Trying to get from session");
+
+                    RecordingSession recordingSession = RecordingSession.getInstance(context);
+                    this.cameraConfig = recordingSession.getCameraConfig();
+                } else {
+                    Log.wtf(TAG, "camera config received");
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "camera config missing. initialized with default values");
+                this.cameraConfig = new CameraConfig(context);
+            }
+        }
+
         if (action != null && action.length() > 0) {
             switch (action) {
                 case "android.intent.action.BOOT_COMPLETED":
@@ -199,15 +216,6 @@ public class Orchestrator extends BroadcastReceiver {
                 break;
 
             case Broadcast.SHUTTER_SERVICE:
-
-                try {
-                    this.cameraConfig = (CameraConfig) intent.getSerializableExtra(DATA_CAMERA_CONFIG);
-                    if (this.cameraConfig == null) throw new NullPointerException();
-                } catch (Exception e) {
-                    Log.w(TAG, "camera config missing. initialized with default values");
-                    this.cameraConfig = new CameraConfig(context);
-                }
-
                 if (operation == OPERATION_START) {
                     shutterServiceStart();
                 } else if (operation == OPERATION_STOP) {
@@ -311,7 +319,7 @@ public class Orchestrator extends BroadcastReceiver {
         Sync.run(context, ShutterService.class, false);
         // TODO: this should be done in its own thread with its own wakelock
 
-        if (!cameraConfig.getPersistentCamera()) {
+        if (!this.cameraConfig.getPersistentCamera()) {
 
             // trigger the next invocation
             long now = System.currentTimeMillis(); // alarm is set right away

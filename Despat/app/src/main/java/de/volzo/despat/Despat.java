@@ -197,6 +197,10 @@ public class Despat extends Application {
     }
 
     public CameraController initCamera(Context context, CameraController.ControllerCallback controllerCallback, TextureView textureView, CameraConfig cameraConfig) throws Exception {
+        if (cameraConfig == null) {
+            throw new NullPointerException("camera config missing");
+        }
+
         if (Config.getLegacyCameraController(context)) {
             Log.d(TAG, "initializing camera controller 1");
             this.camera = new CameraController1(context, controllerCallback, textureView);

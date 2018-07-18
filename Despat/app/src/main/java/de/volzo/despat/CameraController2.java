@@ -90,6 +90,7 @@ public class CameraController2 extends CameraController {
 
     private Handler backgroundHandler = null;
     private HandlerThread backgroundThread;
+    Handler handler = new Handler();
 
     private ImageReader imageReaderJpg;
     private ImageReader imageReaderRaw;
@@ -825,36 +826,50 @@ public class CameraController2 extends CameraController {
         }
     }
 
+    private Runnable closeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                cameraOpenCloseLock.acquire();
+
+                try {
+                    if (captureSession != null) {
+                        captureSession.stopRepeating();
+                        captureSession.close();
+                    }
+                } catch (Exception e) {
+                    Log.w(TAG, "attempt to close captureSession of an already closed camera", e);
+                } finally {
+                    captureSession = null;
+                }
+
+                try {
+                    if (cameraDevice != null) cameraDevice.close();
+                } catch (Exception e) {
+                    Log.w(TAG, "attempt to close already closed camera", e);
+                } finally {
+                    cameraDevice = null;
+                }
+
+
+            } catch (InterruptedException ie) {
+                Log.e(TAG, "lock could not be acquired", ie);
+            } finally {
+                cameraOpenCloseLock.release();
+            }
+        }
+    };
+
     public void closeCamera() {
         Log.d(TAG, "--> closeCamera");
 
-        try {
-            cameraOpenCloseLock.acquire();
+        if ((jpgResultQueue != null && jpgResultQueue.size() > 0) ||
+            (rawResultQueue != null && rawResultQueue.size() > 0)) {
+            Log.w(TAG, "image saver queues not empty");
 
-            try {
-                if (captureSession != null) {
-                    captureSession.stopRepeating();
-                    captureSession.close();
-                }
-            } catch (Exception e) {
-                Log.w(TAG, "attempt to close captureSession of an already closed camera", e);
-            } finally {
-                captureSession = null;
-            }
-
-            try {
-                if (cameraDevice != null) cameraDevice.close();
-            } catch (Exception e) {
-                Log.w(TAG, "attempt to close already closed camera", e);
-            } finally {
-                cameraDevice = null;
-            }
-
-
-        } catch (InterruptedException ie) {
-            Log.e(TAG, "lock could not be acquired", ie);
-        } finally {
-            cameraOpenCloseLock.release();
+            handler.postDelayed(closeRunnable, 1000);
+        } else {
+            handler.post(closeRunnable);
         }
     }
 

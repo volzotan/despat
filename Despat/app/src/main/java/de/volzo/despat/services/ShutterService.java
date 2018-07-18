@@ -130,8 +130,8 @@ public class ShutterService extends Service {
         this.context = this;
         this.handler = new Handler();
 
-        Bundle args = intent.getExtras();
         try {
+            Bundle args = intent.getExtras();
             this.camconfig = (CameraConfig) args.getSerializable(ARG_CAMERA_CONFIG);
         } catch (Exception e) {
             Log.e(TAG, "Camera Config missing");
@@ -363,7 +363,14 @@ public class ShutterService extends Service {
         state = STATE_CAMERA_READY;
 
         if (!Config.getPersistentCamera(context)) {
-            shutdownCamera();
+
+//            Handler handler = new Handler();
+//            handler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+                    shutdownCamera();
+//                }
+//            }, 500);
         }
     }
 

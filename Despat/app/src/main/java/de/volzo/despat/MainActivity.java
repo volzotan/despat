@@ -471,8 +471,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
-
-//        startCamera(new CameraConfig(activity));
+        if (textureView.isAvailable()) {
+            startCamera(new CameraConfig(activity));
+        }
 
         registerAllReceivers();
         startProgressBarUpdate();
@@ -499,7 +500,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
             if (checkPermissionsAreGiven()) {
-
                 try {
                     Size imageSize = CameraController2.getImageSize(activity);
 
@@ -773,7 +773,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 long nextInvocation = Config.getNextShutterServiceInvocation(activity);
                 long diff = nextInvocation - System.currentTimeMillis();
 
-                periodicUpdateHandler.postDelayed(this, 500);
+                periodicUpdateHandler.postDelayed(this, 250);
 
                 if (diff < 0) {
                     captureProgressBar.setProgress(0);

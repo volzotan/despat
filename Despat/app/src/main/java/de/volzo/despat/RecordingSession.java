@@ -44,6 +44,7 @@ public class RecordingSession {
     private static volatile RecordingSession instance;
     private Context context;
     private Session session;
+    private CameraConfig cameraConfig;
 
     private static final int RESUME_MAX_AGE_LAST_CAPTURE = 5 * 60 * 1000;
 
@@ -369,6 +370,18 @@ public class RecordingSession {
         int numberErrors = sessionDao.getNumberOfErrors(session.getId());
 
         return numberErrors;
+    }
+
+    public void setCameraConfig(CameraConfig cameraConfig) throws NotRecordingException {
+        if (!isActive()) throw new NotRecordingException();
+
+        this.cameraConfig = cameraConfig;
+    }
+
+    public CameraConfig getCameraConfig() throws NotRecordingException {
+        if (!isActive()) throw new NotRecordingException();
+
+        return this.cameraConfig;
     }
 
     // ---------------------------------------------------------------------------------------------
