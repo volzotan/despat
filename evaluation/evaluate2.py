@@ -41,7 +41,7 @@ def jsonToBbox(filename):
     res = []
 
     for i in range(0, len(inp["boxes"])):
-        if inp["scores"][i] < 0.01:
+        if inp["scores"][i] < 0.001:
             continue
 
         bbox = {}
@@ -239,6 +239,12 @@ if __name__ == "__main__":
 
     # (input_dir_gt, input_dir_data)
 
+    try:
+        plt.style.use("grayscale")
+        plt.style.use("despat")
+    except Exception as e:
+        print("Setting matplotlib style failed")
+
     INPUT_DIRS = [
         ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/offline"),
         ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/offline"),
@@ -341,5 +347,5 @@ if __name__ == "__main__":
 
     plt.legend(classes)
     plt.tight_layout()
-    plt.savefig('evaluation_map_person.png')
+    plt.savefig('plot_mapPerson.png')
     plt.show()

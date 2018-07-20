@@ -23,6 +23,9 @@ def calculate_size(box):
 
 if __name__ == "__main__":
 
+    plt.style.use("grayscale")
+    plt.style.use("despat")
+
     INPUT_DIRS = [
         "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/",
         "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/",
