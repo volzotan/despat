@@ -71,15 +71,13 @@ var layer_sym = view.append("g");
 var layer_leg = svg.append("g")
     .attr("class", "layer_leg");
 
-
 var svgTime = d3.select("#timeselector svg")
     .attr("width", width)
     .attr("height", 50);
 
 var timeBar = svgTime.append("g");
 
-
-var center = [11.037630+0.0002, 50.971296+0.0001];
+var center = [11.329189, 50.974474]; //[11.037630+0.0002, 50.971296+0.0001];
 
 var projection = d3.geoMercator()
     .scale((1 << 8 + 19) / tau)
@@ -124,11 +122,14 @@ function zoomed() {
 }
 
 var boxes = null;
+    boxesFiltered = null;
     dataset = null;
 
     var settingHexSize = 5;
 
-    var settingFilterTime = null;
+    var settingFilterTime       = null,
+        settingFilterSession    = null,
+        settingFilterClass      = null;
 
 d3.json("dataset.json", function(input) {
 
@@ -141,9 +142,10 @@ d3.json("dataset.json", function(input) {
         if (error) throw error;
 
         boxes = d3.dsvFormat("|").parse(raw);
+
         boxes.forEach((box, index) => {
             // var coord = projection([box.lon, box.lat]), // lonlat!
-                item = Array(10);
+            item = Array(10);
 
             var coords = projection([box["lon"], box["lat"]]);
 
@@ -163,7 +165,7 @@ d3.json("dataset.json", function(input) {
 
         // boxes = boxes.slice(0, 100);
 
-        buildGraph(dataset["cameras"], dataset["corresponding_points"], null);
+        buildGraph(dataset["datasets"], dataset["corresponding_points"], null);
         buildUI(dataset);
 
         $("#overlay").hide();
@@ -186,6 +188,30 @@ var clickFunction = function () {
         var layername = $(this).data("id");
         $("svg .layer_" + layername).toggle("invisible");
         $("svg .legend_layer_" + layername).toggle("invisible");
+
+        return;
+    }
+
+    if ($(this).data("type") === "session") {
+        var sessionIds = [];
+        d3.selectAll("#session-selector li.option-selected").each(function(d, i) {
+            sessionIds.push(d3.select(this).attr("data-id"));
+        });
+
+        settingFilterSession = sessionIds;
+        filter();
+
+        return;
+    }
+
+    if ($(this).data("type") === "class") {
+        var classIds = [];
+        d3.selectAll("#classes-selector li.option-selected").each(function(d, i) {
+            classIds.push(d3.select(this).attr("data-id"));
+        });
+
+        settingFilterClass = classIds;
+        filter();
 
         return;
     }
@@ -221,23 +247,23 @@ var clickFunction = function () {
 
 function buildUI(dataset) {
 
-    var cameras = d3.select("#camera-selector")
+    var sessions = d3.select("#session-selector")
         .append("ul")
         .attr("class", "list-group mb-3");
 
-    cameras.selectAll("ul")
-        .data(dataset["cameras"])
+    sessions.selectAll("ul")
+        .data(dataset["sessions"])
         .enter()
             .append("li")
             .attr("class", "list-group-item d-flex justify-content-between lh-condensed selectable option-selected")
-            .attr("data-type", "camera")
+            .attr("data-type", "session")
             .attr("data-id", function (d) {
                 return d["id"];
             })
         .append("h6")
             .attr("class", "my-0")
             .text(function (d) {
-                return d["id"] + " : " + d["name"];
+                return d["id"] + " : " + d["sessionname"];
         });
 
     var mapProvider = d3.select("#mapprovider-selector")
@@ -300,7 +326,7 @@ function buildUI(dataset) {
     $("#sliderMapAlpha").val(100).trigger("input");
 }
 
-function buildGraph(cameras, points, classmap) {
+function buildGraph(sessions, points, classmap) {
 
     drawLayerHbg();
 
@@ -311,15 +337,14 @@ function buildGraph(cameras, points, classmap) {
     drawLayerSym();
 
     draw_timeBar("#svg-time");
-
 }
 
 function filter() {
 
-    var data = boxes;
+    boxesFiltered = boxes;
 
     if (settingFilterTime != null) {
-        data = boxes.filter(function (d) {
+        boxesFiltered = boxesFiltered.filter(function (d) {
             if (d[0] < settingFilterTime[0]) {
                 return false
             }
@@ -332,8 +357,30 @@ function filter() {
         });
     }
 
-    drawLayerHex(data, settingHexSize);
-    draw_confidence_frequency("#svg-confidence", data);
+    if (settingFilterSession != null) {
+        boxesFiltered = boxesFiltered.filter(function (d) {
+            if (settingFilterSession.includes(d[1])) {
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    console.log(settingFilterClass);
+
+    if (settingFilterClass != null) {
+        boxesFiltered = boxesFiltered.filter(function (d) {
+            if (settingFilterClass.includes(d[2])) {
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    drawLayerHex(settingHexSize);
+    draw_confidence_frequency("#svg-confidence", boxesFiltered);
 }
 
 function drawLayerHbg() {
@@ -364,7 +411,7 @@ function drawLayerMap(tileFunc) {
         .attr("height", tiles.scale);
 }
 
-function drawLayerHex(data, octagonRadius) {
+function drawLayerHex(octagonRadius) {
 
     $(".layer_hex").empty();
     $(".legend_layer_hex").empty();
@@ -379,7 +426,7 @@ function drawLayerHex(data, octagonRadius) {
         .radius(octagonRadius)
         .extent([[0, 0], [width, height]]);
 
-    var hbins = hexbin(data);
+    var hbins = hexbin(boxesFiltered);
 
     hbins.sort(function (a, b) {
         return a.length - b.length;
@@ -521,13 +568,18 @@ function drawLayerSym() {
     $(".layer_sym").empty();
 
     var symbols = [];
-    dataset["cameras"].forEach((cam, index) => {
-        cam["type"] = "CAMERA";
-        symbols.push(cam);
-    });
-    dataset["corresponding_points"].forEach((point, index) => {
-        point["type"] = "POINT";
-        symbols.push(point);
+    dataset["sessions"].forEach((session, index) => {
+        var newSymbol = {};
+        newSymbol["type"] = "CAMERA";
+        newSymbol["position"] = session["position"];
+        symbols.push(newSymbol);
+
+        session["corresponding_points"].forEach((point, index) => {
+            var newSymbol = {};
+            newSymbol["type"] = "POINT";
+            newSymbol["position"] = point["position"];
+            symbols.push(newSymbol);
+        });
     });
 
     var symbols = layer_sym
@@ -565,7 +617,7 @@ function drawLayerSym() {
         .text(function(d) { return d["type"][0] });
 }
 
-function draw_timeBar(classname) {
+function draw_timeBar(classname, redraw) {
 
     var timeMinMax = d3.extent(boxes, function(d) { return d[0]; }),
         binNumber = 200,
@@ -698,7 +750,7 @@ function drawClassSelector() {
     var classCount = Array(dataset["classmap"].length).fill(0);
 
     boxes.forEach((box, index) => {
-        classCount[box[2]-1] += 1;
+        classCount[box[2]] += 1;
     });
 
     var classes = d3.select("#classes-selector")
@@ -708,7 +760,16 @@ function drawClassSelector() {
         .data(dataset["classmap"])
         .enter()
         .append("li")
-        .attr("class", "list-group-item d-flex justify-content-between lh-condensed selectable")
+        .attr("class", function(d, i) {
+            var classes = "list-group-item d-flex justify-content-between lh-condensed selectable";
+            if (classCount[i] === 0) {
+                return classes;
+            }
+
+            classes += " option-selected";
+            return classes;
+
+        })
         .attr("data-type", "class")
         .attr("data-id", function (d, i) {
             return i;
@@ -720,6 +781,7 @@ function drawClassSelector() {
             return "display: block;"
 
         });
+
 
     classes.append("h6")
         .attr("class", "my-0")

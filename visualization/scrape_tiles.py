@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
 import math
@@ -16,12 +15,12 @@ import pickle
 ZOOM_LEVEL = 19 # max zoom level is 19
 
 # OSM
-TILE_URL = "http://a.tile.openstreetmap.org/{0}/{1}/{2}.png"
-TILE_DIR = "tiles/osm_mapnik/{}/{}/"
+# TILE_URL = "http://a.tile.openstreetmap.org/{0}/{1}/{2}.png"
+# TILE_DIR = "tiles/osm_mapnik/{}/{}/"
 
 # GMAPS satellite
-# TILE_URL = "http://mt0.google.com/vt/lyrs=" + "s" + "@132&hl=de&x={1}&y={2}&z={0}"
-# TILE_DIR = "tiles/gmaps_satellite/{}/{}/"
+TILE_URL = "http://mt0.google.com/vt/lyrs=" + "s" + "@132&hl=de&x={1}&y={2}&z={0}"
+TILE_DIR = "tiles/gmaps_satellite/{}/{}/"
 
 # GMAPS standard roadmap
 # TILE_URL = "http://mt0.google.com/vt/lyrs=" + "m" + "@132&hl=de&x={1}&y={2}&z={0}"
@@ -148,8 +147,8 @@ class OSM(object):
 
 if __name__ == '__main__':
 
-    lat = 50.971403
-    lon = 11.037798
+    lat = 50.974474
+    lon = 11.32918
 
     for z in range(14, 19+1):
         map = OSM(lat, lon, 2000, 2000, z)

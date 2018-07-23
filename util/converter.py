@@ -27,8 +27,9 @@ scores
 def class_indices_to_class_names(index, classes):
     result = []
 
-    for item in classes:
-        result.append(index[item]["name"])
+    if classes is not None:
+        for item in classes:
+            result.append(index[item]["name"])
 
     return result
 
@@ -148,6 +149,9 @@ def convert_to_voc(folder_filename, image_filename, image_path, imagesize, bboxe
 
 
 def sanitize_coordinate_order(boxes_as_nparray):
+    if boxes_as_nparray is None:
+        return []
+
     boxes = np.zeros_like(boxes_as_nparray)
 
     # TODO: do some magic with numpy views?

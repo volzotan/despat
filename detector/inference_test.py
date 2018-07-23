@@ -51,19 +51,17 @@ OD_FRAMEWORK_PATH = os.path.join(args.tensorflow_object_detection_path, "object_
 #MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28"
 #MODEL_NAME = "faster_rcnn_resnet101_coco_2018_01_28" 
 MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28"
+#MODEL_NAME = "ssdlite_mobilenet_v2_coco_2018_05_09"
 
 PATH_TO_CKPT = os.path.join(args.models, MODEL_NAME, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
-TILESIZE = [int(4320/2), int(3240/2)]
-OUTPUTSIZE = [int(4320/2), int(3240/2)] #300 # whats fed into the network
+TILESIZE = [int(5952/1), int(3348/1)]
+OUTPUTSIZE = [int(TILESIZE[0]*1), int(TILESIZE[1]*1)] #300 # whats fed into the network
 
-
-def load_image_into_numpy_array(image):
-    (im_width, im_height) = image.size
-    return np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
-
+#TILESIZE = [600, 600]
+#OUTPUTSIZE = [TILESIZE[0], TILESIZE[1]] 
 
 def run_inference_for_single_image(sess, image):
     
@@ -182,9 +180,13 @@ def run(sess, filename, tilesize, outputsize):
         time1 = time.time()
         # the array based representation of the image will be used later in order to prepare the
         # result image with boxes and labels on it.
-        image_np = load_image_into_numpy_array(image)
+
+        # TODO: let this be done by the tilemanager instead
+        (im_width, im_height) = image.size
+        image_np = np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
+
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-        image_np_expanded = np.expand_dims(image_np, axis=0)
+        # image_np_expanded = np.expand_dims(image_np, axis=0)
         # Actual detection.
         time2 = time.time()
         output_dict = run_inference_for_single_image(sess, image_np)
@@ -289,14 +291,21 @@ def run(sess, filename, tilesize, outputsize):
     else:
         raise Exception("unknown file extension")
 
+    output_boxes = converter.sanitize_coordinate_order(output_dict["detection_boxes"])
+    output_classes = converter.class_indices_to_class_names(category_index, output_dict["detection_classes"])
+    if output_dict["detection_scores"] is not None:
+        output_scores = output_dict["detection_scores"].tolist()
+    else: 
+        output_scores = []
+
     exporter(
         file_folder_only, 
         file_name_only, 
         file_full_path, 
         tm.get_image_size(),
-        converter.sanitize_coordinate_order(output_dict["detection_boxes"]),
-        converter.class_indices_to_class_names(category_index, output_dict["detection_classes"]),
-        output_dict["detection_scores"].tolist(),
+        output_boxes,
+        output_classes,
+        output_scores,
         file_output_full_path
     )
 
