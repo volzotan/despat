@@ -41,7 +41,15 @@ def jsonToBbox(filename):
     res = []
 
     for i in range(0, len(inp["boxes"])):
-        if inp["scores"][i] < 0.001:
+        score = None
+
+        # in an older version of the hog script, scores are incorrectly saved as [[a], [b], [c]]
+        if isinstance(inp["scores"][i], list):
+            score = inp["scores"][i][0]
+        else:
+            score = inp["scores"][i]
+
+        if score < 0.001:
             continue
 
         bbox = {}
@@ -245,11 +253,13 @@ if __name__ == "__main__":
     except Exception as e:
         print("Setting matplotlib style failed")
 
+    NETWORK = "/" + "hog"
+
     INPUT_DIRS = [
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/offline"),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/offline"),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/offline"),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation/offline")
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation" + NETWORK),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation" + NETWORK),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation" + NETWORK),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation" + NETWORK)
     ]
 
     LIMIT = 20
@@ -339,6 +349,13 @@ if __name__ == "__main__":
                 recall.append(count_tp / (count_tp + count_fn))
             else:
                 recall.append(1)
+
+        # precision is always the maximum of all following precisions
+        for i in range(0, len(precision)):
+            precision[i] = max(precision[i:])
+
+        # for i in range(0, len(precision)):
+        #     print("{0:5.3f} {1:5.3f}".format(precision[i], recall[i]))
 
         handle = plt.plot(recall, precision, label=c) #, linestyle='--', marker='o')
         handles.append(handle)
