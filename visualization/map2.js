@@ -77,29 +77,13 @@ var svgTime = d3.select("#timeselector svg")
 
 var timeBar = svgTime.append("g");
 
-var center = [11.329189, 50.974474]; //[11.037630+0.0002, 50.971296+0.0001];
+//var center = [11.329189, 50.974474]; //[11.037630+0.0002, 50.971296+0.0001];
 
-var projection = d3.geoMercator()
-    .scale((1 << 8 + 19) / tau)
-    .translate([basewidth / 2, baseheight / 2])
-    // .translate([width / 2, height / 2])
-    .center(center);
-    // .center([11.037630-0.001, 50.971296-0.0005]);
+var projection;
 
-var tiles = d3.tile()
-    .size([basewidth, baseheight])
-    .scale(projection.scale() * tau)
-    .translate(projection([0, 0]))
-    ();
+var tiles;
 
-var zoom = d3.zoom()
-    .scaleExtent([0.4, 7])
-    .translateExtent([[0, 0], [basewidth, baseheight]])
-    .on("zoom", zoomed);
-
-svg.call(zoom)
-    .call(zoom.transform, d3.zoomIdentity
-        .translate(-(basewidth-width)/2, -(baseheight-height)/2));
+var zoom;
 
 function zoomed() {
 
@@ -135,6 +119,9 @@ d3.json("dataset.json", function(input) {
 
     input["mapprovider"] = mapproviders;
     dataset = input;
+
+    var center = dataset["sessions"][0]["position"];
+    initProjection(center);
 
     drawLayerMap(mapproviders[initialMapProvider]["tilefunc"]);
 
@@ -232,8 +219,6 @@ var clickFunction = function () {
     if ($(this).attr("id") === "toggleMapCached") {
         var e = $("#mapprovider-selector li.option-selected");
 
-        console.log(e);
-
         if ($(this).hasClass("option-selected")) {
             drawLayerMap(mapproviders[+e.data("id")]["tilefunc_local"]);
         } else {
@@ -244,6 +229,30 @@ var clickFunction = function () {
     }
 
 };
+
+function initProjection(center) {
+    projection = d3.geoMercator()
+        .scale((1 << 8 + 19) / tau)
+        .translate([basewidth / 2, baseheight / 2])
+    // .translate([width / 2, height / 2])
+        .center([center[1], center[0]]);
+    // .center([11.037630-0.001, 50.971296-0.0005]);
+
+    tiles = d3.tile()
+        .size([basewidth, baseheight])
+        .scale(projection.scale() * tau)
+        .translate(projection([0, 0]))
+        ();
+
+    zoom = d3.zoom()
+        .scaleExtent([0.4, 7])
+        .translateExtent([[0, 0], [basewidth, baseheight]])
+        .on("zoom", zoomed);
+
+    svg.call(zoom)
+        .call(zoom.transform, d3.zoomIdentity
+            .translate(-(basewidth-width)/2, -(baseheight-height)/2));
+}
 
 function buildUI(dataset) {
 
@@ -366,8 +375,6 @@ function filter() {
             return false;
         });
     }
-
-    console.log(settingFilterClass);
 
     if (settingFilterClass != null) {
         boxesFiltered = boxesFiltered.filter(function (d) {
