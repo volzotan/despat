@@ -1,6 +1,7 @@
-from PIL import Image, ImageDraw
-import PIL
+from PIL import Image
 import numpy as np
+import imageio
+from skimage.transform import resize # requires scikit-image
 import sys
 sys.path.append('..')
 from util.drawhelper import Drawhelper
@@ -11,15 +12,24 @@ class TileManager(object):
     posx    = 0
     posy    = 0
 
-    tiles = None
+    tiles   = None
 
     # outputsize should be the inputsize of the network
     # if the network does further scaling as preprocessing
     # _convert_coordinate() will yield wrong results
 
-    def __init__(self, filename, tilesize=[1000, 1000], outputsize=[300, 300], centered=True):
+    def __init__(self, filename, tilesize, outputsize, centered=True):
 
         self.filename = filename
+
+        self.image = imageio.imread(self.filename) #Image.open(self.filename)
+
+        self.imagewidth = self.image.shape[1]
+        self.imageheight = self.image.shape[0]
+
+        if tilesize is None:
+            tilesize = [self.imagewidth, self.imageheight]
+            outputsize = [self.imagewidth, self.imageheight]
 
         if type(tilesize) is int:
             tilesize = [tilesize, tilesize]
@@ -29,11 +39,6 @@ class TileManager(object):
 
         self.tilesize = tilesize
         self.outputsize = outputsize
-
-        self.image = Image.open(self.filename)
-
-        self.imagewidth = self.image.size[0]
-        self.imageheight = self.image.size[1]
 
         self.xoffset = 0
         self.yoffset = 0
@@ -58,6 +63,21 @@ class TileManager(object):
         for tile_id in self.tiles:
             tile = self.tiles[tile_id]
             tile["result"] = None
+
+
+    def _crop_and_resize(self, crop_dim, outputsize):
+        minx = crop_dim[0]
+        miny = crop_dim[1]
+        maxx = crop_dim[2]
+        maxy = crop_dim[3]
+        
+        cropped = self.image[miny:maxy, minx:maxx]
+
+        if maxx-minx == outputsize[0] and maxy-miny == outputsize[1]:
+            return cropped
+        else:
+            resized = resize(cropped, (outputsize[1], outputsize[0]), anti_aliasing=False, preserve_range=True)
+            return resized.astype(np.uint8)
 
 
     def _get_dim_for_tile(self, x, y):
@@ -94,7 +114,7 @@ class TileManager(object):
 
 
     def get_image_size(self):
-        return self.image.size
+        return (self.image.shape[1], self.image.shape[0])
 
 
     def get_all_tile_ids(self):
@@ -112,9 +132,11 @@ class TileManager(object):
     def get_tile_image(self, tile_id):
         tile = self.tiles[tile_id]
         crop_dim = self._get_dim_for_tile(tile["x"], tile["y"])
+        
+        resized = self._crop_and_resize(crop_dim, self.outputsize)
 
-        cropped = self.image.crop(crop_dim)
-        resized = cropped.resize((self.outputsize[0], self.outputsize[1]), PIL.Image.BICUBIC)
+        # cropped = self.image.crop(crop_dim)
+        # resized = cropped.resize((self.outputsize[0], self.outputsize[1]), PIL.Image.BICUBIC)
 
         return resized
 
@@ -143,10 +165,12 @@ class TileManager(object):
     def _draw_bounding_boxes(self, filename, bboxes, scores, threshold):
 
         boxes_above_threshold = []
-        for i in range(0, len(bboxes)):
-            if scores is not None and scores[i] < threshold:
-                continue
-            boxes_above_threshold.append(bboxes[i]) #[bboxes[i][1], bboxes[i][0], bboxes[i][3], bboxes[i][2]])
+
+        if bboxes is not None and len(bboxes) > 0:
+            for i in range(0, len(bboxes)):
+                if scores is not None and scores[i] < threshold:
+                    continue
+                boxes_above_threshold.append(bboxes[i]) #[bboxes[i][1], bboxes[i][0], bboxes[i][3], bboxes[i][2]])
 
         boxes_tiles = []
         for _, tile in self.tiles.items():
@@ -197,13 +221,15 @@ class TileManager(object):
 
 
 if __name__ == "__main__":
-    tm = TileManager("pedestriancrossing.jpg", [2000, 1000], [1000, 500])
+    tm = TileManager("pedestriancrossing.jpg", [2000, 1000], [500, 250])
     # for i in range(0, 10):
     #     print(tm.get_next_tile())
 
     # print(tm.get_all_tiles())
 
-    tile = tm.get_all_tiles()[0]
-    image = tm.get_tile_image(tile["tileid"])
+    tile = tm.get_all_tiles()[1]
+    imagemat = tm.get_tile_image(tile["tileid"])
     print("{} {}".format(tile["x"], tile["y"]))
+    #scipy.misc.imshow(imagemat)
+    image = Image.fromarray(imagemat, 'RGB')
     image.show()

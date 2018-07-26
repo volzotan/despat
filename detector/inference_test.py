@@ -21,9 +21,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--images", default=".")
 parser.add_argument("--output", default=".")
 
-parser.add_argument("--models", default="models")
+parser.add_argument("--model_path", default="models")
+parser.add_argument("--model_name", default="default_model")
+parser.add_argument("--tilesize", nargs="+", type=int)
 parser.add_argument("--tensorflow-object-detection-path", default="/Users/volzotan/Downloads/tensorflow/models/research")
 parser.add_argument("--export", default="json", choices=["xml", "json"])
+parser.add_argument("--output_directory_appendix", default="")
 parser.add_argument("--export-images", action='store_true')
 
 # parser.add_argument("-i", "--input", default=".", nargs='+')
@@ -45,23 +48,28 @@ from object_detection.utils import visualization_utils as vis_util
 
 OD_FRAMEWORK_PATH = os.path.join(args.tensorflow_object_detection_path, "object_detection")
 
-
-#MODEL_NAME = "ssd_mobilenet_v1_coco_2017_11_17"
-#MODEL_NAME = "ssd_mobilenet_v2_coco_2018_03_29"
-#MODEL_NAME = "faster_rcnn_inception_v2_coco_2018_01_28"
-#MODEL_NAME = "faster_rcnn_resnet101_coco_2018_01_28" 
-MODEL_NAME = "faster_rcnn_nas_coco_2018_01_28"
-#MODEL_NAME = "ssdlite_mobilenet_v2_coco_2018_05_09"
-
-PATH_TO_CKPT = os.path.join(args.models, MODEL_NAME, "frozen_inference_graph.pb")
+PATH_TO_CKPT = os.path.join(args.model_path, args.model_name, "frozen_inference_graph.pb")
 PATH_TO_LABELS = os.path.join(OD_FRAMEWORK_PATH, 'data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
-TILESIZE = [int(5952/1), int(3348/1)]
-OUTPUTSIZE = [int(TILESIZE[0]*1), int(TILESIZE[1]*1)] #300 # whats fed into the network
+VISUALIZATION_THRESHOLD = 0.3
+SAVE_THRESHOLD = 0.1
 
-#TILESIZE = [600, 600]
-#OUTPUTSIZE = [TILESIZE[0], TILESIZE[1]] 
+LIMIT = 40
+
+TILESIZE = None
+OUTPUTSIZE = None
+
+if args.tilesize is not None:
+    if len(args.tilesize) == 1:
+        TILESIZE = [args.tilesize[0], args.tilesize[0]]
+    elif len(args.tilesize) == 2:
+        TILESIZE = [args.tilesize[0], args.tilesize[1]]
+    else:
+        print("illegal length of argument TILESIZE: {}".format(len(args.tilesize)))
+        sys.exit(1)
+
+    OUTPUTSIZE = [int(TILESIZE[0]*1), int(TILESIZE[1]*1)] # whats fed into the network
 
 def run_inference_for_single_image(sess, image):
     
@@ -120,8 +128,14 @@ label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
-SOURCE = args.images #"background_subtraction/scaled_2000"
+SOURCE = args.images
 OUTPUT_FOLDER = args.output #"output"
+
+if (args.output_directory_appendix is not None and len(args.output_directory_appendix) > 0):
+    if OUTPUT_FOLDER.endswith("/"):
+        OUTPUT_FOLDER = OUTPUT_FOLDER[:-1]
+    OUTPUT_FOLDER = OUTPUT_FOLDER + args.output_directory_appendix
+
 print("OUTPUT_FOLDER: " + OUTPUT_FOLDER)
 
 if not os.path.exists(OUTPUT_FOLDER):
@@ -148,6 +162,10 @@ else:
 
 images = sorted(images, key=lambda filename: os.path.splitext(os.path.basename(filename))[0])
 
+if LIMIT is not None:
+    if len(images) > LIMIT:
+        images = images[0:LIMIT]
+        print("LIMIT ENFORCED")
 
 def run(sess, filename, tilesize, outputsize):
 
@@ -170,39 +188,25 @@ def run(sess, filename, tilesize, outputsize):
         print("{} already existing".format(file_output_full_path))
         return
 
-    tm = TileManager(filename, tilesize=tilesize, outputsize=outputsize)
+    tm = TileManager(filename, tilesize, outputsize)
 
     for tile_id in tm.get_all_tile_ids():
         time0 = time.time()
+
         image = tm.get_tile_image(tile_id)
-        # image = cv2.imread(image_path)
-        # image = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)    
+
         time1 = time.time()
-        # the array based representation of the image will be used later in order to prepare the
-        # result image with boxes and labels on it.
 
         # TODO: let this be done by the tilemanager instead
-        (im_width, im_height) = image.size
-        image_np = np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
+        # (im_width, im_height) = image.size
+        # image_np = np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
+        image_np = image
 
-        # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-        # image_np_expanded = np.expand_dims(image_np, axis=0)
-        # Actual detection.
         time2 = time.time()
+
         output_dict = run_inference_for_single_image(sess, image_np)
-        # Visualization of the results of a detection.
+
         time3 = time.time()
-        # vis_util.visualize_boxes_and_labels_on_image_array(
-        #     image_np,
-        #     output_dict['detection_boxes'],
-        #     output_dict['detection_classes'],
-        #     output_dict['detection_scores'],
-        #     category_index,
-        #     instance_masks=output_dict.get('detection_masks'),
-        #     use_normalized_coordinates=True,
-        #     line_thickness=8)
-        #plt.figure(figsize=IMAGE_SIZE)
-        #plt.imshow(image_np)
         
         tm.pass_result(tile_id, output_dict)
 
@@ -279,8 +283,12 @@ def run(sess, filename, tilesize, outputsize):
     # pickle.dump(category_index, open( "category_index.pickle", "wb" ))
 
     if args.export_images:
-        export_filename = os.path.join(OUTPUT_FOLDER, "{}_{}_{}x{}-{}x{}.jpg".format(file_name_only, MODEL_NAME, tilesize[0], tilesize[1], outputsize[0], outputsize[1]))
-        tm._draw_bounding_boxes(export_filename, output_dict["detection_boxes"], output_dict["detection_scores"], 0.5)
+        export_filename = None
+        if TILESIZE is None:
+            export_filename = os.path.join(OUTPUT_FOLDER, "{}_{}-full.jpg".format(file_name_only, args.model_name))
+        else:
+            export_filename = os.path.join(OUTPUT_FOLDER, "{}_{}_{}x{}-{}x{}.jpg".format(file_name_only, args.model_name, tilesize[0], tilesize[1], outputsize[0], outputsize[1]))
+        tm._draw_bounding_boxes(export_filename, output_dict["detection_boxes"], output_dict["detection_scores"], VISUALIZATION_THRESHOLD)
 
     exporter = None
 
@@ -298,14 +306,27 @@ def run(sess, filename, tilesize, outputsize):
     else: 
         output_scores = []
 
+    # filter empty SSD detection boxes
+    filtered_boxes = []
+    filtered_classes = []
+    filtered_scores = []
+    for i in range(0, len(output_boxes)):
+        if output_scores[i] < SAVE_THRESHOLD:
+            continue
+
+        filtered_boxes.append(output_boxes[i])
+        filtered_classes.append(output_classes[i])
+        filtered_scores.append(output_scores[i])
+
+
     exporter(
         file_folder_only, 
         file_name_only, 
         file_full_path, 
         tm.get_image_size(),
-        output_boxes,
-        output_classes,
-        output_scores,
+        filtered_boxes,
+        filtered_classes,
+        filtered_scores,
         file_output_full_path
     )
 
@@ -315,18 +336,16 @@ def run(sess, filename, tilesize, outputsize):
 import time
 
 counter = 0
+total_time = time.time()
 with detection_graph.as_default():                                
     with tf.Session() as sess:
 
-        # for tilesize in [3000, 2000, 1500, 1000, 500]:
-        #     for outputsize in [3000, 2000, 1500, 1000, 500]:
-        #         run(sess, "pedestriancrossing.jpg", tilesize, outputsize)
-
         for item in images:
             counter += 1
+            total_time = time.time()
             run(sess, item, TILESIZE, OUTPUTSIZE)
     
-            print("{}/{}".format(counter, len(images)))
+            print("{0}/{1} | time: {2:.2f}s".format(counter, len(images), time.time()-total_time))
 
 
          

@@ -253,13 +253,22 @@ if __name__ == "__main__":
     except Exception as e:
         print("Setting matplotlib style failed")
 
-    NETWORK = "/" + "hog"
+    # NETWORK = "ssd_mobilenet_v1_coco_2018_01_28"
+    # NETWORK = "ssd_mobilenet_v2_coco_2018_03_29"
+    #  NETWORK = "ssd_mobilenet_v1_quantized_300x300_coco14_sync_2018_07_03"
+    # NETWORK = "ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03" + "_1000px"
+    NETWORK = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03" + "_2500px"
+    # NETWORK = "ssd_inception_v2_coco_2018_01_28" + "_300px"
+    # NETWORK = "ssdlite_mobilenet_v2_coco_2018_05_09" + "_300px"
+    # NETWORK = "faster_rcnn_inception_v2_coco_2018_01_28"
+    # NETWORK = "faster_rcnn_resnet101_coco_2018_01_28"
+    # NETWORK = "faster_rcnn_nas_coco_2018_01_28"
 
     INPUT_DIRS = [
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation" + NETWORK),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation" + NETWORK),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation" + NETWORK),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation" + NETWORK)
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation" + "/" + NETWORK),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation" + "/" + NETWORK),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation" + "/" + NETWORK),
+        ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation" + "/" + NETWORK)
     ]
 
     LIMIT = 20
@@ -281,7 +290,7 @@ if __name__ == "__main__":
                 full_filename_dt = os.path.join(input_dir[1], filename)
 
                 if not os.path.isfile(full_filename_dt):
-                    print("no detection data found for ground truth file: {}".format(full_filename_gt))
+                    # print("no detection data found for ground truth file: {}".format(full_filename_gt))
                     continue
 
                 filepairs.append((full_filename_gt, full_filename_dt))
@@ -364,5 +373,5 @@ if __name__ == "__main__":
 
     plt.legend(classes)
     plt.tight_layout()
-    plt.savefig('plot_mapPerson.png')
+    plt.savefig('plot_mapPerson_{}.png'.format(NETWORK))
     plt.show()
