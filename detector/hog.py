@@ -7,8 +7,8 @@ import os
 sys.path.append('..')
 from util import converter
 
-INPUT_FOLDER = "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ"
-OUTPUT_FOLDER = "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/hog"
+INPUT_FOLDER = "/Users/volzotan/Documents/DESPATDATASETS/inference_speed_testset"
+OUTPUT_FOLDER = "/Users/volzotan/Downloads/garbage" #"/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/hog"
 
 images = []
 
@@ -68,7 +68,6 @@ def run(image):
     if (os.path.exists(output_filename)):
         print("{}: already existing".format(output_filename))
         return
-
 
     hog = cv2.HOGDescriptor()
     hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())

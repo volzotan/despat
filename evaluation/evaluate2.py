@@ -2,14 +2,54 @@ import xml.etree.cElementTree as et
 import json
 import sys
 import os
-from operator import attrgetter
 import matplotlib.pyplot as plt
 import numpy as np
 
 sys.path.append('..')
 from util.drawhelper import Drawhelper
+from detector.tilemanager import TileManager
 
 IOU_THRESHOLD = 0.5
+VISUALIZE = False
+
+AP = []
+
+# NETWORK = "ssd_mobilenet_v1_coco_2018_01_28"
+# NETWORK = "ssd_mobilenet_v2_coco_2018_03_29"
+#  NETWORK = "ssd_mobilenet_v1_quantized_300x300_coco14_sync_2018_07_03"
+# NETWORK = "ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"  # + "_1000px"
+# NETWORK = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"
+# NETWORK = "ssd_inception_v2_coco_2018_01_28"
+# NETWORK = "ssdlite_mobilenet_v2_coco_2018_05_09"
+# NETWORK = "faster_rcnn_inception_v2_coco_2018_01_28"
+NETWORK = "faster_rcnn_resnet101_coco_2018_01_28"
+# NETWORK = "faster_rcnn_nas_coco_2018_01_28"
+
+#NETWORK = NETWORK + "_FULL"
+
+INPUT_DIRS = [
+    ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation"),
+    ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation"),
+    ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation"),
+    ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation")
+]
+
+# TILESIZES = np.arange(700, 3001, 50)
+# TILESIZES = [640] + list(TILESIZES)
+
+TILESIZES = np.arange(300, 3001, 50)
+
+LIMIT = 40
+
+
+# Visualization
+
+# EVALUATION_IMAGE_OUTPUT_DIR = "evaluate2_viz"
+# NETWORK                     = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"
+# INPUT_DIRS                  = [("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation")]
+# TILESIZES                   = [800]
+# VISUALIZE                   = True
+
 
 
 def vocToBbox(filename):
@@ -76,17 +116,20 @@ def _filter_by_class(boxes, classnames):
     return res
 
 
-def _split_by_class_and_filter(boxes, classes, score, classname, threshold):
+def _split_by_class_and_filter(data, classname, threshold):
     res = []
 
-    for i in range(0, len(boxes)):
-        if classes[i] != classname:
+    for i in range(0, len(data)):
+        if data[i]["class"] != classname:
             continue
 
-        if score is not None and score[i] < threshold:
-            continue
+        try:
+            if threshold is not None and data[i]["score"] < threshold:
+                continue
+        except KeyError as e:
+            pass
 
-        res.append(boxes[i])
+        res.append(data[i])
 
     return res
 
@@ -158,10 +201,26 @@ def evaluate_all(gt, dt, name_of_class):
     return true_positives, false_positives, false_negatives
 
 
-def evaluate(gt, dt, name_of_class, min_confidence=0.5):
+def visualize(gt, dt, c, xml_filename, output_dir):
+    data = json.load(open(xml_filename, "r"))
 
-    gt_boxes = _split_by_class_and_filter(gt["box"], gt["class"], None, name_of_class, 0)
-    dt_boxes = _split_by_class_and_filter(dt["box"], dt["class"], dt["score"], name_of_class, min_confidence)
+    image_filename = data["image_filename"]
+    image_path = data["path"]
+    image_path = image_path.replace("/media/internal", "/Users/volzotan/Documents")
+    inp = image_path
+    out = os.path.join(output_dir, image_filename)
+    tp, fp, fn = filter_and_evaluate(gt, dt, c, min_confidence=0.7)
+
+    tilesize = TILESIZES[0]
+    tm = TileManager(image_path, tilesize, tilesize)
+
+    draw(inp, out, tp, fp, fn, tiles=tm._get_tile_borders())
+
+
+def filter_and_evaluate(gt, dt, name_of_class, min_confidence=0.5):
+
+    gt_boxes = _split_by_class_and_filter(gt, name_of_class, 0)
+    dt_boxes = _split_by_class_and_filter(dt, name_of_class, min_confidence)
 
     true_positives = []
     false_positives = []
@@ -192,21 +251,16 @@ def evaluate(gt, dt, name_of_class, min_confidence=0.5):
 
     return true_positives, false_positives, false_negatives
 
-    # print("true_positives: {}".format(len(true_positives)))
-    # print("false_positives: {}".format(len(false_positives)))
-    # print("false_negatives: {}".format(len(false_negatives)))
-    #
-    # print("recall: {}".format(len(true_positives) / (len(true_positives) + len(false_positives))))
-    # print("precision: {}".format(len(true_positives) / (len(true_positives) + len(false_negatives))))
-    #
-    # visualize(true_positives, false_positives, false_negatives)
 
+def draw(inp, out, tp, fp, fn, tiles=None):
+    drawhelper = Drawhelper(inp, out)
+    drawhelper.add_boxes([x["box"] for x in tp], color=(0, 255, 0), strokewidth=3)
+    drawhelper.add_boxes([x["box"] for x in fp], color=(255, 0, 0), strokewidth=3)
+    drawhelper.add_boxes([x["box"] for x in fn], color=(0, 0, 0), strokewidth=3)
 
-def visualize(tp, fp, fn):
-    drawhelper = Drawhelper("1523266870453_0.jpg", "1523266870453_0_evaluation.jpg")
-    drawhelper.add_boxes([x["box"] for x in tp], color=(0, 255, 0), strokewidth=2)
-    drawhelper.add_boxes([x["box"] for x in fp], color=(255, 0, 0), strokewidth=2)
-    drawhelper.add_boxes([x["box"] for x in fn], color=(0, 0, 0), strokewidth=2)
+    if tiles is not None:
+        drawhelper.add_boxes(tiles, color=(255, 255, 255), strokewidth=3)
+
     drawhelper.draw()
 
 
@@ -242,7 +296,8 @@ def _area_under_curve(precision, recall):
 
     return area
 
-if __name__ == "__main__":
+
+def run(filepairs, model):
     # print(vocToBbox("output/1523266900504_0.xml"))
 
     # (input_dir_gt, input_dir_data)
@@ -253,52 +308,7 @@ if __name__ == "__main__":
     except Exception as e:
         print("Setting matplotlib style failed")
 
-    # NETWORK = "ssd_mobilenet_v1_coco_2018_01_28"
-    # NETWORK = "ssd_mobilenet_v2_coco_2018_03_29"
-    #  NETWORK = "ssd_mobilenet_v1_quantized_300x300_coco14_sync_2018_07_03"
-    # NETWORK = "ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03" + "_1000px"
-    NETWORK = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03" + "_2500px"
-    # NETWORK = "ssd_inception_v2_coco_2018_01_28" + "_300px"
-    # NETWORK = "ssdlite_mobilenet_v2_coco_2018_05_09" + "_300px"
-    # NETWORK = "faster_rcnn_inception_v2_coco_2018_01_28"
-    # NETWORK = "faster_rcnn_resnet101_coco_2018_01_28"
-    # NETWORK = "faster_rcnn_nas_coco_2018_01_28"
-
-    INPUT_DIRS = [
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation" + "/" + NETWORK),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation" + "/" + NETWORK),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation" + "/" + NETWORK),
-        ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation" + "/" + NETWORK)
-    ]
-
-    LIMIT = 20
-
-    filepairs = []
-    for input_dir in INPUT_DIRS:
-        counter = 0
-        for root, dirs, files in os.walk(input_dir[0]):
-            for f in files:
-                if not f.endswith(".xml"):
-                    continue
-
-                if LIMIT is not None and LIMIT != 0 and counter >= LIMIT:
-                    print("skipped due to limit: {}".format(filename))
-                    continue
-
-                full_filename_gt = os.path.join(root, f)
-                filename = os.path.splitext(os.path.basename(full_filename_gt))[0] + ".json"
-                full_filename_dt = os.path.join(input_dir[1], filename)
-
-                if not os.path.isfile(full_filename_dt):
-                    # print("no detection data found for ground truth file: {}".format(full_filename_gt))
-                    continue
-
-                filepairs.append((full_filename_gt, full_filename_dt))
-                counter += 1
-
-    filepairs = sorted(filepairs, key=lambda filenames: os.path.splitext(os.path.basename(filenames[0]))[0])
-
-    print("filepairs: {}".format(len(filepairs)))
+    # print("filepairs: {}".format(len(filepairs)))
 
     classes = ["person"]
 
@@ -327,6 +337,9 @@ if __name__ == "__main__":
             combined_tp.extend(tp)
             combined_fp.extend(fp)
             combined_fn.extend(fn)
+
+            if VISUALIZE:
+                visualize(gt, dt, c, file_gtdt[1], EVALUATION_IMAGE_OUTPUT_DIR)
 
         combined_positives = combined_tp + combined_fp
         combined_positives = sorted(combined_positives, key=lambda box: box["score"], reverse=True)
@@ -369,9 +382,49 @@ if __name__ == "__main__":
         handle = plt.plot(recall, precision, label=c) #, linestyle='--', marker='o')
         handles.append(handle)
 
-        print("mAP: {}".format(_area_under_curve(precision, recall)))
+        auc = _area_under_curve(precision, recall)
+
+        print("{0} | {1:<90} | mAP: {2}".format(len(filepairs), model, auc))
+
+        AP.append(auc)
 
     plt.legend(classes)
     plt.tight_layout()
-    plt.savefig('plot_mapPerson_{}.png'.format(NETWORK))
-    plt.show()
+    plt.savefig('plot_mapPerson_{}.png'.format(model))
+    # plt.show()
+
+
+if __name__ == "__main__":
+
+    for tilesize in TILESIZES:
+        model = "{}_{}px".format(NETWORK, tilesize)
+
+        filepairs = []
+        for input_dir in INPUT_DIRS:
+            counter = 0
+            annotation_dir = os.path.join(input_dir[1], model)
+            for root, dirs, files in os.walk(input_dir[0]):
+                for f in files:
+                    if not f.endswith(".xml"):
+                        continue
+
+                    if LIMIT is not None and LIMIT != 0 and counter >= LIMIT:
+                        # print("skipped due to limit: {}".format(filename))
+                        continue
+
+                    full_filename_gt = os.path.join(root, f)
+                    filename = os.path.splitext(os.path.basename(full_filename_gt))[0] + ".json"
+                    full_filename_dt = os.path.join(annotation_dir, filename)
+
+                    if not os.path.isfile(full_filename_dt):
+                        # print("no detection data found for ground truth file: {}".format(full_filename_gt))
+                        continue
+
+                    filepairs.append((full_filename_gt, full_filename_dt))
+                    counter += 1
+
+        filepairs = sorted(filepairs, key=lambda filenames: os.path.splitext(os.path.basename(filenames[0]))[0])
+
+        run(filepairs, model)
+
+    print(AP)

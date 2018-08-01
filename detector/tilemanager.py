@@ -162,6 +162,14 @@ class TileManager(object):
         #print(result)
 
 
+    def _get_tile_borders(self):
+        boxes_tiles = []
+        for _, tile in self.tiles.items():
+            boxes_tiles.append(self._get_dim_for_tile(tile["x"], tile["y"]))
+
+        return boxes_tiles
+
+
     def _draw_bounding_boxes(self, filename, bboxes, scores, threshold):
 
         boxes_above_threshold = []
@@ -172,9 +180,7 @@ class TileManager(object):
                     continue
                 boxes_above_threshold.append(bboxes[i]) #[bboxes[i][1], bboxes[i][0], bboxes[i][3], bboxes[i][2]])
 
-        boxes_tiles = []
-        for _, tile in self.tiles.items():
-            boxes_tiles.append(self._get_dim_for_tile(tile["x"], tile["y"]))
+        boxes_tiles = self._get_tile_borders()
 
         drawhelper = Drawhelper(self.filename, filename)
         drawhelper.add_boxes(boxes_above_threshold, color=(0, 255, 0), strokewidth=4, inverse_coordinates=True)

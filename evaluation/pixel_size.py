@@ -33,7 +33,7 @@ if __name__ == "__main__":
         "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation"
     ]
 
-    LIMIT = 20
+    LIMIT = 40
 
     images = []
     counter = 0

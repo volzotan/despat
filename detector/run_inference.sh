@@ -29,44 +29,54 @@ MODEL_NAMES=(
     "faster_rcnn_nas_coco_2018_01_28"
 )
 
+MODEL_NAME=faster_rcnn_resnet101_coco_2018_01_28
+
 TILESIZES=( 
     "300" "350" "400" "450" "500" "550" "600" "650" 
-    "640" 
+#    "640" 
     "700" "750" "800" "850" "900" "950" "1000" "1050" 
     "1100" "1150" "1200" "1250" "1300" "1350"
     "1400" "1450" "1500" "1550" "1600" "1650"
     "1700" "1750" "1800" "1850" "1900" "1950" "2000"
+    "2050" "2100" "2150" "2200" "2250" "2300" "2350"
+    "2400" "2450" "2500" "2550" "2600" "2650" "2700"
+    "2750" "2800" "2850" "2900" "2950" "3000"
 )
 
 
-for MODEL_NAME in "${MODEL_NAMES[@]}"
-do
-    for DIR in "${DIRECTORIES[@]}"
-    do
+# DIRECTORIES=( "18-04-21_bahnhof_ZTE" )
+# MODEL_NAME=ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03
+# TILESIZES=( "800" )
 
-        INPUT=$INPUT_ROOT$DIR
-        OUTPUT=$INPUT"_annotation/"$MODEL_NAME
-        APPENDIX=_FULL
 
-        echo $INPUT
-        echo $OUTPUT
-        echo $MODELS
+# for MODEL_NAME in "${MODEL_NAMES[@]}"
+# do
+#     for DIR in "${DIRECTORIES[@]}"
+#     do
 
-        mkdir $OUTPUT
+#         INPUT=$INPUT_ROOT$DIR
+#         OUTPUT=$INPUT"_annotation/"$MODEL_NAME
+#         APPENDIX=_FULL
 
-        python3 inference_test.py                                                       \
-            --images $INPUT                                                             \
-            --output $OUTPUT                                                            \
-            --tensorflow-object-detection-path $TENSORFLOW_OBJECT_DETECTION_DIR         \
-            --model_path $MODEL_PATH                                                    \
-            --model_name $MODEL_NAME                                                    \
-            --output_directory_appendix $APPENDIX                                       \
-            --export-images
+#         echo $INPUT
+#         echo $OUTPUT
+#         echo $MODELS
 
-    done
-done
+#         mkdir $OUTPUT
 
-exit 0
+#         python3 inference_test.py                                                       \
+#             --images $INPUT                                                             \
+#             --output $OUTPUT                                                            \
+#             --tensorflow-object-detection-path $TENSORFLOW_OBJECT_DETECTION_DIR         \
+#             --model_path $MODEL_PATH                                                    \
+#             --model_name $MODEL_NAME                                                    \
+#             --output_directory_appendix $APPENDIX                                       \
+#             --export-images
+
+#     done
+# done
+
+# exit 0
 
 for TILESIZE in "${TILESIZES[@]}"
 do

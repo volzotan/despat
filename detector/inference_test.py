@@ -84,8 +84,7 @@ def run_inference_for_single_image(sess, image):
 
         tensor_name = key + ':0'
         if tensor_name in all_tensor_names:
-            tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(
-                    tensor_name)
+            tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(tensor_name)
 
     if 'detection_masks' in tensor_dict:
         # The following processing is only for single image
@@ -345,7 +344,7 @@ with detection_graph.as_default():
             total_time = time.time()
             run(sess, item, TILESIZE, OUTPUTSIZE)
     
-            print("{0}/{1} | time: {2:.2f}s".format(counter, len(images), time.time()-total_time))
+            print(">> {0}/{1} | time: {2:.2f}s".format(counter, len(images), time.time()-total_time))
 
 
          
