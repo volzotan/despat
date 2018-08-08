@@ -28,7 +28,7 @@ class Drawhelper(object):
 
     def draw(self):
         image = Image.open(self.input_filename)
-        draw = ImageDraw.Draw(image)
+        draw = ImageDraw.Draw(image, "RGBA")
 
         for boxset in self.box_list:
             b = boxset["boxes"]

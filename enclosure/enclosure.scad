@@ -27,8 +27,8 @@ wb         = 1.2;
 seal_thickness = 1; // private
 heat_inset_diam = 4.1;
 
-screw_inset     = false;
-heat_inset      = true;
+screw_inset     = true;
+heat_inset      = false;
 
 seal_hard       = false; 
 seal_rubber     = true;
@@ -36,10 +36,10 @@ seal_flex       = false;
 
 //include<phone_NEXUS5.scad>;
 //include<phone_MOTOE2.scad>;
-include<phone_MOTOZ1.scad>;
+//include<phone_MOTOZ1.scad>;
 //include<phone_ZTEAXON7.scad>;
+include<phone_MOTOG5S.scad>;
 //include<phone_GENERIC.scad>;
-
 
 //translate([11, 11, 8]) motoE();
 //% translate([07, 9.9, 8]) color("blue") zteaxon7();
@@ -154,21 +154,21 @@ include<phone_MOTOZ1.scad>;
 
 //top();
 //translate([0, 104]) top_flat();
-bottom();
+//bottom();
 //
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal();
 //seal2D();
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal_cutout();
-//translate([sizeBot[0]/2, -2.1-08, 0]) socket_nut_wedge();
-//
-//translate([0, 0]) {
-//    latch(distance=-1.7); 
-//    translate([0, 14.5-1.7, 0]) latch_knob();
-//}
-//translate([13, 0]) mirror([1, 0]) {
-//    latch(distance=-1.7); 
-//    translate([0, 14.5-1.7, 0]) latch_knob();
-//}
+translate([0, -2.1-08-1, 0]) socket_nut_wedge();
+
+translate([0, 0]) {
+    latch(distance=-1.7); 
+    translate([0, 14.5-1.7, 0]) latch_knob();
+}
+translate([13, 0]) mirror([1, 0]) {
+    latch(distance=-1.7); 
+    translate([0, 14.5-1.7, 0]) latch_knob();
+}
 ////translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
 ////
 //translate([33, 20, 5.5]) rotate([90, 180, 0]) mirror([0, 0]) hinge_bottom(screwed=true);
@@ -491,16 +491,7 @@ module top_flat() {
     
     x = 1;
     y = 4.8;
-    
-    
-    difference() {
-        hull() {
-            translate([0, 0, 0]) block2(sizeTopF[0], sizeTopF[1], 0.1, crad=crad, red=x);
-            translate([0, 0, 2.9]) block2(sizeTopF[0], sizeTopF[1], 1.1, crad=crad);
-        }
-        translate([0, sizeTopF[1]/2]) hex();
-    }
-    
+        
     difference() {
         union() {
             difference() {
@@ -549,14 +540,22 @@ module top_flat() {
                 block2(sizeTopF[0], sizeTopF[1], nudge_height, crad=crad, red=y-1.5-0.8-.1);
                 translate([0, 0, -1]) block2(sizeTopF[0], sizeTopF[1], nudge_height+2, crad=crad, red=y-1.5);
             }
+            
+            difference() {
+                hull() {
+                    translate([0, 0, 0]) block2(sizeTopF[0], sizeTopF[1], 0.1, crad=crad, red=x);
+                    translate([0, 0, 2.9]) block2(sizeTopF[0], sizeTopF[1], 1.1, crad=crad);
+                }
+                translate([0, sizeTopF[1]/2]) hex();
+            }
         }
         
         // rotation clamp holes
         if (screw_inset) {           
-            translate([20, sizeTopF[1]+5, 5])               rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-            translate([sizeTopF[0]-20, sizeTopF[1]+5, 5])   rotate([90, 0, 0]) cylinder($fn=32, h=50, d=3.3);
-            translate([20, sizeTopF[1]-2, 5])               rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
-            translate([sizeTopF[0]-20, sizeTopF[1]-2, 5])   rotate([90, 0, 0]) cylinder($fn=6, h=50, d=6.6);
+            translate([20, sizeTopF[1]+5, 5])               rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+            translate([sizeTopF[0]-20, sizeTopF[1]+5, 5])   rotate([90, 0, 0]) cylinder($fn=32, h=10, d=3.3);
+            translate([20, sizeTopF[1]-2, 5])               rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
+            translate([sizeTopF[0]-20, sizeTopF[1]-2, 5])   rotate([90, 0, 0]) cylinder($fn=6, h=10, d=6.6);
         } 
         if (heat_inset) {
           translate([20, sizeTopF[1]+1, 5])                 rotate([90, 0, 0]) cylinder($fn=32, h=5.5+1, d=heat_inset_diam);
@@ -568,7 +567,7 @@ module top_flat() {
     intersection() {
         union() {
             move = 0.1;
-            translate([31.2, -5.5, sizeTopF[2]+move])             rotate([0, -90, 0]) hinge_top();
+            translate([31.2, -5.5, sizeTopF[2]+move])           rotate([0, -90, 0]) hinge_top();
             translate([sizeTopF[0]-15, -5.5, sizeTopF[2]+move]) rotate([0, -90, 0]) hinge_top();
             translate([16.3, 0]) cube([13.6, 2, 2]);
             translate([sizeTopF[0]-30+.1, 0]) cube([13.6, 2, 2]);
@@ -808,8 +807,8 @@ module bottom() {
         
         // camera lens
         translate([lensHole[0], lensHole[1], -1]) {
-            down = 39.4+0.5;
-            up   = 36.9+0.3;
+            down = 39.4+0.3;
+            up   = 36.9+0.1;
             cylinder($fn=64, h=1+3.60+0.3, d=down);
             translate([0, 0, 1+3.60+0.3-0.1]) cylinder($fn=64, h=2, d1=down, d=up);
             translate([0, 0, 6-.3]) cylinder($fn=64, h=2, d=up);
