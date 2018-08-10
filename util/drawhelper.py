@@ -10,32 +10,34 @@ class Drawhelper(object):
 
 
     def add_boxes(self, boxes, color, strokewidth=1, inverse_coordinates=False):
-        boxset = {}
+        boxset = []
 
         if inverse_coordinates:
-            inv_boxes = []
             for box in boxes:
-                inv_boxes.append([box[1], box[0], box[3], box[2]])
-            boxset["boxes"] = inv_boxes
+                boxset.append([box[1], box[0], box[3], box[2]])
         else:
-            boxset["boxes"] = boxes
+            boxset = boxes
 
-        boxset["color"] = color
-        boxset["strokewidth"] = strokewidth
-
-        self.box_list.append(boxset)
+        for box in boxset:
+            self.box_list.append((box, color, strokewidth))
 
 
-    def draw(self):
+    def draw(self, draw_on_empty_canvas=False):
         image = Image.open(self.input_filename)
+
+        if draw_on_empty_canvas:
+            image = Image.new("RGBA", image.size, (0,0,0,0))
+
         draw = ImageDraw.Draw(image, "RGBA")
 
-        for boxset in self.box_list:
-            b = boxset["boxes"]
+        self.box_list = sorted(self.box_list, key=lambda box: box[1])
 
-            for i in range(0, len(b)):
-                for s in range(0, boxset["strokewidth"]):
-                    draw.rectangle([b[i][0] + s, b[i][1] + s, b[i][2] - s, b[i][3] - s], outline=boxset["color"])
+        for box in self.box_list:
+            b = box[0]
+            color = box[1]
+            strokewidth = box[2]
+            for s in range(0, strokewidth):
+                draw.rectangle([b[0] + s, b[1] + s, b[2] - s, b[3] - s], outline=color)
 
         del draw
         image.save(self.output_filename)

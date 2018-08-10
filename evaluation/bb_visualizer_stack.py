@@ -9,6 +9,8 @@ bb_visualizer reads a json file and draws all BB from selected classes on this i
 
 """
 
+OUTPUT_EXTENSION = "jpg"
+
 THRESHOLD = 0.2
 TRANSPARENCY = 10
 alpha = str(hex(int(TRANSPARENCY*2.55)))[2:]
@@ -53,7 +55,7 @@ if __name__ == "__main__":
             
     filelist = sorted(filelist, key=lambda filename: os.path.splitext(os.path.basename(filename[1]))[0])
 
-    image_output_name = os.path.join(OUTPUT_DIR, "stackviz_{}.jpg".format(THRESHOLD))
+    image_output_name = os.path.join(OUTPUT_DIR, "stackviz_{}.{}".format(THRESHOLD, OUTPUT_EXTENSION))
 
     drawhelper = Drawhelper(IMAGE, image_output_name)
 
@@ -66,5 +68,5 @@ if __name__ == "__main__":
 
         print("done:     {} | {}".format(filelist[i][1], i))
 
-    drawhelper.draw()
+    drawhelper.draw()#draw_on_empty_canvas=True)
 

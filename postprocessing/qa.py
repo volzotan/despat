@@ -19,6 +19,13 @@ import json
 import cv2
 import numpy as np
 
+THRESHOLD_OBJECT_IS_ACTIVE  = 0.2
+THRESHOLD_IOU               = 0.75
+
+ACTION_UNDEFINED    = 0
+ACTION_IDLE         = 1
+ACTION_MOVING       = 2
+
 class Qa(object):
 
     images          = []
@@ -46,8 +53,79 @@ class Qa(object):
         self.annotations.append(data)
 
 
+    def _estimate_action(self, box):
+        minx = int(box[0])
+        miny = int(box[1])
+        maxx = int(box[2])
+        maxy = int(box[3])
+
+        thresh, mask = cv2.threshold(self.newest_fgmask, 127, 255, cv2.THRESH_BINARY)
+        mask = np.clip(mask, 0, 1)
+        crop = mask[miny:maxy, minx:maxx]
+        
+        foreground_ratio = np.sum(crop) / np.size(crop)
+
+        if foreground_ratio >= THRESHOLD_OBJECT_IS_ACTIVE:
+            return ACTION_MOVING
+        else:
+            return ACTION_IDLE
+
+
+    def _intersection(self, a, b):
+        xmin = max(a[0], b[0])
+        ymin = max(a[1], b[1])
+        xmax = min(a[2], b[2])
+        ymax = min(a[3], b[3])
+
+        if xmax < xmin or ymax < ymin:
+            return 0
+
+        return (xmax-xmin) * (ymax-ymin) 
+
+
+    def _iou(self, b1, b2):
+
+        box1 = b1
+        box2 = b2
+
+        intersection = self._intersection(box1, box2)
+        union = (box1[2]-box1[0]) * (box1[3]-box1[1]) + (box2[2]-box2[0]) * (box2[3]-box2[1]) - intersection
+
+        return float(intersection) / float(union)
+
+
     def run(self):
-        pass
+        actions = []
+
+        # foreground detection
+        boxes = self.annotations[-1]["boxes"]
+        for i in range(0, len(boxes)):
+            actions.append(self._estimate_action(boxes[i]))
+
+        self.annotations[-1]["actions"] = actions
+
+        # previous detection
+        box_has_predecessor = [0] * len(boxes)
+        if (len(self.annotations) > 1):
+            boxes_prev = self.annotations[-2]["boxes"]
+            boxes_matched = []
+
+            for i in range(0, len(boxes)):
+                box = boxes[i]
+                for prevbox in [x for x in boxes_prev if x not in boxes_matched]:
+                    if (self._iou(box, prevbox)) >= THRESHOLD_IOU:
+                        boxes_matched.append(prevbox)
+                        box_has_predecessor[i] = 1
+                        break
+
+        self.annotations[-1]["predecessor"] = box_has_predecessor     
+
+        # penalties
+        scores = self.annotations[-1]["scores"]
+        if actions[i] == ACTION_IDLE and box_has_predecessor[i] == 0:  
+            scores[i] -= 0.2
+            if scores[i] < 0:
+                scores[i] = 0
 
 
     def viz(self, output_filename):
@@ -62,6 +140,28 @@ class Qa(object):
         red_img[:,:] = (0, 0, 255)
         red_mask = cv2.bitwise_and(red_img, red_img, mask = output)
         vis = cv2.addWeighted(grayscale_img, 1, red_mask, 0.3, 0)
+
+        boxes = self.annotations[-1]["boxes"]
+        actions = self.annotations[-1]["actions"]
+        predecessor = self.annotations[-1]["predecessor"]
+        for i in range(0, len(boxes)):
+            box = boxes[i]
+
+            cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 0))
+
+            # if actions[i] == ACTION_UNDEFINED:
+            #     cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 0))
+
+            if actions[i] == ACTION_IDLE and predecessor[i] == 0:
+                cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+
+            # if actions[i] == ACTION_MOVING:
+                # cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+
+            # if predecessor[i] == 0:
+            #     cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 0))
+            # else:
+            #     cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (255, 0, 0))
 
         cv2.imwrite(output_filename, vis)
         print("written output file to: {}".format(output_filename))
@@ -100,6 +200,8 @@ if __name__ == "__main__":
 
     filelist = sorted(filelist, key=lambda filename: os.path.splitext(os.path.basename(filename[1]))[0])
 
+    filelist = filelist[0:20]
+
     qa = Qa()
 
     for i in range(len(filelist)):
@@ -109,4 +211,7 @@ if __name__ == "__main__":
 
         qa.add_json(filelist[i][0])
 
+        qa.run()
+
         qa.viz(os.path.join(OUTPUT_DIR, filelist[i][1]+".jpg"))
+
