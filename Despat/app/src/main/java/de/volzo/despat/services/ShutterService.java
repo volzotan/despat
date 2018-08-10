@@ -536,6 +536,8 @@ public class ShutterService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
 
+            Util.setHeartbeatManually(context, ShutterService.class);
+
             Despat despat = Util.getDespat(context);
             SystemController systemController = despat.getSystemController();
             RecordingSession session = RecordingSession.getInstance(context);

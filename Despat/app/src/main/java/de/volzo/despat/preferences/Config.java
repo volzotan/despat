@@ -269,6 +269,20 @@ public class Config {
     }
 
     /**
+     * MIN HEARTBEAT INTERVAL
+     */
+    public static final long DEFAULT_MIN_HEARTBEAT_INTERVAL              = 2 * 60 * 1000;        // at most every X ms
+    public static final String KEY_MIN_HEARTBEAT_INTERVAL                = "de.volzo.despat.minHeartbeatInterval";
+
+    public static long getMinHeartbeatInterval(Context context) {
+        return getPropertyLong(context, KEY_MIN_HEARTBEAT_INTERVAL, DEFAULT_MIN_HEARTBEAT_INTERVAL);
+    }
+
+    public static void setMinHeartbeatInterval(Context context, long minHeartbeatInterval) {
+        setProperty(context, KEY_MIN_HEARTBEAT_INTERVAL, minHeartbeatInterval);
+    }
+
+    /**
      * UPLOAD INTERVAL
      */
     public static final long DEFAULT_UPLOAD_INTERVAL                = 15 * 60 * 1000L;

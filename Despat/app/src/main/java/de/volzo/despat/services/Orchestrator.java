@@ -240,6 +240,8 @@ public class Orchestrator extends BroadcastReceiver {
                     heartbeatServiceStart();
                 } else if (operation == OPERATION_STOP) {
                     heartbeatServiceStop();
+                } else if (operation == OPERATION_ONCE) {
+                    heartbeatServiceOnce();
                 } else {
                     Log.w(TAG, "no operation command provided");
                 }
@@ -419,11 +421,18 @@ public class Orchestrator extends BroadcastReceiver {
         }
     }
 
+    private void heartbeatServiceOnce() {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+        ComponentName serviceComponent = new ComponentName(context, HeartbeatService.class);
+        JobInfo.Builder builder = new JobInfo.Builder(HeartbeatService.JOB_ID, serviceComponent);
+        builder.setMinimumLatency(1);
+        builder.setOverrideDeadline(1);
+        jobScheduler.schedule(builder.build());
+    }
+
     private void heartbeatServiceStop() {
         JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
         jobScheduler.cancel(HeartbeatService.JOB_ID);
-
-        // jobScheduler.cancelAll();
     }
 
     // ----------------------------------------------------------------------------------------------------

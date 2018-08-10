@@ -71,7 +71,10 @@ import de.volzo.despat.persistence.ErrorEvent;
 import de.volzo.despat.persistence.ErrorEventDao;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.EventDao;
+import de.volzo.despat.persistence.Status;
+import de.volzo.despat.persistence.StatusDao;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.services.ShutterService;
 
 import static android.content.Context.ACCOUNT_SERVICE;
@@ -156,7 +159,6 @@ public class Util {
     public static Despat getDespat(Context context) {
         return ((Despat) context.getApplicationContext());
     }
-
 
     public static void redirectLogcat() {
         File appDirectory = Config.LOGCAT_DIR;
@@ -292,6 +294,29 @@ public class Util {
 
         ContentResolver.requestSync(syncAccount, Config.SYNC_AUTHORITY, settingsBundle);
         Log.i(TAG, "MANUAL SYNC REQUESTED");
+    }
+
+    public static void setHeartbeatManually(Context context, Class trigger) {
+        Despat despat = Util.getDespat(context);
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        StatusDao statusDao = db.statusDao();
+        Status lastStatus = statusDao.getLast();
+
+        if (lastStatus != null) {
+            long diff = Calendar.getInstance().getTime().getTime() - lastStatus.getTimestamp().getTime();
+
+            if (diff < Config.getMinHeartbeatInterval(context)) {
+                Log.d(TAG, "heartbeat triggered by [" +  trigger.getSimpleName() + "] aborted (min heartbeat interval)");
+                return;
+            }
+        }
+
+        Intent heartbeatIntent = new Intent(context, Orchestrator.class);
+        heartbeatIntent.putExtra(Orchestrator.SERVICE, Broadcast.HEARTBEAT_SERVICE);
+        heartbeatIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_ONCE);
+        context.sendBroadcast(heartbeatIntent);
+
+        Log.d(TAG, "manual Heartbeat trigger");
     }
 
     public static void sleep(int millis) {

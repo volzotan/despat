@@ -20,6 +20,9 @@ public interface StatusDao {
     @Query("SELECT * FROM status WHERE timestamp BETWEEN (:start) AND (:end)")
     List<Status> getAllBetween(Date start, Date end);
 
+    @Query("SELECT * FROM status ORDER BY timestamp DESC LIMIT 1")
+    Status getLast();
+
 //    @Query("SELECT id, timestamp FROM status")
 //    List<Status> getIdsForSyncCheck();
 
