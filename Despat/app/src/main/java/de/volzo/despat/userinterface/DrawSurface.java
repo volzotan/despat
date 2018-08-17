@@ -99,7 +99,7 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
             throw new Exception("surface not valid");
         }
 
-        Canvas canvas = holder.lockCanvas();
+            Canvas canvas = holder.lockCanvas();
 
         if (canvas == null) {
             throw new Exception("canvas not valid");

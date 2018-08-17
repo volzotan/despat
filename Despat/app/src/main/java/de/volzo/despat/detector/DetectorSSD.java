@@ -1,15 +1,19 @@
 package de.volzo.despat.detector;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
+import android.os.Debug;
 import android.util.Log;
 import android.util.Size;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.support.Stopwatch;
@@ -23,12 +27,28 @@ public class DetectorSSD extends Detector {
     private TensorFlowInterface tfInterface;
     private Stopwatch stopwatch;
 
-    private static final int TF_OD_API_INPUT_SIZE = 300;
+//    private static final int TILESIZE_INPUT = 600;
+//    private static final int TILESIZE_OUTPUT = 300;
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
 
-    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/faster_rcnn_inception_v2.pb";
+//    private static final int TILESIZE_INPUT = 1000;
+//    private static final int TILESIZE_OUTPUT = 1000;
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_inception_v2.pb";
+//
+    private static final int TILESIZE_INPUT = 1280;
+    private static final int TILESIZE_OUTPUT = 640;
+    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_fpn.pb";
+
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_ppn.pb";
 //    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v2.pb";
-//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_android_demo.pb";
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssdlite_mobilenet_v2.pb";
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_resnet50_fpn.pb";
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_inception_v2.pb";
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_resnet50.pb";
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_resnet101.pb";
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_nas.pb";
 
+    private static final int TF_OD_API_INPUT_SIZE = TILESIZE_OUTPUT;
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco_labels_list.txt";
 
     private TileManager tileManager = null;
@@ -39,6 +59,20 @@ public class DetectorSSD extends Detector {
 
     @Override
     public void init() throws Exception {
+
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> processes = activityManager.getRunningAppProcesses();
+        for (ActivityManager.RunningAppProcessInfo info : processes) {
+            System.out.println(info.pid + " " + info.processName + " " + info.describeContents());
+        }
+        Debug.MemoryInfo[] meminfo = activityManager.getProcessMemoryInfo(new int[]{processes.get(0).pid});
+        for (Debug.MemoryInfo info : meminfo) {
+            Map<String, String> map = info.getMemoryStats();
+            for (String key : map.keySet()) {
+                Log.d(TAG, key + " : " + map.get(key));
+            }
+        }
 
         try {
             System.loadLibrary("tensorflow_demo");
@@ -77,7 +111,7 @@ public class DetectorSSD extends Detector {
     public void load(File fullFilename) {
         stopwatch.reset();
         stopwatch.start("tileManager init");
-        tileManager = new TileManager(fullFilename);
+        tileManager = new TileManager(fullFilename, TILESIZE_INPUT, TILESIZE_OUTPUT);
         stopwatch.stop("tileManager init");
     }
 
@@ -96,6 +130,7 @@ public class DetectorSSD extends Detector {
 
             // tile.setResults(results); EVIL
             tileManager.passResult(tile, results);
+            System.out.println("tile done: " + tile);
         }
 
 //        ImageView imageView = (ImageView) ((Activity) context).getWindow().getDecorView().findViewById(R.id.imageView);
@@ -103,7 +138,9 @@ public class DetectorSSD extends Detector {
 
         stopwatch.print();
 
-        return tileManager.getFullResults();
+        List<Detector.Recognition> completeResults = tileManager.getFullResults();
+        tileManager.close();
+        return completeResults;
 
 //        for (final TensorFlowDetector.Recognition result : results) {
 //

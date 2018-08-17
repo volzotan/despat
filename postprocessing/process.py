@@ -110,102 +110,145 @@ def classname_to_id(name):
 
 DATA = [
     {
-        "name": "nexus1_hauptgebaeude1",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/hauptgebaeude1_annotation/faster_rcnn_nas_coco_2018_01_28",
+        "name": "low-fi",
+        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/ssd_mobilenet_v1_coco_2018_01_28_600px",
         "src": [
-            [989, 1044],
-            [1513, 919],
-            [1631, 1239],
-            [628, 2375]
+            [1124, 1416],
+            [1773, 2470],
+            [3785, 1267],
+            [3416, 928],
+            [2856, 1303],
+            [2452, 916]
         ],
         "dst": [
-            [50.974466, 11.329602],
-            [50.974402, 11.329671],
-            [50.974418, 11.329485],
-            [50.974488, 11.329267]
+            [50.971296, 11.037630],
+            [50.971173, 11.037914],
+            [50.971456, 11.037915],
+            [50.971705, 11.037711],
+            [50.971402, 11.037796],
+            [50.971636, 11.037486]
         ]
     },
     {
-        "name": "nexus2_hauptgebaeude2",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/hauptgebaeude2_annotation/faster_rcnn_nas_coco_2018_01_28",
+        "name": "mid-fi",
+        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/faster_rcnn_inception_v2_coco_2018_01_28_1600px",
         "src": [
-            [789, 1069],
-            [2583, 1191],
-            [2905, 1357],
-            [1750, 2236]
+            [1124, 1416],
+            [1773, 2470],
+            [3785, 1267],
+            [3416, 928],
+            [2856, 1303],
+            [2452, 916]
         ],
         "dst": [
-            [50.974273, 11.329306],
-            [50.974184, 11.329073],
-            [50.974214, 11.329001],
-            [50.974385, 11.329020]
+            [50.971296, 11.037630],
+            [50.971173, 11.037914],
+            [50.971456, 11.037915],
+            [50.971705, 11.037711],
+            [50.971402, 11.037796],
+            [50.971636, 11.037486]
         ]
     },
-    {
-        "name": "zte_infar",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/infar_annotation/faster_rcnn_nas_coco_2018_01_28",
-        "src": [
-            [2030, 1177],
-            [2749, 1415],
-            [4028, 2445],
-            [1456, 3243]
-        ],
-        "dst": [
-            [50.974456, 11.329067],
-            [50.974498, 11.329196],
-            [50.974530, 11.329404],
-            [50.974418, 11.329482]
-        ]
-    },
-    {
-        "name": "nexus_werkstatt1",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/werkstatt1_annotation/faster_rcnn_nas_coco_2018_01_28",
-        "src": [
-            [640, 1590],
-            [1270, 1480],
-            [1850, 211],
-            [460, 680]
-        ],
-        "dst": [
-            [50.974252, 11.328980],
-            [50.974264, 11.329024],
-            [50.974428, 11.329017],
-            [50.974295, 11.328926]
-        ]
-    },
-    {
-        "name": "nexus_werkstatt2",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/werkstatt2_annotation/faster_rcnn_nas_coco_2018_01_28",
-        "src": [
-            [64, 1222],
-            [907, 2070],
-            [1620, 550],
-            [2960, 523]
-        ],
-        "dst": [
-            [50.974291, 11.328905],
-            [50.974269, 11.329029],
-            [50.974448, 11.329066],
-            [50.974541, 11.329309]
-        ]
-    },
-    {
-        "name": "nexus_dblwerkstatt2",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/dbl_annotation/faster_rcnn_nas_coco_2018_01_28",
-        "src": [
-            [1500, 2200],
-            [2700, 1370],
-            [1597, 197],
-            [130, 340]
-        ],
-        "dst": [
-            [50.973270, 11.329641],
-            [50.973305, 11.329692],
-            [50.973389, 11.329516],
-            [50.973338, 11.329390]
-        ]
-    }
 ]
+
+# DATA = [
+#     {
+#         "name": "nexus1_hauptgebaeude1",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/hauptgebaeude1_annotation/faster_rcnn_nas_coco_2018_01_28",
+#         "src": [
+#             [989, 1044],
+#             [1513, 919],
+#             [1631, 1239],
+#             [628, 2375]
+#         ],
+#         "dst": [
+#             [50.974466, 11.329602],
+#             [50.974402, 11.329671],
+#             [50.974418, 11.329485],
+#             [50.974488, 11.329267]
+#         ]
+#     },
+#     {
+#         "name": "nexus2_hauptgebaeude2",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/hauptgebaeude2_annotation/faster_rcnn_nas_coco_2018_01_28",
+#         "src": [
+#             [789, 1069],
+#             [2583, 1191],
+#             [2905, 1357],
+#             [1750, 2236]
+#         ],
+#         "dst": [
+#             [50.974273, 11.329306],
+#             [50.974184, 11.329073],
+#             [50.974214, 11.329001],
+#             [50.974385, 11.329020]
+#         ]
+#     },
+#     {
+#         "name": "zte_infar",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/infar_annotation/faster_rcnn_nas_coco_2018_01_28",
+#         "src": [
+#             [2030, 1177],
+#             [2749, 1415],
+#             [4028, 2445],
+#             [1456, 3243]
+#         ],
+#         "dst": [
+#             [50.974456, 11.329067],
+#             [50.974498, 11.329196],
+#             [50.974530, 11.329404],
+#             [50.974418, 11.329482]
+#         ]
+#     },
+#     {
+#         "name": "nexus_werkstatt1",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/werkstatt1_annotation/faster_rcnn_nas_coco_2018_01_28",
+#         "src": [
+#             [640, 1590],
+#             [1270, 1480],
+#             [1850, 211],
+#             [460, 680]
+#         ],
+#         "dst": [
+#             [50.974252, 11.328980],
+#             [50.974264, 11.329024],
+#             [50.974428, 11.329017],
+#             [50.974295, 11.328926]
+#         ]
+#     },
+#     {
+#         "name": "nexus_werkstatt2",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/werkstatt2_annotation/faster_rcnn_nas_coco_2018_01_28",
+#         "src": [
+#             [64, 1222],
+#             [907, 2070],
+#             [1620, 550],
+#             [2960, 523]
+#         ],
+#         "dst": [
+#             [50.974291, 11.328905],
+#             [50.974269, 11.329029],
+#             [50.974448, 11.329066],
+#             [50.974541, 11.329309]
+#         ]
+#     },
+#     {
+#         "name": "nexus_dblwerkstatt2",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-07-13_summaery/dbl_annotation/faster_rcnn_nas_coco_2018_01_28",
+#         "src": [
+#             [1500, 2200],
+#             [2700, 1370],
+#             [1597, 197],
+#             [130, 340]
+#         ],
+#         "dst": [
+#             [50.973270, 11.329641],
+#             [50.973305, 11.329692],
+#             [50.973389, 11.329516],
+#             [50.973338, 11.329390]
+#         ]
+#     }
+# ]
 
 with open("boxes.txt", "w") as outputfile:
     writer = csv.writer(outputfile, delimiter="|", quotechar="'", quoting=csv.QUOTE_MINIMAL)

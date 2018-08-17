@@ -10,6 +10,7 @@ from util.drawhelper import Drawhelper
 from detector.tilemanager import TileManager
 
 IOU_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.5
 VISUALIZE = False
 
 AP = []
@@ -22,8 +23,8 @@ AP = []
 # NETWORK = "ssd_inception_v2_coco_2018_01_28"
 # NETWORK = "ssdlite_mobilenet_v2_coco_2018_05_09"
 # NETWORK = "faster_rcnn_inception_v2_coco_2018_01_28"
-NETWORK = "faster_rcnn_resnet101_coco_2018_01_28"
-# NETWORK = "faster_rcnn_nas_coco_2018_01_28"
+# NETWORK = "faster_rcnn_resnet101_coco_2018_01_28"
+NETWORK = "faster_rcnn_nas_coco_2018_01_28"
 
 #NETWORK = NETWORK + "_FULL"
 
@@ -37,14 +38,14 @@ INPUT_DIRS = [
 # TILESIZES = np.arange(700, 3001, 50)
 # TILESIZES = [640] + list(TILESIZES)
 
-TILESIZES = np.arange(300, 3001, 50)
+TILESIZES = [2000] #np.arange(300, 3001, 50) #[1000]
 
 LIMIT = 40
 
 
 # Visualization
 
-# EVALUATION_IMAGE_OUTPUT_DIR = "evaluate2_viz"
+EVALUATION_IMAGE_OUTPUT_DIR = "evaluate2_viz"
 # NETWORK                     = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"
 # INPUT_DIRS                  = [("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation")]
 # TILESIZES                   = [800]
@@ -155,6 +156,24 @@ def _iou(b1, b2):
     union = (box1[2]-box1[0]) * (box1[3]-box1[1]) + (box2[2]-box2[0]) * (box2[3]-box2[1]) - intersection
 
     return float(intersection) / float(union)
+
+
+def _area(b):
+    return (b["box"][2]-b["box"][0]) * (b["box"][3]-b["box"][1])
+
+
+def _bin(data, binstart, binend, binwidth):
+    bins = [[] for x in range(int((binend-binstart)/binwidth))]
+
+    for d in data:
+        pos = int((d - binstart) / binwidth)
+        if pos >= len(bins):
+            pass # drop
+        else:
+            foo = bins[pos]
+            foo.append(d)
+
+    return bins
 
 
 def evaluate_all(gt, dt, name_of_class):
@@ -312,14 +331,13 @@ def run(filepairs, model):
 
     classes = ["person"]
 
-    plt.xlabel('recall')
-    plt.ylabel('precision')
+    plt.xlabel("recall")
+    plt.ylabel("precision")
 
     axes = plt.gca()
     axes.set_xlim([0, 1.05])
     axes.set_ylim([0, 1.05])
 
-    plt.style.use('grayscale')
     handles = []
 
     combined_tp = []
@@ -394,10 +412,92 @@ def run(filepairs, model):
     # plt.show()
 
 
+    # TODO: add calculation for different sizes of bounding box errors here
+
+    # plt.clf()
+    #
+    # try:
+    #     plt.style.use("grayscale")
+    #     plt.style.use("despat")
+    # except Exception as e:
+    #     print("Setting matplotlib style failed")
+    #
+    # fig = plt.figure(figsize=(8, 4))
+    # ax = fig.add_subplot(111)
+    #
+    # area_combined_tp = []
+    # for b in combined_tp:
+    #     if b["score"] < CONFIDENCE_THRESHOLD:
+    #         continue
+    #     area_combined_tp.append(_area(b))
+    #
+    # area_combined_fp = []
+    # for b in combined_fp:
+    #     if b["score"] < CONFIDENCE_THRESHOLD:
+    #         continue
+    #     area_combined_fp.append(_area(b))
+    #
+    # area_combined_fn = []
+    # for b in combined_fn:
+    #     area_combined_fn.append(_area(b))
+    #
+    # binsize = 500
+    # maxsize = 30000
+    #
+    # bins_tp = _bin(area_combined_tp, 0, maxsize, binsize)
+    # bins_fp = _bin(area_combined_fp, 0, maxsize, binsize)
+    # bins_fn = _bin(area_combined_fn, 0, maxsize, binsize)
+    #
+    # print(bins_fp[0])
+    #
+    # rel_bins_tp = []
+    # rel_bins_fp = []
+    # rel_bins_fn = []
+    #
+    # abs_bins_tpfn = []
+    #
+    # for binnumber in range(0, len(bins_tp)):
+    #     abs_bins_tpfn.append(len(bins_tp[binnumber]) + len(bins_fn[binnumber]))
+    #     total_count = abs_bins_tpfn[binnumber]
+    #     if total_count > 0:
+    #         rel_bins_tp.append(len(bins_tp[binnumber])) # / total_count)
+    #         rel_bins_fp.append(len(bins_fp[binnumber])) # / total_count)
+    #         # rel_bins_fn.append((len(bins_fn[binnumber]) / total_count) + rel_bins_tp[binnumber])
+    #     else:
+    #         rel_bins_tp.append(0)
+    #         rel_bins_fp.append(0)
+    #         rel_bins_fn.append(0)
+    #
+    # index = range(0, len(bins_tp))
+    # bar_width = 1
+    #
+    # # ax.set_facecolor("#666666")
+    # # ax.bar(index, rel_bins_fn, bar_width, color="#000000")
+    # ax.bar(index, rel_bins_tp, bar_width, color="#666666") #color="#00FF00")
+    # ax.bar(index, rel_bins_fp, bar_width, color="#FF0000", alpha=0.2)
+    #
+    # ax2 = ax.twinx()
+    # ax2.plot(index, abs_bins_tpfn)
+    #
+    # #ax.set_ylim([0, 1])
+    # plt.xlim(0, len(rel_bins_tp))
+    # # plt.ylim(0, 1)
+    #
+    # plt.tight_layout()
+    # plt.savefig("plot_bbDistribution.png")
+    # plt.show()
+
+
 if __name__ == "__main__":
 
     for tilesize in TILESIZES:
-        model = "{}_{}px".format(NETWORK, tilesize)
+
+        model = ""
+
+        if tilesize is None:
+            model = NETWORK
+        else:
+            model = "{}_{}px".format(NETWORK, tilesize)
 
         filepairs = []
         for input_dir in INPUT_DIRS:

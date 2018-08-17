@@ -28,7 +28,11 @@ public class TileManager {
     private int xoffset = 0;
     private int yoffset = 0;
 
-    public TileManager(File filename) {
+
+    public TileManager(File filename, int tilesize, int outputsize) {
+        this.tilesize = tilesize;
+        this.outputsize = outputsize;
+
         this.filename = filename;
 
         image = BitmapFactory.decodeFile(filename.getAbsolutePath());
@@ -38,6 +42,17 @@ public class TileManager {
 
         init(new Size(imagewidth, imageheight));
     }
+
+//    public TileManager(File filename) {
+//        this.filename = filename;
+//
+//        image = BitmapFactory.decodeFile(filename.getAbsolutePath());
+//
+//        int imagewidth = image.getWidth();
+//        int imageheight = image.getHeight();
+//
+//        init(new Size(imagewidth, imageheight));
+//    }
 
     /*
      * Initializes an empty TileManager which should _not_ be used to try to access image tile
@@ -135,6 +150,13 @@ public class TileManager {
         }
 
         return fullResultset;
+    }
+
+    public void close() {
+        if (image != null) image.recycle();
+        if (imageTile != null) imageTile.recycle();
+        if (imageOutput != null) imageOutput.recycle();
+        if (tiles != null) tiles.clear();
     }
 
     public class Tile {

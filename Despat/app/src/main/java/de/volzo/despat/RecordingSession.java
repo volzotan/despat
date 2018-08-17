@@ -117,6 +117,11 @@ public class RecordingSession {
         heartbeatIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
         context.sendBroadcast(heartbeatIntent);
 
+        Intent recognitionIntent = new Intent(context, Orchestrator.class);
+        recognitionIntent.putExtra(Orchestrator.SERVICE, Broadcast.RECOGNITION_SERVICE);
+        recognitionIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
+        context.sendBroadcast(recognitionIntent);
+
         Despat despat = Util.getDespat(context);
 
         session = new Session();

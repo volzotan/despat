@@ -111,7 +111,8 @@ var boxes = null;
 
     var settingHexSize = 5;
 
-    var settingFilterTime       = null,
+    var settingFilterConfidence = [0.25, 1.0],
+        settingFilterTime       = null,
         settingFilterSession    = null,
         settingFilterClass      = null;
 
@@ -175,6 +176,10 @@ var clickFunction = function () {
         var layername = $(this).data("id");
         $("svg .layer_" + layername).toggle("invisible");
         $("svg .legend_layer_" + layername).toggle("invisible");
+
+        if (layername === "sca") {
+            $("svg .layer_sca foreignObject").toggle("invisible");
+        }
 
         return;
     }
@@ -351,9 +356,18 @@ function buildGraph(sessions, points, classmap) {
 function filter() {
 
     boxesFiltered = boxes;
+    boxesFiltered = boxesFiltered.filter(function (d) {
+        if (settingFilterConfidence != null) {
+            if (d[3] < settingFilterConfidence[0]) {
+                return false
+            }
 
-    if (settingFilterTime != null) {
-        boxesFiltered = boxesFiltered.filter(function (d) {
+            if (d[3] > settingFilterConfidence[1]) {
+                return false
+            }
+        }
+
+        if (settingFilterTime != null) {
             if (d[0] < settingFilterTime[0]) {
                 return false
             }
@@ -361,30 +375,22 @@ function filter() {
             if (d[0] > settingFilterTime[1]) {
                 return false;
             }
+        }
 
-            return true;
-        });
-    }
-
-    if (settingFilterSession != null) {
-        boxesFiltered = boxesFiltered.filter(function (d) {
-            if (settingFilterSession.includes(d[1])) {
-                return true;
+        if (settingFilterSession != null) {
+            if (!settingFilterSession.includes(d[1])) {
+                return false;
             }
+        }
 
-            return false;
-        });
-    }
-
-    if (settingFilterClass != null) {
-        boxesFiltered = boxesFiltered.filter(function (d) {
-            if (settingFilterClass.includes(d[2])) {
-                return true;
+        if (settingFilterClass != null) {
+            if (!settingFilterClass.includes(d[2])) {
+                return false;
             }
+        }
 
-            return false;
-        });
-    }
+        return true;
+    });
 
     drawLayerHex(settingHexSize);
     draw_confidence_frequency("#svg-confidence", boxesFiltered);

@@ -20,7 +20,10 @@ import java.util.List;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.RecordingSession;
+import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
+import de.volzo.despat.persistence.Session;
+import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
@@ -141,6 +144,17 @@ public class Orchestrator extends BroadcastReceiver {
                         ArrayList<String> addInfo = new ArrayList<>();
                         addInfo.add(Util.getHumanReadableTimediff(session.getStart(), Calendar.getInstance().getTime(), false));
                         NotificationUtil.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), addInfo);
+
+                        if (!Util.isServiceRunning(context, RecognitionService.class)) {
+                            AppDatabase db = AppDatabase.getAppDatabase(context);
+                            SessionDao sessionDao = db.sessionDao();
+                            Session newestSession = sessionDao.getLast();
+                            if (newestSession != null) {
+                                Orchestrator.runRecognitionService(context, newestSession.getId());
+                            }
+                        } else {
+                            Log.d(TAG, "RecognitionService not started, already running");
+                        }
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
@@ -383,6 +397,9 @@ public class Orchestrator extends BroadcastReceiver {
     // ----------------------------------------------------------------------------------------------------
 
     private void recognitionServiceStart() {
+
+        // TODO
+
         ComponentName serviceComponent = new ComponentName(context, RecognitionService.class);
         JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
         builder.setMinimumLatency(3 * 1000); // wait at least

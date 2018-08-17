@@ -11,6 +11,7 @@ import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.support.Util;
 
 public class CompressorService extends IntentService {
 
@@ -37,6 +38,7 @@ public class CompressorService extends IntentService {
                 compressor.runForSession(this, session);
             } catch (Exception e) {
                 Log.w(TAG, "compressor failed for session: " + session);
+                Util.saveErrorEvent(this, session.getId(), "compressing image failed", e);
             }
         }
     }

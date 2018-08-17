@@ -155,12 +155,12 @@ public class Stopwatch {
         sb.append("\n");
 
         for (String key : runtime.keySet()) {
-            sb.append(String.format(Config.LOCALE, "%-40s | ", key));
+            sb.append(String.format(Config.LOCALE, "%-44s | ", key));
 
-            List<Double> values = getLast(key, 5);
+            List<Double> values = getLast(key, 10);
 
             for (Double val : values) {
-                sb.append(String.format(Config.LOCALE, "%6.0f ", val));
+                sb.append(String.format(Config.LOCALE, "%5.0f, ", val));
             }
 
             for (int i=0; i<(10-values.size()); i++) {
