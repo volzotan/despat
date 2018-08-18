@@ -18,7 +18,9 @@ import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.NotificationUtil;
+import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 04.08.17.
@@ -116,7 +118,21 @@ public class RecognitionService extends IntentService {
             }
         }
 
-        NotificationUtil.showProgressNotification(this, 100, 100, "RecognitionService", "finished", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME);
+        if (Config.DELETE_AFTER_RECOGNITION) {
+            int deletecounter = 0;
+            for (int i = 0; i < queue.size(); i++) {
+                Capture c = queue.get(i);
+                try {
+                    Util.deleteImage(c.getImage());
+                    deletecounter++;
+                } catch (Exception e) {
+                    Log.w(TAG, "deleting image failed: " + c.getImage().getName(), e);
+                }
+            }
+            Log.d(TAG, "deleted " + deletecounter + " images after recognition");
+        }
+
+        NotificationUtil.showProgressNotification(this, 100, 100, "RecognitionService", "finished", NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, 3000);
 
 //        detector.display((DrawSurface) findViewById(R.id.drawSurface), detections);
     }
@@ -153,6 +169,6 @@ public class RecognitionService extends IntentService {
             positionDao.insert(pos);
         }
 
-        Log.d(TAG, String.format("saved %d/%d detections (skipped %d below threshold", d.size()-skipcounter, d.size(), skipcounter));
+        Log.d(TAG, String.format("saved %d/%d detections (skipped %d below threshold)", d.size()-skipcounter, d.size(), skipcounter));
     }
 }

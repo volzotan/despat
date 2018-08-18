@@ -133,7 +133,12 @@ public class NotificationUtil {
         notificationManager.createNotificationChannel(channel);
     }
 
+
     public static void showProgressNotification(Context context, int pos, int total, String title, String content, int notificationId, String notificationChannelId, String notificationChannelName) {
+        showProgressNotification(context, pos, total, title, content, notificationId, notificationChannelId, notificationChannelName, -1);
+    }
+
+    public static void showProgressNotification(Context context, int pos, int total, String title, String content, int notificationId, String notificationChannelId, String notificationChannelName, int timeout) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -149,6 +154,10 @@ public class NotificationUtil {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.despat_icon))
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_DEFAULT);
+
+        if (timeout > 0) {
+            builder.setTimeoutAfter(timeout);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setChannelId(notificationChannelId);

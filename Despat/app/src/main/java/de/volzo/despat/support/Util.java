@@ -599,6 +599,18 @@ public class Util {
         }
     }
 
+    public static void deleteImage(File f) throws Exception {
+        try {
+            boolean success = f.getCanonicalFile().delete();
+            if (!success) {
+                throw new Exception("no success when deleting file");
+            }
+        } catch (IOException e) {
+            Log.d(TAG, "problem deleting file", e);
+            throw e;
+        }
+    }
+
     public static void deleteDirectory(File dir) throws Exception {
         if (!dir.exists()) {
             return;

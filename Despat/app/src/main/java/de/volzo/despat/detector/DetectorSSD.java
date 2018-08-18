@@ -27,17 +27,17 @@ public class DetectorSSD extends Detector {
     private TensorFlowInterface tfInterface;
     private Stopwatch stopwatch;
 
-//    private static final int TILESIZE_INPUT = 600;
-//    private static final int TILESIZE_OUTPUT = 300;
-//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
+    private static final int TILESIZE_INPUT = 600;
+    private static final int TILESIZE_OUTPUT = 300;
+    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
 
 //    private static final int TILESIZE_INPUT = 1000;
 //    private static final int TILESIZE_OUTPUT = 1000;
 //    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_inception_v2.pb";
 //
-    private static final int TILESIZE_INPUT = 1280;
-    private static final int TILESIZE_OUTPUT = 640;
-    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_fpn.pb";
+//    private static final int TILESIZE_INPUT = 1280;
+//    private static final int TILESIZE_OUTPUT = 640;
+//    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_fpn.pb";
 
 //    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_ppn.pb";
 //    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v2.pb";

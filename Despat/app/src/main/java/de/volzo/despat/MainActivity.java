@@ -45,6 +45,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import de.volzo.despat.detector.Detector;
+import de.volzo.despat.detector.DetectorHOG;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
@@ -410,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            @Override
 //            public void run() {
                 Util.clearTextureView(textureView);
-                Util.drawTextOnTextureView(textureView, "foo");
+//                Util.drawTextOnTextureView(textureView, "foo"); // TODO
                 RecordingSession session = RecordingSession.getInstance(activity);
                 session.startRecordingSession(null, cameraConfig);
 
@@ -812,11 +813,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             detector.init();
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
             List<Detector.Recognition> detections = detector.run();
-            detector.display((DrawSurface) findViewById(R.id.drawSurface), null, detector.recognitionsToRectangles(detections));
+            detector.display((DrawSurface) findViewById(R.id.drawSurface), new Size(4320, 3240), detector.recognitionsToRectangles(detections));
         } catch (Exception e) {
             Log.wtf(TAG, "detector failed", e);
         }
-
 
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
         imageView.setImageBitmap(BitmapFactory.decodeFile(new File(Config.getImageFolder(activity), "test.jpg").getAbsolutePath())); // TODO: glide

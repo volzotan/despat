@@ -28,6 +28,8 @@ public class Config {
     public static final String DATEFORMAT_SHORT                     = "yyyy-MM-dd HH:mm:ss";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
 
+    public static final boolean DELETE_AFTER_RECOGNITION            = true;
+
     public static final float IMGROLL_FREE_SPACE_THRESHOLD          = 300; // in MB
     public static final boolean IMGROLL_DELETE_IF_FULL              = false;
 
