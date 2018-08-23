@@ -1,3 +1,4 @@
+var dataset_name = "dataset_bahnhof";
 
 var mapproviders = [
     {
@@ -40,7 +41,8 @@ var mapproviders = [
 
 var initialMapProvider = 1; // TODO
 
-var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f");
+var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f"),
+    parseDateFallback = d3.timeParse("%Y-%m-%d %H:%M:%S");
 
 var pi = Math.PI,
     tau = 2 * pi;
@@ -77,7 +79,7 @@ var svgTime = d3.select("#timeselector svg")
 
 var timeBar = svgTime.append("g");
 
-//var center = [11.329189, 50.974474]; //[11.037630+0.0002, 50.971296+0.0001];
+var center = [50.971296+0.0001, 11.037630+0.0002, ];
 
 var projection;
 
@@ -116,17 +118,17 @@ var boxes = null;
         settingFilterSession    = null,
         settingFilterClass      = null;
 
-d3.json("dataset.json", function(input) {
+d3.json("data/" + dataset_name + ".json", function(input) {
 
     input["mapprovider"] = mapproviders;
     dataset = input;
 
-    var center = dataset["sessions"][0]["position"];
+    var center = dataset["sessions"][0]["position"];                                                                  // TODO
     initProjection(center);
 
     drawLayerMap(mapproviders[initialMapProvider]["tilefunc"]);
 
-    d3.text(dataset["data"], function(error, raw) {
+    d3.text("data/" + dataset["data"], function(error, raw) {
         if (error) throw error;
 
         boxes = d3.dsvFormat("|").parse(raw);
@@ -147,6 +149,10 @@ d3.json("dataset.json", function(input) {
             item[7] = box["miny"];
             item[8] = box["maxx"];
             item[9] = box["maxy"];
+
+            if (item[0] === null) {
+                item[0] = parseDateFallback(box["timestamp"]);
+            }
 
             boxes[index] = item;
         });

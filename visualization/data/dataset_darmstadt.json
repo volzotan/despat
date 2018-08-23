@@ -1,45 +1,45 @@
 {
-    "cameras": [
+    "sessions": [
         {
-            "id": "1",
-            "name": "Device a",
-            "position": [50.971040, 11.038093]
-        }
-        ],
+            "id": "0",
+            "sessionname": "darmstadt",
+            "devicename": "motoZ",
+            "position": [49.876679, 8.650177],
+            "corresponding_points": [
+                {
+                    "id": "1",
+                    "position": [49.876611, 8.650386]
+                },
+                {
+                    "id": "2",
+                    "position": [49.876455, 8.650274]
 
-    "corresponding_points": [
-        {
-            "id": "1",
-            "position": [50.971296, 11.037630]
-        },
-        {
-            "id": "2",
-            "position": [50.971173, 11.037914]
+                },
+                {
+                    "id": "3",
+                    "position": [49.876099, 8.650315]
 
-        },
-        {
-            "id": "3",
-            "position": [50.971456, 11.037915]
+                },
+                {
+                    "id": "4",
+                    "position": [49.876088, 8.650444]
 
-        },
-        {
-            "id": "4",
-            "position": [50.971705, 11.037711]
+                },
+                {
+                    "id": "5",
+                    "position": [49.876149, 8.650517]
 
-        },
-        {
-            "id": "5",
-            "position": [50.971402, 11.037796]
+                },
+                {
+                    "id": "5",
+                    "position": [49.875917, 8.650722]
 
-        },
-        {
-            "id": "5",
-            "position": [50.971636, 11.037486]
-
+                }
+            ]
         }
     ],
 
-    "data": "boxes.txt",
+    "data": "boxes_darmstadt.txt",
 
     "classmap": [
         "person", 

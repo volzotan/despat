@@ -224,7 +224,7 @@
         }
     ],
 
-    "data": "boxes.txt",
+    "data": "boxes_summaery.txt",
 
     "classmap": [
         "person", 
