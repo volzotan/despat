@@ -1,0 +1,1 @@
+jekyll build && rsync -av _site/ grinzold.de:/var/www/grinzold/masterthesis/guide

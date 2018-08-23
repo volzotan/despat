@@ -1,7 +1,16 @@
 ---
 layout: default
 title: Home
+
+imgdir: intro
 ---
+
+![landingpage example]({{ site.baseurl }}assets/{{ page.imgdir }}/example.png )
+
+Despat is an Android App for detecting and counting objects in streets and public places.
+See the [assembly instructions]({{ site.baseurl }}{% link guide/build_the_enclosure.md %}) to build an weatherproof enclosure, the [guide]({{ site.baseurl }}{% link guide/getting_started.md %}) on conducting urban surveys with the app or have a look at an [example]({{ site.baseurl }}{% link guide/example.md %}) of the gathered data.
+
+<!--
 
 <div class="posts">
   {% for post in paginator.posts %}
@@ -35,3 +44,5 @@ title: Home
     <span class="pagination-item newer">Newer</span>
   {% endif %}
 </div>
+
+-->
