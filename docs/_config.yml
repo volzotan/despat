@@ -19,3 +19,5 @@ version:          1.0
 
 github:
   repo:           https://github.com/volzotan/despat
+
+theme: jekyll-theme-minimal
