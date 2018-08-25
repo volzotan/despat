@@ -1,4 +1,5 @@
-var dataset_name = "dataset_bahnhof";
+var dataset_name = "dataset_bahnhof"
+    dataset_path = null;
 
 var mapproviders = [
     {
@@ -118,7 +119,19 @@ var boxes = null;
         settingFilterSession    = null,
         settingFilterClass      = null;
 
-d3.json("data/" + dataset_name + ".json", function(input) {
+window.onerror = function(message, source, lineno, colno, error) {
+    $("#overlay").hide();
+    $("#overlayError").show();
+    $("#overlayError .errorMessage").text("Error: " + message);
+};
+
+if (window.location.hash) {
+    dataset_path = "data/" + window.location.hash.substring(1) + ".json";
+} else {
+    throw "no dataset specified";
+}
+
+d3.json(dataset_path, function(input) {
 
     input["mapprovider"] = mapproviders;
     dataset = input;
@@ -335,7 +348,7 @@ function buildUI(dataset) {
 
     // set defaults
 
-    $("#toggleMapCached").click();
+    // $("#toggleMapCached").click();
 
     $("li[data-type=layer][data-id=hbg]").click();
     $("li[data-type=layer][data-id=sca]").click();
