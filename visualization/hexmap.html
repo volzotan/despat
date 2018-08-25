@@ -13,11 +13,11 @@
     <polygon points="0,0 1488,0 1488,837 0,837" fill="url(#bgimg)"/>
 </svg>
 
-<script src="d3.v4.min.js"></script>
-<script src="d3-hexbin.v0.2.min.js"></script>
+<script src="lib/d3.v4.min.js"></script>
+<script src="lib/d3-hexbin.v0.2.min.js"></script>
 <script>
 
-    d3.text("boxes.txt", function(error, raw) {
+    d3.text("data/boxes_bahnhof.txt", function(error, raw) {
 
         var dataWidth = 1488; //5952/4;
             dataHeight = 837; //3348/4;
@@ -96,7 +96,7 @@
             .attr("width", dataWidth)
             .attr("height", dataHeight)
             .append("svg:image")
-            .attr("xlink:href", "bg.jpg")
+            .attr("xlink:href", "data/bg.jpg")
             .attr("width", dataWidth)
             .attr("height", dataHeight)
             .attr("x", 0)
