@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import csv
 import os
+from datetime import *
 
 import sys
 sys.path.append('..')
@@ -108,10 +109,58 @@ def classname_to_id(name):
 
 # input
 
+# OUTPUT_FILENAME = "boxes_darmstadt.txt"
+# DATA = [
+#     {
+#         "name": "darmstadt",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_800px",
+#         "src": [
+#             [200, 2930],
+#             [2890, 2350],
+#             [3373, 1678],
+#             [2895, 1596],
+#             [2532, 1589],
+#             [2397, 1446]
+#         ],
+#         "dst": [
+#             [49.876611, 8.650386],
+#             [49.876455, 8.650274],
+#             [49.876099, 8.650315],
+#             [49.876088, 8.650444],
+#             [49.876149, 8.650517],
+#             [49.875917, 8.650722]
+#         ]
+#     }
+# ]
+
+# OUTPUT_FILENAME = "boxes_campusoffice.txt"
+# DATA = [
+#     {
+#         "name": "campusoffice",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/16-07-14_campusoffice_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_1000px",
+#         "src": [
+#             [3090, 3722],
+#             [4010, 2623],
+#             [3000, 2780],
+#             #[2753, 2360],
+#             [1070, 2782]
+#         ],
+#         "dst": [
+#             [50.974806, 11.328820],
+#             [50.974629, 11.328794],
+#             [50.974719, 11.328906],
+#             #[...],
+#             [50.974791, 11.329041]
+#         ]
+#     }
+# ]
+# startdate = datetime(2016, 7, 14, 11)
+
+OUTPUT_FILENAME = "boxes_bahnhof2.txt"
 DATA = [
     {
-        "name": "low-fi",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/ssd_mobilenet_v1_coco_2018_01_28_600px",
+        "name": "default camera",
+        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_800px",
         "src": [
             [1124, 1416],
             [1773, 2470],
@@ -128,28 +177,51 @@ DATA = [
             [50.971402, 11.037796],
             [50.971636, 11.037486]
         ]
-    },
-    {
-        "name": "mid-fi",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/faster_rcnn_inception_v2_coco_2018_01_28_1600px",
-        "src": [
-            [1124, 1416],
-            [1773, 2470],
-            [3785, 1267],
-            [3416, 928],
-            [2856, 1303],
-            [2452, 916]
-        ],
-        "dst": [
-            [50.971296, 11.037630],
-            [50.971173, 11.037914],
-            [50.971456, 11.037915],
-            [50.971705, 11.037711],
-            [50.971402, 11.037796],
-            [50.971636, 11.037486]
-        ]
-    },
+    }
 ]
+
+# DATA = [
+#     {
+#         "name": "low-fi",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/ssd_mobilenet_v1_coco_2018_01_28_600px",
+#         "src": [
+#             [1124, 1416],
+#             [1773, 2470],
+#             [3785, 1267],
+#             [3416, 928],
+#             [2856, 1303],
+#             [2452, 916]
+#         ],
+#         "dst": [
+#             [50.971296, 11.037630],
+#             [50.971173, 11.037914],
+#             [50.971456, 11.037915],
+#             [50.971705, 11.037711],
+#             [50.971402, 11.037796],
+#             [50.971636, 11.037486]
+#         ]
+#     },
+#     {
+#         "name": "mid-fi",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/faster_rcnn_inception_v2_coco_2018_01_28_1600px",
+#         "src": [
+#             [1124, 1416],
+#             [1773, 2470],
+#             [3785, 1267],
+#             [3416, 928],
+#             [2856, 1303],
+#             [2452, 916]
+#         ],
+#         "dst": [
+#             [50.971296, 11.037630],
+#             [50.971173, 11.037914],
+#             [50.971456, 11.037915],
+#             [50.971705, 11.037711],
+#             [50.971402, 11.037796],
+#             [50.971636, 11.037486]
+#         ]
+#     },
+# ]
 
 # DATA = [
 #     {
@@ -250,7 +322,7 @@ DATA = [
 #     }
 # ]
 
-with open("boxes.txt", "w") as outputfile:
+with open(OUTPUT_FILENAME, "w") as outputfile:
     writer = csv.writer(outputfile, delimiter="|", quotechar="'", quoting=csv.QUOTE_MINIMAL)
     writer.writerow([
         "timestamp",
@@ -288,6 +360,10 @@ for dataset in DATA:
     output = []
 
     for imagedata in image_list:
+
+        # dirty fix for the missing timestamps in the campusoffice dataset
+        # startdate = startdate + timedelta(seconds=60)
+
         for i in range(0, len(imagedata["boxes"])):
 
             if imagedata["scores"] is not None and imagedata["scores"][i] < CONFIDENCE_THRESHOLD:
@@ -300,6 +376,9 @@ for dataset in DATA:
 
             # data:
             # timestamp device class confidence lat lon minx miny maxx maxy
+
+            # dirty fix for the missing timestamps in the campusoffice dataset
+            # out.append(startdate)
 
             out.append(imagedata["timestamp"])
             out.append(DATA.index(dataset))
@@ -325,7 +404,7 @@ for dataset in DATA:
 
     # output
 
-    with open("boxes.txt", "a") as outputfile:
+    with open(OUTPUT_FILENAME, "a") as outputfile:
         writer = csv.writer(outputfile, delimiter="|", quotechar="'", quoting=csv.QUOTE_MINIMAL)
         for line in output:
             writer.writerow(line)

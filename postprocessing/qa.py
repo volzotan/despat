@@ -18,6 +18,7 @@ import os
 import json
 import cv2
 import numpy as np
+import time
 
 THRESHOLD_OBJECT_IS_ACTIVE  = 0.2
 THRESHOLD_IOU               = 0.75
@@ -122,10 +123,19 @@ class Qa(object):
 
         # penalties
         scores = self.annotations[-1]["scores"]
-        if actions[i] == ACTION_IDLE and box_has_predecessor[i] == 0:  
-            scores[i] -= 0.2
-            if scores[i] < 0:
-                scores[i] = 0
+        for i in range(0, len(boxes)):
+            if actions[i] == ACTION_IDLE and box_has_predecessor[i] == 0:  
+                print("class: {0:20s} | conf old: {1:.3f}".format(self.annotations[-1]["classes"][i], scores[i]))
+                scores[i] -= 0.1
+
+            if actions[i] == ACTION_MOVING and box_has_predecessor[i] == 0:
+                scores[i] += 0.1 
+
+            if actions[i] == ACTION_MOVING and box_has_predecessor[i] == 1:
+                scores[i] -= 0.1 
+
+
+        scores = np.clip(scores, 0, 1)
 
 
     def viz(self, output_filename):
@@ -175,6 +185,11 @@ class Qa(object):
         pass
 
 
+    def save_json(self, filename):
+        with open(filename, 'w') as outfile:
+            json.dump(self.annotations[-1], outfile)
+
+
 if __name__ == "__main__":
     # check for CLI arguments
     
@@ -200,18 +215,21 @@ if __name__ == "__main__":
 
     filelist = sorted(filelist, key=lambda filename: os.path.splitext(os.path.basename(filename[1]))[0])
 
-    filelist = filelist[0:20]
+    filelist = filelist[0:40]
 
     qa = Qa()
 
     for i in range(len(filelist)):
+        start = time.time()
 
         data = json.load(open(filelist[i][0], "r"))
         qa.add_image(os.path.join(IMAGE_DIR, data["image_filename"]))
-
         qa.add_json(filelist[i][0])
-
         qa.run()
-
+        
         qa.viz(os.path.join(OUTPUT_DIR, filelist[i][1]+".jpg"))
+        
+        qa.save_json(os.path.join(OUTPUT_DIR, filelist[i][1]))
+
+        print("{0:2d} : {1:.2f}s".format(i, time.time() - start))
 
