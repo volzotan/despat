@@ -58,7 +58,7 @@ It makes sense to print only the lower part of the enclosure with 0.3mm layer he
 
 ## assembly
 
-![1]({{ site.baseurl }}assets/{{ page.imgdir }}/assembly1.png )
+![1]({{ site.url }}/assets/{{ page.imgdir }}/assembly1.png )
 
 To insert the heat inserts heat them up with a heatgun or a soldering iron and press them into the holes. While this is not an extremly complex task, it is recommended to practice beforehand with one or two inserts.
 
