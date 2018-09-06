@@ -64,13 +64,13 @@ To insert the heat inserts heat them up with a heatgun or a soldering iron and p
 
 The wedge to keep the tripod nut in place may need a slight amount of sanding before fitting perfectly. If no sanding paper is available, a rough surface such as concrete may be up to the task, too. The nut should align with the hole and the bottom of the enclosure should be perfectly flat. If the wedge sticks out, it needs to be inserted further.
 
-![2]({{ site.baseurl }}assets/{{ page.imgdir }}/assembly2.png )
+![2]({{ site.url }}/assets/{{ page.imgdir }}/assembly2.png )
 
 Screw on the hinges at the back side of the base. If sanding the surface of the hinges which connects to the base slightly the gap is minimized.
 
 The very last step for the enclosure base is adding glue to the UV filter and placing it in the opening. Take care to apply enough glue all around the thread without letting it ooze on the glass.
 
-![3]({{ site.baseurl }}assets/{{ page.imgdir }}/assembly3.png )
+![3]({{ site.url }}/assets/{{ page.imgdir }}/assembly3.png )
 
 Screw on the last parts. If the latches should close inwards or outwards is up to your preference. Do not apply to much force with the screw, you should be able to move the latches. If you are using the enclosure top with nyloc nuts instead of heat inserts, it may be easier to insert the nut first and then just use the screw and screw it on to pull it in the cavity.
 
