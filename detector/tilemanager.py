@@ -3,6 +3,7 @@ import numpy as np
 import imageio
 from skimage.transform import resize # requires scikit-image
 import sys
+import random
 sys.path.append('..')
 from util.drawhelper import Drawhelper
 import util.converter
@@ -18,7 +19,7 @@ class TileManager(object):
     # if the network does further scaling as preprocessing
     # _convert_coordinate() will yield wrong results
 
-    def __init__(self, filename, tilesize, outputsize, centered=True):
+    def __init__(self, filename, tilesize, outputsize, centered=True, jitter=False):
 
         self.filename = filename
 
@@ -46,6 +47,10 @@ class TileManager(object):
         if centered:
             self.xoffset = int( (self.imagewidth % self.tilesize[0]) / 2 )
             self.yoffset = int( (self.imageheight % self.tilesize[1]) / 2 )
+
+            if jitter:
+                self.xoffset = int(self.xoffset * random.uniform(0, 2))
+                self.yoffset = int(self.yoffset * random.uniform(0, 2))
 
         x_tiles = int( self.imagewidth / self.tilesize[0] )
         y_tiles = int( self.imageheight / self.tilesize[1] )

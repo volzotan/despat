@@ -187,7 +187,7 @@ def run(sess, filename, tilesize, outputsize):
         print("{} already existing".format(file_output_full_path))
         return
 
-    tm = TileManager(filename, tilesize, outputsize)
+    tm = TileManager(filename, tilesize, outputsize, jitter=True)
 
     for tile_id in tm.get_all_tile_ids():
         time0 = time.time()
