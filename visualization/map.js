@@ -40,7 +40,7 @@ var mapproviders = [
     }
 ];
 
-var initialMapProvider = 1; // TODO
+var initialMapProvider = 0; // TODO
 
 var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f"),
     parseDateFallback = d3.timeParse("%Y-%m-%d %H:%M:%S");
@@ -436,7 +436,7 @@ function drawLayerMap(tileFunc) {
         .data(tiles)
         .enter().append("image")
         .attr("xlink:href", tileFunc)
-        .attr("filter", "url(#grayscale)")
+        // .attr("filter", "url(#grayscale)")
         .attr("x", function(d) { return ((d[0] + tiles.translate[0]) * tiles.scale)|0; }) // double to int
         .attr("y", function(d) { return ((d[1] + tiles.translate[1]) * tiles.scale)|0; })
         .attr("width", tiles.scale)
