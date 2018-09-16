@@ -1,4 +1,4 @@
-var dataset_name = "dataset_bahnhof"
+var dataset_name = "dataset_bahnhof",
     dataset_path = null;
 
 var mapproviders = [
@@ -40,7 +40,7 @@ var mapproviders = [
     }
 ];
 
-var initialMapProvider = 0; // TODO
+var initialMapProvider = 0;
 
 var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S.%f"),
     parseDateFallback = d3.timeParse("%Y-%m-%d %H:%M:%S");
@@ -63,13 +63,10 @@ var view = svg.append("g");
 var layer_map = view.append("g")
     .attr("class", "layer_map");
 
-var layer_hbg = view.append("g");
-
-var layer_hex = view.append("g");
-
-var layer_sca = null;
-
-var layer_sym = view.append("g");
+var layer_hbg = view.append("g"),
+    layer_hex = view.append("g"),
+    layer_sca = null,
+    layer_sym = view.append("g");
 
 var layer_leg = svg.append("g")
     .attr("class", "layer_leg");
@@ -82,16 +79,12 @@ var timeBar = svgTime.append("g");
 
 var center = [50.971296+0.0001, 11.037630+0.0002, ];
 
-var projection;
-
-var tiles;
-
-var zoom;
+var projection,
+    tiles,
+    zoom;
 
 function zoomed() {
-
     var transform = d3.event.transform;
-
     view.attr("transform", transform);
 
     // TODO
@@ -105,11 +98,10 @@ function zoomed() {
     // layer_sym
     //     .attr("transform", transform)
     //     // .style("stroke-width", 1 / transform.k);
-
 }
 
-var boxes = null;
-    boxesFiltered = null;
+var boxes = null,
+    boxesFiltered = null,
     dataset = null;
 
     var settingHexSize = 5;
@@ -117,7 +109,8 @@ var boxes = null;
     var settingFilterConfidence = [0.25, 1.0],
         settingFilterTime       = null,
         settingFilterSession    = null,
-        settingFilterClass      = null;
+        settingFilterClass      = null,
+        settingFilterAction     = null;
 
 window.onerror = function(message, source, lineno, colno, error) {
     $("#overlay").hide();
@@ -148,7 +141,7 @@ d3.json(dataset_path, function(input) {
 
         boxes.forEach((box, index) => {
             // var coord = projection([box.lon, box.lat]), // lonlat!
-            item = Array(10);
+            item = Array(11);
 
             var coords = projection([box["lon"], box["lat"]]);
 
@@ -162,6 +155,7 @@ d3.json(dataset_path, function(input) {
             item[7] = box["miny"];
             item[8] = box["maxx"];
             item[9] = box["maxy"];
+            item[10] = +box["action"];
 
             if (item[0] === null) {
                 item[0] = parseDateFallback(box["timestamp"]);
@@ -252,6 +246,18 @@ var clickFunction = function () {
         return;
     }
 
+    if ($(this).attr("id") === "toggleActions") {
+        if ($(this).hasClass("option-selected")) {
+            settingFilterAction = [0, 1];
+            filter();
+        } else {
+            settingFilterAction = null;
+            filter();
+        }
+
+        return;
+    }
+
 };
 
 function initProjection(center) {
@@ -328,6 +334,7 @@ function buildUI(dataset) {
 
     $("li.selectable").click(clickFunction);
     $("#toggleMapCached").click(clickFunction);
+    $("#toggleActions").click(clickFunction);
 
     // $("#sliderHex").on("change", function(event) {
     //     console.log(event);
@@ -449,10 +456,10 @@ function drawLayerHex(octagonRadius) {
     $(".legend_layer_hex").empty();
 
     var hexbin = d3.hexbin()
-        .x(function(d) {
+        .x(function (d) {
             return d[5];
         })
-        .y(function(d) {
+        .y(function (d) {
             return d[4];
         })
         .radius(octagonRadius)
@@ -465,15 +472,18 @@ function drawLayerHex(octagonRadius) {
     });
 
     var percentage_cutoff = (hbins.length / 100) * 1,
-        hbins_minmaxcutoff = hbins.slice(percentage_cutoff, hbins.length - percentage_cutoff);
+        hbins_minmaxcutoff = d3.extent(
+            hbins.slice(percentage_cutoff, hbins.length - percentage_cutoff),
+            function (d) {
+                return d.length;
+            }
+        );
 
-    var color = d3.scaleSequential(d3.interpolateViridis)
-        .domain(d3.extent(hbins_minmaxcutoff, function (d) {
-            return d.length;
-        }));
+    var scaleViridis = d3.scaleSequential(d3.interpolateViridis).domain(hbins_minmaxcutoff),
+        scaleBlue = d3.scaleSequential(d3.interpolateLab("white", "blue")).domain(hbins_minmaxcutoff),
+        scaleYellow = d3.scaleSequential(d3.interpolateLab("white", "yellow")).domain(hbins_minmaxcutoff);
 
     // heatmap graph
-
     draw_heatmap_bin_frequency("#svg-heatmap", hbins);
 
     layer_hex
@@ -489,11 +499,19 @@ function drawLayerHex(octagonRadius) {
             return "translate(" + d.x + "," + d.y + ")";
         })
         .attr("fill", function (d) {
-            return color(d.length);
+            if (settingFilterAction != null) {
+                var ratio = calculateActionRatio(d);
+                return calculateRatioColor([scaleYellow(ratio[0]), scaleBlue(ratio[1])]);
+            } else {
+                return scaleViridis(d.length);
+            }
         });
 
     // legend
+    drawLegend(hbins_minmaxcutoff);
+}
 
+function drawLegend(extent) {
     var legendHeight = 200,
         legendWidth = 20;
 
@@ -536,9 +554,7 @@ function drawLayerHex(octagonRadius) {
 
     var legendScale = d3.scaleLinear()
         .domain([-3, 3])
-        .domain(d3.extent(hbins_minmaxcutoff, function (d) {
-            return d.length;
-        }))
+        .domain(extent)
         .range([legendHeight, 0]);
 
     var legendAxis = d3.axisLeft()

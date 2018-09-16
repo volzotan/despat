@@ -239,12 +239,18 @@
             <h5 class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">Map</span>
             </h5>
-
             <div id="mapprovider-selector"></div>
-
             <div class="toggleButton">
                 <input type="checkbox" class="tgl tgl-default tgl-on-primary" id="toggleMapCached"/>
                 <label for="toggleMapCached">Use locally cached map tiles</label>
+            </div>
+
+            <h5 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted">Actions</span>
+            </h5>
+            <div class="toggleButton">
+                <input type="checkbox" class="tgl tgl-default tgl-on-primary" id="toggleActions"/>
+                <label for="toggleActions">Display actions</label>
             </div>
         </div>
 
@@ -280,6 +286,7 @@
 <script src="lib/d3.v4.min.js"></script>
 <script src="lib/d3-tile.v0.0.min.js"></script>
 <script src="lib/d3-hexbin.v0.2.min.js"></script>
+<script src="lib/d3-scale-chromatic.min.js"></script>
 
 <script src="lib/jquery-3.3.1.min.js"></script>
 

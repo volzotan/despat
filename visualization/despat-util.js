@@ -102,3 +102,28 @@ function calculateTicksForTimespan(extent, numberOfTicks) {
 
     return ticks;
 }
+
+function calculateActionRatio(boxes) {
+    filtered = boxes.filter(function (d) {
+        if (d[10] == 1) {
+            return false;
+        }
+        return true;
+    });
+
+    // [idle, active]
+    return [boxes.length-filtered.length, filtered.length];
+}
+
+function calculateRatioColor(colors) {
+    console.log(colors);
+    var c1 = colors[0].substring(colors[0].indexOf("(")+1, colors[0].length-1).split(", "),
+        c2 = colors[1].substring(colors[1].indexOf("(")+1, colors[1].length-1).split(", "),
+        c3 = [];
+
+    for (var i=0; i<3; i++) {
+        c3[i] = Math.round(((+c1[i]) + (+c2[i]))/2);
+    }
+
+    return "rgb(" + c3[0] + ", " + c3[1] + ", " + c3[2] + ")";
+}

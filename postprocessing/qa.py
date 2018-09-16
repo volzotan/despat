@@ -61,6 +61,10 @@ class Qa(object):
         maxy = int(box[3])
 
         thresh, mask = cv2.threshold(self.newest_fgmask, 127, 255, cv2.THRESH_BINARY)
+
+        if mask is None:
+            return ACTION_UNDEFINED
+
         mask = np.clip(mask, 0, 1)
         crop = mask[miny:maxy, minx:maxx]
         
@@ -162,11 +166,14 @@ class Qa(object):
             # if actions[i] == ACTION_UNDEFINED:
             #     cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 0))
 
-            if actions[i] == ACTION_IDLE and predecessor[i] == 0:
-                cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+            # if actions[i] == ACTION_IDLE and predecessor[i] == 0:
+            #     cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
 
-            # if actions[i] == ACTION_MOVING:
-                # cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+            if actions[i] == ACTION_IDLE:
+                cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (255, 0, 0))
+
+            if actions[i] == ACTION_MOVING:
+                cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 255))
 
             # if predecessor[i] == 0:
             #     cv2.rectangle(vis, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 0))
@@ -193,9 +200,10 @@ class Qa(object):
 if __name__ == "__main__":
     # check for CLI arguments
     
-    IMAGE_DIR       = "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ"
-    ANNOTATION_DIR  = "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_1000px"
-    OUTPUT_DIR      = "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_fusion"
+    BASE_DIR        = "/media/internal/DESPATDATASETS/"
+    IMAGE_DIR       = BASE_DIR + "18-04-21_bahnhof_ZTE"
+    ANNOTATION_DIR  = BASE_DIR + "18-04-21_bahnhof_ZTE_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_800px"
+    OUTPUT_DIR      = BASE_DIR + "18-04-21_bahnhof_ZTE_fusion"
 
     try:
         os.makedirs(OUTPUT_DIR)
@@ -215,11 +223,18 @@ if __name__ == "__main__":
 
     filelist = sorted(filelist, key=lambda filename: os.path.splitext(os.path.basename(filename[1]))[0])
 
-    filelist = filelist[0:40]
+    # filelist = filelist[0:40]
 
     qa = Qa()
 
     for i in range(len(filelist)):
+        output_filename = os.path.join(OUTPUT_DIR, filelist[i][1])
+
+        # not a good idea, bg model needs to be initialized
+        if (os.path.exists(output_filename)):
+            print("skipped: {}".format(output_filename))
+            continue
+
         start = time.time()
 
         data = json.load(open(filelist[i][0], "r"))
@@ -227,9 +242,9 @@ if __name__ == "__main__":
         qa.add_json(filelist[i][0])
         qa.run()
         
-        qa.viz(os.path.join(OUTPUT_DIR, filelist[i][1]+".jpg"))
+        # qa.viz(os.path.join(OUTPUT_DIR, filelist[i][1]+".jpg"))
         
-        qa.save_json(os.path.join(OUTPUT_DIR, filelist[i][1]))
+        qa.save_json(output_filename)
 
         print("{0:2d} : {1:.2f}s".format(i, time.time() - start))
 
