@@ -133,52 +133,55 @@ def classname_to_id(name):
 #     }
 # ]
 
-# OUTPUT_FILENAME = "boxes_campusoffice.txt"
-# DATA = [
-#     {
-#         "name": "campusoffice",
-#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/16-07-14_campusoffice_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_1000px",
-#         "src": [
-#             [3090, 3722],
-#             [4010, 2623],
-#             [3000, 2780],
-#             #[2753, 2360],
-#             [1070, 2782]
-#         ],
-#         "dst": [
-#             [50.974806, 11.328820],
-#             [50.974629, 11.328794],
-#             [50.974719, 11.328906],
-#             #[...],
-#             [50.974791, 11.329041]
-#         ]
-#     }
-# ]
-# startdate = datetime(2016, 7, 14, 11)
-
-OUTPUT_FILENAME = "boxes_bahnhof2.txt"
+OUTPUT_FILENAME = "boxes_campusoffice.txt"
 DATA = [
     {
-        "name": "default camera",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_800px",
+        "name": "campusoffice",
+        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/16-07-14_campusoffice_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_1100px",
         "src": [
-            [1124, 1416],
-            [1773, 2470],
-            [3785, 1267],
-            [3416, 928],
-            [2856, 1303],
-            [2452, 916]
+            #[3090, 3722],   # 1
+            [4010, 2623],   # 2
+            [3000, 2780],   # 3
+            #[2753, 2360],  # 4
+            [1070, 2782],   # 5
+            [4824, 3925]    # 6
         ],
         "dst": [
-            [50.971296, 11.037630],
-            [50.971173, 11.037914],
-            [50.971456, 11.037915],
-            [50.971705, 11.037711],
-            [50.971402, 11.037796],
-            [50.971636, 11.037486]
+            #[50.974806, 11.328820], # 1
+            [50.974629, 11.328794], # 2
+            [50.974719, 11.328906], # 3
+            #[...],                 # 4
+            [50.974796, 11.329128], # [50.974791, 11.329041], # 5
+            [50.974816, 11.328647]  # 6
         ]
     }
 ]
+startdate = datetime(2016, 7, 14, 11)
+
+# OUTPUT_FILENAME = "boxes_bahnhof3.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         # "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_800px",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_fusion",
+#         "src": [
+#             [1124, 1416],
+#             [1773, 2470],
+#             [3785, 1267],
+#             [3416, 928],
+#             [2856, 1303],
+#             [2452, 916]
+#         ],
+#         "dst": [
+#             [50.971296, 11.037630],
+#             [50.971173, 11.037914],
+#             [50.971456, 11.037915],
+#             [50.971705, 11.037711],
+#             [50.971402, 11.037796],
+#             [50.971636, 11.037486]
+#         ]
+#     }
+# ]
 
 # DATA = [
 #     {
@@ -334,7 +337,8 @@ with open(OUTPUT_FILENAME, "w") as outputfile:
         "minx",
         "miny",
         "maxx",
-        "maxy"
+        "maxy",
+        "action"
     ])
 
 for dataset in DATA:
@@ -362,7 +366,7 @@ for dataset in DATA:
     for imagedata in image_list:
 
         # dirty fix for the missing timestamps in the campusoffice dataset
-        # startdate = startdate + timedelta(seconds=60)
+        startdate = startdate + timedelta(seconds=60)
 
         for i in range(0, len(imagedata["boxes"])):
 
@@ -378,9 +382,9 @@ for dataset in DATA:
             # timestamp device class confidence lat lon minx miny maxx maxy
 
             # dirty fix for the missing timestamps in the campusoffice dataset
-            # out.append(startdate)
+            out.append(startdate)
 
-            out.append(imagedata["timestamp"])
+            # out.append(imagedata["timestamp"])
             out.append(DATA.index(dataset))
             out.append(classname_to_id(imagedata["classes"][i]))
             out.append(imagedata["scores"][i]) # TODO: use here own confidence metric based on camera angle, etc
@@ -399,6 +403,11 @@ for dataset in DATA:
             out.append(pointsOut[0][0][1].item())
 
             out = out + imagedata["boxes"][i]
+
+            if "actions" in imagedata.keys():
+                out.append(imagedata["actions"][i])
+            else:
+                out.append(-1)
 
             output.append(out)
 

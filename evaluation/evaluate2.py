@@ -10,7 +10,7 @@ from util.drawhelper import Drawhelper
 from detector.tilemanager import TileManager
 
 IOU_THRESHOLD = 0.5
-CONFIDENCE_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.1 #0.5
 VISUALIZE = False
 
 AP = []
@@ -19,14 +19,14 @@ AP = []
 # NETWORK = "ssd_mobilenet_v2_coco_2018_03_29"
 #  NETWORK = "ssd_mobilenet_v1_quantized_300x300_coco14_sync_2018_07_03"
 # NETWORK = "ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"  # + "_1000px"
-# NETWORK = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"
+NETWORK = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"
 # NETWORK = "ssd_inception_v2_coco_2018_01_28"
 # NETWORK = "ssdlite_mobilenet_v2_coco_2018_05_09"
 # NETWORK = "faster_rcnn_inception_v2_coco_2018_01_28"
 # NETWORK = "faster_rcnn_resnet101_coco_2018_01_28"
-NETWORK = "faster_rcnn_nas_coco_2018_01_28"
+# NETWORK = "faster_rcnn_nas_coco_2018_01_28"
 
-#NETWORK = NETWORK + "_FULL"
+# NETWORK = NETWORK + "_FULL"
 
 INPUT_DIRS = [
     ("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_zitadelle_ZTE_annotation"),
@@ -35,21 +35,34 @@ INPUT_DIRS = [
     ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation")
 ]
 
-# TILESIZES = np.arange(700, 3001, 50)
-# TILESIZES = [640] + list(TILESIZES)
-
-TILESIZES = [2000] #np.arange(300, 3001, 50) #[1000]
+TILESIZES = np.arange(700, 3001, 50)
+TILESIZES = [640] + list(TILESIZES)
+# TILESIZES = np.arange(300, 3001, 50) #[1000] #[800]
 
 LIMIT = 40
+
+
+# ------------------------------------------------------------------------------------------------
+
+INPUT_DIRS = [
+    ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_fusion"),
+#    ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/","/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_1000px"),
+]
+
+NETWORK = ""
+TILESIZES = [None]
+
 
 
 # Visualization
 
 EVALUATION_IMAGE_OUTPUT_DIR = "evaluate2_viz"
 # NETWORK                     = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"
+NETWORK                     = "ssd_mobilenet_v1_coco_2018_01_28"
 # INPUT_DIRS                  = [("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation")]
-# TILESIZES                   = [800]
-# VISUALIZE                   = True
+INPUT_DIRS                  = [("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation")]
+TILESIZES                   = [3000]
+VISUALIZE                   = True
 
 
 
@@ -228,12 +241,15 @@ def visualize(gt, dt, c, xml_filename, output_dir):
     image_path = image_path.replace("/media/internal", "/Users/volzotan/Documents")
     inp = image_path
     out = os.path.join(output_dir, image_filename)
-    tp, fp, fn = filter_and_evaluate(gt, dt, c, min_confidence=0.7)
+    # tp, fp, fn = filter_and_evaluate(gt, dt, c, min_confidence=0.7)
+    tp, fp, fn = filter_and_evaluate(gt, dt, c, min_confidence=0.1)
 
     tilesize = TILESIZES[0]
     tm = TileManager(image_path, tilesize, tilesize)
 
-    draw(inp, out, tp, fp, fn, tiles=tm._get_tile_borders())
+    # draw(inp, out, tp, fp, fn, tiles=tm._get_tile_borders())
+    draw(inp, out, tp, fp, fn) #, tiles=tm._get_tile_borders())
+    # draw(inp, out, [], [], [], tiles=tm._get_tile_borders())
 
 
 def filter_and_evaluate(gt, dt, name_of_class, min_confidence=0.5):
@@ -327,16 +343,18 @@ def run(filepairs, model):
     except Exception as e:
         print("Setting matplotlib style failed")
 
+    fig = plt.figure(figsize=(8, 3))
+    ax = fig.add_subplot(111)
+
     # print("filepairs: {}".format(len(filepairs)))
 
     classes = ["person"]
 
-    plt.xlabel("recall")
-    plt.ylabel("precision")
+    # ax.xlabel("recall")
+    # ax.ylabel("precision")
 
-    axes = plt.gca()
-    axes.set_xlim([0, 1.05])
-    axes.set_ylim([0, 1.05])
+    ax.set_xlim([0, 1.05])
+    ax.set_ylim([0, 1.05])
 
     handles = []
 
@@ -406,9 +424,9 @@ def run(filepairs, model):
 
         AP.append(auc)
 
-    plt.legend(classes)
-    plt.tight_layout()
-    plt.savefig('plot_mapPerson_{}.png'.format(model))
+    # plt.legend(classes)
+    # plt.tight_layout()
+    # plt.savefig('plot_mapPerson_{}.png'.format(model))
     # plt.show()
 
 
@@ -526,5 +544,9 @@ if __name__ == "__main__":
         filepairs = sorted(filepairs, key=lambda filenames: os.path.splitext(os.path.basename(filenames[0]))[0])
 
         run(filepairs, model)
+
+    plt.tight_layout()
+    plt.savefig('plot_mapPerson_{}.png'.format(model))
+    plt.show()
 
     print(AP)
