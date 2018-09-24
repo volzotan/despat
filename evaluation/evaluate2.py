@@ -35,34 +35,35 @@ INPUT_DIRS = [
     ("/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation", "/Users/volzotan/Documents/DESPATDATASETS/18-05-28_bonn_ZTE_annotation")
 ]
 
-TILESIZES = np.arange(700, 3001, 50)
-TILESIZES = [640] + list(TILESIZES)
+# TILESIZES = np.arange(700, 3001, 50)
+# TILESIZES = [640] + list(TILESIZES)
 # TILESIZES = np.arange(300, 3001, 50) #[1000] #[800]
+TILESIZES = [800]
 
 LIMIT = 40
 
 
 # ------------------------------------------------------------------------------------------------
 
-INPUT_DIRS = [
-    ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_fusion"),
-#    ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/","/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_1000px"),
-]
-
-NETWORK = ""
-TILESIZES = [None]
+# INPUT_DIRS = [
+#     ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_fusion"),
+# #    ("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/","/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_1000px"),
+# ]
+#
+# NETWORK = ""
+# TILESIZES = [None]
 
 
 
 # Visualization
 
-EVALUATION_IMAGE_OUTPUT_DIR = "evaluate2_viz"
-# NETWORK                     = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"
-NETWORK                     = "ssd_mobilenet_v1_coco_2018_01_28"
-# INPUT_DIRS                  = [("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation")]
-INPUT_DIRS                  = [("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation")]
-TILESIZES                   = [3000]
-VISUALIZE                   = True
+# EVALUATION_IMAGE_OUTPUT_DIR = "evaluate2_viz"
+# # NETWORK                     = "ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03"
+# NETWORK                     = "ssd_mobilenet_v1_coco_2018_01_28"
+# # INPUT_DIRS                  = [("/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation")]
+# INPUT_DIRS                  = [("/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation/", "/Users/volzotan/Documents/DESPATDATASETS/18-04-09_darmstadt_motoZ_annotation")]
+# TILESIZES                   = [3000]
+# VISUALIZE                   = False
 
 
 
@@ -337,13 +338,17 @@ def run(filepairs, model):
 
     # (input_dir_gt, input_dir_data)
 
+
+    COLOR_1 = "#fde725" #"#3b528b"
+
     try:
-        plt.style.use("grayscale")
-        plt.style.use("despat")
+        plt.style.use('grayscale')
+        plt.style.use('despat')
+        plt.style.use('despat_dark')
     except Exception as e:
         print("Setting matplotlib style failed")
 
-    fig = plt.figure(figsize=(8, 3))
+    fig = plt.figure(figsize=(8, 4))
     ax = fig.add_subplot(111)
 
     # print("filepairs: {}".format(len(filepairs)))
@@ -415,7 +420,7 @@ def run(filepairs, model):
         # for i in range(0, len(precision)):
         #     print("{0:5.3f} {1:5.3f}".format(precision[i], recall[i]))
 
-        handle = plt.plot(recall, precision, label=c) #, linestyle='--', marker='o')
+        handle = plt.plot(recall, precision, label=c, color=COLOR_1) #, linestyle='--', marker='o')
         handles.append(handle)
 
         auc = _area_under_curve(precision, recall)
@@ -424,9 +429,12 @@ def run(filepairs, model):
 
         AP.append(auc)
 
-    # plt.legend(classes)
+    plt.legend(classes, frameon=False)
+    plt.grid(False)
+    plt.ylabel("Precision")
+    plt.xlabel("Recall")
     # plt.tight_layout()
-    # plt.savefig('plot_mapPerson_{}.png'.format(model))
+    # plt.savefig('plot_mapPerson_{}.png'.format(model), transparent=True)
     # plt.show()
 
 
@@ -546,7 +554,7 @@ if __name__ == "__main__":
         run(filepairs, model)
 
     plt.tight_layout()
-    plt.savefig('plot_mapPerson_{}.png'.format(model))
-    plt.show()
+    plt.savefig('plot_mapPerson_{}.png'.format(model), transparent=True)
+    # plt.show()
 
     print(AP)

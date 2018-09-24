@@ -155,8 +155,10 @@ public class NotificationUtil {
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_DEFAULT);
 
-        if (timeout > 0) {
-            builder.setTimeoutAfter(timeout);
+        if (Build.VERSION.SDK_INT >= 26) {
+            if (timeout > 0) {
+                builder.setTimeoutAfter(timeout);
+            }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

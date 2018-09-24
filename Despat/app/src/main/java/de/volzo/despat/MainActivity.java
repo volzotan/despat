@@ -368,9 +368,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        } else {
 //            Log.wtf(TAG, "session missing");
 //        }
-//
-        HomographyCalculator hcalc = new HomographyCalculator();
-        hcalc.test(this);
+
+//        HomographyCalculator hcalc = new HomographyCalculator();
+//        hcalc.test(this);
 
         //        btSettings.callOnClick();
 

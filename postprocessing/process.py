@@ -109,6 +109,180 @@ def classname_to_id(name):
 
 # input
 
+OUTPUT_FILENAME = "hamburg.txt"
+DATA = [
+    {
+        "name": "default camera",
+        "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/hamburg_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_700px",
+        "src": [
+            [630, 3205],
+            [4720, 2975],
+            [5287, 2614],
+            [2962, 2385],
+            [4889, 3529]
+        ],
+        "dst": [
+            [53.552405, 10.008568],
+            [53.552896, 10.008186],
+            [53.553016, 10.007925],
+            [53.552594, 10.007984],
+            [53.552897, 10.008380]
+        ]
+    }
+]
+MISSING_TIMESTAMPS = True
+INTERVAL = 60
+startdate = datetime(2016, 7, 14, 11)
+
+
+# OUTPUT_FILENAME = "muenster.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/muenster_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_800px",
+#         "src": [
+#             [1365, 1607],
+#             [845, 1814],
+#             [4114, 1870],
+#             [3483, 1716],
+#             [2822, 1673]
+#         ],
+#         "dst": [
+#             [48.398967, 9.991036],
+#             [48.398642, 9.990946],
+#             [48.398435, 9.991564],
+#             [48.398593, 9.991556],
+#             [48.398716, 9.991453]
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2016, 7, 14, 11)
+
+
+# OUTPUT_FILENAME = "grotemarkt.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/grotemarkt_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_800px",
+#         "src": [
+#             [690, 2598],
+#             [2461, 2510],
+#             [3908, 2535],
+#             [4111, 2909]
+#         ],
+#         "dst": [
+#             [50.846428, 4.352338],
+#             [50.846852, 4.351798],
+#             [50.847185, 4.352194],
+#             [50.846615, 4.353058]
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2016, 7, 14, 11)
+
+
+# OUTPUT_FILENAME = "bauhaus2.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/bauhaus2_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_800px",
+#         "src": [
+#             [5013, 2750],
+#             [2639, 2450],
+#             [132, 2710],
+#             [5644, 3113]
+#         ],
+#         "dst": [
+#             [50.974458, 11.328543],
+#             [50.974633, 11.329000],
+#             [50.974901, 11.328804],
+#             [50.974513, 11.328446]   
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2016, 7, 14, 11)
+
+
+# OUTPUT_FILENAME = "bienfaiteurs1.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/bienfaiteurs1_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_800px",
+#         "src": [
+#             [1196, 2503],
+#             [4335, 2844],
+#             [3807, 1670],
+#             [429, 1561]
+#         ],
+#         "dst": [
+#             [50.858247, 4.384386],
+#             [50.858212, 4.384051],
+#             [50.857564, 4.384064],
+#             [50.858206, 4.384898] 
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2016, 7, 14, 11)
+
+
+# OUTPUT_FILENAME = "bienfaiteurs2.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/bienfaiteurs2_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_800px",
+#         "src": [
+#             [1594, 2747],
+#             [1067, 1830],
+#             [3045, 1050],
+#             [5813, 2599]
+#         ],
+#         "dst": [
+#             [50.858260, 4.384210],
+#             [50.858160, 4.384304],
+#             [50.857565, 4.384063],
+#             [50.858199, 4.383854]
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2016, 7, 14, 11)
+
+
+# OUTPUT_FILENAME = "olympiastadion.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/olympiastadion_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_800px",
+#         "src": [
+#             [1329, 3017],
+#             [2005, 2512],
+#             [3954, 2519],
+#             [4614, 3030],
+#             [4349, 2222]
+#         ],
+#         "dst": [
+#             [52.517187, 13.249406],
+#             [52.517283, 13.249645],
+#             [52.517130, 13.249788],
+#             [52.517064, 13.249504],
+#             [52.517151, 13.250352]
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2016, 7, 14, 11)
+
+
 # OUTPUT_FILENAME = "boxes_darmstadt.txt"
 # DATA = [
 #     {
@@ -133,30 +307,32 @@ def classname_to_id(name):
 #     }
 # ]
 
-OUTPUT_FILENAME = "boxes_campusoffice.txt"
-DATA = [
-    {
-        "name": "campusoffice",
-        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/16-07-14_campusoffice_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_1100px",
-        "src": [
-            #[3090, 3722],   # 1
-            [4010, 2623],   # 2
-            [3000, 2780],   # 3
-            #[2753, 2360],  # 4
-            [1070, 2782],   # 5
-            [4824, 3925]    # 6
-        ],
-        "dst": [
-            #[50.974806, 11.328820], # 1
-            [50.974629, 11.328794], # 2
-            [50.974719, 11.328906], # 3
-            #[...],                 # 4
-            [50.974796, 11.329128], # [50.974791, 11.329041], # 5
-            [50.974816, 11.328647]  # 6
-        ]
-    }
-]
-startdate = datetime(2016, 7, 14, 11)
+# OUTPUT_FILENAME = "boxes_campusoffice.txt"
+# DATA = [
+#     {
+#         "name": "campusoffice",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/16-07-14_campusoffice_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_1100px",
+#         "src": [
+#             #[3090, 3722],   # 1
+#             [4010, 2623],   # 2
+#             [3000, 2780],   # 3
+#             #[2753, 2360],  # 4
+#             [1070, 2782],   # 5
+#             [4824, 3925]    # 6
+#         ],
+#         "dst": [
+#             #[50.974806, 11.328820], # 1
+#             [50.974629, 11.328794], # 2
+#             [50.974719, 11.328906], # 3
+#             #[...],                 # 4
+#             [50.974796, 11.329128], # [50.974791, 11.329041], # 5
+#             [50.974816, 11.328647]  # 6
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2016, 7, 14, 11)
 
 # OUTPUT_FILENAME = "boxes_bahnhof3.txt"
 # DATA = [
@@ -183,6 +359,7 @@ startdate = datetime(2016, 7, 14, 11)
 #     }
 # ]
 
+# OUTPUT_FILENAME = "boxes_lomihi.txt"
 # DATA = [
 #     {
 #         "name": "low-fi",
@@ -207,6 +384,26 @@ startdate = datetime(2016, 7, 14, 11)
 #     {
 #         "name": "mid-fi",
 #         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/faster_rcnn_inception_v2_coco_2018_01_28_1600px",
+#         "src": [
+#             [1124, 1416],
+#             [1773, 2470],
+#             [3785, 1267],
+#             [3416, 928],
+#             [2856, 1303],
+#             [2452, 916]
+#         ],
+#         "dst": [
+#             [50.971296, 11.037630],
+#             [50.971173, 11.037914],
+#             [50.971456, 11.037915],
+#             [50.971705, 11.037711],
+#             [50.971402, 11.037796],
+#             [50.971636, 11.037486]
+#         ]
+#     },
+#     {
+#         "name": "high-fi",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/18-04-21_bahnhof_ZTE_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_1000px",
 #         "src": [
 #             [1124, 1416],
 #             [1773, 2470],
@@ -360,13 +557,15 @@ for dataset in DATA:
         image_list.append(data)
 
     h, status = calculate_homography(dataset["src"], dataset["dst"])
+    print("status: " + str(status))
 
     output = []
 
     for imagedata in image_list:
 
-        # dirty fix for the missing timestamps in the campusoffice dataset
-        startdate = startdate + timedelta(seconds=60)
+        # dirty fix for the missing timestamps in datasets
+        if MISSING_TIMESTAMPS:
+            startdate = startdate + timedelta(seconds=60)
 
         for i in range(0, len(imagedata["boxes"])):
 
@@ -381,10 +580,12 @@ for dataset in DATA:
             # data:
             # timestamp device class confidence lat lon minx miny maxx maxy
 
-            # dirty fix for the missing timestamps in the campusoffice dataset
-            out.append(startdate)
+            # dirty fix for the missing timestamps in datasets
+            if MISSING_TIMESTAMPS:
+                out.append(startdate)
+            else:
+                out.append(imagedata["timestamp"])
 
-            # out.append(imagedata["timestamp"])
             out.append(DATA.index(dataset))
             out.append(classname_to_id(imagedata["classes"][i]))
             out.append(imagedata["scores"][i]) # TODO: use here own confidence metric based on camera angle, etc
