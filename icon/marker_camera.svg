@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="33px"
+	 height="33px" viewBox="0 0 33 33" enable-background="new 0 0 33 33" xml:space="preserve">
+<g id="Base_Marker" display="none">
+	<circle display="inline" fill="#4D4D4D" cx="16.5" cy="14.417" r="14.125"/>
+	<polygon display="inline" fill="#4D4D4D" points="16.5,32.896 26.145,24.708 6.856,24.708 	"/>
+</g>
+<g id="Base_Marker_Narrow" display="none">
+	<circle display="inline" fill="#4D4D4D" cx="16.5" cy="12.75" r="12.333"/>
+	<polygon display="inline" fill="#4D4D4D" points="16.5,32.25 20.562,23.025 12.439,23.025 	"/>
+</g>
+<g id="Base_Marker_1_" display="none">
+	<path display="inline" fill="#F5E61F" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M27.886,12.807
+		c0-6.288-5.098-11.385-11.386-11.385c-6.288,0-11.385,5.098-11.385,11.385c0,5.21,3.503,9.593,8.28,10.945l3.105,6.352l3.106-6.352
+		C24.383,22.399,27.886,18.018,27.886,12.807z"/>
+</g>
+<g id="Ebene_12">
+	<path fill="#4D4D4D" stroke="#FFFFFF" stroke-width="2" stroke-miterlimit="10" d="M27.886,12.807
+		c0-6.288-5.098-11.385-11.386-11.385c-6.288,0-11.385,5.098-11.385,11.385c0,5.21,3.503,9.593,8.28,10.945l3.105,6.352l3.106-6.352
+		C24.383,22.399,27.886,18.018,27.886,12.807z"/>
+</g>
+<g id="Plus" display="none">
+	<rect x="9.22" y="11.5" display="inline" fill="#FFFFFF" width="14.562" height="2"/>
+	<rect x="15.5" y="5.219" display="inline" fill="#FFFFFF" width="2" height="14.562"/>
+</g>
+<g id="Plus_black" display="none">
+	<rect x="9.22" y="11.5" display="inline" width="14.562" height="2"/>
+	<rect x="15.5" y="5.219" display="inline" width="2" height="14.562"/>
+</g>
+<g id="Plus_1" display="none">
+	<rect x="13.209" y="5.583" display="inline" fill="#FFFFFF" width="1.385" height="11.083"/>
+	<rect x="8.36" y="10.433" display="inline" fill="#FFFFFF" width="11.083" height="1.385"/>
+	<text transform="matrix(1 0 0 1 15.208 21.875)" display="inline" fill="#FFFFFF" font-family="'Courier-Bold'" font-size="12">1</text>
+</g>
+<g id="Ebene_7" display="none">
+	<rect x="15.808" y="3.333" display="inline" fill="#FFFFFF" width="1.385" height="11.083"/>
+	<rect x="10.958" y="8.183" display="inline" fill="#FFFFFF" width="11.083" height="1.385"/>
+	
+		<text transform="matrix(1 0 0 1 11.9985 26.8726)" display="inline" fill="#FFFFFF" font-family="'Courier-Bold'" font-size="15.0043">1</text>
+</g>
+<g id="Camera">
+	<g>
+		<circle fill="#FFFFFF" cx="16.507" cy="13.268" r="2.502"/>
+		<path fill="#FFFFFF" d="M19.004,8.486V7.36h-5.003v1.126h-1.55v-0.76h-2.174v0.76H9.709v9.451h0.568h2.174h1.55h5.003h4.295V8.486
+			H19.004z M16.507,16.893c-2.002,0-3.625-1.623-3.625-3.625c0-2.001,1.623-3.624,3.625-3.624s3.625,1.623,3.625,3.624
+			C20.132,15.27,18.509,16.893,16.507,16.893z"/>
+	</g>
+</g>
+<g id="Camera_1" display="none">
+	<text transform="matrix(1 0 0 1 12.665 25.314)" display="inline" fill="#FFFFFF" font-family="'Courier'" font-size="12.9784">1</text>
+	<g display="inline">
+		<circle fill="#FFFFFF" cx="16.507" cy="10.175" r="2.284"/>
+		<path fill="#FFFFFF" d="M18.786,5.81V4.782h-4.567V5.81h-1.415V5.117H10.82V5.81h-0.518v8.627h0.518h1.984h1.415h4.567h3.92V5.81
+			H18.786z M16.507,13.483c-1.828,0-3.309-1.481-3.309-3.308c0-1.828,1.481-3.309,3.309-3.309s3.309,1.481,3.309,3.309
+			C19.815,12.002,18.334,13.483,16.507,13.483z"/>
+	</g>
+</g>
+<g id="Unknown" display="none">
+	
+		<text transform="matrix(1 0 0 1 11.3018 19.0845)" display="inline" fill="#FFFFFF" font-family="'FiraMonoOT'" font-size="17.3299">?</text>
+</g>
+<g id="Colors">
+	<rect x="38.231" y="5.048" fill="#481E70" width="23.979" height="7.635"/>
+	<rect x="38.231" y="20.317" fill="#F5E61F" width="23.979" height="7.635"/>
+	<rect x="38.231" y="12.683" fill="#47C06E" width="23.979" height="7.634"/>
+	<rect x="62.21" y="5.049" fill="none" width="23.187" height="7.634"/>
+	<text transform="matrix(1 0 0 1 65.4751 8.916)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" font-size="5.4484">481E70</text>
+	<rect x="62.21" y="12.683" fill="none" width="23.187" height="7.635"/>
+	<text transform="matrix(1 0 0 1 65.2925 16.5508)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" font-size="5.4484">47C06E</text>
+	<rect x="62.21" y="20.318" fill="none" width="23.187" height="7.634"/>
+	<text transform="matrix(1 0 0 1 65.6167 24.1851)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" font-size="5.4484">F5E61F</text>
+</g>
+</svg>
