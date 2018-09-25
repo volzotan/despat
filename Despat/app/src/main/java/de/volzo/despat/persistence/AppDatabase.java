@@ -12,7 +12,8 @@ import android.content.Context;
                         HomographyPoint.class,
                         Position.class,
                         ErrorEvent.class,
-                        Event.class},
+                        Event.class,
+                        Benchmark.class},
                         version = 1)
 
 @TypeConverters(RoomConverter.class)
@@ -28,6 +29,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract PositionDao positionDao();
     public abstract ErrorEventDao errorEventDao();
     public abstract EventDao eventDao();
+    public abstract BenchmarkDao benchmarkDao();
 
     public static AppDatabase getAppDatabase(Context context) {
         if (INSTANCE == null) {
@@ -47,6 +49,7 @@ public abstract class AppDatabase extends RoomDatabase {
         AppDatabase.destroyInstance();
         AppDatabase db = AppDatabase.getAppDatabase(context);
 
+        db.benchmarkDao().dropTable();
         db.eventDao().dropTable();
         db.errorEventDao().dropTable();
         db.homographyPointDao().dropTable();

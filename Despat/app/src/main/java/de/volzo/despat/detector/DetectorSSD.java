@@ -11,10 +11,14 @@ import android.util.Size;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Benchmark;
+import de.volzo.despat.persistence.BenchmarkDao;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.support.Stopwatch;
 
@@ -24,10 +28,12 @@ public class DetectorSSD extends Detector {
 
     private Context context;
 
+    private String detectorName;
+
     private TensorFlowInterface tfInterface;
     private Stopwatch stopwatch;
 
-    private static final int TILESIZE_INPUT = 600;
+    private static final int TILESIZE_INPUT = 800;
     private static final int TILESIZE_OUTPUT = 300;
     private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
 
@@ -58,7 +64,28 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init(String detector) throws Exception {
+
+        if (detector == null) {
+
+        }
+
+        switch (detector) {
+            case "low": {
+                break;
+            }
+            case "mid": {
+                break;
+            }
+            case "high": {
+                break;
+            }
+            default: {
+                throw new Exception("undefined detector selected");
+            }
+        }
+
+        this.detectorName = detector;
 
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
@@ -126,7 +153,15 @@ public class DetectorSSD extends Detector {
             Bitmap crop = tileManager.getTileImage(tile);
             results = tfInterface.recognizeImage(crop);
             crop.recycle();
-            stopwatch.stop("totalInference");
+            double totalInferenceTime = stopwatch.stop("totalInference");
+
+            AppDatabase db = AppDatabase.getAppDatabase(context);
+            BenchmarkDao benchmarkDao = db.benchmarkDao();
+            Benchmark benchmark = new Benchmark();
+            benchmark.setDetector(detectorName);
+            benchmark.setTimestamp(Calendar.getInstance().getTime());
+            benchmark.setInferenceTime(totalInferenceTime);
+            benchmarkDao.insert();
 
             // tile.setResults(results); EVIL
             tileManager.passResult(tile, results);

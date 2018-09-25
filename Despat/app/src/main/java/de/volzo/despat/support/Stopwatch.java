@@ -32,7 +32,7 @@ public class Stopwatch {
         start.put(key, Calendar.getInstance().getTime());
     }
 
-    public void stop(String key) {
+    public double stop(String key) {
         if (!start.containsKey(key)) {
             Log.w(TAG, "failed stopping timer. key " + key + " missing");
         }
@@ -48,6 +48,8 @@ public class Stopwatch {
         double diff = now.getTime() - startTime.getTime();
         measurements.add(diff);
         runtime.put(key, measurements);
+
+        return diff;
     }
 
     public Double getLast(String key) {

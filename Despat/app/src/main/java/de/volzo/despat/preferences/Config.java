@@ -28,7 +28,7 @@ public class Config {
     public static final String DATEFORMAT_SHORT                     = "yyyy-MM-dd HH:mm:ss";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
 
-    public static final boolean DELETE_AFTER_RECOGNITION            = true;
+    public static final boolean DELETE_AFTER_RECOGNITION            = false;
 
     public static final float IMGROLL_FREE_SPACE_THRESHOLD          = 300; // in MB
     public static final boolean IMGROLL_DELETE_IF_FULL              = false;
@@ -217,6 +217,22 @@ public class Config {
     public static void setShutterInterval(Context context, int shutterInterval) {
         setProperty(context, KEY_SHUTTER_INTERVAL, shutterInterval);
     }
+
+    /**
+     * NETWORK FIDELITY
+     *
+     */
+    public static final String DEFAULT_NETWORK_FIDELITY             = "low";
+    public static final String KEY_NETWORK_FIDELITY                 = "de.volzo.despat.networkFidelity";
+
+    public static String getNetworkFidelity(Context context) {
+        return getProperty(context, KEY_NETWORK_FIDELITY, DEFAULT_NETWORK_FIDELITY);
+    }
+
+    public static void setNetworkFidelity(Context context, int networkFidelity) {
+        setProperty(context, KEY_NETWORK_FIDELITY, networkFidelity);
+    }
+
 
     /**
      * PHONE HOME

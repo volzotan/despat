@@ -16,7 +16,7 @@ public abstract class Detector {
 
     float CONFIDENCE_THRESHOLD = 0.5f;
 
-    public abstract void init() throws Exception;
+    public abstract void init(String detector) throws Exception;
     public abstract void load(File fullFilename);
     public abstract List<Recognition> run() throws Exception;
     public abstract void save() throws Exception;

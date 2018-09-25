@@ -115,26 +115,42 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         category.addPreference(prefShutterInterval);
         preferenceSummaryMap.put(prefShutterInterval, R.string.pref_summary_shutterInterval);
 
-        // SERVER ----------------------------------------------------------------------------------
+        // NETWORK ---------------------------------------------------------------------------------
 
         category = new PreferenceCategory(context);
-        category.setTitle("Server");
+        category.setTitle("Detection Settings");
         screen.addPreference(category);
 
-        SwitchPreference prefPhoneHome = new SwitchPreference(context);
-        prefPhoneHome.setTitle(context.getString(R.string.pref_title_phoneHome));
-        prefPhoneHome.setSummary(context.getString(R.string.pref_summary_phoneHome));
-        prefPhoneHome.setDefaultValue(Config.DEFAULT_PHONE_HOME);
-        prefPhoneHome.setKey(Config.KEY_PHONE_HOME);
-        category.addPreference(prefPhoneHome);
+        ListPreference prefNetworkFidelity = new ListPreference(context);
+        prefNetworkFidelity.setTitle(R.string.pref_title_networkFidelity);
+        prefNetworkFidelity.setSummary(R.string.pref_summary_networkFidelity);
+        prefNetworkFidelity.setEntryValues(new String[] {"low", "mid", "high"});
+        prefNetworkFidelity.setEntries(new String[] {"Low-fidelity", "Medium-Fidelity", "High-Fidelity"});
+        prefNetworkFidelity.setDefaultValue(Config.DEFAULT_NETWORK_FIDELITY);
+        prefNetworkFidelity.setKey(Config.KEY_NETWORK_FIDELITY);
+        category.addPreference(prefNetworkFidelity);
+        preferenceSummaryMap.put(prefNetworkFidelity, R.string.pref_summary_networkFidelity);
 
-        EditTextPreference prefServerAddress = new EditTextPreference(context);
-        prefServerAddress.setTitle(context.getString(R.string.pref_title_serverAddress));
-        prefServerAddress.setSummary(context.getString(R.string.pref_summary_serverAddress));
-        prefServerAddress.setDefaultValue(Config.DEFAULT_SERVER_ADDRESS);
-        prefServerAddress.setKey(Config.KEY_SERVER_ADDRESS);
-        category.addPreference(prefServerAddress);
-        preferenceSummaryMap.put(prefServerAddress, R.string.pref_summary_serverAddress);
+        // SERVER ----------------------------------------------------------------------------------
+
+//        category = new PreferenceCategory(context);
+//        category.setTitle("Server");
+//        screen.addPreference(category);
+//
+//        SwitchPreference prefPhoneHome = new SwitchPreference(context);
+//        prefPhoneHome.setTitle(context.getString(R.string.pref_title_phoneHome));
+//        prefPhoneHome.setSummary(context.getString(R.string.pref_summary_phoneHome));
+//        prefPhoneHome.setDefaultValue(Config.DEFAULT_PHONE_HOME);
+//        prefPhoneHome.setKey(Config.KEY_PHONE_HOME);
+//        category.addPreference(prefPhoneHome);
+//
+//        EditTextPreference prefServerAddress = new EditTextPreference(context);
+//        prefServerAddress.setTitle(context.getString(R.string.pref_title_serverAddress));
+//        prefServerAddress.setSummary(context.getString(R.string.pref_summary_serverAddress));
+//        prefServerAddress.setDefaultValue(Config.DEFAULT_SERVER_ADDRESS);
+//        prefServerAddress.setKey(Config.KEY_SERVER_ADDRESS);
+//        category.addPreference(prefServerAddress);
+//        preferenceSummaryMap.put(prefServerAddress, R.string.pref_summary_serverAddress);
 
         setPreferenceScreen(screen);
     }
@@ -168,8 +184,13 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         Integer summaryKey = preferenceSummaryMap.get(preference);
 
         if (preference instanceof ListPreference) {
-            ListPreference listPreference = (ListPreference) preference;
-            listPreference.setSummary(listPreference.getEntry());
+//            ListPreference listPreference = (ListPreference) preference;
+//            listPreference.setSummary(listPreference.getEntry());
+
+            if (summaryKey != null) {
+                String newValue = sharedPrefs.getString(key, "undefined");
+                preference.setSummary(String.format(Config.LOCALE, context.getString(summaryKey), newValue));
+            }
             return;
         }
 

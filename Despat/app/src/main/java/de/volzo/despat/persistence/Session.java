@@ -52,7 +52,13 @@ public class Session {
     @ColumnInfo(name = "resumed")
     private boolean resumed = false;
 
-    // --- additional information --- //
+    // --- settings --- //
+
+    @ColumnInfo(name = "detector")
+    private String detector;
+
+    @ColumnInfo(name = "tilesize")
+    private int tilesize;
 
     @ColumnInfo(name = "shutter_interval")
     private Integer shutterInterval;
@@ -187,6 +193,22 @@ public class Session {
 
     public void setResumed(boolean resumed) {
         this.resumed = resumed;
+    }
+
+    public String getDetector() {
+        return detector;
+    }
+
+    public void setDetector(String detector) {
+        this.detector = detector;
+    }
+
+    public int getTilesize() {
+        return tilesize;
+    }
+
+    public void setTilesize(int tilesize) {
+        this.tilesize = tilesize;
     }
 
     public Integer getShutterInterval() {

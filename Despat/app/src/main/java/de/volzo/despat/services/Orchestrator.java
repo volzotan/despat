@@ -155,6 +155,18 @@ public class Orchestrator extends BroadcastReceiver {
                         } else {
                             Log.d(TAG, "RecognitionService not started, already running");
                         }
+
+                        if (!Util.isServiceRunning(context, CompressorService.class)) {
+                            AppDatabase db = AppDatabase.getAppDatabase(context);
+                            SessionDao sessionDao = db.sessionDao();
+                            Session newestSession = sessionDao.getLast();
+                            if (newestSession != null) {
+                                Orchestrator.runCompressorService(context, newestSession.getId()); // TODO: only add newest images
+                            }
+                        } else {
+                            Log.d(TAG, "CompressorService not started, already running");
+                        }
+
                     } catch (RecordingSession.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }

@@ -142,6 +142,8 @@ public class NotificationUtil {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setUpServiceProgressNotificationChannel(context, notificationChannelId, notificationChannelName);
         }
@@ -155,17 +157,18 @@ public class NotificationUtil {
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_DEFAULT);
 
-        if (Build.VERSION.SDK_INT >= 26) {
-            if (timeout > 0) {
+        if (timeout > 0) {
+            if (Build.VERSION.SDK_INT >= 26) {
                 builder.setTimeoutAfter(timeout);
+            } else {
+                Log.d(TAG, "timeout not supported due to API level. Notification deleted");
+                notificationManager.cancel(notificationId);
             }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setChannelId(notificationChannelId);
         }
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(notificationId, builder.build());
     }
 
