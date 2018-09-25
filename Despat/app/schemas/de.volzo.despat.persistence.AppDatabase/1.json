@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "5b27c823969178cdc77f70355964b92b",
+    "identityHash": "f40c96701899289270470df13d12e369",
     "entities": [
       {
         "tableName": "Status",
@@ -86,7 +86,7 @@
       },
       {
         "tableName": "Session",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `image_width` INTEGER NOT NULL, `image_height` INTEGER NOT NULL, `exclusion_image` BLOB, `compressed_image` TEXT, `homography_matrix` TEXT, `resumed` INTEGER NOT NULL, `shutter_interval` INTEGER, `exposure_threshold` REAL, `exposure_compensation` REAL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `image_width` INTEGER NOT NULL, `image_height` INTEGER NOT NULL, `exclusion_image` BLOB, `compressed_image` TEXT, `homography_matrix` TEXT, `resumed` INTEGER NOT NULL, `detector` TEXT, `tilesize` INTEGER NOT NULL, `shutter_interval` INTEGER, `exposure_threshold` REAL, `exposure_compensation` REAL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -157,6 +157,18 @@
           {
             "fieldPath": "resumed",
             "columnName": "resumed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "detector",
+            "columnName": "detector",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tilesize",
+            "columnName": "tilesize",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -525,7 +537,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"5b27c823969178cdc77f70355964b92b\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"f40c96701899289270470df13d12e369\")"
     ]
   }
 }

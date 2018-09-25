@@ -34,3 +34,6 @@ corodiak.db
 Gemfile.lock
 postprocessing/background_subtraction/scaled_*
 postprocessing/background_subtraction/output_*
+visualization/bahnhof_tiles
+visualization/css/bootstrap.css.map
+visualization/css/bootstrap.min.css.map
