@@ -23,7 +23,7 @@ import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.support.ImageRollover;
-import de.volzo.despat.RecordingSession;
+import de.volzo.despat.SessionManager;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.support.Broadcast;
@@ -540,7 +540,7 @@ public class ShutterService extends Service {
 
             Despat despat = Util.getDespat(context);
             SystemController systemController = despat.getSystemController();
-            RecordingSession session = RecordingSession.getInstance(context);
+            SessionManager session = SessionManager.getInstance(context);
             float batteryLevel = systemController.getBatteryLevel();
             Log.i(TAG, "shutter released. BATT: " + batteryLevel + "% | IMAGES: " + session.getImagesTaken());
 
@@ -550,7 +550,7 @@ public class ShutterService extends Service {
 
                 try {
                     session.stopRecordingSession("low battery");
-                } catch (RecordingSession.NotRecordingException e) {
+                } catch (SessionManager.NotRecordingException e) {
                     Log.e(TAG, "stopping session failed. attempting stop via broadcast", e);
                     Util.saveErrorEvent(context, "stopping session failed. attempting stop via broadcast", e);
 

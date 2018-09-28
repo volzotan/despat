@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Locale;
 
 import de.volzo.despat.R;
-import de.volzo.despat.RecordingSession;
+import de.volzo.despat.SessionManager;
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
@@ -109,7 +109,7 @@ public class SessionFragment extends Fragment {
         try {
             Detector detector = new DetectorSSD(context);
             Size imageSize = session.getImageSize();
-            detector.display(drawSurface, imageSize, detector.positionsToRectangles(positions));
+            detector.display(drawSurface, imageSize, detector.positionsToRectangles(positions), session);
         } catch (Exception e) {
             Log.e(TAG, "drawing results failed", e);
         }
@@ -127,7 +127,7 @@ public class SessionFragment extends Fragment {
 
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
         try {
-            Status maxTempStatus = RecordingSession.getMaxTemperatureDuringSession(context, session);
+            Status maxTempStatus = SessionManager.getMaxTemperatureDuringSession(context, session);
 
             if (maxTempStatus != null) {
                 DateFormat df = new SimpleDateFormat(Config.DATEFORMAT);
@@ -143,7 +143,7 @@ public class SessionFragment extends Fragment {
         }
         tvNumberOfDetections.setText(Integer.toString(positionDao.getCountBySession(session.getId())));
 
-        tvGlitches.setText(RecordingSession.checkForIntegrity(getContext(), session));
+        tvGlitches.setText(SessionManager.checkForIntegrity(getContext(), session));
 
         view.findViewById(R.id.bt_export).setOnClickListener(new View.OnClickListener() {
             @Override

@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         fabRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!RecordingSession.getInstance(activity).isActive()) {
+                if (!SessionManager.getInstance(activity).isActive()) {
                     Log.d(TAG, "startCapturing");
 
                     Despat despat = Util.getDespat(activity);
@@ -269,10 +269,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 } else {
                     Log.d(TAG, "stopCapturing");
                     Util.darkenTextureView(textureView);
-                    RecordingSession session = RecordingSession.getInstance(activity);
+                    SessionManager session = SessionManager.getInstance(activity);
                     try {
                         session.stopRecordingSession();
-                    } catch (RecordingSession.NotRecordingException e) {
+                    } catch (SessionManager.NotRecordingException e) {
                         Log.e(TAG, "stopping Recording Session failed", e);
                     }
                     stopProgressBarUpdate();
@@ -412,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            public void run() {
                 Util.clearTextureView(textureView);
 //                Util.drawTextOnTextureView(textureView, "foo"); // TODO
-                RecordingSession session = RecordingSession.getInstance(activity);
+                SessionManager session = SessionManager.getInstance(activity);
                 session.startRecordingSession(null, cameraConfig);
 
                 updatePreviewImage();
@@ -573,7 +573,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     private void setButtonStates() {
         final TextView tvFapRec = findViewById(R.id.tvFapRec);
 
-        if (RecordingSession.getInstance(activity).isActive()) {
+        if (SessionManager.getInstance(activity).isActive()) {
             findViewById(R.id.layout_buttons).setVisibility(View.GONE);
             tvFapRec.setText("STOP");
 
@@ -595,7 +595,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void startCamera(CameraConfig cameraConfig) {
 
-        if (RecordingSession.getInstance(activity).isActive()) {
+        if (SessionManager.getInstance(activity).isActive()) {
             Log.i(TAG, "no preview while recordingSession is active");
             return;
         }
@@ -680,7 +680,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void updatePreviewImage() {
         Context context = activity;
-        RecordingSession session = RecordingSession.getInstance(context);
+        SessionManager session = SessionManager.getInstance(context);
 
         setButtonStates();
 
@@ -711,7 +711,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             } else {
                 activeSession = false;
             }
-        } catch (RecordingSession.NotRecordingException e) {
+        } catch (SessionManager.NotRecordingException e) {
             activeSession = false;
         }
 
@@ -739,7 +739,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         newestImage = img;
                     }
                 }
-            } catch (RecordingSession.NotRecordingException e) {
+            } catch (SessionManager.NotRecordingException e) {
                 Log.w(TAG, "no session active, displaying last capture failed");
             }
 
@@ -813,7 +813,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             detector.init();
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
             List<Detector.Recognition> detections = detector.run();
-            detector.display((DrawSurface) findViewById(R.id.drawSurface), new Size(4320, 3240), detector.recognitionsToRectangles(detections));
+            detector.display((DrawSurface) findViewById(R.id.drawSurface), new Size(4320, 3240), detector.recognitionsToRectangles(detections), null);
         } catch (Exception e) {
             Log.wtf(TAG, "detector failed", e);
         }

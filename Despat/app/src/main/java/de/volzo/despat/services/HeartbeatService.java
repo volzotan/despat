@@ -8,7 +8,7 @@ import java.util.Calendar;
 
 import de.volzo.despat.Despat;
 import de.volzo.despat.support.ImageRollover;
-import de.volzo.despat.RecordingSession;
+import de.volzo.despat.SessionManager;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
@@ -49,7 +49,7 @@ public class HeartbeatService extends JobService {
         status.setBatteryExternal(-1); // TODO
         status.setStateCharging(systemController.getBatteryChargingState());
 
-        RecordingSession session = RecordingSession.getInstance(this);
+        SessionManager session = SessionManager.getInstance(this);
         if (session.isActive()) {
             status.setNumberImagesTaken(session.getImagesTaken());
         }

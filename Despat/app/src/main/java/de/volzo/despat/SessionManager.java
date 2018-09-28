@@ -37,11 +37,11 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Util;
 
-public class RecordingSession {
+public class SessionManager {
 
-    private static final String TAG = RecordingSession.class.getSimpleName();
+    private static final String TAG = SessionManager.class.getSimpleName();
 
-    private static volatile RecordingSession instance;
+    private static volatile SessionManager instance;
     private Context context;
     private Session session;
     private CameraConfig cameraConfig;
@@ -49,7 +49,7 @@ public class RecordingSession {
     private static final int RESUME_MAX_AGE_LAST_CAPTURE = 5 * 60 * 1000;
 
     //private constructor.
-    private RecordingSession(Context context){
+    private SessionManager(Context context){
 
         //Prevent form the reflection api.
         if (instance != null){
@@ -76,17 +76,17 @@ public class RecordingSession {
         }
     }
 
-    public static RecordingSession getInstance(Context context) {
+    public static SessionManager getInstance(Context context) {
         if (instance == null) { //if there is no instance available... create new one
-            synchronized (RecordingSession.class) {
+            synchronized (SessionManager.class) {
                 if (instance == null) {
-                    instance = new RecordingSession(context);
+                    instance = new SessionManager(context);
                 }
             }
         }
 
         // TODO:
-        // the RecordingSession Singleton may be killed at any time during normal
+        // the SessionManager Singleton may be killed at any time during normal
         // operation of the ShutterService, but still the session variable should
         // be "repopulated" once the instance will be required again
         // just use resume session?
@@ -129,6 +129,9 @@ public class RecordingSession {
         session.setStart(Calendar.getInstance().getTime());
         session.setLocation(null);
 
+        // TODO: tilesize?
+        session.setTilesize(1000);
+
         // TODO: add logic here for zoom, exclusion parts and the resulting imageSize
         try {
             Rect zoomRegion = cameraConfig.getZoomRegion();
@@ -160,7 +163,7 @@ public class RecordingSession {
             public void locationAcquired(Location location) {
 
                 try {
-                    RecordingSession.getInstance(context).setLocation(location);
+                    SessionManager.getInstance(context).setLocation(location);
                 } catch (NotRecordingException e) {
                     Log.w(TAG, "session already stopped when adding location");
                 }
@@ -430,7 +433,7 @@ public class RecordingSession {
         List<Session> sessions = sessionDao.getAll();
 
         for (Session session : sessions) {
-            String res = RecordingSession.checkForIntegrity(context, session);
+            String res = SessionManager.checkForIntegrity(context, session);
             boolean noGlitch = true;
 
             if (res != null && res.length() > 0) noGlitch = false;

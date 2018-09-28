@@ -16,6 +16,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.volzo.despat.persistence.Session;
+import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.support.Stopwatch;
 
@@ -35,7 +37,7 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init(String detector) throws Exception {
 
         stopwatch = new Stopwatch();
         stopwatch.start("HOG init");
@@ -45,7 +47,6 @@ public class DetectorHOG extends Detector {
         hog.setSVMDetector(HOGDescriptor.getDefaultPeopleDetector());
 
         stopwatch.stop("HOG init");
-
     }
 
     @Override
@@ -111,7 +112,7 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
-    public void display(DrawSurface surface, final Size imageSize, List<RectF> rectangles) {
+    public void display(DrawSurface surface, final Size imageSize, List<RectF> rectangles, final DetectorConfig detectorConfig) {
         final List<RectF> rects = rectangles;
         surface.setCallback(new DrawSurface.DrawSurfaceCallback() {
             @Override

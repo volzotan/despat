@@ -9,18 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.volzo.despat.persistence.Position;
+import de.volzo.despat.persistence.Session;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.userinterface.DrawSurface;
 
 public abstract class Detector {
 
     float CONFIDENCE_THRESHOLD = 0.5f;
 
-    public abstract void init(String detector) throws Exception;
+    public abstract void init(DetectorConfig detectorConfig) throws Exception;
     public abstract void load(File fullFilename);
     public abstract List<Recognition> run() throws Exception;
     public abstract void save() throws Exception;
-    public abstract void display(DrawSurface surface, Size imageSize, List<RectF> rectangles);
+    public abstract void display(DrawSurface surface, Size imageSize, List<RectF> rectangles, Session session);
 
     public List<RectF> positionsToRectangles(List<Position> results) {
 

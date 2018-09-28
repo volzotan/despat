@@ -19,6 +19,8 @@ import java.util.Map;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Benchmark;
 import de.volzo.despat.persistence.BenchmarkDao;
+import de.volzo.despat.persistence.Session;
+import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.support.Stopwatch;
 
@@ -28,14 +30,14 @@ public class DetectorSSD extends Detector {
 
     private Context context;
 
-    private String detectorName;
+    private DetectorConfig detectorConfig;
 
     private TensorFlowInterface tfInterface;
     private Stopwatch stopwatch;
 
-    private static final int TILESIZE_INPUT = 800;
-    private static final int TILESIZE_OUTPUT = 300;
-    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
+    private int TILESIZE_INPUT = 800;
+    private int TILESIZE_OUTPUT = 300;
+    private String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
 
 //    private static final int TILESIZE_INPUT = 1000;
 //    private static final int TILESIZE_OUTPUT = 1000;
@@ -54,7 +56,6 @@ public class DetectorSSD extends Detector {
 //    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_resnet101.pb";
 //    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_nas.pb";
 
-    private static final int TF_OD_API_INPUT_SIZE = TILESIZE_OUTPUT;
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco_labels_list.txt";
 
     private TileManager tileManager = null;
@@ -64,28 +65,31 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
-    public void init(String detector) throws Exception {
+    public void init(DetectorConfig detectorConfig) throws Exception {
 
-        if (detector == null) {
+        this.detectorConfig = detectorConfig;
+        TILESIZE_INPUT = detectorConfig.getTilesize();
 
-        }
-
-        switch (detector) {
+        switch (this.detectorConfig.getDetector()) {
             case "low": {
+                TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
+                TILESIZE_OUTPUT = 300;
                 break;
             }
             case "mid": {
+                TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_inception_v2.pb";
+                TILESIZE_OUTPUT = TILESIZE_INPUT;
                 break;
             }
             case "high": {
+                TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_fpn.pb";
+                TILESIZE_OUTPUT = 640;
                 break;
             }
             default: {
                 throw new Exception("undefined detector selected");
             }
         }
-
-        this.detectorName = detector;
 
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
@@ -116,12 +120,14 @@ public class DetectorSSD extends Detector {
                     context.getAssets(),
                     TF_OD_API_MODEL_FILE,
                     TF_OD_API_LABELS_FILE,
-                    TF_OD_API_INPUT_SIZE
+                    TILESIZE_OUTPUT
             );
         } catch (final IOException e) {
             Log.e(TAG, "Exception initializing classifier!", e);
             throw e;
         }
+
+        Log.d(TAG, String.format("Detector init. Model: %s @ $d", detectorConfig.getDetector(), detectorConfig.getTilesize()));
 
 //        rgbFrameBitmap = Bitmap.createBitmap(sourceImageWidth, sourceImageHeight, Bitmap.Config.ARGB_8888);
 //        croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Bitmap.Config.ARGB_8888);
@@ -158,7 +164,7 @@ public class DetectorSSD extends Detector {
             AppDatabase db = AppDatabase.getAppDatabase(context);
             BenchmarkDao benchmarkDao = db.benchmarkDao();
             Benchmark benchmark = new Benchmark();
-            benchmark.setDetector(detectorName);
+            benchmark.setDetector(this.detectorConfig.getDetector());
             benchmark.setTimestamp(Calendar.getInstance().getTime());
             benchmark.setInferenceTime(totalInferenceTime);
             benchmarkDao.insert();
@@ -204,7 +210,7 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
-    public void display(DrawSurface surface, final Size imageSize, List<RectF> rectangles) {
+    public void display(DrawSurface surface, final Size imageSize, List<RectF> rectangles, final DetectorConfig detectorConfig) {
         final List<RectF> rects = rectangles;
         surface.setCallback(new DrawSurface.DrawSurfaceCallback() {
             @Override
@@ -212,8 +218,10 @@ public class DetectorSSD extends Detector {
                 try {
                     surface.clearCanvas();
 
-                    if (tileManager == null) tileManager = new TileManager(imageSize);
-                    surface.addBoxes(imageSize, tileManager.getTileBoxes(), surface.paintBlack);
+                    if (detectorConfig != null) {
+                        if (tileManager == null) tileManager = new TileManager(imageSize, detectorConfig.getTilesize());
+                        surface.addBoxes(imageSize, tileManager.getTileBoxes(), surface.paintBlack);
+                    }
                     surface.addBoxes(imageSize, rects, surface.paintGreen);
                 } catch (Exception e) {
                     Log.e(TAG, "displaying results failed. unable to draw on canvas", e);

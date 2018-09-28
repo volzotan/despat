@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.volzo.despat.R;
-import de.volzo.despat.RecordingSession;
+import de.volzo.despat.SessionManager;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
@@ -99,7 +99,7 @@ public class SessionListActivity extends AppCompatActivity {
                 sessions.remove(session);
             }
 
-            RecordingSession.deleteSessionFromDatabase(context, session);
+            SessionManager.deleteSessionFromDatabase(context, session);
             Log.d(TAG, "deleted session: " + session);
         }
 

@@ -19,7 +19,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import de.volzo.despat.CameraController;
-import de.volzo.despat.RecordingSession;
+import de.volzo.despat.SessionManager;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
@@ -91,7 +91,7 @@ public class Orchestrator extends BroadcastReceiver {
                 if (this.cameraConfig == null) {
                     Log.d(TAG, "camera config not stored in intent. Trying to get from session");
 
-                    RecordingSession recordingSession = RecordingSession.getInstance(context);
+                    SessionManager recordingSession = SessionManager.getInstance(context);
                     this.cameraConfig = recordingSession.getCameraConfig();
                 } else {
                     Log.wtf(TAG, "camera config received");
@@ -108,7 +108,7 @@ public class Orchestrator extends BroadcastReceiver {
                     Util.saveEvent(context, Event.EventType.BOOT, null);
 
                     if (Config.getResumeAfterReboot(context)) {
-                        RecordingSession session = RecordingSession.getInstance(context);
+                        SessionManager session = SessionManager.getInstance(context);
                         try {
                             session.resumeRecordingSession();
                             NotificationUtil.showStandardNotification(context, "resumed session: " + session.getSessionName());
@@ -129,7 +129,7 @@ public class Orchestrator extends BroadcastReceiver {
 
                 case Broadcast.PICTURE_TAKEN:
                     try {
-                        RecordingSession session = RecordingSession.getInstance(context);
+                        SessionManager session = SessionManager.getInstance(context);
                         if (session == null) {
                             Log.w(TAG, "image taken while no recordingSession is active");
                             break;
@@ -156,18 +156,18 @@ public class Orchestrator extends BroadcastReceiver {
                             Log.d(TAG, "RecognitionService not started, already running");
                         }
 
-                        if (!Util.isServiceRunning(context, CompressorService.class)) {
-                            AppDatabase db = AppDatabase.getAppDatabase(context);
-                            SessionDao sessionDao = db.sessionDao();
-                            Session newestSession = sessionDao.getLast();
-                            if (newestSession != null) {
-                                Orchestrator.runCompressorService(context, newestSession.getId()); // TODO: only add newest images
-                            }
-                        } else {
-                            Log.d(TAG, "CompressorService not started, already running");
-                        }
+//                        if (!Util.isServiceRunning(context, CompressorService.class)) {
+//                            AppDatabase db = AppDatabase.getAppDatabase(context);
+//                            SessionDao sessionDao = db.sessionDao();
+//                            Session newestSession = sessionDao.getLast();
+//                            if (newestSession != null) {
+//                                Orchestrator.runCompressorService(context, newestSession.getId()); // TODO: only add newest images
+//                            }
+//                        } else {
+//                            Log.d(TAG, "CompressorService not started, already running");
+//                        }
 
-                    } catch (RecordingSession.NotRecordingException nre) {
+                    } catch (SessionManager.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
                     break;
@@ -178,7 +178,7 @@ public class Orchestrator extends BroadcastReceiver {
 
                 case Broadcast.ERROR_OCCURED:
                     try {
-                        RecordingSession session = RecordingSession.getInstance(context);
+                        SessionManager session = SessionManager.getInstance(context);
                         if (session == null) {
                             Log.w(TAG, "error occured while no recordingSession is active");
                             break;
@@ -204,7 +204,7 @@ public class Orchestrator extends BroadcastReceiver {
                         Log.e(TAG, "error occured: " + desc, e);
 
                         NotificationUtil.updateShutterNotification(context, ShutterService.FOREGROUND_NOTIFICATION_ID, session.getImagesTaken(), session.getErrors(), null);
-                    } catch (RecordingSession.NotRecordingException nre) {
+                    } catch (SessionManager.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
                     break;

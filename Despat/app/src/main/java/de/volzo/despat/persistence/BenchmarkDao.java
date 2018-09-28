@@ -12,10 +12,10 @@ import java.util.List;
 public interface BenchmarkDao {
 
     @Query("SELECT * FROM benchmark")
-    List<Capture> getAll();
+    List<Benchmark> getAll();
 
     @Query("SELECT * FROM benchmark WHERE detector = :detector")
-    List<Capture> getAllByDetector(String detector);
+    List<Benchmark> getAllByDetector(String detector);
 
     @Insert
     void insert(Benchmark... benchmarks);

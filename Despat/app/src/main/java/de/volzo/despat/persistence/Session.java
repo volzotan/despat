@@ -12,6 +12,8 @@ import android.util.Size;
 import java.io.File;
 import java.util.Date;
 
+import de.volzo.despat.preferences.DetectorConfig;
+
 @Entity
 
 public class Session {
@@ -54,11 +56,8 @@ public class Session {
 
     // --- settings --- //
 
-    @ColumnInfo(name = "detector")
-    private String detector;
-
-    @ColumnInfo(name = "tilesize")
-    private int tilesize;
+    @ColumnInfo(name = "detector_config")
+    private DetectorConfig detectorConfig;
 
     @ColumnInfo(name = "shutter_interval")
     private Integer shutterInterval;
@@ -193,22 +192,6 @@ public class Session {
 
     public void setResumed(boolean resumed) {
         this.resumed = resumed;
-    }
-
-    public String getDetector() {
-        return detector;
-    }
-
-    public void setDetector(String detector) {
-        this.detector = detector;
-    }
-
-    public int getTilesize() {
-        return tilesize;
-    }
-
-    public void setTilesize(int tilesize) {
-        this.tilesize = tilesize;
     }
 
     public Integer getShutterInterval() {

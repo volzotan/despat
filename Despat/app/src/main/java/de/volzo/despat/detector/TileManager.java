@@ -60,7 +60,8 @@ public class TileManager {
      * tiling for an overlay on the compressed image during visualization.
      *
      */
-    public TileManager(Size imageSize) {
+    public TileManager(Size imageSize, int tilesize) {
+        this.tilesize = tilesize;
         init(imageSize);
     }
 
