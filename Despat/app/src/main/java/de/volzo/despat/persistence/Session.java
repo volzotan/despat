@@ -1,6 +1,7 @@
 package de.volzo.despat.persistence;
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
@@ -12,6 +13,7 @@ import android.util.Size;
 import java.io.File;
 import java.util.Date;
 
+import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.DetectorConfig;
 
 @Entity
@@ -56,8 +58,11 @@ public class Session {
 
     // --- settings --- //
 
-    @ColumnInfo(name = "detector_config")
+    @Embedded(prefix = "detectorconfig_")
     private DetectorConfig detectorConfig;
+
+    @Embedded(prefix = "cameraconfig_")
+    private CameraConfig cameraConfig;
 
     @ColumnInfo(name = "shutter_interval")
     private Integer shutterInterval;
@@ -216,6 +221,22 @@ public class Session {
 
     public void setExposureCompensation(Double exposureCompensation) {
         this.exposureCompensation = exposureCompensation;
+    }
+
+    public DetectorConfig getDetectorConfig() {
+        return detectorConfig;
+    }
+
+    public void setDetectorConfig(DetectorConfig detectorConfig) {
+        this.detectorConfig = detectorConfig;
+    }
+
+    public CameraConfig getCameraConfig() {
+        return cameraConfig;
+    }
+
+    public void setCameraConfig(CameraConfig cameraConfig) {
+        this.cameraConfig = cameraConfig;
     }
 
     public String toString() {

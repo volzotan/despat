@@ -1,9 +1,12 @@
 package de.volzo.despat.persistence;
 
 import android.arch.persistence.room.TypeConverter;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +20,7 @@ import de.volzo.despat.preferences.Config;
 public class RoomConverter {
 
     @TypeConverter
-    public static Date toDate(String timeString) {
+    public static Date stringToDate(String timeString) {
         DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
         try {
             return timeString == null ? null : dateFormat.parse(timeString);
@@ -28,23 +31,38 @@ public class RoomConverter {
     }
 
     @TypeConverter
-    public static String toTimeString(Date date) {
+    public static String dateToString(Date date) {
         DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
         return date == null ? null : dateFormat.format(date);
     }
 
     @TypeConverter
-    public static File toFile(String path) {
+    public static File stringToFile(String path) {
         return path == null ? null : new File(path);
     }
 
     @TypeConverter
-    public static String toPath(File file) {
+    public static String fileToString(File file) {
         return file == null ? null : file.getAbsolutePath();
     }
 
     @TypeConverter
-    public static Double[][] to2dDoubleArray(String doubleArrayString) {
+    public static String rectToString(Rect rect) {
+        if (rect == null) return null;
+        return String.format(Config.LOCALE, "%d;%d;%d;%d", rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    @TypeConverter
+    public static Rect stringToRect(String rect) {
+        if (rect == null || rect.equals("")) {
+            return null;
+        }
+        String[] numbers = rect.split(";");
+        return new Rect(Integer.parseInt(numbers[0]), Integer.parseInt(numbers[1]), Integer.parseInt(numbers[2]), Integer.parseInt(numbers[3]));
+    }
+
+    @TypeConverter
+    public static Double[][] stringToDoubleArray(String doubleArrayString) {
         if (doubleArrayString == null || doubleArrayString.length() == 0) {
             return null;
         }
@@ -75,7 +93,7 @@ public class RoomConverter {
     }
 
     @TypeConverter
-    public static String to2dDoubleArrayString(Double[][] array) {
+    public static String doubleArrayToString(Double[][] array) {
         if (array == null) return null;
 
         StringBuilder sb = new StringBuilder();

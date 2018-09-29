@@ -37,7 +37,7 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
-    public void init(String detector) throws Exception {
+    public void init(DetectorConfig detectorConfig) throws Exception {
 
         stopwatch = new Stopwatch();
         stopwatch.start("HOG init");

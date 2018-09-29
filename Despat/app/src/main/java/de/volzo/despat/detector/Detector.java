@@ -22,7 +22,7 @@ public abstract class Detector {
     public abstract void load(File fullFilename);
     public abstract List<Recognition> run() throws Exception;
     public abstract void save() throws Exception;
-    public abstract void display(DrawSurface surface, Size imageSize, List<RectF> rectangles, Session session);
+    public abstract void display(DrawSurface surface, Size imageSize, List<RectF> rectangles, DetectorConfig detectorConfig);
 
     public List<RectF> positionsToRectangles(List<Position> results) {
 

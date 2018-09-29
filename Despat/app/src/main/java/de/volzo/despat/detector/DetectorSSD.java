@@ -154,6 +154,10 @@ public class DetectorSSD extends Detector {
 
         List<Detector.Recognition> results;
 
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        BenchmarkDao benchmarkDao = db.benchmarkDao();
+        long fullImageTimer = System.currentTimeMillis();
+
         for (TileManager.Tile tile : tileManager.getAllTiles()){
             stopwatch.start("totalInference");
             Bitmap crop = tileManager.getTileImage(tile);
@@ -161,18 +165,24 @@ public class DetectorSSD extends Detector {
             crop.recycle();
             double totalInferenceTime = stopwatch.stop("totalInference");
 
-            AppDatabase db = AppDatabase.getAppDatabase(context);
-            BenchmarkDao benchmarkDao = db.benchmarkDao();
             Benchmark benchmark = new Benchmark();
             benchmark.setDetector(this.detectorConfig.getDetector());
             benchmark.setTimestamp(Calendar.getInstance().getTime());
+            benchmark.setType(Benchmark.TYPE_TILE);
             benchmark.setInferenceTime(totalInferenceTime);
-            benchmarkDao.insert();
+            benchmarkDao.insert(benchmark);
 
             // tile.setResults(results); EVIL
             tileManager.passResult(tile, results);
             System.out.println("tile done: " + tile);
         }
+
+        Benchmark benchmark = new Benchmark();
+        benchmark.setDetector(this.detectorConfig.getDetector());
+        benchmark.setTimestamp(Calendar.getInstance().getTime());
+        benchmark.setType(Benchmark.TYPE_IMAGE);
+        benchmark.setInferenceTime(System.currentTimeMillis() - fullImageTimer);
+        benchmarkDao.insert(benchmark);
 
 //        ImageView imageView = (ImageView) ((Activity) context).getWindow().getDecorView().findViewById(R.id.imageView);
 //        imageView.setImageBitmap(tileManager.getTileImage(tileManager.getAllTiles().get(12)));

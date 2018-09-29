@@ -20,6 +20,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import de.volzo.despat.detector.Detector;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
@@ -29,6 +30,7 @@ import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
 import de.volzo.despat.preferences.CameraConfig;
+import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.services.RecognitionService;
@@ -44,21 +46,21 @@ public class SessionManager {
     private static volatile SessionManager instance;
     private Context context;
     private Session session;
-    private CameraConfig cameraConfig;
+//    private CameraConfig cameraConfig;
 
     private static final int RESUME_MAX_AGE_LAST_CAPTURE = 5 * 60 * 1000;
 
     //private constructor.
     private SessionManager(Context context){
 
-        //Prevent form the reflection api.
+        //Prevent from the reflection api.
         if (instance != null){
             throw new RuntimeException("Use getInstance() method to get the single instance of this class.");
         }
 
         this.context = context;
 
-        // reopen session?
+        // reopen/reload session?
 
         if (!Util.isServiceRunning(context, ShutterService.class)) return;
 
@@ -72,7 +74,7 @@ public class SessionManager {
         if (session.getEnd() != null) {
             session = null;
         } else {
-            Log.i(TAG, "reopened session: " + session.getSessionName());
+            Log.i(TAG, "reopened/reloaded session: " + session.getSessionName());
         }
     }
 
@@ -96,7 +98,7 @@ public class SessionManager {
 
     // --------------------------------------------------------------------------------------------------------------
 
-    public void startRecordingSession(String sessionName, CameraConfig cameraConfig) {
+    public void startRecordingSession(String sessionName, CameraConfig cameraConfig, DetectorConfig detectorConfig) {
         if (session != null) {
             try {
                 stopRecordingSession();
@@ -130,7 +132,7 @@ public class SessionManager {
         session.setLocation(null);
 
         // TODO: tilesize?
-        session.setTilesize(1000);
+        session.setDetectorConfig(detectorConfig);
 
         // TODO: add logic here for zoom, exclusion parts and the resulting imageSize
         try {
@@ -144,6 +146,8 @@ public class SessionManager {
             Log.w(TAG, "unable to set image size in session");
         }
 
+        session.setCameraConfig(cameraConfig);
+
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
         final long[] ids = sessionDao.insert(session);
@@ -152,9 +156,9 @@ public class SessionManager {
         Intent shutterIntent = new Intent(context, Orchestrator.class);
         shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
         shutterIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
-        Bundle args = new Bundle();
-        args.putSerializable(Orchestrator.DATA_CAMERA_CONFIG, cameraConfig);
-        shutterIntent.putExtras(args);
+//        Bundle args = new Bundle();
+//        args.putSerializable(Orchestrator.DATA_CAMERA_CONFIG, cameraConfig);
+//        shutterIntent.putExtras(args);
         context.sendBroadcast(shutterIntent);
 
         SystemController systemController = despat.getSystemController();
@@ -380,18 +384,6 @@ public class SessionManager {
         return numberErrors;
     }
 
-    public void setCameraConfig(CameraConfig cameraConfig) throws NotRecordingException {
-        if (!isActive()) throw new NotRecordingException();
-
-        this.cameraConfig = cameraConfig;
-    }
-
-    public CameraConfig getCameraConfig() throws NotRecordingException {
-        if (!isActive()) throw new NotRecordingException();
-
-        return this.cameraConfig;
-    }
-
     // ---------------------------------------------------------------------------------------------
 
     public static Status getMaxTemperatureDuringSession(Context context, Session session) throws Exception {
@@ -484,6 +476,11 @@ public class SessionManager {
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    public Session getSession() throws NotRecordingException {
+        if (!isActive()) throw new NotRecordingException();
+        return session;
+    }
 
     public long getSessionId() throws NotRecordingException {
         if (!isActive()) throw new NotRecordingException();

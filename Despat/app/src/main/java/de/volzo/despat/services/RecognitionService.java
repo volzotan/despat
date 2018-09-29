@@ -22,9 +22,6 @@ import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
 
-/**
- * Created by volzotan on 04.08.17.
- */
 
 public class RecognitionService extends IntentService {
 
@@ -98,7 +95,7 @@ public class RecognitionService extends IntentService {
         try {
             detector = new DetectorSSD(this);
 //            detector = new DetectorHOG(activity);
-            detector.init(session);
+            detector.init(session.getDetectorConfig());
         } catch (Exception e) {
             Log.e(TAG, "detector init failed", e);
             return;

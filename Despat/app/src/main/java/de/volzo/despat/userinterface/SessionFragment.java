@@ -109,7 +109,7 @@ public class SessionFragment extends Fragment {
         try {
             Detector detector = new DetectorSSD(context);
             Size imageSize = session.getImageSize();
-            detector.display(drawSurface, imageSize, detector.positionsToRectangles(positions), session);
+            detector.display(drawSurface, imageSize, detector.positionsToRectangles(positions), session.getDetectorConfig());
         } catch (Exception e) {
             Log.e(TAG, "drawing results failed", e);
         }

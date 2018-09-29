@@ -1,6 +1,7 @@
 package de.volzo.despat.userinterface;
 
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -14,7 +15,10 @@ import android.widget.TimePicker;
 import de.volzo.despat.CameraController;
 import de.volzo.despat.CameraController2;
 import de.volzo.despat.R;
+import de.volzo.despat.SessionManager;
 import de.volzo.despat.preferences.CameraConfig;
+import de.volzo.despat.preferences.Config;
+import de.volzo.despat.preferences.DetectorConfig;
 
 public class ConfigureActivity extends AppCompatActivity {
 
@@ -24,6 +28,7 @@ public class ConfigureActivity extends AppCompatActivity {
     public static final String COUNTING_SESSION = "COUNTING_SESSION";
 
     public static final String DATA_CAMERA_CONFIG = "DATA_CAMERA_CONFIG";
+    public static final String DATA_DETECTOR_CONFIG = "DATA_DETECTOR_CONFIG";
 
     ConfigureActivity activity;
 
@@ -56,7 +61,10 @@ public class ConfigureActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent resultIntent = new Intent();
 
+                Context context = activity;
+
                 CameraConfig cameraConfig = new CameraConfig(activity);
+                DetectorConfig detectorConfig = new DetectorConfig(Config.getNetworkFidelity(context), 600); // TODO
 
 //                // TODO:
 //                try {
@@ -66,7 +74,12 @@ public class ConfigureActivity extends AppCompatActivity {
 //
 //                cameraConfig.setShutterInterval(1000);
 
-                resultIntent.putExtra(DATA_CAMERA_CONFIG, cameraConfig);
+//                resultIntent.putExtra(DATA_CAMERA_CONFIG, cameraConfig);
+//                resultIntent.putExtra(DATA_DETECTOR_CONFIG, detectorConfig);
+
+                SessionManager session = SessionManager.getInstance(activity);
+                session.startRecordingSession(null, cameraConfig, detectorConfig);
+
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }

@@ -189,7 +189,7 @@ public class SessionExporter {
         o.put("end", session.getEnd());
         o.put("lat", session.getLatitude());
         o.put("lon", session.getLongitude());
-        o.put("homograhpyMatrix", RoomConverter.to2dDoubleArrayString(session.getHomographyMatrix()));
+        o.put("homograhpyMatrix", RoomConverter.doubleArrayToString(session.getHomographyMatrix()));
         o.put("resumed", session.isResumed());
 
         try {

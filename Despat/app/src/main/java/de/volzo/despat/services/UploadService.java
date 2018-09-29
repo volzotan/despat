@@ -11,9 +11,6 @@ import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.SystemController;
 import de.volzo.despat.web.ServerConnector;
 
-/**
- * Created by volzotan on 10.08.17.
- */
 
 public class UploadService extends JobService {
 

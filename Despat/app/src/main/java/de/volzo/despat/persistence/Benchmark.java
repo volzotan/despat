@@ -17,6 +17,9 @@ import static android.arch.persistence.room.ForeignKey.CASCADE;
 
 public class Benchmark {
 
+    public static final int TYPE_IMAGE = 1;
+    public static final int TYPE_TILE  = 2;
+
     @PrimaryKey(autoGenerate = true)
     private long id;
 
@@ -25,6 +28,9 @@ public class Benchmark {
 
     @ColumnInfo(name = "timestamp")
     private Date timestamp;
+
+    @ColumnInfo(name = "type")
+    private int type;
 
     @ColumnInfo(name = "detector")
     private String detector;
@@ -54,6 +60,14 @@ public class Benchmark {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getDetector() {

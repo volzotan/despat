@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import de.volzo.despat.CameraController;
 import de.volzo.despat.SessionManager;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
@@ -31,9 +30,6 @@ import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.web.Sync;
 
-/**
- * Created by volzotan on 15.08.17.
- */
 
 public class Orchestrator extends BroadcastReceiver {
 
@@ -46,8 +42,6 @@ public class Orchestrator extends BroadcastReceiver {
     public static final int OPERATION_START     = 1;
     public static final int OPERATION_STOP      = 2;
     public static final int OPERATION_ONCE      = 3;
-
-    public static final String DATA_CAMERA_CONFIG = "DATA_CAMERA_CONFIG";
 
     private Context context;
     private CameraConfig cameraConfig;
@@ -86,20 +80,34 @@ public class Orchestrator extends BroadcastReceiver {
         log(action, service, operation, reason);
 
         if (service != null && (service.equals(Broadcast.SHUTTER_SERVICE) || service.equals(Broadcast.ALL_SERVICES))) {
-            try {
-                this.cameraConfig = (CameraConfig) intent.getSerializableExtra(DATA_CAMERA_CONFIG);
-                if (this.cameraConfig == null) {
-                    Log.d(TAG, "camera config not stored in intent. Trying to get from session");
 
-                    SessionManager recordingSession = SessionManager.getInstance(context);
-                    this.cameraConfig = recordingSession.getCameraConfig();
-                } else {
-                    Log.wtf(TAG, "camera config received");
+            try {
+                SessionManager sessionManager = SessionManager.getInstance(context);
+                Session session =  sessionManager.getSession();
+                this.cameraConfig = session.getCameraConfig();
+
+                if (cameraConfig == null) {
+                    throw new Exception(String.format("empty camera config in session [%s]", session.toString()));
                 }
             } catch (Exception e) {
-                Log.w(TAG, "camera config missing. initialized with default values");
+                Log.e(TAG, "camera config missing. initialized with default values");
                 this.cameraConfig = new CameraConfig(context);
             }
+
+//            try {
+//                this.cameraConfig = (CameraConfig) intent.getSerializableExtra(DATA_CAMERA_CONFIG);
+//                if (this.cameraConfig == null) {
+//                    Log.d(TAG, "camera config not stored in intent. Trying to get from session");
+//
+//                    SessionManager sessionManager = SessionManager.getInstance(context);
+//                    this.cameraConfig = sessionManager.getCameraConfig();
+//                } else {
+//                    Log.wtf(TAG, "camera config received");
+//                }
+//            } catch (Exception e) {
+//                Log.w(TAG, "camera config missing. initialized with default values");
+//                this.cameraConfig = new CameraConfig(context);
+//            }
         }
 
         if (action != null && action.length() > 0) {
@@ -317,9 +325,9 @@ public class Orchestrator extends BroadcastReceiver {
         // start the Shutter Service
         if (!Util.isServiceRunning(context, ShutterService.class)) {
             Intent shutterServiceIntent = new Intent(context, ShutterService.class);
-            Bundle args = new Bundle();
-            args.putSerializable(ShutterService.ARG_CAMERA_CONFIG, cameraConfig);
-            shutterServiceIntent.putExtras(args);
+//            Bundle args = new Bundle();
+//            args.putSerializable(ShutterService.ARG_CAMERA_CONFIG, cameraConfig);
+//            shutterServiceIntent.putExtras(args);
 
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

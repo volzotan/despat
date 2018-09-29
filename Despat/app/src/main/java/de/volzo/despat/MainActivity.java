@@ -53,6 +53,7 @@ import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.CameraConfig;
+import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
@@ -403,8 +404,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             return;
         }
 
-        CameraConfig cameraConfig = (CameraConfig) data.getSerializableExtra(ConfigureActivity.DATA_CAMERA_CONFIG);
-
         final TextureView textureView = findViewById(R.id.textureView);
 //        final Handler handler = new Handler();
 //        handler.postDelayed(new Runnable() {
@@ -412,8 +411,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            public void run() {
                 Util.clearTextureView(textureView);
 //                Util.drawTextOnTextureView(textureView, "foo"); // TODO
-                SessionManager session = SessionManager.getInstance(activity);
-                session.startRecordingSession(null, cameraConfig);
 
                 updatePreviewImage();
 //            }
@@ -810,7 +807,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         try {
             detector = new DetectorSSD(activity);
 //            detector = new DetectorHOG(activity);
-            detector.init();
+            detector.init(new DetectorConfig("low", 600));
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
             List<Detector.Recognition> detections = detector.run();
             detector.display((DrawSurface) findViewById(R.id.drawSurface), new Size(4320, 3240), detector.recognitionsToRectangles(detections), null);

@@ -21,6 +21,9 @@ import java.util.List;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
+import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Session;
+import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.SessionManager;
@@ -31,9 +34,6 @@ import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
 
-/**
- * Created by volzotan on 04.08.17.
- */
 
 public class ShutterService extends Service {
 
@@ -131,8 +131,13 @@ public class ShutterService extends Service {
         this.handler = new Handler();
 
         try {
-            Bundle args = intent.getExtras();
-            this.camconfig = (CameraConfig) args.getSerializable(ARG_CAMERA_CONFIG);
+//            Bundle args = intent.getExtras();
+//            this.camconfig = (CameraConfig) args.getSerializable(ARG_CAMERA_CONFIG);
+
+            AppDatabase db = AppDatabase.getAppDatabase(context);
+            SessionDao sessionDao = db.sessionDao();
+            Session session = sessionDao.getLast();
+            this.camconfig = session.getCameraConfig();
         } catch (Exception e) {
             Log.e(TAG, "Camera Config missing");
         }
