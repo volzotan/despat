@@ -352,7 +352,8 @@ public class SessionManager {
         Capture capture = new Capture();
         capture.setSessionId(session.getId());
         capture.setRecordingTime(Calendar.getInstance().getTime());
-        capture.setProcessed(false);
+        capture.setProcessed_detector(false);
+        capture.setProcessed_compressor(false);
         capture.setImage(image);
 
         captureDao.insert(capture);

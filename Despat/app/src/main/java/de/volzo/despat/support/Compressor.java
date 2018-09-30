@@ -47,6 +47,8 @@ public class Compressor implements Callable<Integer> {
 
     private static final String TAG = Compressor.class.getSimpleName();
 
+    private static final int MAX_NUMBER_OF_IMAGES = 150;
+
     private Mat mat;
     private int counter = 0;
 
@@ -157,31 +159,56 @@ public class Compressor implements Callable<Integer> {
             return;
         }
 
-        // load first image to get width and height for initialization
-        File imageFile = captures.get(0).getImage();
-        if (imageFile == null || !imageFile.exists()) {
-            throw new Exception("first image file missing");
-        }
-
-        Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-        init(bitmap.getWidth(), bitmap.getHeight());
-
-        captures = captures.subList(0, Math.min(captures.size(), 150));
-
-        for (Capture c : captures) {
-            add(c.getImage());
-            System.out.println(counter);
-        }
+        init(session.getImageWidth(), session.getImageHeight());
 
         File imageFolder = Config.getImageFolder(context);
         File compressedImagePath = new File(imageFolder, session.getSessionName() + ".jpg");
-        toJpeg(compressedImagePath);
+        File compressedStorePath = new File(imageFolder, session.getSessionName() + ".ctmp");
+        if (compressedStorePath.exists()) {
+            Log.i(TAG, "found existing store for session: " + session);
+            unstore(compressedStorePath);
+            counter = captureDao.getNumberOfCompressorProcessedCaptures(session.getId());
+        }
 
-        session.setCompressedImage(compressedImagePath);
-        sessionDao.update(session);
+//        // load first image to get width and height for initialization
+//        File imageFile = captures.get(0).getImage();
+//        if (imageFile == null || !imageFile.exists()) {
+//            throw new Exception("first image file missing");
+//        }
+//
+//        Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+//        init(bitmap.getWidth(), bitmap.getHeight());
 
-        Log.d(TAG, "created compressed image for session " + session + " in " + compressedImagePath);
+        captures = captures.subList(0, Math.min(captures.size(), MAX_NUMBER_OF_IMAGES));
+
+        for (Capture c : captures) {
+
+            if (c.isProcessed_compressor()) {
+                continue;
+            }
+
+            add(c.getImage());
+            c.setProcessed_compressor(true);
+            captureDao.update(c);
+
+            System.out.println(counter);
+        }
+
+        // complete if: all images have processed_compressor == true
+        // at least MAX_NUMBER_OF_IMAGES have processed_compressor = true
+        int numberOfProcessedCaptures = captureDao.getNumberOfCompressorProcessedCaptures(session.getId());
+        if (numberOfProcessedCaptures == captures.size() || numberOfProcessedCaptures >= MAX_NUMBER_OF_IMAGES) {
+            toJpeg(compressedImagePath);
+            session.setCompressedImage(compressedImagePath);
+            sessionDao.update(session);
+
+            Log.d(TAG, "created compressed image for session " + session + " in " + compressedImagePath);
+        } else {
+            store(compressedStorePath);
+            Log.d(TAG, "created intermediate store for session " + session + " in " + compressedStorePath);
+        }
     }
+
 
     public void init(int width, int height) {
         this.width = width;

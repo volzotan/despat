@@ -74,7 +74,7 @@ public class RecognitionService extends IntentService {
         int skipcounter = 0;
         int errorcounter = 0;
         for (Capture c : captures) {
-            if (c.isProcessed()) {
+            if (c.isProcessed_detector()) {
                 skipcounter += 1;
                 continue;
             }
@@ -109,7 +109,7 @@ public class RecognitionService extends IntentService {
                 detector.load(c.getImage());
                 List<Detector.Recognition> detections = detector.run();
                 saveDetections(c, detections);
-                c.setProcessed(true);
+                c.setProcessed_detector(true);
                 captureDao.update(c);
             } catch (Exception e) {
                 Log.e(TAG, "detector run failed", e);
@@ -120,6 +120,12 @@ public class RecognitionService extends IntentService {
             int deletecounter = 0;
             for (int i = 0; i < queue.size(); i++) {
                 Capture c = queue.get(i);
+
+                if (!c.isProcessed_compressor() || !c.isProcessed_detector()) {
+                    Log.d(TAG, "deletion failed: capture not processed completely: " + c);
+                    continue;
+                }
+
                 try {
                     Util.deleteImage(c.getImage());
                     deletecounter++;

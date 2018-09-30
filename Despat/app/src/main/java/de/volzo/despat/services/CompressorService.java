@@ -36,6 +36,9 @@ public class CompressorService extends IntentService {
             Compressor compressor = new Compressor();
             try {
                 compressor.runForSession(this, session);
+
+                // TODO: load compressor storage, add image(s) and store again
+                // do this while keeping track which images have been added already
             } catch (Exception e) {
                 Log.w(TAG, "compressor failed for session: " + session);
                 Util.saveErrorEvent(this, session.getId(), "compressing image failed", e);

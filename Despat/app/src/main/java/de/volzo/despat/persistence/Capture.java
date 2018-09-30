@@ -29,8 +29,11 @@ public class Capture {
     @ColumnInfo(name = "image_path")
     private File image;
 
-    @ColumnInfo(name = "processed")
-    private boolean processed;
+    @ColumnInfo(name = "processed_detector")
+    private boolean processed_detector;
+
+    @ColumnInfo(name = "processed_compressor")
+    private boolean processed_compressor;
 
     public long getId() {
         return id;
@@ -64,11 +67,19 @@ public class Capture {
         this.image = image;
     }
 
-    public boolean isProcessed() {
-        return processed;
+    public boolean isProcessed_detector() {
+        return processed_detector;
     }
 
-    public void setProcessed(boolean processed) {
-        this.processed = processed;
+    public void setProcessed_detector(boolean processed_detector) {
+        this.processed_detector = processed_detector;
+    }
+
+    public boolean isProcessed_compressor() {
+        return processed_compressor;
+    }
+
+    public void setProcessed_compressor(boolean processed_compressor) {
+        this.processed_compressor = processed_compressor;
     }
 }

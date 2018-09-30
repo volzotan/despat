@@ -26,6 +26,9 @@ public interface CaptureDao {
     @Query("SELECT * FROM capture WHERE session_id = :sessionId ORDER BY recording_time DESC LIMIT 3")
     List<Capture> getLast3FromSession(long sessionId);
 
+    @Query("SELECT COUNT(*) FROM capture WHERE session_id = :sessionId AND processed_compressor = 1")
+    int getNumberOfCompressorProcessedCaptures(long sessionId);
+
     @Insert
     void insert(Capture... captures);
 
