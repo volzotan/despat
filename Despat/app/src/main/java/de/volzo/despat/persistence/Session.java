@@ -64,9 +64,6 @@ public class Session {
     @Embedded(prefix = "cameraconfig_")
     private CameraConfig cameraConfig;
 
-    @ColumnInfo(name = "shutter_interval")
-    private Integer shutterInterval;
-
     @ColumnInfo(name = "exposure_threshold")
     private Double exposureThreshold;
 
@@ -99,6 +96,14 @@ public class Session {
     public void setImageSize(Size imageSize) {
         imageWidth = imageSize.getWidth();
         imageHeight = imageSize.getHeight();
+    }
+
+    public Integer getShutterInterval() {
+        if (cameraConfig != null) {
+            return cameraConfig.getShutterInterval();
+        } else {
+            return null;
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -197,14 +202,6 @@ public class Session {
 
     public void setResumed(boolean resumed) {
         this.resumed = resumed;
-    }
-
-    public Integer getShutterInterval() {
-        return shutterInterval;
-    }
-
-    public void setShutterInterval(Integer shutterInterval) {
-        this.shutterInterval = shutterInterval;
     }
 
     public Double getExposureThreshold() {

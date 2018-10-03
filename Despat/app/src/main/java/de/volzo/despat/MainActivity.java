@@ -41,6 +41,7 @@ import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -211,28 +212,28 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        Button btKill = (Button) findViewById(R.id.bt_reset);
-        btKill.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent killIntent = new Intent(activity, Orchestrator.class);
-                killIntent.putExtra(Orchestrator.SERVICE, Broadcast.ALL_SERVICES);
-                killIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
-                sendBroadcast(killIntent);
-
-                AppDatabase.purgeDatabase(activity);
-                Config.reset(activity);
-
-                // TODO: delete despat folder
-
-                Log.i(TAG, "KILL: db purged. now attempting reboot!");
-
-                Despat despat = Util.getDespat(activity);
-                SystemController systemController = despat.getSystemController();
-                systemController.reboot();
-            }
-        });
+//        Button btKill = (Button) findViewById(R.id.bt_reset);
+//        btKill.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                Intent killIntent = new Intent(activity, Orchestrator.class);
+//                killIntent.putExtra(Orchestrator.SERVICE, Broadcast.ALL_SERVICES);
+//                killIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
+//                sendBroadcast(killIntent);
+//
+//                AppDatabase.purgeDatabase(activity);
+//                Config.reset(activity);
+//
+//                // TODO: delete despat folder
+//
+//                Log.i(TAG, "KILL: db purged. now attempting reboot!");
+//
+//                Despat despat = Util.getDespat(activity);
+//                SystemController systemController = despat.getSystemController();
+//                systemController.reboot();
+//            }
+//        });
 
         setButtonStates();
 
@@ -334,6 +335,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         registerAllReceivers();
         startProgressBarUpdate();
         updatePreviewImage();
+
+        updateSysInfobox();
 
         runTestCode();
     }
@@ -808,7 +811,36 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     private void updateSysInfobox() {
+        TextView time = (TextView) findViewById(R.id.tv_sysinfo_time);
+        TextView imagesTaken = (TextView) findViewById(R.id.tv_sysinfo_imagestaken);
+        TextView imagesInMemory = (TextView) findViewById(R.id.tv_sysinfo_imagesinmemory);
+        TextView freeSpaceInternal = (TextView) findViewById(R.id.tv_sysinfo_freespaceinternal);
+        TextView freeSpaceExternal = (TextView) findViewById(R.id.tv_sysinfo_freespaceexternal);
+        TextView batteryInternal = (TextView) findViewById(R.id.tv_sysinfo_batteryinternal);
+        TextView batteryExternal = (TextView) findViewById(R.id.tv_sysinfo_batteryexternal);
+        TextView stateCharging = (TextView) findViewById(R.id.tv_sysinfo_statecharging);
+        TextView temperatureDevice = (TextView) findViewById(R.id.tv_sysinfo_temperaturedevice);
+        TextView temperatureBattery = (TextView) findViewById(R.id.tv_sysinfo_temperaturebattery);
+        TextView dozeWhitelisted = (TextView) findViewById(R.id.tv_sysinfo_dozewhitelisted);
 
+        Despat despat = ((Despat) getApplicationContext());
+        SystemController systemController = despat.getSystemController();
+        ImageRollover imgroll = new ImageRollover(this, ".jpg");
+        SessionManager sessionManager = SessionManager.getInstance(this);
+
+        time.setText((new SimpleDateFormat(Config.DATEFORMAT_SHORT, Config.LOCALE)).format(Calendar.getInstance().getTime()));
+        if (sessionManager.isActive()) {
+            imagesTaken.setText(sessionManager.getImagesTaken());
+        }
+        imagesInMemory.setText(Integer.toString(imgroll.getNumberOfSavedImages()));
+        freeSpaceInternal.setText(Float.toString(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(this))));
+        freeSpaceExternal.setText("");
+        batteryInternal.setText(Integer.toString(systemController.getBatteryLevel()));
+        batteryExternal.setText("");
+        stateCharging.setText(Boolean.toString(systemController.getBatteryChargingState()));
+        temperatureDevice.setText("");
+        temperatureBattery.setText(Float.toString(systemController.getBatteryTemperature()));
+        dozeWhitelisted.setText("?");
     }
 
     public void runRecognizer() {

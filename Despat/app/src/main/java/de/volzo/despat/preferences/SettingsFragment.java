@@ -43,6 +43,15 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.registerOnSharedPreferenceChangeListener(this);
 
+        Preference textPref = new Preference(context);
+        textPref.setTitle("");
+        textPref.setSummary(R.string.pref_summary_intro);
+        textPref.setKey("PREFERENCE_TEXT_INTRO");
+        textPref.setSelectable(false);
+        textPref.setPersistent(false);
+        screen.addPreference(textPref);
+//        preferenceSummaryMap.put(textPref, R.string.pref_summary_intro);
+
         // GENERAL ---------------------------------------------------------------------------------
 
         category = new PreferenceCategory(context);

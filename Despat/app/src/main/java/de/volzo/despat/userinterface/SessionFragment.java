@@ -119,8 +119,8 @@ public class SessionFragment extends Fragment {
         }
 
         tvName.setText(session.getSessionName());
-        if (session.getShutterInterval() != null) {
-            tvShutterInterval.setText(session.getShutterInterval());
+        if (session.getCameraConfig() != null) {
+            tvShutterInterval.setText(String.format("%dms", Integer.toString(session.getCameraConfig().getShutterInterval())));
         }
         tvDetector.setText(session.getDetectorConfig().getDetector());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));
@@ -136,7 +136,6 @@ public class SessionFragment extends Fragment {
         tvNumberOfCaptures.setText(Integer.toString(sessionDao.getNumberOfCaptures(session.getId())));
         try {
             Status maxTempStatus = SessionManager.getMaxTemperatureDuringSession(context, session);
-
             if (maxTempStatus != null) {
                 DateFormat df = new SimpleDateFormat(Config.DATEFORMAT);
                 tvMaxTemperature.setText(
