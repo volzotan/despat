@@ -91,19 +91,19 @@ public class DetectorSSD extends Detector {
             }
         }
 
-        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> processes = activityManager.getRunningAppProcesses();
-        for (ActivityManager.RunningAppProcessInfo info : processes) {
-            System.out.println(info.pid + " " + info.processName + " " + info.describeContents());
-        }
-        Debug.MemoryInfo[] meminfo = activityManager.getProcessMemoryInfo(new int[]{processes.get(0).pid});
-        for (Debug.MemoryInfo info : meminfo) {
-            Map<String, String> map = info.getMemoryStats();
-            for (String key : map.keySet()) {
-                Log.d(TAG, key + " : " + map.get(key));
-            }
-        }
+//        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+//        ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
+//        List<ActivityManager.RunningAppProcessInfo> processes = activityManager.getRunningAppProcesses();
+//        for (ActivityManager.RunningAppProcessInfo info : processes) {
+//            System.out.println(info.pid + " " + info.processName + " " + info.describeContents());
+//        }
+//        Debug.MemoryInfo[] meminfo = activityManager.getProcessMemoryInfo(new int[]{processes.get(0).pid});
+//        for (Debug.MemoryInfo info : meminfo) {
+//            Map<String, String> map = info.getMemoryStats();
+//            for (String key : map.keySet()) {
+//                Log.d(TAG, key + " : " + map.get(key));
+//            }
+//        }
 
         try {
             System.loadLibrary("tensorflow_demo");
@@ -127,7 +127,7 @@ public class DetectorSSD extends Detector {
             throw e;
         }
 
-        Log.d(TAG, String.format("Detector init. Model: %s @ $d", detectorConfig.getDetector(), detectorConfig.getTilesize()));
+        Log.d(TAG, String.format("Detector init. Model: %s @ %d", detectorConfig.getDetector(), detectorConfig.getTilesize()));
 
 //        rgbFrameBitmap = Bitmap.createBitmap(sourceImageWidth, sourceImageHeight, Bitmap.Config.ARGB_8888);
 //        croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Bitmap.Config.ARGB_8888);
@@ -166,6 +166,7 @@ public class DetectorSSD extends Detector {
             double totalInferenceTime = stopwatch.stop("totalInference");
 
             Benchmark benchmark = new Benchmark();
+//            benchmark.setSessionId(session.getId());
             benchmark.setDetector(this.detectorConfig.getDetector());
             benchmark.setTimestamp(Calendar.getInstance().getTime());
             benchmark.setType(Benchmark.TYPE_TILE);

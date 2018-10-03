@@ -260,13 +260,13 @@ public class SessionManager {
         }
         context.sendBroadcast(shutterIntent);
 
-        Orchestrator.runCompressorService(context);
-
         session.setEnd(Calendar.getInstance().getTime());
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
         sessionDao.update(session);
+
+        Orchestrator.runCompressorService(context);
 
         Util.saveEvent(context, Event.EventType.SESSION_STOP, session.getSessionName());
 

@@ -10,6 +10,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -89,6 +90,8 @@ public class Compressor implements Callable<Integer> {
         long time_searchFiles = System.currentTimeMillis();
         long time_init = 0;
         long time_add = 0;
+        long time_store = 0;
+        long time_unstore = 0;
         long time_toJpeg = 0;
 
         File imageFolder = Config.getImageFolder(context);
@@ -109,20 +112,41 @@ public class Compressor implements Callable<Integer> {
         time_searchFiles = System.currentTimeMillis() - time_searchFiles;
         time_init = System.currentTimeMillis();
 
-        images = images.subList(0, 10);
+        images = images.subList(0, 20);
         Bitmap bitmap = BitmapFactory.decodeFile(images.get(0).getAbsolutePath());
 
-        init(bitmap.getWidth(), bitmap.getHeight());
+        init(bitmap.getWidth()/2, bitmap.getHeight()/2);
 
         time_init = System.currentTimeMillis() - time_init;
         time_add = System.currentTimeMillis();
 
         for (File f : images) {
             add(f);
-            System.out.println(counter);
+            Log.d(TAG, "image added: " + counter);
         }
 
         time_add = System.currentTimeMillis() - time_add;
+
+        try {
+            time_store = System.currentTimeMillis();
+
+            System.out.println(this.mat.get(0, 0)[0]);
+
+            File storeFile = new File(imageFolder, "test.pgm");
+            store(storeFile);
+
+            time_store = System.currentTimeMillis() - time_store;
+            time_unstore = System.currentTimeMillis();
+
+            unstore(storeFile);
+
+            System.out.println(this.mat.get(0, 0)[0]);
+
+            time_unstore = System.currentTimeMillis() - time_unstore;
+        } catch (Exception e) {
+            Log.e(TAG, "storing/unstoring failed", e);
+        }
+
         time_toJpeg = System.currentTimeMillis();
 
         toJpeg(new File(imageFolder, "compressed.jpg"));
@@ -134,6 +158,8 @@ public class Compressor implements Callable<Integer> {
         System.out.println("init: " + time_init);
         System.out.println("add: " + time_add);
         System.out.println("add per image: " + time_add/counter);
+        System.out.println("store: " + time_store);
+        System.out.println("unstore: " + time_unstore);
         System.out.println("toJpeg: " + time_toJpeg);
     }
 
@@ -163,7 +189,7 @@ public class Compressor implements Callable<Integer> {
 
         File imageFolder = Config.getImageFolder(context);
         File compressedImagePath = new File(imageFolder, session.getSessionName() + ".jpg");
-        File compressedStorePath = new File(imageFolder, session.getSessionName() + ".ctmp");
+        File compressedStorePath = new File(imageFolder, session.getSessionName() + ".pgm");
         if (compressedStorePath.exists()) {
             Log.i(TAG, "found existing store for session: " + session);
             unstore(compressedStorePath);
@@ -191,13 +217,15 @@ public class Compressor implements Callable<Integer> {
             c.setProcessed_compressor(true);
             captureDao.update(c);
 
-            System.out.println(counter);
+            Log.d(TAG, "image added: " + counter);
         }
 
-        // complete if: all images have processed_compressor == true
+        // complete if:
+        // session has ended (=> has end date)
+        // all images have processed_compressor == true
         // at least MAX_NUMBER_OF_IMAGES have processed_compressor = true
         int numberOfProcessedCaptures = captureDao.getNumberOfCompressorProcessedCaptures(session.getId());
-        if (numberOfProcessedCaptures == captures.size() || numberOfProcessedCaptures >= MAX_NUMBER_OF_IMAGES) {
+        if (session.getEnd() != null && numberOfProcessedCaptures == captures.size() || numberOfProcessedCaptures >= MAX_NUMBER_OF_IMAGES) {
             toJpeg(compressedImagePath);
             session.setCompressedImage(compressedImagePath);
             sessionDao.update(session);
@@ -224,6 +252,8 @@ public class Compressor implements Callable<Integer> {
 
         Mat imgMat = Imgcodecs.imread(path.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 
+        Imgproc.resize(imgMat, imgMat, new Size(this.width, this.height));
+
         if (imgMat.width() != this.width || imgMat.height() != this.height) {
             Log.w(TAG, "incompatible size of file: " + path.getName());
             return;
@@ -238,70 +268,84 @@ public class Compressor implements Callable<Integer> {
         counter++;
     }
 
-    public void store(File path) throws Exception {
-        try {
-            FileOutputStream fos = new FileOutputStream(path);
-            short[] data = new short[1];
-            byte[] binary = new byte[2];
-
-            if (mat == null) {
-                throw new Exception("compressor must be initialized");
-            }
-
-            for (int i=0; i<mat.rows(); i++) {
-                for (int j=0; j<mat.cols(); j++) {
-                    mat.get(i, j, data);
-
-                    binary[1] = (byte)(data[0] >>> 8);
-                    binary[0] = (byte)(data[0]);
-                    fos.write(binary);
-                }
-            }
-
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            Log.e(TAG, "storing failed", e);
-            throw e;
-        }
+    // Store as a Portable Greymap Image
+    // Max value: 65536
+    private void store(File path) throws Exception {
+        Imgcodecs.imwrite(path.getAbsolutePath(), this.mat);
     }
 
-    public void unstore(File path) throws Exception {
-        try {
-            short[] data = new short[1];
-            byte[] binary = new byte[2];
-
-            if (mat == null) {
-                throw new Exception("compressor must be initialized");
-            }
-
-            FileInputStream fis = new FileInputStream(path);
-
-            for (int i=0; i<mat.rows(); i++) {
-                for (int j=0; j<mat.cols(); j++) {
-                    int pos = i * mat.rows() * 2 + j * 2;
-
-                    try {
-                        int ret = fis.read(binary);
-                        if (ret <= 0) {
-                            throw new IOException("file ended prematurely");
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        Log.e(TAG, "out of bounds. pos: " + pos);
-                        throw e;
-                    }
-
-                    data[0] = (short) ((binary[1] << 8) + binary[0]);
-                    mat.put(i, j, data);
-                }
-            }
-
-            fis.close();
-        } catch (IOException e) {
-            Log.e(TAG, "storing failed", e);
-            throw e;
-        }
+    private void unstore(File path) throws Exception {
+        this.mat = Imgcodecs.imread(path.getAbsolutePath(), Imgcodecs.IMREAD_UNCHANGED);
     }
+
+    // Do NOT use for large matrices (ie. images). Slow.
+//    public void store(File path) throws Exception {
+//        long start = System.currentTimeMillis();
+//        try {
+//            FileOutputStream fos = new FileOutputStream(path);
+//            short[] data = new short[1];
+//            byte[] binary = new byte[2];
+//
+//            if (mat == null) {
+//                throw new Exception("compressor must be initialized");
+//            }
+//
+//            for (int i=0; i<mat.rows(); i++) {
+//                for (int j=0; j<mat.cols(); j++) {
+//                    mat.get(i, j, data);
+//
+//                    binary[1] = (byte)(data[0] >>> 8);
+//                    binary[0] = (byte)(data[0]);
+//                    fos.write(binary);
+//                }
+//            }
+//
+//            fos.flush();
+//            fos.close();
+//        } catch (IOException e) {
+//            Log.e(TAG, "storing failed", e);
+//            throw e;
+//        }
+//
+//        Log.d(TAG, String.format("storing took %dms", System.currentTimeMillis() - start));
+//    }
+//
+//    public void unstore(File path) throws Exception {
+//        try {
+//            short[] data = new short[1];
+//            byte[] binary = new byte[2];
+//
+//            if (mat == null) {
+//                throw new Exception("compressor must be initialized");
+//            }
+//
+//            FileInputStream fis = new FileInputStream(path);
+//
+//            for (int i=0; i<mat.rows(); i++) {
+//                for (int j=0; j<mat.cols(); j++) {
+//                    int pos = i * mat.rows() * 2 + j * 2;
+//
+//                    try {
+//                        int ret = fis.read(binary);
+//                        if (ret <= 0) {
+//                            throw new IOException("file ended prematurely");
+//                        }
+//                    } catch (ArrayIndexOutOfBoundsException e) {
+//                        Log.e(TAG, "out of bounds. pos: " + pos);
+//                        throw e;
+//                    }
+//
+//                    data[0] = (short) ((binary[1] << 8) + binary[0]);
+//                    mat.put(i, j, data);
+//                }
+//            }
+//
+//            fis.close();
+//        } catch (IOException e) {
+//            Log.e(TAG, "storing failed", e);
+//            throw e;
+//        }
+//    }
 
     public void toJpeg(File path) {
         Mat matExportGray = Mat.zeros(mat.height(), mat.width(), CvType.CV_8UC1);

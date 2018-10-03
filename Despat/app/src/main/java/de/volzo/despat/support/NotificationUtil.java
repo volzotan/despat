@@ -163,6 +163,7 @@ public class NotificationUtil {
             } else {
                 Log.d(TAG, "timeout not supported due to API level. Notification deleted");
                 notificationManager.cancel(notificationId);
+                return;
             }
         }
 

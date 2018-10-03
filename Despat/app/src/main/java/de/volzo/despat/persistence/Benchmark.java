@@ -24,7 +24,7 @@ public class Benchmark {
     private long id;
 
     @ColumnInfo(name = "session_id")
-    private long sessionId;
+    private Long sessionId; // can be null, this Long instead of long
 
     @ColumnInfo(name = "timestamp")
     private Date timestamp;
@@ -46,11 +46,11 @@ public class Benchmark {
         this.id = id;
     }
 
-    public long getSessionId() {
+    public Long getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(long sessionId) {
+    public void setSessionId(Long sessionId) {
         this.sessionId = sessionId;
     }
 

@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <ImageView
+            <de.volzo.despat.support.AspectRatioImageView
                 android:id="@+id/compressedpreview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -32,7 +32,7 @@
             android:orientation="vertical"
             android:layout_margin="7dp"
             android:columnCount="2"
-            android:rowCount="7" >
+            android:rowCount="9" >
 
             <TextView
                 android:id="@+id/label_name"
@@ -52,12 +52,51 @@
                 android:layout_margin="3dp"
                 android:text="undef." />
 
+
+            <TextView
+                android:id="@+id/label_shutterInterval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_row="1"
+                android:layout_margin="3dp"
+                android:text="interval:" />
+
+            <TextView
+                android:id="@+id/shutterInterval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_row="1"
+                android:layout_margin="3dp"
+                android:text="undef." />
+
+
+            <TextView
+                android:id="@+id/label_detector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_row="2"
+                android:layout_margin="3dp"
+                android:text="Detector Name:" />
+
+            <TextView
+                android:id="@+id/detector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_row="2"
+                android:layout_margin="3dp"
+                android:text="undef." />
+
+
             <TextView
                 android:id="@+id/label_start"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_row="1"
+                android:layout_row="3"
                 android:layout_margin="3dp"
                 android:text="start:" />
 
@@ -66,16 +105,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:layout_row="1"
+                android:layout_row="3"
                 android:layout_margin="3dp"
                 android:text="undef." />
+
 
             <TextView
                 android:id="@+id/label_end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_row="2"
+                android:layout_row="4"
                 android:layout_margin="3dp"
                 android:text="end:" />
 
@@ -84,7 +124,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:layout_row="2"
+                android:layout_row="4"
                 android:layout_margin="3dp"
                 android:text="undef." />
 
@@ -93,7 +133,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_row="3"
+                android:layout_row="5"
                 android:layout_margin="3dp"
                 android:text="duration:" />
 
@@ -102,7 +142,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:layout_row="3"
+                android:layout_row="5"
                 android:layout_margin="3dp"
                 android:text="undef." />
 
@@ -111,7 +151,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_row="4"
+                android:layout_row="6"
                 android:layout_margin="3dp"
                 android:text="captures" />
 
@@ -120,7 +160,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:layout_row="4"
+                android:layout_row="6"
                 android:layout_margin="3dp"
                 android:text="-1" />
 
@@ -129,7 +169,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_row="5"
+                android:layout_row="7"
                 android:layout_margin="3dp"
                 android:text="max temperature:" />
 
@@ -138,7 +178,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:layout_row="5"
+                android:layout_row="7"
                 android:layout_margin="3dp"
                 android:text="-1" />
 
@@ -147,7 +187,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_row="6"
+                android:layout_row="8"
                 android:layout_margin="3dp"
                 android:text="objects:" />
 
@@ -156,7 +196,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:layout_row="6"
+                android:layout_row="8"
                 android:layout_margin="3dp"
                 android:text="-1" />
 

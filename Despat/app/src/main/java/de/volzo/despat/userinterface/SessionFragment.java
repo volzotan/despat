@@ -41,6 +41,7 @@ import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.AspectRatioImageView;
 import de.volzo.despat.support.Util;
 
 
@@ -85,8 +86,10 @@ public class SessionFragment extends Fragment {
 
         final Session session = sessionDao.getById(sessionId);
 
-        ImageView ivCompressedPreview = (ImageView) view.findViewById(R.id.compressedpreview);
+        AspectRatioImageView ivCompressedPreview = (AspectRatioImageView) view.findViewById(R.id.compressedpreview);
         TextView tvName = (TextView) view.findViewById(R.id.name);
+        TextView tvShutterInterval = (TextView) view.findViewById(R.id.shutterInterval);
+        TextView tvDetector = (TextView) view.findViewById(R.id.detector);
         TextView tvStart = (TextView) view.findViewById(R.id.start);
         TextView tvEnd = (TextView) view.findViewById(R.id.end);
         TextView tvDuration = (TextView) view.findViewById(R.id.duration);
@@ -97,10 +100,11 @@ public class SessionFragment extends Fragment {
 
         try {
             File f = session.getCompressedImage();
+            ivCompressedPreview.setAspectRatio(session.getImageWidth(), session.getImageHeight());
             if (f == null) throw new Exception("compressed image missing");
             Glide.with(context).load(f.getAbsoluteFile()).into(ivCompressedPreview);
         } catch (Exception e) {
-            Log.w(TAG, "compressed preview for session " + session.toString() + "could not be loaded");
+            Log.w(TAG, "compressed preview for session " + session.toString() + " could not be loaded");
             Glide.with(context).load(R.drawable.missing_img).into(ivCompressedPreview);
         }
 
@@ -115,6 +119,10 @@ public class SessionFragment extends Fragment {
         }
 
         tvName.setText(session.getSessionName());
+        if (session.getShutterInterval() != null) {
+            tvShutterInterval.setText(session.getShutterInterval());
+        }
+        tvDetector.setText(session.getDetectorConfig().getDetector());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));
 
         if (session.getEnd() != null) {

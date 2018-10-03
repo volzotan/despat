@@ -10,6 +10,9 @@ import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import de.volzo.despat.CameraController;
@@ -19,6 +22,7 @@ import de.volzo.despat.SessionManager;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.preferences.DetectorConfig;
+import de.volzo.despat.support.Util;
 
 public class ConfigureActivity extends AppCompatActivity {
 
@@ -38,6 +42,32 @@ public class ConfigureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_configure);
 
         this.activity = this;
+
+        EditText etSessionName = (EditText) findViewById(R.id.et_sessionName);
+        etSessionName.setText(Util.getMostlyUniqueRandomString(activity));
+
+        final TextView tvInterval = (TextView) findViewById(R.id.tv_shutterInterval_value);
+
+        final SeekBar sbInterval = (SeekBar) findViewById(R.id.sb_interval);
+//        sbInterval.setMin(3);
+        sbInterval.setMax(120);
+        sbInterval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tvInterval.setText(String.format("%ds", progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        sbInterval.setProgress((int) (Config.getShutterInterval(activity)/1000));
 
 //        Button btSetTime = (Button) findViewById(R.id.bt_setTime);
 //        btSetTime.setOnClickListener(new View.OnClickListener() {
@@ -64,6 +94,8 @@ public class ConfigureActivity extends AppCompatActivity {
                 Context context = activity;
 
                 CameraConfig cameraConfig = new CameraConfig(activity);
+                cameraConfig.setShutterInterval(sbInterval.getProgress() * 1000);
+
                 DetectorConfig detectorConfig = new DetectorConfig(Config.getNetworkFidelity(context), 600); // TODO
 
 //                // TODO:

@@ -58,6 +58,7 @@ import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.Compressor;
 import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
@@ -339,16 +340,19 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void runTestCode() {
 
+//        Compressor compressor = new Compressor();
+//        compressor.test(activity);
+
 //        Util.printCameraParameters(this);
 
-        AppDatabase db = AppDatabase.getAppDatabase(this);
-        SessionDao sessionDao = db.sessionDao();
-        Session lastSession = sessionDao.getLast();
-        if (lastSession != null) {
-//            Orchestrator.runRecognitionService(this, lastSession.getId());
-        };
-        Intent compressorIntent = new Intent(this, CompressorService.class);
-        startService(compressorIntent);
+//        AppDatabase db = AppDatabase.getAppDatabase(this);
+//        SessionDao sessionDao = db.sessionDao();
+//        Session lastSession = sessionDao.getLast();
+//        if (lastSession != null) {
+////            Orchestrator.runRecognitionService(this, lastSession.getId());
+//        };
+//        Intent compressorIntent = new Intent(this, CompressorService.class);
+//        startService(compressorIntent);
 
 //        if (lastSession != null) {
 //            Intent pointIntent = new Intent(activity, PointActivity.class);
@@ -801,6 +805,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         captureProgressBar.setEnabled(false);
 
         Log.d(TAG, "periodicUpdateHandler start");
+    }
+
+    private void updateSysInfobox() {
+
     }
 
     public void runRecognizer() {

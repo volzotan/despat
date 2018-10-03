@@ -83,14 +83,14 @@ public class Orchestrator extends BroadcastReceiver {
 
             try {
                 SessionManager sessionManager = SessionManager.getInstance(context);
-                Session session =  sessionManager.getSession();
+                Session session = sessionManager.getSession();
                 this.cameraConfig = session.getCameraConfig();
 
                 if (cameraConfig == null) {
                     throw new Exception(String.format("empty camera config in session [%s]", session.toString()));
                 }
             } catch (Exception e) {
-                Log.e(TAG, "camera config missing. initialized with default values");
+                Log.e(TAG, "camera config missing. initialized with default values", e);
                 this.cameraConfig = new CameraConfig(context);
             }
 
@@ -164,16 +164,16 @@ public class Orchestrator extends BroadcastReceiver {
                             Log.d(TAG, "RecognitionService not started, already running");
                         }
 
-//                        if (!Util.isServiceRunning(context, CompressorService.class)) {
-//                            AppDatabase db = AppDatabase.getAppDatabase(context);
-//                            SessionDao sessionDao = db.sessionDao();
-//                            Session newestSession = sessionDao.getLast();
-//                            if (newestSession != null) {
-//                                Orchestrator.runCompressorService(context, newestSession.getId()); // TODO: only add newest images
-//                            }
-//                        } else {
-//                            Log.d(TAG, "CompressorService not started, already running");
-//                        }
+                        if (!Util.isServiceRunning(context, CompressorService.class)) {
+                            AppDatabase db = AppDatabase.getAppDatabase(context);
+                            SessionDao sessionDao = db.sessionDao();
+                            Session newestSession = sessionDao.getLast();
+                            if (newestSession != null) {
+                                Orchestrator.runCompressorService(context, newestSession.getId()); // TODO: only add newest images
+                            }
+                        } else {
+                            Log.d(TAG, "CompressorService not started, already running");
+                        }
 
                     } catch (SessionManager.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
@@ -300,7 +300,19 @@ public class Orchestrator extends BroadcastReceiver {
 
     public static void runCompressorService(Context context) {
         Log.d(TAG, "CompressorService started");
+
+        if (Util.isServiceRunning(context, CompressorService.class)) {
+            Log.d(TAG, "CompressorService already running");
+        }
+
         Intent compressorIntent = new Intent(context, CompressorService.class);
+        context.startService(compressorIntent);
+    }
+
+    public static void runCompressorService(Context context, long sessionId) {
+        Log.d(TAG, "CompressorService started (for single session)");
+        Intent compressorIntent = new Intent(context, CompressorService.class);
+        compressorIntent.putExtra(CompressorService.ARG_SESSION_ID, sessionId);
         context.startService(compressorIntent);
     }
 

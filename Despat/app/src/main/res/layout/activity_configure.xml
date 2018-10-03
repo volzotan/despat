@@ -14,28 +14,143 @@
         <!--android:layout_height="wrap_content"-->
         <!--android:id="@+id/bt_setTime" />-->
 
-    <TextView
-        android:id="@+id/tv_sessionName"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:textSize="14dp"
-        android:textStyle="bold"
-        android:text="dataset name:"/>
-
-    <TextView
-        android:id="@+id/tip_sessionName"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:textAlignment="viewEnd"
-        android:layout_toRightOf="@+id/tv_sessionName"
-        android:layout_marginLeft="10dp"
-        android:text="an easy to remember and descriptive name for this dataset"/>
+        android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/et_sessionName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_sessionName"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_sessionName"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:textSize="14dp"
+                android:textStyle="bold"
+                android:text="Dataset Name:"/>
+
+            <TextView
+                android:id="@+id/tip_sessionName"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:textAlignment="viewEnd"
+                android:layout_toRightOf="@+id/tv_sessionName"
+                android:layout_marginLeft="10dp"
+                android:text="an easy to remember and descriptive name for this dataset"/>
+
+            <EditText
+                android:id="@+id/et_sessionName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_sessionName"/>
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="12dp"
+            android:background="#666666"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_shutterInterval"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:textSize="14dp"
+                android:textStyle="bold"
+                android:text="Interval:"/>
+
+            <TextView
+                android:id="@+id/tip_shutterInterval"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:textAlignment="viewEnd"
+                android:layout_toRightOf="@+id/tv_shutterInterval"
+                android:layout_marginLeft="10dp"
+                android:text="time between captures"/>
+
+            <TextView
+                android:id="@+id/tv_shutterInterval_value"
+                android:layout_width="wrap_content"
+                android:layout_below="@+id/tip_shutterInterval"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="6dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_centerInParent="true"
+                android:textAlignment="textEnd"
+                android:gravity="center_vertical"
+                android:text="undef."/>
+
+            <SeekBar
+                android:id="@+id/sb_interval"
+                android:layout_width="match_parent"
+                android:layout_marginTop="6dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:progressTint="@android:color/transparent"
+                android:layout_below="@+id/tv_shutterInterval"
+                android:layout_toLeftOf="@+id/tv_shutterInterval_value" />
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="12dp"
+            android:background="#666666"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_detector"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:textSize="14dp"
+                android:textStyle="bold"
+                android:text="Detection Algorithm:"/>
+
+            <TextView
+                android:id="@+id/tip_detector"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:textAlignment="viewEnd"
+                android:layout_toRightOf="@+id/tv_detector"
+                android:layout_marginLeft="10dp"
+                android:text="fast or slower but more precise"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_detector">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"/>
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"/>
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"/>
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
     <Button
         android:text="Start"
