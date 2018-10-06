@@ -49,6 +49,9 @@ public class Position {
     @ColumnInfo(name = "type")
     private String type;
 
+    @ColumnInfo(name = "type_id")
+    private int typeId;
+
     @ColumnInfo(name = "recognition_confidence")
     private Float recognitionConfidence;
 
@@ -141,6 +144,14 @@ public class Position {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public int getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(int typeId) {
+        this.typeId = typeId;
     }
 
     public Float getRecognitionConfidence() {

@@ -118,8 +118,7 @@ public class TensorFlowInterface {
         }
 
         // Pre-allocate buffers.
-        d.outputNames = new String[] {"detection_boxes", "detection_scores",
-                "detection_classes", "num_detections"};
+        d.outputNames = new String[] {"detection_boxes", "detection_scores", "detection_classes", "num_detections"};
         d.intValues = new int[d.inputSize * d.inputSize];
         d.byteValues = new byte[d.inputSize * d.inputSize * 3];
         d.outputScores = new float[MAX_RESULTS];
@@ -189,7 +188,7 @@ public class TensorFlowInterface {
                             outputLocations[4 * i] * inputSize,
                             outputLocations[4 * i + 3] * inputSize,
                             outputLocations[4 * i + 2] * inputSize);
-            pq.add(new Detector.Recognition("" + i, labels.get((int) outputClasses[i]), outputScores[i], detection));
+            pq.add(new Detector.Recognition("" + i, labels.get((int) outputClasses[i]), (int) outputClasses[i], outputScores[i], detection));
         }
 
         final ArrayList<Detector.Recognition> recognitions = new ArrayList<Detector.Recognition>();

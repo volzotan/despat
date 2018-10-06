@@ -230,6 +230,12 @@ public class Compressor implements Callable<Integer> {
             session.setCompressedImage(compressedImagePath);
             sessionDao.update(session);
 
+            if (compressedStorePath.exists()) {
+                compressedStorePath.delete();
+//                context.deleteFile(compressedStorePath.getAbsolutePath());
+                Log.i(TAG, "removed store for session: " + session);
+            }
+
             Log.d(TAG, "created compressed image for session " + session + " in " + compressedImagePath);
         } else {
             store(compressedStorePath);

@@ -120,7 +120,7 @@ public class SessionFragment extends Fragment {
 
         tvName.setText(session.getSessionName());
         if (session.getCameraConfig() != null) {
-            tvShutterInterval.setText(String.format("%dms", Integer.toString(session.getCameraConfig().getShutterInterval())));
+            tvShutterInterval.setText(String.format("%dms", session.getCameraConfig().getShutterInterval()));
         }
         tvDetector.setText(session.getDetectorConfig().getDetector());
         tvStart.setText(Util.getDateFormat().format(session.getStart()));

@@ -26,6 +26,7 @@
     <application
         android:name=".Despat"
         android:allowBackup="true"
+        android:fullBackupContent="true"
         android:icon="@mipmap/despat_icon"
         android:label="@string/app_name"
         android:supportsRtl="true"

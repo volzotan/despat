@@ -164,10 +164,12 @@ public class RecognitionService extends IntentService {
 
             // The detected position is not the center of the bounding box
             // but the approximate point where the object touches the ground
+            // TODO: this works well for class person, apply different strategy for cars, etc.
             pos.setX((loc.right - loc.left)/2f);
             pos.setY((loc.bottom));
 
             pos.setType(rec.getTitle());
+            pos.setTypeId(rec.getClassId());
             pos.setRecognitionConfidence(rec.getConfidence());
 
             positionDao.insert(pos);

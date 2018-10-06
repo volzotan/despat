@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f40c96701899289270470df13d12e369",
+    "identityHash": "267ff72896cf32e183becc4481821c91",
     "entities": [
       {
         "tableName": "Status",
@@ -86,7 +86,7 @@
       },
       {
         "tableName": "Session",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `image_width` INTEGER NOT NULL, `image_height` INTEGER NOT NULL, `exclusion_image` BLOB, `compressed_image` TEXT, `homography_matrix` TEXT, `resumed` INTEGER NOT NULL, `detector` TEXT, `tilesize` INTEGER NOT NULL, `shutter_interval` INTEGER, `exposure_threshold` REAL, `exposure_compensation` REAL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `image_width` INTEGER NOT NULL, `image_height` INTEGER NOT NULL, `exclusion_image` BLOB, `compressed_image` TEXT, `homography_matrix` TEXT, `resumed` INTEGER NOT NULL, `exposure_threshold` REAL, `exposure_compensation` REAL, `detectorconfig_detector` TEXT, `detectorconfig_tilesize` INTEGER, `cameraconfig_persistentCamera` INTEGER, `cameraconfig_shutterInterval` INTEGER, `cameraconfig_legacyCameraController` INTEGER, `cameraconfig_formatJpg` INTEGER, `cameraconfig_formatRaw` INTEGER, `cameraconfig_zoomRegion` TEXT, `cameraconfig_endCaptureWithoutUnlockingFocus` INTEGER, `cameraconfig_numberOfBurstImages` INTEGER, `cameraconfig_jpegQuality` INTEGER, `cameraconfig_meteringMaxTime` INTEGER, `cameraconfig_runMediascannerAfterCapture` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -161,24 +161,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "detector",
-            "columnName": "detector",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "tilesize",
-            "columnName": "tilesize",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "shutterInterval",
-            "columnName": "shutter_interval",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
             "fieldPath": "exposureThreshold",
             "columnName": "exposure_threshold",
             "affinity": "REAL",
@@ -188,6 +170,84 @@
             "fieldPath": "exposureCompensation",
             "columnName": "exposure_compensation",
             "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "detectorConfig.detector",
+            "columnName": "detectorconfig_detector",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "detectorConfig.tilesize",
+            "columnName": "detectorconfig_tilesize",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.persistentCamera",
+            "columnName": "cameraconfig_persistentCamera",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.shutterInterval",
+            "columnName": "cameraconfig_shutterInterval",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.legacyCameraController",
+            "columnName": "cameraconfig_legacyCameraController",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.formatJpg",
+            "columnName": "cameraconfig_formatJpg",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.formatRaw",
+            "columnName": "cameraconfig_formatRaw",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.zoomRegion",
+            "columnName": "cameraconfig_zoomRegion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.endCaptureWithoutUnlockingFocus",
+            "columnName": "cameraconfig_endCaptureWithoutUnlockingFocus",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.numberOfBurstImages",
+            "columnName": "cameraconfig_numberOfBurstImages",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.jpegQuality",
+            "columnName": "cameraconfig_jpegQuality",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.meteringMaxTime",
+            "columnName": "cameraconfig_meteringMaxTime",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.runMediascannerAfterCapture",
+            "columnName": "cameraconfig_runMediascannerAfterCapture",
+            "affinity": "INTEGER",
             "notNull": false
           }
         ],
@@ -202,7 +262,7 @@
       },
       {
         "tableName": "Capture",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `recording_time` TEXT, `image_path` TEXT, `processed` INTEGER NOT NULL, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `recording_time` TEXT, `image_path` TEXT, `processed_detector` INTEGER NOT NULL, `processed_compressor` INTEGER NOT NULL, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -229,8 +289,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "processed",
-            "columnName": "processed",
+            "fieldPath": "processed_detector",
+            "columnName": "processed_detector",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "processed_compressor",
+            "columnName": "processed_compressor",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -326,7 +392,7 @@
       },
       {
         "tableName": "Position",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `capture_id` INTEGER NOT NULL, `minx` REAL, `miny` REAL, `maxx` REAL, `maxy` REAL, `x` REAL, `y` REAL, `latitude` REAL, `longitude` REAL, `type` TEXT, `recognition_confidence` REAL, `position_confidence` REAL, FOREIGN KEY(`capture_id`) REFERENCES `Capture`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `capture_id` INTEGER NOT NULL, `minx` REAL, `miny` REAL, `maxx` REAL, `maxy` REAL, `x` REAL, `y` REAL, `latitude` REAL, `longitude` REAL, `type` TEXT, `type_id` INTEGER NOT NULL, `recognition_confidence` REAL, `position_confidence` REAL, FOREIGN KEY(`capture_id`) REFERENCES `Capture`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -393,6 +459,12 @@
             "columnName": "type",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "typeId",
+            "columnName": "type_id",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "recognitionConfidence",
@@ -533,11 +605,73 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "Benchmark",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER, `timestamp` TEXT, `type` INTEGER NOT NULL, `detector` TEXT, `inference_time` REAL NOT NULL, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "detector",
+            "columnName": "detector",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inferenceTime",
+            "columnName": "inference_time",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "Session",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"f40c96701899289270470df13d12e369\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"267ff72896cf32e183becc4481821c91\")"
     ]
   }
 }

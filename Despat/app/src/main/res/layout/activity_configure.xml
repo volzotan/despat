@@ -129,31 +129,54 @@
                 android:layout_marginLeft="10dp"
                 android:text="fast or slower but more precise"/>
 
-            <LinearLayout
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:layout_below="@+id/tv_detector">-->
+
+                <!--<Button-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="0.3"/>-->
+                <!--<Button-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="0.3"/>-->
+                <!--<Button-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="0.3"/>-->
+            <!--</LinearLayout>-->
+
+            <RadioGroup
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_below="@+id/tv_detector">
-
-                <Button
+                <RadioButton android:id="@+id/rb_option1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.3"/>
-                <Button
+                    android:layout_weight="0.3"
+                    android:text="option1"/>
+                <RadioButton android:id="@+id/rb_option2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.3"/>
-                <Button
+                    android:layout_weight="0.3"
+                    android:text="option2"/>
+                <RadioButton android:id="@+id/rb_option3"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.3"/>
-            </LinearLayout>
+                    android:layout_weight="0.3"
+                    android:text="option2"/>
+            </RadioGroup>
 
         </RelativeLayout>
 
     </LinearLayout>
 
     <Button
-        android:text="Start"
+        android:text="Start Recording"
         android:textColor="@color/colorAccent"
         android:layout_alignParentBottom="true"
         android:layout_width="fill_parent"

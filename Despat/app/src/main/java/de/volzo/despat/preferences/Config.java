@@ -57,7 +57,7 @@ public class Config {
     public static final int SHUTTER_RELEASE_DELAY                   = 500;
 
     // number of images taken during every capture
-    public static final int NUMBER_OF_BURST_IMAGES                  = 2;
+    public static final int NUMBER_OF_BURST_IMAGES                  = 1;
 
     // use fixed ISO value. null=disabled | v1 only
     public static final Integer FIXED_ISO_VALUE                     = 200;
@@ -172,8 +172,16 @@ public class Config {
     /**
      * WORKING DIRECTORY
      */
-    public static final File DEFAULT_WORKING_DIRECTORY              = new File(Environment.getExternalStorageDirectory(), ("despat"));
+    //public static final File DEFAULT_WORKING_DIRECTORY              = context.getApplicationInfo().dataDir; //new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final String KEY_WORKING_DIRECTORY                = "de.volzo.despat.workingDirectory";
+
+    public static final File getWorkingDirectory(Context context) {
+        String fh = getProperty(context, KEY_WORKING_DIRECTORY, "");
+        if (fh == null || fh.equals("")) {
+            return new File(context.getApplicationInfo().dataDir);
+        }
+        return new File(fh);
+    }
 
     /**
      * PERSISTENT CAMERA

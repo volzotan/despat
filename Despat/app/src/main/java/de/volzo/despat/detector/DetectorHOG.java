@@ -81,6 +81,7 @@ public class DetectorHOG extends Detector {
             Recognition rec = new Recognition(
                     "",
                     "person",
+                    1,
                     (float) foundWeights.get(i, 0)[0],
                     new RectF(
                             (float) rect.x,

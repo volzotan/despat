@@ -1,17 +1,21 @@
 package de.volzo.despat.support;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -23,7 +27,6 @@ import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import de.volzo.despat.CameraController;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
@@ -45,7 +48,7 @@ public class SessionExporter {
     private static final String del = "|";
     private static final DateFormat dateFormat = new SimpleDateFormat(Config.DATEFORMAT, new Locale("de", "DE"));
 
-    private static final String HEADER_POSITION         = "timestamp"+del+"minx"+del+"miny"+del+"maxx"+del+"maxy"+del+"state_charging"+del+"temperature_device"+del+"temperature_battery";
+    private static final String HEADER_POSITION         = "timestamp"+del+"device"+del+"class"+del+"confidence"+del+"lat"+del+"lon"+del+"minx"+del+"miny"+del+"maxx"+del+"maxy"+del+"action";
     private static final String HEADER_STATUS           = "timestamp"+del+"free_space_internal"+del+"free_space_external"+del+"battery_internal"+del+"battery_external"+del+"state_charging"+del+"temperature_device"+del+"temperature_battery";
     private static final String HEADER_HOMOGRAPHYPOINT  = "modification_time"+del+"x"+del+"y"+del+"latitude"+del+"longitude";
 
@@ -153,20 +156,20 @@ public class SessionExporter {
         }
 
         // corresponding points
-//        List<HomographyPoint> homographyPoints = homographyPointDao.getAllBySession(session.getId());
-//        try {
-//            File exportFile = new File(tmpdir, "correspondingpoints.csv");
-//            writeHomographyPointToFile(exportFile, homographyPoints);
-//            files.add(exportFile);
-//        } catch (Exception e) {
-//            Log.e(TAG, "writing correspondingpoints.csv failed", e);
-//            throw new Exception("writing correspondingpoints.csv failed");
-//        }
+        List<HomographyPoint> homographyPoints = homographyPointDao.getAllBySession(session.getId());
+        try {
+            File exportFile = new File(tmpdir, "correspondingpoints.csv");
+            writeHomographyPointToFile(exportFile, homographyPoints);
+            files.add(exportFile);
+        } catch (Exception e) {
+            Log.e(TAG, "writing correspondingpoints.csv failed", e);
+            throw new Exception("writing correspondingpoints.csv failed");
+        }
 
         // info
         try {
             File exportFile = new File(tmpdir, "info.json");
-            writeInfoToFile(exportFile, session);
+            writeInfoToFile(exportFile, session, homographyPoints);
             files.add(exportFile);
         } catch (Exception e) {
             Log.e(TAG, "writing info.json failed", e);
@@ -180,22 +183,59 @@ public class SessionExporter {
         Util.shareFile(context, exportZip);
     }
 
-    private void writeInfoToFile(File f, Session session) throws Exception {
+    private void writeInfoToFile(File f, Session session, List<HomographyPoint> points) throws Exception {
         JSONObject o = new JSONObject();
+        JSONArray sessionArray = new JSONArray();
+        JSONObject sessionObject = new JSONObject();
+        JSONArray correspondingPointsArray = new JSONArray();
 
-        o.put("sessionId", session.getId());
-        o.put("sessionName", session.getSessionName());
-        o.put("start", session.getStart()); // TODO: dateformat?
-        o.put("end", session.getEnd());
-        o.put("lat", session.getLatitude());
-        o.put("lon", session.getLongitude());
-        o.put("homograhpyMatrix", RoomConverter.doubleArrayToString(session.getHomographyMatrix()));
-        o.put("resumed", session.isResumed());
+        sessionObject.put("id", session.getId());
+        sessionObject.put("sessionname", session.getSessionName());
+        sessionObject.put("devicename", Config.getDeviceName(context));
+
+        JSONArray positionArray = new JSONArray();
+        positionArray.put(session.getLatitude());
+        positionArray.put(session.getLongitude());
+        sessionObject.put("position", positionArray);
+
+        JSONObject point = null;
+        JSONArray pointLocationArray = null;
+        for (int i=0; i<points.size(); i++) {
+            point = new JSONObject();
+            pointLocationArray = new JSONArray();
+            point.put("id", i);
+            pointLocationArray.put(points.get(i).getLatitude());
+            pointLocationArray.put(points.get(i).getLongitude());
+            point.put("position", pointLocationArray);
+            correspondingPointsArray.put(point);
+        }
+        sessionObject.put("corresponding_points", correspondingPointsArray);
+
+        sessionObject.put("start", dateFormat.format(session.getStart()));
+        sessionObject.put("end", dateFormat.format(session.getEnd()));
+        sessionObject.put("homographyMatrix", RoomConverter.doubleArrayToString(session.getHomographyMatrix()));
+        sessionObject.put("resumed", session.isResumed());
+
+        sessionArray.put(sessionObject);
+        o.put("sessions", sessionArray);
+
+        o.put("data", "detections.csv");
+
+        JSONArray classmapArray = new JSONArray();
+        InputStream labelsInput = context.getAssets().open("coco_labels_list.txt");
+        BufferedReader br = new BufferedReader(new InputStreamReader(labelsInput));
+        String line;
+        while ((line = br.readLine()) != null) {
+            classmapArray.put(line);
+        }
+        br.close();
+        o.put("classmap", classmapArray);
 
         try {
             FileOutputStream fos = new FileOutputStream(f);
             OutputStreamWriter osw = new OutputStreamWriter(fos);
-            osw.write(o.toString());
+            osw.write(o.toString(4));
+            osw.close();
         } catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
             throw e;
@@ -211,17 +251,21 @@ public class SessionExporter {
 
             for (Position p : data) {
                 write(osw, captureTimestamps.get(p.getCaptureId()));
+                write(osw,0);
+                write(osw, p.getTypeId());
+                write(osw, p.getRecognitionConfidence());
+                write(osw, p.getLatitude());
+                write(osw, p.getLongitude());
                 write(osw, p.getMinx());
                 write(osw, p.getMiny());
                 write(osw, p.getMaxx());
                 write(osw, p.getMaxy());
-                write(osw, p.getX());
-                write(osw, p.getY());
-                write(osw, p.getLatitude());
-                write(osw, p.getLongitude());
-                write(osw, p.getType());
-                write(osw, p.getRecognitionConfidence());
-                write(osw, p.getPositionConfidence());
+                write(osw, -1);
+
+//                write(osw, p.getX());
+//                write(osw, p.getY());
+//                write(osw, p.getPositionConfidence());
+
                 osw.write("\n");
             }
 

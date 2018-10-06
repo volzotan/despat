@@ -19,276 +19,319 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <GridLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:rowCount="12"
-                android:columnCount="2">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="0"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
-                    android:text="foo" />
-
-                <TextView
-                    android:id="@+id/tv_sysinfo_foo"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="0"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
-
-                <TextView
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="1"
-                    android:layout_column="0"
-                    android:textSize="12dp"
-                    android:text="time" />
+                    android:text="time"
+                    android:layout_weight="0.5" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_time"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="1"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="2"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="images taken" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_imagestaken"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="2"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="3"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="images in memory" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_imagesinmemory"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="3"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="4"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="free space internal" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_freespaceinternal"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="4"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="5"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="free space external" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_freespaceexternal"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="5"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="6"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="battery internal" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_batteryinternal"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="6"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="7"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="battery external" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_batteryexternal"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="7"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="8"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="state charging" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_statecharging"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="8"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="9"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="temperature device" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_temperaturedevice"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="9"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="10"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="temperature battery" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_temperaturebattery"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="10"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="11"
-                    android:layout_column="0"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
+                    android:layout_weight="0.5"
                     android:text="doze whitelisted" />
 
                 <TextView
                     android:id="@+id/tv_sysinfo_dozewhitelisted"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_row="11"
-                    android:layout_column="1"
-                    android:textSize="12dp" />
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"
+                    android:layout_marginRight="10dp"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
 
-            </GridLayout>
-
-            <GridLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:rowCount="2"
-                android:columnCount="4">
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/bt_runRecognizer"
-                    android:textSize="12dp"
                     android:text="run detector"
-                    android:layout_row="0"
-                    android:layout_column="0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5"/>
 
                 <Button
                     android:id="@+id/bt_toggleCamera"
-                    android:textSize="12dp"
                     android:text="toggle camera"
-                    android:layout_row="0"
-                    android:layout_column="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5" />
 
                 <Button
                     android:id="@+id/bt_sync"
-                    android:textSize="12dp"
                     android:text="force sync"
-                    android:layout_row="0"
-                    android:layout_column="2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <Button
-                    android:id="@+id/bt_reset"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
                     android:textSize="12dp"
-                    android:text="reset all data"
-                    android:layout_row="0"
-                    android:layout_column="3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_weight="0.5" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal">
+
+                <!--<Button-->
+                    <!--android:id="@+id/bt_reset"-->
+                    <!--android:textSize="12dp"-->
+                    <!--android:text="reset all data"-->
+                    <!--android:layout_row="0"-->
+                    <!--android:layout_column="3"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content" />-->
 
                 <Button
                     android:id="@+id/bt_compressorServiceStart"
-                    android:textSize="12dp"
                     android:text="force compressor"
-                    android:layout_row="1"
-                    android:layout_column="0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5" />
 
                 <Button
                     android:id="@+id/bt_homographyServiceStart"
-                    android:textSize="12dp"
                     android:text="force homography"
-                    android:layout_row="1"
-                    android:layout_column="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5" />
 
                 <Button
                     android:id="@+id/bt_recognitionServiceStart"
-                    android:textSize="12dp"
                     android:text="force recognition"
-                    android:layout_row="1"
-                    android:layout_column="2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:textSize="12dp"
+                    android:layout_weight="0.5" />
 
-            </GridLayout>
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

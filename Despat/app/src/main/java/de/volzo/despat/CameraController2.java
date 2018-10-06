@@ -179,9 +179,9 @@ public class CameraController2 extends CameraController {
                 reportFailAndClose("creating capture session failed", e);
             }
 
-            if (Looper.myLooper() == Looper.getMainLooper()) {
-                Log.wtf(TAG, "camera is running on UI thread");
-            }
+//            if (Looper.myLooper() == Looper.getMainLooper()) {
+//                Log.wtf(TAG, "camera is running on UI thread");
+//            }
         }
 
         @Override
@@ -299,7 +299,7 @@ public class CameraController2 extends CameraController {
             }
             final int position = photoOrientation;
 
-            Log.wtf(TAG, "ORIENTATION: " + photoOrientation);
+//            Log.d(TAG, "ORIENTATION: " + photoOrientation);
 
             if (textureView != null) {
                 // Lowly camera API developers haven't deemed it necessary to integrate automatic screen rotation and aspect ratio
@@ -729,7 +729,7 @@ public class CameraController2 extends CameraController {
                     } else { // final image of burstSequence: no remaining images in the pipeline, shut it down.
 
                         // Caveat: image may not yet be written to disk at this point
-                        // just because the broadcast is send, the image may not yet be available
+                        // just because the broadcast is sent, the image may not yet be available
 
                         // TODO: move broadcast code to controllerCallback
                         sendBroadcast(context, filename);

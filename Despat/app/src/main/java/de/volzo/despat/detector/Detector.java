@@ -51,12 +51,14 @@ public abstract class Detector {
 
         private final String id;
         private final String title;
+        private final int classId;
         private final Float confidence;
         private RectF location;
 
-        public Recognition(final String id, final String title, final Float confidence, final RectF location) {
+        public Recognition(final String id, final String title, final int classId, final Float confidence, final RectF location) {
             this.id = id;
             this.title = title;
+            this.classId = classId;
             this.confidence = confidence;
             this.location = location;
         }
@@ -66,6 +68,8 @@ public abstract class Detector {
         }
 
         public String getTitle() { return title; }
+
+        public int getClassId() { return classId; }
 
         public Float getConfidence() {
             return confidence;
