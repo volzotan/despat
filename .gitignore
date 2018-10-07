@@ -37,3 +37,4 @@ postprocessing/background_subtraction/output_*
 visualization/bahnhof_tiles
 visualization/css/bootstrap.css.map
 visualization/css/bootstrap.min.css.map
+visualization/data

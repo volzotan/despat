@@ -16,7 +16,6 @@ android {
             }
         }
     }
-
     buildTypes {
         debug {
             buildConfigField "java.util.Date", "buildTime", "new java.util.Date(" + System.currentTimeMillis() + "L)"
@@ -28,68 +27,57 @@ android {
             buildConfigField "java.util.Date", "buildTime", "new java.util.Date(" + System.currentTimeMillis() + "L)"
         }
     }
-
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
     aaptOptions {
         noCompress "tflite"
     }
+    buildToolsVersion '27.0.3'
 }
 
 dependencies {
     implementation 'com.android.support:design:26.1.0'
-
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-
     implementation 'com.android.support:support-v4:26.1.0'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.android.support:recyclerview-v7:26.1.0'
-
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testImplementation 'junit:junit:4.12'
-
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
-
     // openCV for HOG and the compressor
     implementation project(':openCVLibrary310')
-
     // tensorflow
     implementation 'org.tensorflow:tensorflow-android:+'
     // implementation 'org.tensorflow:tensorflow-lite:+'
-
     // Photoview to preview pitch-zoomable images
     implementation 'com.github.chrisbanes:PhotoView:2.0.0'
-
     // UsbSerial for Powerbrain
     implementation 'com.github.felHR85:UsbSerial:4.5'
-
     // Volley for the Web-Interface
     implementation 'com.android.volley:volley:1.0.0'
-
     // osmdroid for OSM support
     implementation 'org.osmdroid:osmdroid-android:6.0.1'
-
     // glide for displaying compressed images
     implementation 'com.github.bumptech.glide:glide:4.3.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
-
+    // MPAndroidChart for Session plots
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
     // ACRA for bug reporting
     def acraVersion = '5.0.0'
     implementation "ch.acra:acra-http:$acraVersion"
     implementation "ch.acra:acra-notification:$acraVersion"
     implementation "ch.acra:acra-limiter:$acraVersion"
-
     // Room
-    implementation "android.arch.persistence.room:runtime:1.1.0"
+    implementation 'android.arch.persistence.room:runtime:1.1.0'
     annotationProcessor "android.arch.persistence.room:compiler:1.1.0"
     // Test helpers for Room (optional)
-    testImplementation "android.arch.persistence.room:testing:1.1.0"
-
+    testImplementation 'android.arch.persistence.room:testing:1.1.0'
     // debug: access sqlite DB via chrome developer tools
     implementation 'com.facebook.stetho:stetho:1.5.0'
-
     // SU lib for reboots
     // implementation 'eu.chainfire:libsuperuser:1.0.0.+'
-
 }
