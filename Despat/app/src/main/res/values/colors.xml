@@ -12,10 +12,46 @@
 
     <color name="black">#000000</color>
     <color name="opaqueBlack">#80000000</color>
+    <color name="white">#FFFFFF</color>
 
     <color name="bg_list_item">#333</color>
     <color name="bg_row_background">#B00020</color>
 
     <color name="error">#B00020</color>
     <color name="rec_button">#B00020</color>
+
+    <!-- Intro Tour -->
+
+    <!-- Screens background color-->
+    <color name="bg_screen1">#f64c73</color>
+    <color name="bg_screen2">#20d2bb</color>
+    <color name="bg_screen3">#3395ff</color>
+    <color name="bg_screen4">#c873f4</color>
+
+    <!-- dots inactive colors -->
+    <color name="dot_dark_screen1">#222222</color>
+    <color name="dot_dark_screen2">#222222</color>
+    <color name="dot_dark_screen3">#222222</color>
+    <color name="dot_dark_screen4">#222222</color>
+
+    <!-- dots active colors -->
+    <color name="dot_light_screen1">#666666</color>
+    <color name="dot_light_screen2">#666666</color>
+    <color name="dot_light_screen3">#666666</color>
+    <color name="dot_light_screen4">#666666</color>
+
+    <array name="array_dot_active">
+        <item>@color/dot_light_screen1</item>
+        <item>@color/dot_light_screen2</item>
+        <item>@color/dot_light_screen3</item>
+        <item>@color/dot_light_screen4</item>
+    </array>
+
+    <array name="array_dot_inactive">
+        <item>@color/dot_dark_screen1</item>
+        <item>@color/dot_dark_screen2</item>
+        <item>@color/dot_dark_screen3</item>
+        <item>@color/dot_dark_screen4</item>
+    </array>
+
 </resources>

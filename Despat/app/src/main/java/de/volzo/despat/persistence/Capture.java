@@ -4,9 +4,13 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
+import android.content.Context;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import de.volzo.despat.preferences.Config;
 
 import static android.arch.persistence.room.ForeignKey.CASCADE;
 
@@ -81,5 +85,16 @@ public class Capture {
 
     public void setProcessed_compressor(boolean processed_compressor) {
         this.processed_compressor = processed_compressor;
+    }
+
+    public String toString() {
+        SimpleDateFormat df = new SimpleDateFormat(Config.DATEFORMAT);
+        return String.format(
+                "[%d] %s (%b]%b)",
+                this.id,
+                df.format(this.recordingTime),
+                this.isProcessed_detector(),
+                this.isProcessed_compressor()
+        );
     }
 }

@@ -157,7 +157,9 @@
 
                 <Button
                     android:text="Datasets"
-                    android:drawableLeft="@drawable/ic_reorder_horizontal_white_18dp"
+                    android:drawableLeft="@drawable/ic_baseline_reorder"
+                    android:drawableTint="@color/white"
+                    android:paddingLeft="6dp"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_column="0"
@@ -168,7 +170,9 @@
 
                 <Button
                     android:text="Settings"
-                    android:drawableStart="@drawable/ic_settings_white_18dp"
+                    android:drawableStart="@drawable/ic_baseline_settings"
+                    android:drawableTint="@color/white"
+                    android:paddingLeft="6dp"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_column="0"

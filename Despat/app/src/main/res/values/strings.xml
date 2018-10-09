@@ -3,8 +3,11 @@
     <string name="title_activity_configure">ConfigureActivity</string>
     <string name="title_activity_settings2">Settings</string>
 
-    <!-- Strings related to Settings -->
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="start">Got it</string>
 
+    <!-- Strings related to Settings -->
 
     <string name="pref_summary_intro">Settings can be overwritten when starting a new recording.</string>
 
@@ -50,5 +53,6 @@
         matched to a location on the map. To increase the precision the points should be evenly
         distributed in the whole image and not concentrated at one spot.
     </string>
+    <string name="title_activity_tour">TourActivity</string>
 
 </resources>

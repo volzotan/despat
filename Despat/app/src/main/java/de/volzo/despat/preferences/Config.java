@@ -28,7 +28,7 @@ public class Config {
     public static final String DATEFORMAT_SHORT                     = "yyyy-MM-dd HH:mm:ss";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
 
-    public static final boolean DELETE_AFTER_RECOGNITION            = false;
+    public static final boolean DELETE_AFTER_RECOGNITION            = true;
 
     public static final float IMGROLL_FREE_SPACE_THRESHOLD          = 300; // in MB
     public static final boolean IMGROLL_DELETE_IF_FULL              = false;
@@ -351,11 +351,24 @@ public class Config {
     public static final String KEY_IMAGE_FOLDER                     = "de.volzo.despat.imageFolder";
 
     public static File getImageFolder(Context context) {
-        return new File(getProperty(context, KEY_IMAGE_FOLDER, DEFAULT_WORKING_DIRECTORY.getAbsolutePath()));
+        return new File(getProperty(context, KEY_IMAGE_FOLDER, getWorkingDirectory(context).getAbsolutePath()));
     }
 
     public static void setImageFolder(Context context, String imageFolder) {
         setProperty(context, KEY_IMAGE_FOLDER, imageFolder);
+    }
+
+    /**
+     * FIRST TIME LAUNCH
+     */
+    public static final String KEY_FIRST_TIME_LAUNCH                = "de.volzo.despat.firstTimeLaunch";
+
+    public static boolean getFirstTimeLaunch(Context context) {
+        return getPropertyBoolean(context, KEY_FIRST_TIME_LAUNCH, true);
+    }
+
+    public static void setFirstTimeLaunch(Context context, boolean firstTimeLaunch) {
+        setProperty(context, KEY_FIRST_TIME_LAUNCH, firstTimeLaunch);
     }
 
     /**

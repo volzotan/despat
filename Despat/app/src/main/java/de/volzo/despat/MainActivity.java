@@ -62,11 +62,13 @@ import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Compressor;
 import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
+import de.volzo.despat.support.SessionExporter;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.ConfigureActivity;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.userinterface.SessionListActivity;
 import de.volzo.despat.userinterface.SettingsActivity2;
+import de.volzo.despat.userinterface.TourActivity;
 import de.volzo.despat.web.Sync;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -89,6 +91,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (Config.getFirstTimeLaunch(this)) {
+            Intent intent = new Intent(this, TourActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
@@ -100,10 +108,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         despat = ((Despat) getApplicationContext());
 
 //        Util.disableDoze();
-        whitelistAppForDoze();
+        whitelistAppForDoze(activity);
 
-        if (!checkPermissionsAreGiven()) {
-            requestPermissions();
+        if (!checkPermissionsAreGiven(activity)) {
+            requestPermissions(activity);
         } else {
             init();
         }
@@ -343,6 +351,20 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void runTestCode() {
 
+
+//        AppDatabase db = AppDatabase.getAppDatabase(this);
+//        SessionDao sessionDao = db.sessionDao();
+//        Session lastSession = sessionDao.getLast();
+//
+//        if (lastSession != null) {
+//            SessionExporter exporter = new SessionExporter(this, lastSession.getId());
+//            try {
+//                exporter.export();
+//            } catch (Exception e) {
+//                Log.e(TAG, "export failed:", e);
+//            }
+//        }
+
 //        Compressor compressor = new Compressor();
 //        compressor.test(activity);
 
@@ -504,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
-            if (checkPermissionsAreGiven()) {
+            if (checkPermissionsAreGiven(activity)) {
                 try {
                     Size imageSize = CameraController2.getImageSize(activity);
 
@@ -892,23 +914,21 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     /* Request a confirmation from the user that the app should be put on the Doze whitelist.
      * That allows the alarm manager to fire more often than once in 9 minutes.
      */
-    private void whitelistAppForDoze() {
+    public static void whitelistAppForDoze(Activity activity) {
         PowerManager powerManger = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
         if (!powerManger.isIgnoringBatteryOptimizations(activity.getPackageName())) {
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-            Uri uri = Uri.fromParts("package", getPackageName(), null);
+            Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
             intent.setData(uri);
-            startActivity(intent);
+            activity.startActivity(intent);
         }
     }
 
-    private boolean checkPermissionsAreGiven() {
-        Activity activity = this;
-
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+    public static boolean checkPermissionsAreGiven(Context context) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 ) {
             return false;
         } else {
@@ -916,7 +936,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
     }
 
-    private void requestPermissions() {
+    public static void requestPermissions(Activity activity) {
         ActivityCompat.requestPermissions(activity,
                 new String[]{Manifest.permission.CAMERA,
                         Manifest.permission.RECORD_AUDIO,

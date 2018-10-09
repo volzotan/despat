@@ -211,7 +211,8 @@
 
         <Button
             android:id="@+id/bt_export"
-            android:drawableLeft="@drawable/ic_package_down_white_18dp"
+            android:drawableLeft="@drawable/ic_baseline_get_app"
+            android:drawableTint="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Export" />

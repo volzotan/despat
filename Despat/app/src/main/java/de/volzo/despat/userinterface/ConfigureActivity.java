@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Size;
@@ -50,11 +52,12 @@ public class ConfigureActivity extends AppCompatActivity {
 
         final SeekBar sbInterval = (SeekBar) findViewById(R.id.sb_interval);
 //        sbInterval.setMin(3);
-        sbInterval.setMax(120);
+        final int sbIntervalMin = 3;
+        sbInterval.setMax(120-sbIntervalMin);
         sbInterval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvInterval.setText(String.format("%ds", progress));
+                tvInterval.setText(String.format("%ds", progress+sbIntervalMin));
             }
 
             @Override
@@ -67,7 +70,48 @@ public class ConfigureActivity extends AppCompatActivity {
 
             }
         });
-        sbInterval.setProgress((int) (Config.getShutterInterval(activity)/1000));
+        sbInterval.setProgress((int) (Config.getShutterInterval(activity)/1000 - sbIntervalMin));
+
+//        final SeekBar sbNetworkFidelity = (SeekBar) findViewById(R.id.sb_networkFidelity);
+//        sbNetworkFidelity.setMax(2);
+//        switch (Config.getNetworkFidelity(activity)) {
+//            case "low": {
+//                sbNetworkFidelity.setProgress(0);
+//                break;
+//            }
+//            case "mid": {
+//                sbNetworkFidelity.setProgress(1);
+//                break;
+//            }
+//            case "high": {
+//                sbNetworkFidelity.setProgress(2);
+//                break;
+//            }
+//            default:
+//                Log.e(TAG, "undefined network fidelity state: " + Config.getNetworkFidelity(activity));
+//        }
+
+        final String[] detector_values = {"low", "mid", "high"};
+        final Button[] detector_buttons = {
+                findViewById(R.id.bt_detector1),
+                findViewById(R.id.bt_detector2),
+                findViewById(R.id.bt_detector3),
+        };
+
+        setDetectorButtonStates(Config.getNetworkFidelity(activity), detector_values, detector_buttons);
+        View.OnClickListener buttonClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String state = (String) v.getTag();
+                setDetectorButtonStates(state, detector_values, detector_buttons);
+            }
+        };
+
+        for (int i=0; i<detector_buttons.length; i++) {
+            detector_buttons[i].setTag(detector_values[i]);
+            detector_buttons[i].setText(detector_values[i]);
+            detector_buttons[i].setOnClickListener(buttonClickListener);
+        }
 
 //        Button btSetTime = (Button) findViewById(R.id.bt_setTime);
 //        btSetTime.setOnClickListener(new View.OnClickListener() {
@@ -96,7 +140,13 @@ public class ConfigureActivity extends AppCompatActivity {
                 CameraConfig cameraConfig = new CameraConfig(activity);
                 cameraConfig.setShutterInterval(sbInterval.getProgress() * 1000);
 
-                DetectorConfig detectorConfig = new DetectorConfig(Config.getNetworkFidelity(context), 600); // TODO
+                String fidelity = Config.getNetworkFidelity(context);
+                for (int i=0; i<detector_buttons.length; i++) {
+                    if (detector_buttons[i].isSelected()) {
+                        fidelity = detector_values[i];
+                    }
+                }
+                DetectorConfig detectorConfig = new DetectorConfig(fidelity, 600); // TODO
 
 //                // TODO:
 //                try {
@@ -116,6 +166,25 @@ public class ConfigureActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private void setDetectorButtonStates(String state, String[] values, Button[] buttons) {
+
+        for (int i=0; i<buttons.length; i++) {
+            buttons[i].setTextColor(ContextCompat.getColor(activity, R.color.white));
+            buttons[i].setSelected(false);
+        }
+
+        for (int i=0; i<buttons.length; i++) {
+            if (state.equals(values[i])) {
+                buttons[i].setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
+                buttons[i].setSelected(true);
+
+                return;
+            }
+        }
+
+        Log.e(TAG, "undefined network fidelity state: " + Config.getNetworkFidelity(activity));
     }
 
 }
