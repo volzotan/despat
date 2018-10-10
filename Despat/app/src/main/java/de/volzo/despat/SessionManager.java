@@ -131,6 +131,7 @@ public class SessionManager {
         session.setStart(Calendar.getInstance().getTime());
         session.setLocation(null);
 
+        session.setCameraConfig(cameraConfig);
         // TODO: tilesize?
         session.setDetectorConfig(detectorConfig);
 
@@ -145,8 +146,6 @@ public class SessionManager {
         } catch (Exception e) {
             Log.w(TAG, "unable to set image size in session");
         }
-
-        session.setCameraConfig(cameraConfig);
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();

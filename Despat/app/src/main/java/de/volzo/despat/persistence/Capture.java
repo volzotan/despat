@@ -90,7 +90,7 @@ public class Capture {
     public String toString() {
         SimpleDateFormat df = new SimpleDateFormat(Config.DATEFORMAT);
         return String.format(
-                "[%d] %s (%b]%b)",
+                "[%d] %s (%b|%b)",
                 this.id,
                 df.format(this.recordingTime),
                 this.isProcessed_detector(),

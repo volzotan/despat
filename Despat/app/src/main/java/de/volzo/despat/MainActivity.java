@@ -89,8 +89,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        // remove launcher theme
+        setTheme(R.style.AppTheme);
+
         super.onCreate(savedInstanceState);
 
+        // Intro Tour?
         if (Config.getFirstTimeLaunch(this)) {
             Intent intent = new Intent(this, TourActivity.class);
             startActivity(intent);
@@ -808,11 +813,18 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     return;
                 }
 
-                long shutterInterval = Config.getShutterInterval(activity);
+                try {
+
+                SessionManager sessionManager = SessionManager.getInstance(activity);
+                long shutterInterval = sessionManager.getSession().getCameraConfig().getShutterInterval();
                 int progress = (int) (((float) diff / (float) shutterInterval) * 100f);
 
                 captureProgressBar.setEnabled(true);
                 captureProgressBar.setProgress(progress);
+                } catch (SessionManager.NotRecordingException e) {
+                    captureProgressBar.setBackgroundColor(getResources().getColor(R.color.error));
+                    captureProgressBar.setProgress(100);
+                }
             }
         };
         periodicUpdateHandler.post(updateRunnable);

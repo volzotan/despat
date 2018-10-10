@@ -49,15 +49,11 @@ public class TourActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(TAG, "TOUR!");
-
         this.context = this;
         this.activity = this;
 
         // Making notification bar transparent
-//        if (Build.VERSION.SDK_INT >= 21) {
-//            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-//        }
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         setContentView(R.layout.activity_tour);
 
@@ -71,6 +67,7 @@ public class TourActivity extends AppCompatActivity {
                 R.layout.tour2,
                 R.layout.tour3,
                 R.layout.tour4,
+                R.layout.tour5,
         };
 
         addBottomDots(0);
@@ -138,8 +135,6 @@ public class TourActivity extends AppCompatActivity {
         public void onPageSelected(int position) {
             addBottomDots(position);
 
-            Log.wtf(TAG, Integer.toString(position));
-
             if (position == 2) {
                 MainActivity.whitelistAppForDoze(activity);
             }
@@ -174,18 +169,15 @@ public class TourActivity extends AppCompatActivity {
     };
 
     private void changeStatusBarColor() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.TRANSPARENT);
     }
 
     public class ViewPagerAdapter extends PagerAdapter {
         private LayoutInflater layoutInflater;
 
-        public ViewPagerAdapter() {
-        }
+        public ViewPagerAdapter() {}
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {

@@ -138,6 +138,8 @@ public class ShutterService extends Service {
             SessionDao sessionDao = db.sessionDao();
             Session session = sessionDao.getLast();
             this.camconfig = session.getCameraConfig();
+
+            Log.wtf(TAG, Integer.toString(this.camconfig.getShutterInterval()));
         } catch (Exception e) {
             Log.e(TAG, "Camera Config missing");
         }
@@ -572,7 +574,7 @@ public class ShutterService extends Service {
             if (Config.getPersistentCamera(context)) {
 
                 long now = System.currentTimeMillis();
-                long nextExecution = now + Config.getShutterInterval(context);
+                long nextExecution = now + camconfig.getShutterInterval();
                 nextExecution -= nextExecution % 1000;
                 long delay = nextExecution - now;
                 Log.d(TAG, "delay: " + delay);

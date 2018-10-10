@@ -36,6 +36,8 @@ public class ConfigureActivity extends AppCompatActivity {
     public static final String DATA_CAMERA_CONFIG = "DATA_CAMERA_CONFIG";
     public static final String DATA_DETECTOR_CONFIG = "DATA_DETECTOR_CONFIG";
 
+    private final int sbIntervalMin = 3;
+
     ConfigureActivity activity;
 
     @Override
@@ -52,7 +54,6 @@ public class ConfigureActivity extends AppCompatActivity {
 
         final SeekBar sbInterval = (SeekBar) findViewById(R.id.sb_interval);
 //        sbInterval.setMin(3);
-        final int sbIntervalMin = 3;
         sbInterval.setMax(120-sbIntervalMin);
         sbInterval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -138,7 +139,7 @@ public class ConfigureActivity extends AppCompatActivity {
                 Context context = activity;
 
                 CameraConfig cameraConfig = new CameraConfig(activity);
-                cameraConfig.setShutterInterval(sbInterval.getProgress() * 1000);
+                cameraConfig.setShutterInterval((sbInterval.getProgress()+sbIntervalMin) * 1000);
 
                 String fidelity = Config.getNetworkFidelity(context);
                 for (int i=0; i<detector_buttons.length; i++) {
