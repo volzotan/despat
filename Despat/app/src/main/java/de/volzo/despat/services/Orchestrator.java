@@ -79,8 +79,12 @@ public class Orchestrator extends BroadcastReceiver {
 
         log(action, service, operation, reason);
 
-        if (service != null && (service.equals(Broadcast.SHUTTER_SERVICE) || service.equals(Broadcast.ALL_SERVICES))) {
-
+        if (service != null && (
+                service.equals(Broadcast.ALL_SERVICES) || (
+                        service.equals(Broadcast.SHUTTER_SERVICE) &&
+                        (operation == OPERATION_ONCE || operation == OPERATION_START)
+                )
+        )) {
             try {
                 SessionManager sessionManager = SessionManager.getInstance(context);
                 Session session = sessionManager.getSession();

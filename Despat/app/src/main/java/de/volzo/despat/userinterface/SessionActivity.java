@@ -1,7 +1,11 @@
 package de.volzo.despat.userinterface;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -22,12 +26,15 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.ErrorEvent;
 import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
+import de.volzo.despat.persistence.Position;
+import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.SessionExporter;
@@ -96,10 +103,47 @@ public class SessionActivity extends AppCompatActivity implements
 
 
     @Override
-    public void onSessionActionSelection(long sessionId, String action) {
+    public void onSessionActionSelection(final long sessionId, String action) {
 
-        // TODO: check if homography operation is already done!
+        // check the dataset for errors or inconsistencies
+        AppDatabase database = AppDatabase.getAppDatabase(activity);
+        HomographyPointDao homographyPointDao = database.homographyPointDao();
+        List<HomographyPoint> homographyPoints = homographyPointDao.getAllBySession(sessionId);
+        PositionDao positionDao = database.positionDao();
+        List<Position> positions = positionDao.getAllBySession(sessionId); // TODO: slow. getting ALL positions
 
+        String errorMessage = null;
+
+        if (positions == null || positions.size() == 0) {
+            errorMessage = "This dataset contains no detected objects. This may be due to an camera error or too short observation time.";
+        } else if (positions.get(0).getLatitude() == null) {
+            errorMessage = "This dataset contains no calculated object coordinates. This is possibly an error.";
+        } else if (homographyPoints == null || homographyPoints.size() < 4) {
+            int diff = 4 - homographyPoints.size();
+            errorMessage = String.format("This dataset contains less than four different mapped points. Please add %d more so that positions of detected objects can be calculated", diff);
+        }
+
+        if (errorMessage != null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setMessage(errorMessage)
+                    .setPositiveButton(R.string.export_anyway, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            export(sessionId);
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else {
+            export(sessionId);
+        }
+    }
+
+    private void export(long sessionId) {
         SessionExporter exporter = new SessionExporter(this, sessionId);
 
         try {
@@ -107,17 +151,17 @@ public class SessionActivity extends AppCompatActivity implements
         } catch (Exception e) {
             String msg = e.getMessage();
             Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG);
-//            snackbar.setAction("UNDO", new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    for (Map.Entry<Session, Integer> entry : sessionsDeleteList.entrySet()) {
-//                        Session s = entry.getKey();
-//                        Integer i = entry.getValue();
-//                        ((SessionRecyclerViewAdapter) adapter).restoreItem(s, i);
-//                    }
-//                }
-//            });
-//            snackbar.setActionTextColor(Color.YELLOW);
+            //            snackbar.setAction("UNDO", new View.OnClickListener() {
+            //                @Override
+            //                public void onClick(View view) {
+            //                    for (Map.Entry<Session, Integer> entry : sessionsDeleteList.entrySet()) {
+            //                        Session s = entry.getKey();
+            //                        Integer i = entry.getValue();
+            //                        ((SessionRecyclerViewAdapter) adapter).restoreItem(s, i);
+            //                    }
+            //                }
+            //            });
+            //            snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();
         }
     }
