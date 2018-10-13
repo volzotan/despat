@@ -7,6 +7,15 @@
     <string name="next">Next</string>
     <string name="start">Got it</string>
 
+    <string name="cancel">Cancel</string>
+    <string name="exportAnyway">Export anyway</string>
+
+    <!-- Error Messages -->
+
+    <string name="error_export_emptyDataset">This dataset contains no detected objects. This may be due to an camera error or too short observation time.</string>
+    <string name="error_export_noTransformedCoordinates">This dataset contains no calculated object coordinates. This is possibly an error."</string>
+    <string name="error_export_tooFewHomographyPoints">"This dataset contains less than four different mapped points. Please add %d more so that positions of detected objects can be calculated"</string>
+
     <!-- Strings related to Settings -->
 
     <string name="pref_summary_intro">Settings can be overwritten when starting a new recording.</string>
@@ -54,5 +63,7 @@
         distributed in the whole image and not concentrated at one spot.
     </string>
     <string name="title_activity_tour">TourActivity</string>
+
+    <string name="tip_btn_datasets">Tooltip Test</string>
 
 </resources>

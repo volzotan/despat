@@ -24,7 +24,7 @@ public class Benchmark {
     private long id;
 
     @ColumnInfo(name = "session_id")
-    private Long sessionId; // can be null, this Long instead of long
+    private Long sessionId; // can be null, Long instead of long
 
     @ColumnInfo(name = "timestamp")
     private Date timestamp;

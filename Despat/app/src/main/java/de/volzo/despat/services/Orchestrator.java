@@ -43,6 +43,8 @@ public class Orchestrator extends BroadcastReceiver {
     public static final int OPERATION_STOP      = 2;
     public static final int OPERATION_ONCE      = 3;
 
+    public static final String ARG_SESSION_ID   = "ARG_SESSION_ID";
+
     private Context context;
     private CameraConfig cameraConfig;
     private String reason;
@@ -79,15 +81,19 @@ public class Orchestrator extends BroadcastReceiver {
 
         log(action, service, operation, reason);
 
-        if (service != null && (
-                service.equals(Broadcast.ALL_SERVICES) || (
-                        service.equals(Broadcast.SHUTTER_SERVICE) &&
-                        (operation == OPERATION_ONCE || operation == OPERATION_START)
-                )
-        )) {
+        if (service != null && (service.equals(Broadcast.ALL_SERVICES) || service.equals(Broadcast.SHUTTER_SERVICE))) {
             try {
-                SessionManager sessionManager = SessionManager.getInstance(context);
-                Session session = sessionManager.getSession();
+                Long sessionId = intent.getLongExtra(Orchestrator.ARG_SESSION_ID, -1);
+                Session session = null;
+
+                if (sessionId != null && sessionId >= 0) { // TODO: does Room allow sessionId 0?
+                    AppDatabase database = AppDatabase.getAppDatabase(context);
+                    SessionDao sessionDao = database.sessionDao();
+                    session = sessionDao.getById(sessionId);
+                } else {
+                    SessionManager sessionManager = SessionManager.getInstance(context);
+                    session = sessionManager.getSession();
+                }
                 this.cameraConfig = session.getCameraConfig();
 
                 if (cameraConfig == null) {

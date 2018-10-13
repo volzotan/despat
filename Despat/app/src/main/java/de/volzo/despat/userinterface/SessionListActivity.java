@@ -30,6 +30,7 @@ import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.support.Util;
 
-public class SessionListActivity extends AppCompatActivity {
+public class SessionListActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
     private static final String TAG = SessionActivity.class.getSimpleName();
 
@@ -51,6 +52,10 @@ public class SessionListActivity extends AppCompatActivity {
 
     List<Session> sessions;
     HashMap<Session, Integer> sessionsDeleteList = new HashMap<Session, Integer>();
+    Session deletedSession;
+    Integer deletedSessionIndex;
+
+    SessionRecyclerViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +75,14 @@ public class SessionListActivity extends AppCompatActivity {
         SessionDao sessionDao = db.sessionDao();
         sessions = sessionDao.getAll();
 
-        SessionRecyclerViewAdapter adapter = new SessionRecyclerViewAdapter(activity, sessions, this);
+        List<Session> dummyData = new LinkedList<>();
+        SessionManager sessionManager = SessionManager.getInstance(context);
+        dummyData.add(sessionManager.createDummyData());
+        dummyData.add(sessionManager.createDummyData());
+        dummyData.add(sessionManager.createDummyData());
+//        sessions = dummyData;
+
+        adapter = new SessionRecyclerViewAdapter(activity, sessions, this);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.session_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
@@ -80,60 +92,84 @@ public class SessionListActivity extends AppCompatActivity {
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), layoutManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
 
-        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(this, sessionsDeleteList, adapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(recyclerView);
-    }
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
 
-    public List<Session> getSessions() {
-        return sessions;
-    }
-
-    public void deleteSessions() {
-        for (Map.Entry<Session, Integer> entry : sessionsDeleteList.entrySet()) {
-            Session session = entry.getKey();
-            Integer i = entry.getValue();
-
-            if (sessions != null && sessions.contains(session)) {
-                Log.w(TAG, "session " + session + " still in session list");
-                sessions.remove(session);
-            }
-
-            SessionManager.deleteSessionFromDatabase(context, session);
-            Log.d(TAG, "deleted session: " + session);
-        }
-
-        sessionsDeleteList.clear();
-    }
-
-    public void onSelect(Session session) {
-        Intent intent = new Intent(activity, SessionActivity.class);
-        intent.putExtra(SessionActivity.ARG_SESSION_ID, session.getId());
-        startActivity(intent);
+//        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(this, sessionsDeleteList, adapter);
+//        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+//        touchHelper.attachToRecyclerView(recyclerView);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        deleteSessions();
+        if (deletedSession != null) deleteSession();
     }
 
-    public interface ItemTouchHelperAdapter {
+    public void onSelect(Session session) {
+        if (deletedSession != null) deleteSession();
 
-        boolean onItemMove(int fromPosition, int toPosition);
-
-        void onItemDismiss(int position);
+        Intent intent = new Intent(activity, SessionActivity.class);
+        intent.putExtra(SessionActivity.ARG_SESSION_ID, session.getId());
+        startActivity(intent);
     }
 
-    public interface ItemTouchHelperViewHolder {
+    public void deleteSession() {
+        if (deletedSession == null || deletedSessionIndex == null) {
+            Log.w(TAG, "nothing to delete");
+            return;
+        }
 
-        void onItemSelected();
+        if (sessions != null && sessions.contains(deletedSession)) {
+            Log.w(TAG, "session " + deletedSession + " still in session list");
+            sessions.remove(deletedSession);
+        }
 
-        void onItemClear();
+        SessionManager.deleteSessionFromDatabase(context, deletedSession);
+        Log.d(TAG, "deleted session: " + deletedSession);
+
+        deletedSession = null;
+        deletedSessionIndex = null;
     }
 
-    class SessionRecyclerViewAdapter extends RecyclerView.Adapter<SessionRecyclerViewAdapter.ViewHolder> implements ItemTouchHelperAdapter {
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        if (viewHolder instanceof SessionRecyclerViewAdapter.ViewHolder) {
+
+            Session session = sessions.get(viewHolder.getAdapterPosition());
+
+            if (deletedSession != null) {
+                deleteSession();
+            }
+
+            if (session == null) {
+                Log.e(TAG, "delete failed, no sessions present");
+                Snackbar.make(findViewById(android.R.id.content), "delete failed, no sessions present", Snackbar.LENGTH_LONG).show();
+                return;
+            }
+
+            // backup of removed item for undo purpose
+            deletedSession = sessions.get(viewHolder.getAdapterPosition());
+            deletedSessionIndex = viewHolder.getAdapterPosition();
+
+            adapter.removeItem(viewHolder.getAdapterPosition());
+
+            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), session.getSessionName() + " deleted", Snackbar.LENGTH_LONG);
+            snackbar.setAction("UNDO", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    adapter.restoreItem(deletedSession, deletedSessionIndex);
+                    deletedSession = null;
+                    deletedSessionIndex = null;
+                }
+            });
+            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
+        }
+    }
+
+    class SessionRecyclerViewAdapter extends RecyclerView.Adapter<SessionRecyclerViewAdapter.ViewHolder> {
 
         public final String TAG = SessionRecyclerViewAdapter.class.getSimpleName();
 
@@ -169,8 +205,6 @@ public class SessionListActivity extends AppCompatActivity {
                 Glide.with(context).load(f.getAbsoluteFile()).into(holder.preview);
             } catch (Exception e) {
                 Log.w(TAG, "compressed preview for session " + session.toString() + "could not be loaded");
-//                bm = BitmapFactory.decodeResource(getResources(), R.drawable.missing_img);
-
                 Bitmap bm = null;
                 bm = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeResource(getResources(), R.drawable.missing_img), 400, 300);
                 holder.preview.setImageBitmap(bm);
@@ -204,18 +238,8 @@ public class SessionListActivity extends AppCompatActivity {
             return sessions.size();
         }
 
-        @Override
-        public boolean onItemMove(int fromPosition, int toPosition) {
-            return false;
-        }
-
-        @Override
-        public void onItemDismiss(int position) {
-            removeItem(position);
-        }
-
         public void removeItem(int position) {
-            sessions.remove(position);
+            this.sessions.remove(position);
             // notify the item removed by position
             // to perform recycler view delete animations
             // NOTE: don't call notifyDataSetChanged()
@@ -223,11 +247,12 @@ public class SessionListActivity extends AppCompatActivity {
         }
 
         public void restoreItem(Session session, int position) {
-            sessions.add(position, session);
+            this.sessions.add(position, session);
+            // notify item added by position
             notifyItemInserted(position);
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
 
             public final View view;
 
@@ -257,146 +282,72 @@ public class SessionListActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onItemSelected() {
-//                itemView.setBackgroundColor(Color.LTGRAY);
-            }
-
-            @Override
-            public void onItemClear() {
-//                itemView.setBackgroundColor(0);
-            }
-
-            @Override
             public String toString() {
                 return super.toString() + " '" + name.getText() + "'";
             }
         }
     }
+}
 
-    public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
+class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback {
+        private RecyclerItemTouchHelperListener listener;
 
-        private final SessionListActivity activity;
-        private final ItemTouchHelperAdapter adapter;
-
-        HashMap<Session, Integer> sessionsDeleteList;
-
-        public SimpleItemTouchHelperCallback(SessionListActivity activity, HashMap<Session, Integer> sessionsDeleteList, ItemTouchHelperAdapter adapter) {
-            this.activity = activity;
-            this.sessionsDeleteList = sessionsDeleteList;
-            this.adapter = adapter;
+        public RecyclerItemTouchHelper(int dragDirs, int swipeDirs, RecyclerItemTouchHelperListener listener) {
+            super(dragDirs, swipeDirs);
+            this.listener = listener;
         }
 
         @Override
-        public boolean isLongPressDragEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isItemViewSwipeEnabled() {
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
             return true;
-        }
-
-        @Override
-        public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-            if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
-                final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-                final int swipeFlags = 0;
-                return makeMovementFlags(dragFlags, swipeFlags);
-            } else {
-                final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-                final int swipeFlags = ItemTouchHelper.START ; //ItemTouchHelper.START | ItemTouchHelper.END;
-                return makeMovementFlags(dragFlags, swipeFlags);
-            }
-        }
-
-        @Override
-        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder source, RecyclerView.ViewHolder target) {
-            if (source.getItemViewType() != target.getItemViewType()) {
-                return false;
-            }
-
-            adapter.onItemMove(source.getAdapterPosition(), target.getAdapterPosition());
-            return true;
-        }
-
-        @Override
-        public void onSwiped(RecyclerView.ViewHolder viewHolder, int i) {
-//            activity.onDelete(sessions.get(viewHolder.getAdapterPosition()));
-
-            Session session = activity.getSessions().get(viewHolder.getAdapterPosition());
-
-            if (session == null) {
-                Log.e(TAG, "delete failed, no sessions present");
-                Snackbar.make(findViewById(android.R.id.content), "delete failed, no sessions present", Snackbar.LENGTH_LONG).show();
-            }
-
-            if (sessionsDeleteList.containsKey(session)) {
-                Log.w(TAG, "session already in delete list");
-                return;
-            }
-
-            if (sessionsDeleteList.size() > 0) {
-                activity.deleteSessions();
-            }
-
-            sessionsDeleteList.put(session, viewHolder.getAdapterPosition());
-
-            String msg = null;
-
-            if (sessionsDeleteList.size() == 1) {
-                msg = "Deleted session";
-            } else {
-                msg = "Deleted " + sessionsDeleteList.size() + " sessions";
-            }
-
-            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_INDEFINITE);
-            snackbar.setAction("UNDO", new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    for (Map.Entry<Session, Integer> entry : sessionsDeleteList.entrySet()) {
-                        Session s = entry.getKey();
-                        Integer i = entry.getValue();
-                        ((SessionRecyclerViewAdapter) adapter).restoreItem(s, i);
-                        sessionsDeleteList.clear();
-                    }
-                }
-            });
-            snackbar.setActionTextColor(getResources().getColor(R.color.colorAccent));
-            snackbar.show();
-
-            ((SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground.setTranslationX(100);
-
-            adapter.onItemDismiss(viewHolder.getAdapterPosition());
-        }
-
-        @Override
-        public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-            if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                ((SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground.setTranslationX(dX);
-            } else {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-            }
         }
 
         @Override
         public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
-            if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
-                if (viewHolder instanceof ItemTouchHelperViewHolder) {
-                    ItemTouchHelperViewHolder itemViewHolder = (ItemTouchHelperViewHolder) viewHolder;
-                    itemViewHolder.onItemSelected();
-                }
-            }
+            if (viewHolder != null) {
+                final View foregroundView = ((SessionListActivity.SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground;
 
-            super.onSelectedChanged(viewHolder, actionState);
+                getDefaultUIUtil().onSelected(foregroundView);
+            }
+        }
+
+        @Override
+        public void onChildDrawOver(Canvas c, RecyclerView recyclerView,
+                                    RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                    int actionState, boolean isCurrentlyActive) {
+            final View foregroundView = ((SessionListActivity.SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground;
+            getDefaultUIUtil().onDrawOver(c, recyclerView, foregroundView, dX, dY,
+                    actionState, isCurrentlyActive);
         }
 
         @Override
         public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-            super.clearView(recyclerView, viewHolder);
-            if (viewHolder instanceof ItemTouchHelperViewHolder) {
-                ItemTouchHelperViewHolder itemViewHolder = (SessionRecyclerViewAdapter.ViewHolder) viewHolder;
-                itemViewHolder.onItemClear();
-            }
+            final View foregroundView = ((SessionListActivity.SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground;
+            getDefaultUIUtil().clearView(foregroundView);
         }
-    }
+
+        @Override
+        public void onChildDraw(Canvas c, RecyclerView recyclerView,
+                                RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                int actionState, boolean isCurrentlyActive) {
+            final View foregroundView = ((SessionListActivity.SessionRecyclerViewAdapter.ViewHolder) viewHolder).viewForeground;
+
+            getDefaultUIUtil().onDraw(c, recyclerView, foregroundView, dX, dY,
+                    actionState, isCurrentlyActive);
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+            listener.onSwiped(viewHolder, direction, viewHolder.getAdapterPosition());
+        }
+
+        @Override
+        public int convertToAbsoluteDirection(int flags, int layoutDirection) {
+            return super.convertToAbsoluteDirection(flags, layoutDirection);
+        }
+
+        public interface RecyclerItemTouchHelperListener {
+            void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position);
+        }
 }
+

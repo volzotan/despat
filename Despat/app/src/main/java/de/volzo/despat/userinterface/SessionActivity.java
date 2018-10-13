@@ -115,18 +115,18 @@ public class SessionActivity extends AppCompatActivity implements
         String errorMessage = null;
 
         if (positions == null || positions.size() == 0) {
-            errorMessage = "This dataset contains no detected objects. This may be due to an camera error or too short observation time.";
-        } else if (positions.get(0).getLatitude() == null) {
-            errorMessage = "This dataset contains no calculated object coordinates. This is possibly an error.";
+            errorMessage = activity.getString(R.string.error_export_emptyDataset);
         } else if (homographyPoints == null || homographyPoints.size() < 4) {
             int diff = 4 - homographyPoints.size();
-            errorMessage = String.format("This dataset contains less than four different mapped points. Please add %d more so that positions of detected objects can be calculated", diff);
+            errorMessage = String.format(activity.getString(R.string.error_export_tooFewHomographyPoints), diff);
+        } else if (positions.get(0).getLatitude() == null) {
+            errorMessage = activity.getString(R.string.error_export_noTransformedCoordinates);
         }
 
         if (errorMessage != null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
             builder.setMessage(errorMessage)
-                    .setPositiveButton(R.string.export_anyway, new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.exportAnyway, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             export(sessionId);
                         }
@@ -151,17 +151,6 @@ public class SessionActivity extends AppCompatActivity implements
         } catch (Exception e) {
             String msg = e.getMessage();
             Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG);
-            //            snackbar.setAction("UNDO", new View.OnClickListener() {
-            //                @Override
-            //                public void onClick(View view) {
-            //                    for (Map.Entry<Session, Integer> entry : sessionsDeleteList.entrySet()) {
-            //                        Session s = entry.getKey();
-            //                        Integer i = entry.getValue();
-            //                        ((SessionRecyclerViewAdapter) adapter).restoreItem(s, i);
-            //                    }
-            //                }
-            //            });
-            //            snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();
         }
     }

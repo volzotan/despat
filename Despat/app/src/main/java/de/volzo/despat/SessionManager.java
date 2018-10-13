@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.persistence.AppDatabase;
@@ -46,7 +47,6 @@ public class SessionManager {
     private static volatile SessionManager instance;
     private Context context;
     private Session session;
-//    private CameraConfig cameraConfig;
 
     private static final int RESUME_MAX_AGE_LAST_CAPTURE = 5 * 60 * 1000;
 
@@ -254,6 +254,7 @@ public class SessionManager {
         Intent shutterIntent = new Intent(context, Orchestrator.class);
         shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
         shutterIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
+        shutterIntent.putExtra(Orchestrator.ARG_SESSION_ID, session.getId());
         if (reason != null) {
             shutterIntent.putExtra(Orchestrator.REASON, reason);
         }
@@ -284,6 +285,9 @@ public class SessionManager {
         for (Capture c : captures) {
             // TODO: check if image exists in memory and delete it
         }
+
+        // TODO: delete compressed image (store and jpg)
+        // Delete ZIP (is it in ./temp ?)
 
         sessionDao.delete(session);
     }
@@ -382,6 +386,26 @@ public class SessionManager {
         int numberErrors = sessionDao.getNumberOfErrors(session.getId());
 
         return numberErrors;
+    }
+
+    public Session createDummyData() {
+        Session dummy = new Session();
+
+        dummy.setId(ThreadLocalRandom.current().nextInt(1000, 10000 + 1));
+        dummy.setSessionName(Util.getMostlyUniqueRandomString(context));
+
+        // TODO: set start, end, etc.
+        Calendar startCal = Calendar.getInstance();
+        startCal.add(Calendar.MINUTE, -ThreadLocalRandom.current().nextInt(10, 100 + 1));
+        Calendar endCal = Calendar.getInstance();
+        endCal.add(Calendar.MINUTE, -ThreadLocalRandom.current().nextInt(0, 9 + 1));
+
+        dummy.setStart(startCal.getTime());
+        dummy.setEnd(endCal.getTime());
+
+        dummy.setCompressedImage(null);
+
+        return dummy;
     }
 
     // ---------------------------------------------------------------------------------------------
