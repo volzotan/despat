@@ -82,9 +82,17 @@ public class SessionListActivity extends AppCompatActivity implements RecyclerIt
         dummyData.add(sessionManager.createDummyData());
 //        sessions = dummyData;
 
-        adapter = new SessionRecyclerViewAdapter(activity, sessions, this);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.session_list);
+
+        if (sessions == null || sessions.size() == 0) {
+            LinearLayout ll_empty = findViewById(R.id.empty_view);
+            recyclerView.setVisibility(View.GONE);
+            ll_empty.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        adapter = new SessionRecyclerViewAdapter(activity, sessions, this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);

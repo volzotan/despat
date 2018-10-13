@@ -157,6 +157,7 @@
 
                 <Button
                     android:text="Datasets"
+                    android:tooltipText="@string/tip_btn_datasets"
                     android:drawableLeft="@drawable/ic_baseline_reorder"
                     android:drawableTint="@color/white"
                     android:paddingLeft="6dp"

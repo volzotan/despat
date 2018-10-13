@@ -2,6 +2,7 @@ package de.volzo.despat.services;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.database.sqlite.SQLiteConstraintException;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
@@ -111,6 +112,9 @@ public class RecognitionService extends IntentService {
                 saveDetections(c, detections);
                 c.setProcessed_detector(true);
                 captureDao.update(c);
+            } catch (SQLiteConstraintException e) {
+                Log.e(TAG, "detector run failed. Saving failed. Probably the session has been deleted. Abort.", e);
+                return;
             } catch (Exception e) {
                 Log.e(TAG, "detector run failed", e);
             }
@@ -141,7 +145,7 @@ public class RecognitionService extends IntentService {
 //        detector.display((DrawSurface) findViewById(R.id.drawSurface), detections);
     }
 
-    private void saveDetections(Capture capture, List<Detector.Recognition> d) {
+    private void saveDetections(Capture capture, List<Detector.Recognition> d) throws Exception {
         AppDatabase db = AppDatabase.getAppDatabase(this);
         PositionDao positionDao = db.positionDao();
 

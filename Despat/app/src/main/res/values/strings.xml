@@ -16,6 +16,8 @@
     <string name="error_export_noTransformedCoordinates">This dataset contains no calculated object coordinates. This is possibly an error."</string>
     <string name="error_export_tooFewHomographyPoints">"This dataset contains less than four different mapped points. Please add %d more so that positions of detected objects can be calculated"</string>
 
+    <string name="recyclerview_empty">"No datasets have been recorded yet"</string>
+
     <!-- Strings related to Settings -->
 
     <string name="pref_summary_intro">Settings can be overwritten when starting a new recording.</string>
@@ -53,6 +55,11 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_osm">OsmActivity</string>
     <string name="title_activity_session">SessionActivity</string>
+
+    <!-- Tour -->
+
+    <string name="tour1_box1">Before starting right away I ask you to make yourself familiar with how this app works.</string>
+    <string name="tour1_box2">We\'ll discuss settings for detecting pedestrians and will have a look at postprocessing.</string>
 
     <!-- Tooltips -->
 
