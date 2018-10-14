@@ -72,5 +72,6 @@
     <string name="title_activity_tour">TourActivity</string>
 
     <string name="tip_btn_datasets">Tooltip Test</string>
+    <string name="title_activity_launch">LaunchActivity</string>
 
 </resources>

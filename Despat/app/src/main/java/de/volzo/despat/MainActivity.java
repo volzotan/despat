@@ -95,13 +95,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         super.onCreate(savedInstanceState);
 
-        // Intro Tour?
-        if (Config.getFirstTimeLaunch(this)) {
-            Intent intent = new Intent(this, TourActivity.class);
-            startActivity(intent);
-            finish();
-        }
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
@@ -864,7 +857,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         time.setText((new SimpleDateFormat(Config.DATEFORMAT_SHORT, Config.LOCALE)).format(Calendar.getInstance().getTime()));
         if (sessionManager.isActive()) {
-            imagesTaken.setText(sessionManager.getImagesTaken());
+            imagesTaken.setText(Integer.toString(sessionManager.getImagesTaken()));
         }
         imagesInMemory.setText(Integer.toString(imgroll.getNumberOfSavedImages()));
         freeSpaceInternal.setText(Float.toString(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(this))));

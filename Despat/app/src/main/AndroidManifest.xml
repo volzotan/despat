@@ -32,15 +32,22 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
-            android:theme="@style/AppTheme.Launcher"
-            android:screenOrientation="sensorLandscape">
+            android:name=".userinterface.LaunchActivity"
+            android:label="@string/title_activity_launch"
+            android:theme="@style/AppThemeLauncher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".userinterface.TourActivity"
+            android:label="@string/title_activity_tour"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="sensorLandscape"
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".userinterface.PreviewActivity"
             android:screenOrientation="sensorLandscape" />
@@ -161,10 +168,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name=".userinterface.TourActivity"
-            android:label="@string/title_activity_tour"
-            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>
