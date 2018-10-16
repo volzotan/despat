@@ -3,7 +3,7 @@ package de.volzo.despat.userinterface;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.MapView;
 

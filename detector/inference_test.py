@@ -55,10 +55,10 @@ NUM_CLASSES = 90
 VISUALIZATION_THRESHOLD = 0.3
 SAVE_THRESHOLD = 0.1
 
-LIMIT = 40
+LIMIT = None #40
 
-TILESIZE = None
-OUTPUTSIZE = None
+TILESIZE = None #[int(4160/4), int(3120/3)] #None
+OUTPUTSIZE = None #TILESIZE #None
 
 if args.tilesize is not None:
     if len(args.tilesize) == 1:

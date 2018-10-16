@@ -1,6 +1,6 @@
 package de.volzo.despat.persistence;
 
-import android.arch.persistence.room.TypeConverter;
+import androidx.room.TypeConverter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;

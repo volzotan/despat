@@ -9,10 +9,16 @@ TENSORFLOW_OBJECT_DETECTION_DIR=/home/volzotan/tensorflow_directory/models/resea
 MODEL_PATH=/home/volzotan/tensorflow_directory/zoo/
 #MODEL_PATH=/Users/volzotan/GIT/despat/detector/models/
 
+# DIRECTORIES=(
+#     "18-04-09_darmstadt_motoZ"
+#     "18-04-21_bahnhof_ZTE"
+#     "18-04-21_zitadelle_ZTE"
+#     "18-05-28_bonn_ZTE"
+# )
+
 DIRECTORIES=(
-    "18-04-09_darmstadt_motoZ"
     "18-04-21_bahnhof_ZTE"
-    "18-04-21_zitadelle_ZTE"
+    "18-04-18_schillerstrasse_ZTE/converted"
     "18-05-28_bonn_ZTE"
 )
 
@@ -29,20 +35,23 @@ MODEL_NAMES=(
     "faster_rcnn_nas_coco_2018_01_28"
 )
 
-MODEL_NAME=faster_rcnn_resnet101_coco_2018_01_28
+MODEL_NAME=ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03
+
+# TILESIZES=( 
+#     "300" "350" "400" "450" "500" "550" "600" "650" 
+# #    "640" 
+#     "700" "750" "800" "850" "900" "950" "1000" "1050" 
+#     "1100" "1150" "1200" "1250" "1300" "1350"
+#     "1400" "1450" "1500" "1550" "1600" "1650"
+#     "1700" "1750" "1800" "1850" "1900" "1950" "2000"
+#     "2050" "2100" "2150" "2200" "2250" "2300" "2350"
+#     "2400" "2450" "2500" "2550" "2600" "2650" "2700"
+#     "2750" "2800" "2850" "2900" "2950" "3000"
+# )
 
 TILESIZES=( 
-    "300" "350" "400" "450" "500" "550" "600" "650" 
-#    "640" 
-    "700" "750" "800" "850" "900" "950" "1000" "1050" 
-    "1100" "1150" "1200" "1250" "1300" "1350"
-    "1400" "1450" "1500" "1550" "1600" "1650"
-    "1700" "1750" "1800" "1850" "1900" "1950" "2000"
-    "2050" "2100" "2150" "2200" "2250" "2300" "2350"
-    "2400" "2450" "2500" "2550" "2600" "2650" "2700"
-    "2750" "2800" "2850" "2900" "2950" "3000"
+    "800"
 )
-
 
 # DIRECTORIES=( "18-04-21_bahnhof_ZTE" )
 # MODEL_NAME=ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03
@@ -86,6 +95,7 @@ do
         INPUT=$INPUT_ROOT$DIR
         OUTPUT=$INPUT"_annotation/"$MODEL_NAME
         APPENDIX="_"$TILESIZE"px"
+        #APPENDIX="_reference2"
 
         echo $INPUT
         echo $OUTPUT
@@ -100,8 +110,8 @@ do
             --model_path $MODEL_PATH                                                    \
             --model_name $MODEL_NAME                                                    \
             --tilesize $TILESIZE                                                        \
-            --output_directory_appendix $APPENDIX                                       \
-            --export-images
+            --output_directory_appendix $APPENDIX                                       
+            #--export-images
 
     done
 done
