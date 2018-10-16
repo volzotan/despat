@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.ToggleButton;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.CameraController2;
@@ -93,7 +94,7 @@ public class ConfigureActivity extends AppCompatActivity {
 //        }
 
         final String[] detector_values = {"low", "mid", "high"};
-        final Button[] detector_buttons = {
+        final ToggleButton[] detector_buttons = {
                 findViewById(R.id.bt_detector1),
                 findViewById(R.id.bt_detector2),
                 findViewById(R.id.bt_detector3),

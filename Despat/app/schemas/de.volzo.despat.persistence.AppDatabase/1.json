@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "267ff72896cf32e183becc4481821c91",
+    "identityHash": "2abe264c8a029da26ffd09474875ad6c",
     "entities": [
       {
         "tableName": "Status",
@@ -307,7 +307,16 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_Capture_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "createSql": "CREATE  INDEX `index_Capture_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "Session",
@@ -375,7 +384,16 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_HomographyPoint_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "createSql": "CREATE  INDEX `index_HomographyPoint_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "Session",
@@ -485,7 +503,16 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_Position_capture_id",
+            "unique": false,
+            "columnNames": [
+              "capture_id"
+            ],
+            "createSql": "CREATE  INDEX `index_Position_capture_id` ON `${TABLE_NAME}` (`capture_id`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "Capture",
@@ -553,7 +580,16 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_ErrorEvent_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "createSql": "CREATE  INDEX `index_ErrorEvent_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "Session",
@@ -671,7 +707,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"267ff72896cf32e183becc4481821c91\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"2abe264c8a029da26ffd09474875ad6c\")"
     ]
   }
 }

@@ -3,6 +3,7 @@ package de.volzo.despat.persistence;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.io.File;
@@ -12,7 +13,8 @@ import static androidx.room.ForeignKey.CASCADE;
 @Entity(foreignKeys = @ForeignKey(  entity = Capture.class,
                                     parentColumns = "id",
                                     childColumns = "capture_id",
-                                    onDelete = CASCADE))
+                                    onDelete = CASCADE),
+        indices = {@Index("capture_id")})
 
 public class Position {
 

@@ -17,6 +17,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
+
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
@@ -45,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import androidx.core.content.res.ResourcesCompat;
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorHOG;
 import de.volzo.despat.detector.DetectorSSD;
@@ -243,8 +246,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         setButtonStates();
 
-        final FloatingActionButton fabRec = findViewById(R.id.fabRec);
-        final TextView tvFapRec = findViewById(R.id.tvFapRec);
+        final MaterialButton fabRec = findViewById(R.id.fabRec);
         fabRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -274,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //                    startProgressBarUpdate();
 ////                    btStartStopCapturing.setChecked(true);
 
-                    tvFapRec.setText("STOP");
+                    fabRec.setText("STOP");
                 } else {
                     Log.d(TAG, "stopCapturing");
                     Util.darkenTextureView(textureView);
@@ -595,11 +597,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     private void setButtonStates() {
-        final TextView tvFapRec = findViewById(R.id.tvFapRec);
+        // TODO
+        final MaterialButton fabRec = findViewById(R.id.fabRec);
 
         if (SessionManager.getInstance(activity).isActive()) {
             findViewById(R.id.layout_buttons).setVisibility(View.GONE);
-            tvFapRec.setText("STOP");
+            fabRec.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_stop, null));
+            fabRec.setText("Stop Recording");
 
             findViewById(R.id.block_general).setVisibility(View.GONE);
             findViewById(R.id.block_session).setVisibility(View.VISIBLE);
@@ -607,7 +611,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             findViewById(R.id.block_numberofimages).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.layout_buttons).setVisibility(View.VISIBLE);
-            tvFapRec.setText("REC");
+            fabRec.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_rec, null));
+            fabRec.setText("Start Recording");
 
             findViewById(R.id.block_general).setVisibility(View.VISIBLE);
             findViewById(R.id.block_session).setVisibility(View.GONE);

@@ -5,12 +5,13 @@
 
     <!-- The background color, preferably the same as your normal theme -->
     <item android:drawable="@color/colorPrimaryDark"/>
-    
+
     <item
         android:height="10dp"
-        android:width="10dp">
+        android:width="10dp"
+        android:gravity="center">
         <bitmap
-            android:src="@drawable/icon"
+            android:src="@drawable/icon256px"
             android:gravity="center"/>
     </item>
 

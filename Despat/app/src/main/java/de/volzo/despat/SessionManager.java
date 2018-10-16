@@ -276,6 +276,8 @@ public class SessionManager {
     }
 
     public static void deleteSessionFromDatabase(Context context, Session session) {
+        Log.d(TAG, "deleting session: " + session.toString());
+
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
         CaptureDao captureDao = db.captureDao();

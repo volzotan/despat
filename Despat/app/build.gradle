@@ -48,36 +48,52 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
+
     // openCV for HOG and the compressor
     implementation project(':openCVLibrary310')
+
     // tensorflow
     implementation 'org.tensorflow:tensorflow-android:+'
     // implementation 'org.tensorflow:tensorflow-lite:+'
+
     // Photoview to preview pitch-zoomable images
     implementation 'com.github.chrisbanes:PhotoView:2.0.0'
+
     // UsbSerial for Powerbrain
     implementation 'com.github.felHR85:UsbSerial:4.5'
+
     // Volley for the Web-Interface
     implementation 'com.android.volley:volley:1.1.0'
+
     // osmdroid for OSM support
     implementation 'org.osmdroid:osmdroid-android:6.0.1'
+
     // glide for displaying compressed images
     implementation 'com.github.bumptech.glide:glide:4.3.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
+
     // MPAndroidChart for Session plots
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+
+    // ToggleButtons for ConfigureActivity Network Fidelity
+//    implementation 'com.anthonymandra:ToggleButtons:3.0.0'
+
     // ACRA for bug reporting
     def acraVersion = '5.0.0'
     implementation "ch.acra:acra-http:$acraVersion"
     implementation "ch.acra:acra-notification:$acraVersion"
     implementation "ch.acra:acra-limiter:$acraVersion"
-    // Room
+
+    // Room Database
     implementation 'androidx.room:room-runtime:2.0.0-beta01'
     annotationProcessor 'androidx.room:room-compiler:2.0.0-beta01'
+
     // Test helpers for Room (optional)
     testImplementation 'androidx.room:room-testing:2.0.0-beta01'
+
     // debug: access sqlite DB via chrome developer tools
     implementation 'com.facebook.stetho:stetho:1.5.0'
+
     // SU lib for reboots
     // implementation 'eu.chainfire:libsuperuser:1.0.0.+'
 }

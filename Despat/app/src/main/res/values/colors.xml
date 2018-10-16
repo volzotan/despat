@@ -5,12 +5,13 @@
     <color name="colorAccent2">#47C06E</color>
     <color name="colorAccent3">#481E70</color>
 
-    <!--<color name="colorPrimary">#444</color>-->
-    <color name="colorPrimaryDark">#333</color>
-    <!--<color name="windowBackground">#222</color>-->
-    <!--<color name="navigationBarColor">#666</color>-->
+    <color name="colorPrimary">#444</color>
+    <color name="colorPrimaryDark">#222</color>
+    <color name="windowBackground">#333</color>
+    <color name="navigationBarColor">#666</color>
 
     <color name="black">#000000</color>
+    <color name="darkGrey">#222222</color>
     <color name="opaqueBlack">#80000000</color>
     <color name="white">#FFFFFF</color>
 

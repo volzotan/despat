@@ -131,30 +131,102 @@
                 android:layout_marginLeft="10dp"
                 android:text="fast or slower but more precise"/>
 
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:layout_below="@+id/tv_detector">-->
+
+                <!--<com.google.android.material.button.MaterialButton-->
+                    <!--android:id="@+id/bt_detector1"-->
+                    <!--style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="0.3"/>-->
+                <!--<com.google.android.material.button.MaterialButton-->
+                    <!--android:id="@+id/bt_detector2"-->
+                    <!--style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="0.3"/>-->
+                <!--<com.google.android.material.button.MaterialButton-->
+                    <!--android:id="@+id/bt_detector3"-->
+                    <!--style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="0.3"/>-->
+            <!--</LinearLayout>-->
+
+            <!--<androidx.appcompat.widget.ToggleGroup-->
+                <!--android:id="@+id/groupTextFormat"-->
+                <!--style="@style/Widget.Material.ToggleGroup"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="24dp"-->
+                <!--android:layout_below="@+id/tv_detector"-->
+                <!--android:layout_margin="5dp"-->
+                <!--app:backgroundColor="@color/toggle_off"-->
+                <!--app:divider="@drawable/light_divider"-->
+                <!--app:orientation="horizontal"-->
+                <!--app:exclusive="true">-->
+
+                <!--<androidx.appcompat.widget.ToggleButton-->
+                    <!--android:id="@+id/buttonBold"-->
+                    <!--style="@style/Widget.Material.ToggleButton"-->
+                    <!--android:text="low"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="0.3"/>-->
+
+                <!--<androidx.appcompat.widget.ToggleButton-->
+                    <!--android:id="@+id/buttonItalic"-->
+                    <!--style="@style/Widget.Material.ToggleButton"-->
+                    <!--android:text="medium"-->
+                    <!--android:checked="true"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="0.3"/>-->
+
+                <!--<androidx.appcompat.widget.ToggleButton-->
+                    <!--android:id="@+id/buttonUnderline"-->
+                    <!--style="@style/Widget.Material.ToggleButton"-->
+                    <!--android:text="high"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="0.3"/>-->
+
+        <!--</androidx.appcompat.widget.ToggleGroup>-->
+
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_below="@+id/tv_detector">
 
-                <Button
+                <ToggleButton
                     android:id="@+id/bt_detector1"
+                    android:textOff="low"
+                    android:textOn="low"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:drawable="@drawable/radiobutton"
-                    android:layout_weight="0.3"/>
-                <Button
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3" />
+
+                <ToggleButton
                     android:id="@+id/bt_detector2"
+                    android:textOff="medium"
+                    android:textOn="medium"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:drawable="@drawable/radiobutton"
-                    android:layout_weight="0.3"/>
-                <Button
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3" />
+
+                <ToggleButton
                     android:id="@+id/bt_detector3"
+                    android:textOff="high"
+                    android:textOn="high"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:drawable="@drawable/radiobutton"
-                    android:layout_weight="0.3"/>
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3" />
+
             </LinearLayout>
 
         </RelativeLayout>
@@ -163,7 +235,8 @@
 
     <Button
         android:text="Start Recording"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/rec_button"
         android:layout_alignParentBottom="true"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

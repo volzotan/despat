@@ -43,7 +43,7 @@ import de.volzo.despat.support.Util;
 
 public class SessionListActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
-    private static final String TAG = SessionActivity.class.getSimpleName();
+    private static final String TAG = SessionListActivity.class.getSimpleName();
 
     Context context;
 
@@ -135,7 +135,6 @@ public class SessionListActivity extends AppCompatActivity implements RecyclerIt
         }
 
         SessionManager.deleteSessionFromDatabase(context, deletedSession);
-        Log.d(TAG, "deleted session: " + deletedSession);
 
         deletedSession = null;
         deletedSessionIndex = null;
