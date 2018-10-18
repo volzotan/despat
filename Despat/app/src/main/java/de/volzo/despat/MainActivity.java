@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Handler;
@@ -18,8 +17,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -246,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         setButtonStates();
 
-        final MaterialButton fabRec = findViewById(R.id.fabRec);
+        final Button fabRec = findViewById(R.id.fabRec);
         fabRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -597,12 +594,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     }
 
     private void setButtonStates() {
-        // TODO
-        final MaterialButton fabRec = findViewById(R.id.fabRec);
+        final Button fabRec = findViewById(R.id.fabRec);
 
         if (SessionManager.getInstance(activity).isActive()) {
             findViewById(R.id.layout_buttons).setVisibility(View.GONE);
-            fabRec.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_stop, null));
+//            fabRec.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_stop, null));
             fabRec.setText("Stop Recording");
 
             findViewById(R.id.block_general).setVisibility(View.GONE);
@@ -611,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             findViewById(R.id.block_numberofimages).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.layout_buttons).setVisibility(View.VISIBLE);
-            fabRec.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_rec, null));
+//            fabRec.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_rec, null));
             fabRec.setText("Start Recording");
 
             findViewById(R.id.block_general).setVisibility(View.VISIBLE);

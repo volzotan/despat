@@ -154,30 +154,61 @@
                 android:layout_marginBottom="2dp"
                 android:orientation="vertical">
 
-                <com.google.android.material.button.MaterialButton
+                <!--<com.google.android.material.button.MaterialButton-->
+                    <!--android:id="@+id/bt_sessions"-->
+                    <!--android:text="Datasets"-->
+                    <!--android:tooltipText="@string/tip_btn_datasets"-->
+                    <!--style="@style/MaterialIconButton"-->
+                    <!--android:paddingLeft="6dp"-->
+                    <!--android:layout_width="fill_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:textColor="@android:color/white"-->
+                    <!--app:icon="@drawable/ic_baseline_reorder"-->
+                    <!--app:iconTint="@android:color/white"-->
+                    <!--app:iconSize="20dp"/>-->
+
+                <!--<com.google.android.material.button.MaterialButton-->
+                    <!--android:id="@+id/bt_settings"-->
+                    <!--android:text="Settings"-->
+                    <!--style="@style/MaterialIconButton"-->
+                    <!--android:paddingLeft="6dp"-->
+                    <!--android:layout_width="fill_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:textColor="@android:color/white"-->
+                    <!--app:icon="@drawable/ic_baseline_settings"-->
+                    <!--app:iconTint="@android:color/white"-->
+                    <!--app:iconSize="20dp"/>-->
+
+                <Button
                     android:id="@+id/bt_sessions"
                     android:text="Datasets"
                     android:tooltipText="@string/tip_btn_datasets"
-                    style="@style/MaterialIconButton"
-                    android:paddingLeft="6dp"
+                    android:paddingLeft="4dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginRight="2dp"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="@color/buttonColor"
                     android:textColor="@android:color/white"
-                    app:icon="@drawable/ic_baseline_reorder"
-                    app:iconTint="@android:color/white"
-                    app:iconSize="20dp"/>
+                    android:textAlignment="textStart"
+                    android:drawableLeft="@drawable/ic_baseline_reorder"
+                    android:drawableTint="@color/white"
+                    android:drawablePadding="8dp" />
 
-                <com.google.android.material.button.MaterialButton
+                <Button
                     android:id="@+id/bt_settings"
                     android:text="Settings"
-                    style="@style/MaterialIconButton"
-                    android:paddingLeft="6dp"
+                    android:paddingLeft="4dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginRight="2dp"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="@color/buttonColor"
                     android:textColor="@android:color/white"
-                    app:icon="@drawable/ic_baseline_settings"
-                    app:iconTint="@android:color/white"
-                    app:iconSize="20dp"/>
+                    android:textAlignment="textStart"
+                    android:drawableLeft="@drawable/ic_baseline_settings"
+                    android:drawableTint="@color/white"
+                    android:drawablePadding="8dp" />
 
             </LinearLayout>
 
@@ -277,62 +308,51 @@
 
     </LinearLayout>
 
-    <!--<FrameLayout-->
+    <!--<com.google.android.material.button.MaterialButton-->
+        <!--android:id="@+id/fabRec"-->
+        <!--style="@style/Widget.MaterialComponents.Button.TextButton.IconButton"-->
         <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_height="60dp"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:layout_marginRight="12dp"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:elevation="6dp"-->
+        <!--android:paddingStart="20dp"-->
+        <!--android:paddingEnd="20dp"-->
         <!--android:layout_gravity="bottom|right"-->
-        <!--android:padding="16dp" >-->
+        <!--android:text="Start Recording"-->
+        <!--android:textAllCaps="true"-->
+        <!--android:textColor="@android:color/white"-->
+        <!--android:textSize="14sp"-->
+        <!--app:backgroundTint="@color/rec_button"-->
+        <!--app:cornerRadius="32dp"-->
+        <!--app:icon="@drawable/ic_rec"-->
+        <!--app:iconPadding="12dp"-->
+        <!--app:iconSize="24dp"-->
+        <!--app:iconTint="@android:color/white"-->
+        <!--app:layout_anchorGravity="bottom|right" />-->
 
-        <!--<android.support.design.widget.FloatingActionButton-->
-            <!--android:id="@+id/fabRec"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--app:borderWidth="0dp"-->
-            <!--android:elevation="6dp"-->
-            <!--app:backgroundTint="@color/rec_button"/>-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/tvFapRec"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center"-->
-            <!--android:text="REC"-->
-            <!--android:elevation="7dp"-->
-            <!--android:textColor="@android:color/white"-->
-            <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
-    <!--</FrameLayout>-->
-
-    <!--<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-        <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent">-->
-
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/fabRec"
-        style="@style/Widget.MaterialComponents.Button.TextButton.IconButton"
         android:layout_width="wrap_content"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginRight="12dp"
         android:layout_marginBottom="8dp"
-        android:elevation="6dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
         android:layout_gravity="bottom|right"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:text="Start Recording"
-        android:textAllCaps="true"
-        android:textColor="@android:color/white"
-        android:textSize="14sp"
         app:backgroundTint="@color/rec_button"
-        app:cornerRadius="32dp"
-        app:icon="@drawable/ic_rec"
-        app:iconPadding="12dp"
+        android:drawableLeft="@drawable/ic_rec"
+        android:drawableTint="@color/white"
+        android:drawablePadding="10dp"
         app:iconSize="24dp"
-        app:iconTint="@android:color/white"
-        app:layout_anchorGravity="bottom|right" />
+    />
 
-    <!--</androidx.coordinatorlayout.widget.CoordinatorLayout>-->
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
