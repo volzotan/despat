@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -44,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import androidx.core.content.res.ResourcesCompat;
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
@@ -76,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     Detector detector;
 
     TextureView textureView;
-    PhotoViewAttacher photoViewAttacher;
 
     Handler periodicUpdateHandler;
 
@@ -586,10 +587,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         stopProgressBarUpdate();
 
-        if (photoViewAttacher != null) {
-//            photoViewAttacher.cleanup();
-        }
-
         if (powerbrain != null) {
             powerbrain.disconnect();
             powerbrain = null;
@@ -605,7 +602,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         if (SessionManager.getInstance(activity).isActive()) {
             findViewById(R.id.layout_buttons).setVisibility(View.GONE);
-//            fabRec.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_stop, null));
+
+            Drawable icon = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_stop);
+            icon.setBounds( 0, 0, 62, 62 );
+            fabRec.setCompoundDrawables( icon, null, null, null );
             fabRec.setText("Stop Recording");
 
             findViewById(R.id.block_general).setVisibility(View.GONE);
@@ -614,7 +614,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             findViewById(R.id.block_numberofimages).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.layout_buttons).setVisibility(View.VISIBLE);
-//            fabRec.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_rec, null));
+
+            Drawable icon = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_rec);
+            icon.setBounds( 0, 0, 62, 62 );
+            fabRec.setCompoundDrawables( icon, null, null, null );
             fabRec.setText("Start Recording");
 
             findViewById(R.id.block_general).setVisibility(View.VISIBLE);

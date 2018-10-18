@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2abe264c8a029da26ffd09474875ad6c",
+    "identityHash": "baef3300035f7d8b619267cc0fd88f55",
     "entities": [
       {
         "tableName": "Status",
@@ -689,7 +689,16 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_Benchmark_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "createSql": "CREATE  INDEX `index_Benchmark_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "Session",
@@ -707,7 +716,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"2abe264c8a029da26ffd09474875ad6c\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"baef3300035f7d8b619267cc0fd88f55\")"
     ]
   }
 }

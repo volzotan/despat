@@ -159,7 +159,6 @@ public class ConfigureActivity extends AppCompatActivity {
                         fidelity = detector_values[i];
                     }
                 }
-                Log.wtf(TAG, fidelity);
                 DetectorConfig detectorConfig = new DetectorConfig(fidelity, 700); // TODO
 
 //                // TODO:
