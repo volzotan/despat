@@ -143,7 +143,7 @@ public class Despat extends Application {
             }
         } else {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DespatWakeLockTag");
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "de.volzo.despat:despatWakeLockTag");
 
             if (wakeLock == null) {
                 Log.e(TAG, "acquiring wake lock failed");

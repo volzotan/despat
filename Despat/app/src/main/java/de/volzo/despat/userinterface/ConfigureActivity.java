@@ -1,5 +1,6 @@
 package de.volzo.despat.userinterface;
 
+import android.app.ActionBar;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -13,10 +14,14 @@ import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.CameraController2;
@@ -93,14 +98,10 @@ public class ConfigureActivity extends AppCompatActivity {
 //                Log.e(TAG, "undefined network fidelity state: " + Config.getNetworkFidelity(activity));
 //        }
 
+        LinearLayout toggleLayout = findViewById(R.id.toggleContainerNetworkFidelity);
+        final List<ToggleButton> detector_buttons = new ArrayList<>();
         final String[] detector_values = {"low", "mid", "high"};
-        final ToggleButton[] detector_buttons = {
-                findViewById(R.id.bt_detector1),
-                findViewById(R.id.bt_detector2),
-                findViewById(R.id.bt_detector3),
-        };
 
-        setDetectorButtonStates(Config.getNetworkFidelity(activity), detector_values, detector_buttons);
         View.OnClickListener buttonClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,11 +110,21 @@ public class ConfigureActivity extends AppCompatActivity {
             }
         };
 
-        for (int i=0; i<detector_buttons.length; i++) {
-            detector_buttons[i].setTag(detector_values[i]);
-            detector_buttons[i].setText(detector_values[i]);
-            detector_buttons[i].setOnClickListener(buttonClickListener);
+        for (String value : detector_values) {
+            ToggleButton button = new ToggleButton(this);
+            button.setTag(value);
+            button.setText(value);
+            button.setTextOff(value);
+            button.setTextOn(value);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            layoutParams.weight = 1.0f / detector_values.length;
+            button.setLayoutParams(layoutParams);
+            toggleLayout.addView(button);
+            detector_buttons.add(button);
+            button.setOnClickListener(buttonClickListener);
         }
+
+        setDetectorButtonStates(Config.getNetworkFidelity(activity), detector_values, detector_buttons);
 
 //        Button btSetTime = (Button) findViewById(R.id.bt_setTime);
 //        btSetTime.setOnClickListener(new View.OnClickListener() {
@@ -143,12 +154,13 @@ public class ConfigureActivity extends AppCompatActivity {
                 cameraConfig.setShutterInterval((sbInterval.getProgress()+sbIntervalMin) * 1000);
 
                 String fidelity = Config.getNetworkFidelity(context);
-                for (int i=0; i<detector_buttons.length; i++) {
-                    if (detector_buttons[i].isSelected()) {
+                for (int i=0; i<detector_buttons.size(); i++) {
+                    if (detector_buttons.get(i).isChecked()) {
                         fidelity = detector_values[i];
                     }
                 }
-                DetectorConfig detectorConfig = new DetectorConfig(fidelity, 600); // TODO
+                Log.wtf(TAG, fidelity);
+                DetectorConfig detectorConfig = new DetectorConfig(fidelity, 700); // TODO
 
 //                // TODO:
 //                try {
@@ -170,17 +182,17 @@ public class ConfigureActivity extends AppCompatActivity {
         });
     }
 
-    private void setDetectorButtonStates(String state, String[] values, Button[] buttons) {
+    private void setDetectorButtonStates(String state, String[] values, List<ToggleButton> buttons) {
 
-        for (int i=0; i<buttons.length; i++) {
-            buttons[i].setTextColor(ContextCompat.getColor(activity, R.color.white));
-            buttons[i].setSelected(false);
+        for (int i=0; i<buttons.size(); i++) {
+            buttons.get(i).setTextColor(ContextCompat.getColor(activity, R.color.white));
+            buttons.get(i).setChecked(false);
         }
 
-        for (int i=0; i<buttons.length; i++) {
+        for (int i=0; i<buttons.size(); i++) {
             if (state.equals(values[i])) {
-                buttons[i].setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
-                buttons[i].setSelected(true);
+                buttons.get(i).setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
+                buttons.get(i).setChecked(true);
 
                 return;
             }

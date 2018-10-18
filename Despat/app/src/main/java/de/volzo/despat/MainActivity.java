@@ -44,9 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-import androidx.core.content.res.ResourcesCompat;
 import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorHOG;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
@@ -55,20 +53,15 @@ import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.DetectorConfig;
-import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
-import de.volzo.despat.support.Compressor;
-import de.volzo.despat.support.HomographyCalculator;
 import de.volzo.despat.support.ImageRollover;
-import de.volzo.despat.support.SessionExporter;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.ConfigureActivity;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.userinterface.SessionListActivity;
 import de.volzo.despat.userinterface.SettingsActivity2;
-import de.volzo.despat.userinterface.TourActivity;
 import de.volzo.despat.web.Sync;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -485,6 +478,19 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         super.onPause();
 
         cleanup();
+
+        final TextureView textureView = (TextureView) findViewById(R.id.textureView);
+
+//        final Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (textureView != null && textureView.isAvailable() && textureView.getSurfaceTexture() != null && !textureView.getSurfaceTexture().isReleased()) {
+//                    textureView.getSurfaceTexture().release();
+//                    Log.wtf(TAG, "textureView released by timeout");
+//                }
+//            }
+//        }, 1200);
     }
 
     @Override
@@ -549,6 +555,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
         despat.closeCamera();
+        Log.wtf(TAG, "SurfaceTexture destroyed");
         return true;
     }
 

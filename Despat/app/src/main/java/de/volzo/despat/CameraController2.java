@@ -209,9 +209,12 @@ public class CameraController2 extends CameraController {
                 imageReaderRaw = null;
             }
 
-            // if a textureView exists outside of the CameraController
-            // closing the surfaces would cause problems
+            // textureView is null, surfaceTexture object has been created
+            // by the CameraController because no live preview is required
             if (textureView == null) {
+
+                Log.wtf(TAG, "Surface Release");
+
                 if(surface != null) {
                     surface.release();
                 }
@@ -220,6 +223,13 @@ public class CameraController2 extends CameraController {
                     surfaceTexture.release();
                 }
             }
+
+            // if a textureView exists outside of the CameraController
+            // closing the surfaces would cause problems
+//            if (textureView != null) {
+//                Log.wtf(TAG, "Surface Release2");
+//                textureView.getSurfaceTexture().release();
+//            }
 
             Handler mainHandler = new Handler(context.getMainLooper());
             Runnable runnable = new Runnable() {
@@ -850,8 +860,6 @@ public class CameraController2 extends CameraController {
                 } finally {
                     cameraDevice = null;
                 }
-
-
             } catch (InterruptedException ie) {
                 Log.e(TAG, "lock could not be acquired", ie);
             } finally {
