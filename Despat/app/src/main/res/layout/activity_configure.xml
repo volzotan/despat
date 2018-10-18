@@ -198,35 +198,11 @@
 
 
             <LinearLayout
+                android:id="@+id/toggleContainerNetworkFidelity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_below="@+id/tv_detector">
-
-                <ToggleButton
-                    android:id="@+id/bt_detector1"
-                    android:textOff="low"
-                    android:textOn="low"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.3" />
-
-                <ToggleButton
-                    android:id="@+id/bt_detector2"
-                    android:textOff="medium"
-                    android:textOn="medium"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.3" />
-
-                <ToggleButton
-                    android:id="@+id/bt_detector3"
-                    android:textOff="high"
-                    android:textOn="high"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.3" />
-
             </LinearLayout>
 
         </RelativeLayout>
