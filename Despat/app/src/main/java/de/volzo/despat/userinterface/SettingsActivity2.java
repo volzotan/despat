@@ -4,11 +4,8 @@ package de.volzo.despat.userinterface;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 
-import de.volzo.despat.preferences.Config;
 import de.volzo.despat.preferences.SettingsFragment;
 
 public class SettingsActivity2 extends Activity {

@@ -4,17 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +21,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import de.volzo.despat.MainActivity;
 import de.volzo.despat.R;
+import de.volzo.despat.MainActivity;
 import de.volzo.despat.preferences.Config;
 
 public class TourActivity extends AppCompatActivity {

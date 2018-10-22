@@ -1,40 +1,27 @@
 package de.volzo.despat.userinterface;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
 import android.os.Bundle;
-import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import android.util.Log;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import de.volzo.despat.R;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
-import de.volzo.despat.R;
 import de.volzo.despat.SessionManager;
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
-import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
-import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
@@ -87,6 +74,7 @@ public class SessionFragment extends Fragment {
         final Session session = sessionDao.getById(sessionId);
 
         AspectRatioImageView ivCompressedPreview = (AspectRatioImageView) view.findViewById(R.id.compressedpreview);
+        TextView tvSessionSummary = (TextView) view.findViewById(R.id.tvSessionSummary);
         TextView tvName = (TextView) view.findViewById(R.id.name);
         TextView tvShutterInterval = (TextView) view.findViewById(R.id.shutterInterval);
         TextView tvDetector = (TextView) view.findViewById(R.id.detector);
@@ -117,6 +105,8 @@ public class SessionFragment extends Fragment {
         } catch (Exception e) {
             Log.e(TAG, "drawing results failed", e);
         }
+
+        tvSessionSummary.setText("TODO"); // TODO
 
         tvName.setText(session.getSessionName());
         if (session.getCameraConfig() != null) {
