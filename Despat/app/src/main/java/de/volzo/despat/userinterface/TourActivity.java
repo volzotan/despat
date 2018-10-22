@@ -3,12 +3,19 @@ package de.volzo.despat.userinterface;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+
+import androidx.core.view.ViewCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.PowerManager;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +44,7 @@ public class TourActivity extends AppCompatActivity {
     private LinearLayout dotsLayout;
     private TextView[] dots;
     private int[] layouts;
-    private Button btnSkip, btnNext;
+    private Button btnPrev, btnNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +60,7 @@ public class TourActivity extends AppCompatActivity {
 
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
-        btnSkip = (Button) findViewById(R.id.btn_skip);
+        btnPrev = (Button) findViewById(R.id.btn_prev);
         btnNext = (Button) findViewById(R.id.btn_next);
 
         layouts = new int[]{
@@ -62,27 +69,33 @@ public class TourActivity extends AppCompatActivity {
                 R.layout.tour3,
                 R.layout.tour4,
                 R.layout.tour5,
+                R.layout.tour6,
+                R.layout.tour7,
         };
 
         addBottomDots(0);
         changeStatusBarColor();
 
         viewPagerAdapter = new ViewPagerAdapter();
-        viewPager.setAdapter(viewPagerAdapter);
         viewPager.addOnPageChangeListener(viewPagerPageChangeListener);
+        viewPager.setAdapter(viewPagerAdapter);
 
-        btnSkip.setOnClickListener(new View.OnClickListener() {
+        btnPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchHomeScreen();
+                int current = getItem(-1);
+                if (current < 0) {
+                    launchHomeScreen();
+                } else {
+                    // move to prev screen
+                    viewPager.setCurrentItem(current);
+                }
             }
         });
 
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // checking for last page
-                // if last page home screen will be launched
                 int current = getItem(+1);
                 if (current < layouts.length) {
                     // move to next screen
@@ -129,26 +142,31 @@ public class TourActivity extends AppCompatActivity {
         public void onPageSelected(int position) {
             addBottomDots(position);
 
-            if (position == 2) {
-                MainActivity.whitelistAppForDoze(activity);
-            }
-
-            if (position == 3) {
-                if (!MainActivity.checkPermissionsAreGiven(activity)) {
-                    MainActivity.requestPermissions(activity);
-                }
-            }
+//            if (position == 2) {
+//                MainActivity.whitelistAppForDoze(activity);
+//            }
+//
+//            if (position == 3) {
+//                if (!MainActivity.checkPermissionsAreGiven(activity)) {
+//                    MainActivity.requestPermissions(activity);
+//                }
+//            }
 
             // changing the next button text 'NEXT' / 'GOT IT'
             if (position == layouts.length - 1) {
                 // last page. make button text to GOT IT
                 btnNext.setText(getString(R.string.start));
-                btnSkip.setVisibility(View.GONE);
+//                btnPrev.setVisibility(View.GONE);
+            } else if (position == 0) {
+                btnPrev.setText(getString(R.string.skip));
+//                btnNext.setVisibility(View.VISIBLE);
             } else {
                 // still pages are left
                 btnNext.setText(getString(R.string.next));
-                btnSkip.setVisibility(View.VISIBLE);
+                btnPrev.setText(getString(R.string.prev));
+//                btnPrev.setVisibility(View.VISIBLE);
             }
+
         }
 
         @Override
@@ -168,6 +186,85 @@ public class TourActivity extends AppCompatActivity {
         window.setStatusBarColor(Color.TRANSPARENT);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MainActivity.PERMISSION_REQUEST_CODE: {
+                boolean success = true;
+
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        success = false;
+                        break;
+                    }
+                }
+
+                if (success) {
+                    Log.w(TAG, "permissions are granted by user");
+                    setButtonStates(true, null);
+                } else {
+                    Log.w(TAG, "permissions denied by user");
+                    setButtonStates(false, null);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MainActivity.DOZE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                setButtonStates(null, true);
+            } else {
+                setButtonStates(null, false);
+            }
+        } else {
+            Log.wtf(TAG, "unknown request code: " + requestCode);
+        }
+    }
+
+    public void setButtonStates(Boolean permissions, Boolean doze) {
+        Button btPermissions = findViewById(R.id.btPermissions);
+        Button btDoze = findViewById(R.id.btDoze);
+
+        if (btPermissions != null) {
+            int color = R.color.darkGrey;
+
+            if (permissions == null) {
+                if (!MainActivity.checkPermissionsAreGiven(activity)) {
+                    color = R.color.darkGrey;
+                } else {
+                    color = R.color.success;
+                }
+            } else if (permissions == true) {
+                color = R.color.success;
+            } else {
+                color = R.color.error;
+            }
+
+//          btPermissions.setBackgroundTintList(getResources().getColor(R.color.darkGrey, null));
+            ViewCompat.setBackgroundTintList(btPermissions, ColorStateList.valueOf(getResources().getColor(color, null)));
+        }
+
+        if (btDoze != null) {
+            int color = R.color.darkGrey;
+
+            if (doze == null) {
+                if (!MainActivity.checkWhitelistingForDoze(activity)) {
+                    color = R.color.darkGrey;
+                } else {
+                    color = R.color.success;
+                }
+            } else if (doze == true) {
+                color = R.color.success;
+            } else {
+                color = R.color.error;
+            }
+
+            ViewCompat.setBackgroundTintList(btDoze, ColorStateList.valueOf(getResources().getColor(color, null)));
+        }
+    }
+
     public class ViewPagerAdapter extends PagerAdapter {
         private LayoutInflater layoutInflater;
 
@@ -183,6 +280,33 @@ public class TourActivity extends AppCompatActivity {
             if (position == 0) {
                 ImageView imageView = findViewById(R.id.iv_tour1_bg);
                 Glide.with(context).load(R.drawable.hamburg).into(imageView);
+            }
+
+            setButtonStates(null, null);
+
+            Button btPermissions = findViewById(R.id.btPermissions);
+            Button btDoze = findViewById(R.id.btDoze);
+
+            if (btPermissions != null) {
+                btPermissions.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (!MainActivity.checkPermissionsAreGiven(activity)) {
+                            MainActivity.requestPermissions(activity);
+                        }
+                    }
+                });
+            }
+
+            if (btDoze != null) {
+                btDoze.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (!MainActivity.checkWhitelistingForDoze(activity)) {
+                            MainActivity.whitelistAppForDoze(activity);
+                        }
+                    }
+                });
             }
 
             return view;

@@ -69,7 +69,8 @@ import de.volzo.despat.web.Sync;
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int PERMISSION_REQUEST_CODE = 0x123;
+    public static final int PERMISSION_REQUEST_CODE     = 0x123;
+    public static final int DOZE_REQUEST_CODE           = 0x124;
 
     Despat despat;
     MainActivity activity = this;
@@ -927,6 +928,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        tvStatus.setText("n: " + res.coordinates.length);
     }
 
+    public static boolean checkWhitelistingForDoze(Activity activity) {
+        PowerManager powerManger = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+        return powerManger.isIgnoringBatteryOptimizations(activity.getPackageName());
+    }
+
     /* Request a confirmation from the user that the app should be put on the Doze whitelist.
      * That allows the alarm manager to fire more often than once in 9 minutes.
      */
@@ -937,7 +943,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
             Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
             intent.setData(uri);
-            activity.startActivity(intent);
+            activity.startActivityForResult(intent, DOZE_REQUEST_CODE);
         }
     }
 
@@ -966,7 +972,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         switch (requestCode) {
             case PERMISSION_REQUEST_CODE: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                boolean success = false;
+
+                for (int result : grantResults) {
+                    if (result == PackageManager.PERMISSION_GRANTED) {
+                        success = true;
+                        break;
+                    }
+                }
+
+                if (success) {
                     Log.w(TAG, "permissions are granted by user");
                     init();
                 } else {

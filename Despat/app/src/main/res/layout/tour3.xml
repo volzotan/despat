@@ -11,17 +11,10 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="@dimen/img_width_height"
-            android:layout_height="@dimen/img_width_height"
-            android:layout_marginBottom="20dp"
-            android:src="@drawable/ic_baseline_camera_alt"
-            android:tint="@color/white"/>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Permissions"
+            android:text="What‘s Happening"
             android:textColor="@android:color/white"
             android:textSize="@dimen/slide_title"
             android:textStyle="bold" />
@@ -32,7 +25,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="@dimen/desc_padding"
             android:paddingRight="@dimen/desc_padding"
-            android:text="To use the camera and save data, permissions need to be granted."
+            android:text="The phone will take pictures in regular intervals and detect pedestrians, cyclists and cars."
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="@dimen/slide_desc" />

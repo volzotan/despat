@@ -5,26 +5,42 @@
     android:background="@color/bg_list_item">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="@dimen/img_width_height"
-            android:layout_height="@dimen/img_width_height"
-            android:paddingBottom="20dp"
-            android:src="@drawable/ic_baseline_battery_alert"
-            android:tint="@color/white"/>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Battery Saving"
+            android:layout_marginBottom="10dp"
+            android:text="Device Placement"
             android:textColor="@android:color/white"
             android:textSize="@dimen/slide_title"
             android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:paddingBottom="0dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/tour2" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:paddingBottom="20dp"
+            android:background="@android:color/black"/>
+
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Battery Saving"-->
+            <!--android:textColor="@android:color/white"-->
+            <!--android:textSize="@dimen/slide_title"-->
+            <!--android:textStyle="bold" />-->
 
         <TextView
             android:layout_width="wrap_content"
@@ -32,7 +48,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="@dimen/desc_padding"
             android:paddingRight="@dimen/desc_padding"
-            android:text="Android limits apps to preserve battery. In order to run in the background, despat needs to be exempt from this restrictions."
+            android:text="Place the phone on an elevated viewpoint (a window, a balcony, a bridge)."
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="@dimen/slide_desc" />

@@ -6,6 +6,7 @@
     <string name="title_activity_tour">TourActivity</string>
 
     <string name="skip">Skip</string>
+    <string name="prev">Prev</string>
     <string name="next">Next</string>
     <string name="start">Got it</string>
 
