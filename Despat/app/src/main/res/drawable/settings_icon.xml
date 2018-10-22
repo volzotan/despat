@@ -2,7 +2,6 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/half_overlay"
         android:drawable="@drawable/ic_baseline_settings"
         android:width="20dp"
         android:height="20dp"
