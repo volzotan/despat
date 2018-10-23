@@ -344,7 +344,7 @@
         android:paddingTop="14dp"
         android:paddingBottom="14dp"
         android:text="Start Recording"
-        app:backgroundTint="@color/rec_button"
+        android:backgroundTint="@color/rec_button"
         android:drawableLeft="@drawable/ic_rec"
         android:drawableTint="@color/white"
         android:drawablePadding="10dp"

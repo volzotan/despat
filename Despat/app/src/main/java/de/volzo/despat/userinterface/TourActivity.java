@@ -1,5 +1,6 @@
 package de.volzo.despat.userinterface;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -28,8 +29,11 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import java.security.Permission;
+
 import de.volzo.despat.R;
 import de.volzo.despat.MainActivity;
+import de.volzo.despat.SessionManager;
 import de.volzo.despat.preferences.Config;
 
 public class TourActivity extends AppCompatActivity {
@@ -132,6 +136,10 @@ public class TourActivity extends AppCompatActivity {
 
     private void launchHomeScreen() {
         Config.setFirstTimeLaunch(context, false);
+
+        SessionManager sessionManager = SessionManager.getInstance(context);
+        sessionManager.createExampleSession(context);
+
         startActivity(new Intent(context, MainActivity.class));
         finish();
     }
@@ -142,17 +150,7 @@ public class TourActivity extends AppCompatActivity {
         public void onPageSelected(int position) {
             addBottomDots(position);
 
-//            if (position == 2) {
-//                MainActivity.whitelistAppForDoze(activity);
-//            }
-//
-//            if (position == 3) {
-//                if (!MainActivity.checkPermissionsAreGiven(activity)) {
-//                    MainActivity.requestPermissions(activity);
-//                }
-//            }
-
-            // changing the next button text 'NEXT' / 'GOT IT'
+            // adjust button captions for first and last page
             if (position == layouts.length - 1) {
                 // last page. make button text to GOT IT
                 btnNext.setText(getString(R.string.start));
@@ -192,8 +190,14 @@ public class TourActivity extends AppCompatActivity {
             case MainActivity.PERMISSION_REQUEST_CODE: {
                 boolean success = true;
 
-                for (int result : grantResults) {
-                    if (result != PackageManager.PERMISSION_GRANTED) {
+                for (int i=0; i<grantResults.length; i++) {
+                    // even though only still image permissions are required, video/audio is part of the
+                    // permission package. But since android never displays the audio request, it is denied.
+                    if (permissions[i].equals(Manifest.permission.RECORD_AUDIO)) {
+                        continue;
+                    }
+
+                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                         success = false;
                         break;
                     }
@@ -229,39 +233,51 @@ public class TourActivity extends AppCompatActivity {
 
         if (btPermissions != null) {
             int color = R.color.darkGrey;
+            int text = R.string.grantPermission;
 
             if (permissions == null) {
                 if (!MainActivity.checkPermissionsAreGiven(activity)) {
                     color = R.color.darkGrey;
+                    text = R.string.grantPermission;
                 } else {
                     color = R.color.success;
+                    text = R.string.permissionGranted;
                 }
             } else if (permissions == true) {
                 color = R.color.success;
+                text = R.string.permissionGranted;
             } else {
                 color = R.color.error;
+                text = R.string.notGranted;
             }
 
 //          btPermissions.setBackgroundTintList(getResources().getColor(R.color.darkGrey, null));
             ViewCompat.setBackgroundTintList(btPermissions, ColorStateList.valueOf(getResources().getColor(color, null)));
+            btPermissions.setText(text);
         }
 
         if (btDoze != null) {
             int color = R.color.darkGrey;
+            int text = R.string.grantPermission;
 
             if (doze == null) {
                 if (!MainActivity.checkWhitelistingForDoze(activity)) {
                     color = R.color.darkGrey;
+                    text = R.string.grantException;
                 } else {
                     color = R.color.success;
+                    text = R.string.exceptionGranted;
                 }
             } else if (doze == true) {
                 color = R.color.success;
+                text = R.string.exceptionGranted;
             } else {
                 color = R.color.error;
+                text = R.string.notGranted;
             }
 
             ViewCompat.setBackgroundTintList(btDoze, ColorStateList.valueOf(getResources().getColor(color, null)));
+            btDoze.setText(text);
         }
     }
 
@@ -277,9 +293,16 @@ public class TourActivity extends AppCompatActivity {
             View view = layoutInflater.inflate(layouts[position], container, false);
             container.addView(view);
 
-            if (position == 0) {
-                ImageView imageView = findViewById(R.id.iv_tour1_bg);
-                Glide.with(context).load(R.drawable.hamburg).into(imageView);
+            switch (position) {
+                case 0: {
+                    ImageView imageView = findViewById(R.id.iv_tour1_bg);
+                    Glide.with(context).load(R.drawable.hamburg).into(imageView);
+                    break;
+                }
+                case 5: {
+                    ImageView imageView = findViewById(R.id.iv_tour5);
+                    Glide.with(context).load(R.drawable.tour5).into(imageView);
+                }
             }
 
             setButtonStates(null, null);

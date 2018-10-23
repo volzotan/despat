@@ -971,12 +971,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_REQUEST_CODE: {
-                // If request is cancelled, the result arrays are empty.
-                boolean success = false;
+                boolean success = true;
 
-                for (int result : grantResults) {
-                    if (result == PackageManager.PERMISSION_GRANTED) {
-                        success = true;
+                for (int i=0; i<grantResults.length; i++) {
+                    // even though only still image permissions are required, video/audio is part of the
+                    // permission package. But since android never displays the audio request, it is denied.
+                    if (permissions[i].equals(Manifest.permission.RECORD_AUDIO)) {
+                        continue;
+                    }
+
+                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                        success = false;
                         break;
                     }
                 }

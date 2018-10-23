@@ -5,17 +5,25 @@
     <string name="title_activity_launch">LaunchActivity</string>
     <string name="title_activity_tour">TourActivity</string>
 
-    <string name="skip">Skip</string>
-    <string name="prev">Prev</string>
-    <string name="next">Next</string>
-    <string name="start">Got it</string>
-
     <string name="cancel">Cancel</string>
     <string name="exportAnyway">Export anyway</string>
 
     <string name="sessionSummary_objects">This dataset consists of %d objects detected in %d images.</string>
     <string name="sessionSummary_noPoints">No corresponding map points have been selected yet.</string>
     <string name="sessionSummary_readyForExport">ready for export</string>
+
+    <!-- Tour -->
+
+    <string name="skip">Skip</string>
+    <string name="prev">Prev</string>
+    <string name="next">Next</string>
+    <string name="start">Got it</string>
+
+    <string name="grantPermission">grant permission</string>
+    <string name="permissionGranted">permission granted</string>
+    <string name="grantException">grant exception</string>
+    <string name="exceptionGranted">exception granted</string>
+    <string name="notGranted">failed</string>
 
     <!-- Error Messages -->
 
