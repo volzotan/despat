@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Getting started or How to set up the camera
+title: Getting started
 date: 2018-06-01 12:00:00
 
 permalink: getting-started
 ---
 
-[future work]
+3 placement examples
