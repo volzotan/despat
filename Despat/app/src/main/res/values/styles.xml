@@ -15,17 +15,6 @@
         <!-- <item name="colorPrimaryDark">@android:color/white</item> -->
     </style>
 
-    <style name="MaterialIconButton" parent="Widget.MaterialComponents.Button.IconButton">
-        <item name="colorButtonNormal">@color/colorAccent2</item>
-        <item name="android:colorButtonNormal">@color/colorAccent3</item>
-        <item name="colorAccent">@color/colorAccent3</item>
-        <item name="android:colorAccent">@color/colorAccent3</item>
-        <item name="android:textSize">14dp</item>
-        <item name="android:color">@color/colorAccent2</item>
-        <item name="colorPrimary">@color/colorAccent2</item>
-        <item name="android:colorPrimary">@color/colorAccent2</item>
-    </style>
-
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
