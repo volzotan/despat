@@ -410,6 +410,26 @@ public class SessionManager {
         return dummy;
     }
 
+    public void createExampleSession(Context context) {
+        Session example = new Session();
+
+        example.setSessionName("Example Dataset");
+        example.setStart(new Date((long) 0));
+        example.setEnd(new Date((long) 60*60*1000));
+
+        example.setCompressedImage(null); // TODO
+
+        CameraConfig cameraConfig = new CameraConfig();
+        example.setCameraConfig(cameraConfig);
+
+        DetectorConfig detectorConfig = new DetectorConfig("low", 1000);
+        example.setDetectorConfig(detectorConfig);
+
+        AppDatabase database = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = database.sessionDao();
+        sessionDao.insert(example);
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     public static Status getMaxTemperatureDuringSession(Context context, Session session) throws Exception {

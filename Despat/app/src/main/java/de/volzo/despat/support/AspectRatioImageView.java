@@ -3,8 +3,11 @@ package de.volzo.despat.support;
 import android.content.Context;
 import androidx.appcompat.widget.AppCompatImageView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 public class AspectRatioImageView extends AppCompatImageView {
+
+    private static final String TAG = AspectRatioImageView.class.getSimpleName();
 
     private Integer ratio_x = null;
     private Integer ratio_y = null;
@@ -37,12 +40,18 @@ public class AspectRatioImageView extends AppCompatImageView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        if (ratio_x != null && ratio_y != null) {
-            int width = getMeasuredWidth();
-            int height = (width * this.ratio_y) / this.ratio_x;
-            setMeasuredDimension(width, height);
-        } else {
+        if (ratio_x == null || ratio_y == null) {
             setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
         }
+
+        if (this.ratio_x == 0 || this.ratio_y == 0) {
+            Log.w(TAG, "initialized with default ratio 4:3");
+            this.ratio_x = 4;
+            this.ratio_y = 3;
+        }
+
+        int width = getMeasuredWidth();
+        int height = (width * this.ratio_y) / this.ratio_x;
+        setMeasuredDimension(width, height);
     }
 }
