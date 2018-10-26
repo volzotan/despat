@@ -289,9 +289,12 @@ public class HomographyPointListFragment extends Fragment implements
             HomographyPoint point = data.get(position);
             holder.point = point;
 
-            float dist = Util.distanceBetweenCoordinates(session.getLatitude(), session.getLongitude(), point.getLatitude(), point.getLongitude());
-
-            holder.desc.setText(String.format(Config.LOCALE, "distance to camera: %-4.2fm", dist));
+            if (session.getLatitude() != null && session.getLongitude() != null) {
+                float dist = Util.distanceBetweenCoordinates(session.getLatitude(), session.getLongitude(), point.getLatitude(), point.getLongitude());
+                holder.desc.setText(String.format(Config.LOCALE, "distance to camera: %-4.2fm", dist));
+            } else {
+                Log.w(TAG, "session is missing location information");
+            }
 
 //            holder.view.setOnClickListener(new View.OnClickListener() {
 //                @Override

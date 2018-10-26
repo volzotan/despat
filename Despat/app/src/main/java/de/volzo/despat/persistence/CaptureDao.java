@@ -30,7 +30,7 @@ public interface CaptureDao {
     int getNumberOfCompressorProcessedCaptures(long sessionId);
 
     @Insert
-    void insert(Capture... captures);
+    long[] insert(Capture... captures);
 
     @Update
     void update(Capture... captures);

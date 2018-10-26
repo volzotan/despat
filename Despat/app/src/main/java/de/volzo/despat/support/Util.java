@@ -12,6 +12,7 @@ import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -636,6 +637,44 @@ public class Util {
                 int len;
                 while ((len = in.read(buf)) > 0) {
                     out.write(buf, 0, len);
+                }
+            }
+        }
+    }
+
+    public static void copyAssets(Context context, String assetSrc, File dst) throws Exception {
+        AssetManager assetManager = context.getAssets();
+
+        if (assetSrc == null) {
+            throw new NullPointerException();
+        }
+
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = assetManager.open(assetSrc);
+            out = new FileOutputStream(dst);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while((read = in.read(buffer)) > 0){
+                out.write(buffer, 0, read);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to copy asset file: " + assetSrc, e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // NOOP
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // NOOP
                 }
             }
         }

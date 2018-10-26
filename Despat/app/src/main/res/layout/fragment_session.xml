@@ -73,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.25"
                     android:layout_margin="3dp"
-                    android:text="interval:" />
+                    android:text="Interval:" />
                 <TextView
                     android:id="@+id/shutterInterval"
                     android:layout_width="wrap_content"
@@ -94,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="3dp"
                     android:layout_weight="0.25"
-                    android:text="Detector Name:" />
+                    android:text="Detector:" />
                 <TextView
                     android:id="@+id/detector"
                     android:layout_width="wrap_content"
@@ -115,7 +115,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.25"
                     android:layout_margin="3dp"
-                    android:text="start:" />
+                    android:text="Start:" />
                 <TextView
                     android:id="@+id/start"
                     android:layout_width="wrap_content"
@@ -136,7 +136,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.25"
                     android:layout_margin="3dp"
-                    android:text="end:" />
+                    android:text="End:" />
                 <TextView
                     android:id="@+id/end"
                     android:layout_width="wrap_content"
@@ -157,7 +157,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.25"
                     android:layout_margin="3dp"
-                    android:text="duration:" />
+                    android:text="Duration:" />
                 <TextView
                     android:id="@+id/duration"
                     android:layout_width="wrap_content"
@@ -178,7 +178,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.25"
                     android:layout_margin="3dp"
-                    android:text="captures" />
+                    android:text="Captures:" />
 
                 <TextView
                     android:id="@+id/numberOfCaptures"
@@ -200,7 +200,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.25"
                     android:layout_margin="3dp"
-                    android:text="max temperature:" />
+                    android:text="Max temperature:" />
 
                 <TextView
                     android:id="@+id/maxTemperature"
@@ -222,7 +222,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.25"
                     android:layout_margin="3dp"
-                    android:text="objects:" />
+                    android:text="Objects:" />
                 <TextView
                     android:id="@+id/numberOfDetections"
                     android:layout_width="wrap_content"

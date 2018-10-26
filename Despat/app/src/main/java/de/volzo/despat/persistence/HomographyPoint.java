@@ -55,6 +55,14 @@ public class HomographyPoint {
         this.longitude = longitude;
     }
 
+    @Ignore
+    public HomographyPoint(int x, int y, Double latitude, Double longitude) {
+        this.x = (double) x;
+        this.y = (double) y;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
     public long getId() {
         return id;
     }

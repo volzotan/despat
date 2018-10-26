@@ -2,6 +2,7 @@ package de.volzo.despat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Camera;
@@ -13,9 +14,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +34,10 @@ import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Event;
+import de.volzo.despat.persistence.HomographyPoint;
+import de.volzo.despat.persistence.HomographyPointDao;
+import de.volzo.despat.persistence.Position;
+import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
@@ -411,23 +423,113 @@ public class SessionManager {
     }
 
     public void createExampleSession(Context context) {
+        AppDatabase database = AppDatabase.getAppDatabase(context);
+        SessionDao sessionDao = database.sessionDao();
+        HomographyPointDao pointDao = database.homographyPointDao();
+        CaptureDao captureDao = database.captureDao();
+        PositionDao positionDao = database.positionDao();
+
         Session example = new Session();
 
         example.setSessionName("Example Dataset");
         example.setStart(new Date((long) 0));
         example.setEnd(new Date((long) 60*60*1000));
 
-        example.setCompressedImage(null); // TODO
+        example.setLatitude(50.971040);
+        example.setLongitude(11.038093);
+
+        try {
+            File imageFolder = Config.getImageFolder(context);
+            File compressedImage = new File(imageFolder, example.getSessionName() + ".jpg");
+            Util.copyAssets(context, "exampledataset_compressedimage.jpg", compressedImage);
+            example.setCompressedImage(compressedImage);
+        } catch (Exception e) {
+            Log.w(TAG, "copying compressed image for example dataset failed", e);
+        }
+
+        example.setImageWidth(5952);
+        example.setImageHeight(3348);
 
         CameraConfig cameraConfig = new CameraConfig();
+        cameraConfig.setShutterInterval(10000);
         example.setCameraConfig(cameraConfig);
 
         DetectorConfig detectorConfig = new DetectorConfig("low", 1000);
         example.setDetectorConfig(detectorConfig);
 
-        AppDatabase database = AppDatabase.getAppDatabase(context);
-        SessionDao sessionDao = database.sessionDao();
-        sessionDao.insert(example);
+        Long sessionId = sessionDao.insert(example)[0];
+
+        List<HomographyPoint> points = new ArrayList<>();
+        points.add(new HomographyPoint(1124, 1416, 50.971296, 11.037630));
+        points.add(new HomographyPoint(1773, 2470, 50.971173, 11.037914));
+        points.add(new HomographyPoint(3785, 1267, 50.971456, 11.037915));
+        points.add(new HomographyPoint(3416, 928, 50.971705, 11.037711));
+        points.add(new HomographyPoint(2856, 1303, 50.971402, 11.037796));
+        points.add(new HomographyPoint(2452, 916, 50.971636, 11.037486));
+
+        for (HomographyPoint p : points) {
+            p.setSessionId(sessionId);
+            pointDao.insert(p);
+        }
+
+        Capture dummyCapture = new Capture();
+        dummyCapture.setSessionId(sessionId);
+        dummyCapture.setProcessed_compressor(true);
+        dummyCapture.setProcessed_detector(true);
+        dummyCapture.setRecordingTime(new Date((long) 0 + cameraConfig.getShutterInterval()));
+        Long captureId = captureDao.insert(dummyCapture)[0];
+
+        AssetManager assetManager = context.getAssets();
+        String csvFilename = "exampledataset.csv";
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(assetManager.open(csvFilename), "UTF-8"));
+
+            int count = 0;
+            String line;
+            Position pos;
+            String[] data;
+            while ((line = reader.readLine()) != null) {
+                if (count == 0) {
+                    count++;
+                    continue;
+                }
+
+                pos = new Position();
+                pos.setCaptureId(captureId);
+
+                data = line.split("\\|");
+
+                try {
+                    pos.setTypeId(Integer.parseInt(data[2]));
+                    pos.setRecognitionConfidence(Float.parseFloat(data[3]));
+                    pos.setLatitude(Double.parseDouble(data[4]));
+                    pos.setLongitude(Double.parseDouble(data[5]));
+                    pos.setMinx(Float.parseFloat(data[6]));
+                    pos.setMiny(Float.parseFloat(data[7]));
+                    pos.setMaxx(Float.parseFloat(data[8]));
+                    pos.setMaxy(Float.parseFloat(data[9]));
+
+                    positionDao.insert(pos);
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, "skipped line: " + count);
+                }
+
+                count++;
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "loading example dataset CSVs failed", e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    Log.w(TAG, "closing CSV reader failed", e);
+                }
+            }
+        }
+
     }
 
     // ---------------------------------------------------------------------------------------------
