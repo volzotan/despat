@@ -1,5 +1,6 @@
 package de.volzo.despat.services;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.job.JobInfo;
@@ -11,6 +12,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import java.io.File;
@@ -146,6 +148,14 @@ public class Orchestrator extends BroadcastReceiver {
                     break;
 
                 case Broadcast.PICTURE_TAKEN:
+
+                    String processName = Util.getProcessName(context);
+                    if (processName == null) {
+                        Log.e(TAG, "missing process name. Capture could not be saved");
+                    } else if (!processName.equals("de.volzo.despat:despatShutterService")) {
+                        return;
+                    }
+
                     try {
                         SessionManager session = SessionManager.getInstance(context);
                         if (session == null) {

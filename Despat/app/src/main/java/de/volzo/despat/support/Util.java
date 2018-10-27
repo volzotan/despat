@@ -98,6 +98,18 @@ public class Util {
         return false;
     }
 
+    public static String getProcessName(Context context) {
+        int pid = android.os.Process.myPid();
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()) {
+            if (processInfo.pid == pid) {
+                return processInfo.processName;
+            }
+        }
+
+        return null;
+    }
+
     public static long getFreeSpaceOnDevice(File dir) {
         try {
             return (new StatFs(dir.getPath())).getAvailableBytes();

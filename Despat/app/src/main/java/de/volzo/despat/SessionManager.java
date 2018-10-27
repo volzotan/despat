@@ -374,6 +374,8 @@ public class SessionManager {
         capture.setImage(image);
 
         captureDao.insert(capture);
+
+        Log.d(TAG, "capture added");
     }
 
     public void addError(String desc, Throwable e) throws NotRecordingException {
