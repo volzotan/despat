@@ -33,13 +33,16 @@
 
         <ImageView
             android:id="@+id/iv_tour5"
-            android:layout_width="200dp"
-            android:layout_height="200dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:paddingLeft="@dimen/desc_padding"
+            android:paddingRight="@dimen/desc_padding"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:paddingLeft="@dimen/desc_padding"
             android:paddingRight="@dimen/desc_padding"
             android:text="The ZIP archive contains Comma Separated Values files (CSV) which can be imported in Excel or in the visualization tool:"
@@ -54,6 +57,7 @@
             android:paddingLeft="@dimen/desc_padding"
             android:paddingRight="@dimen/desc_padding"
             android:text="despat.de/visualize"
+            android:autoLink="web"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="@dimen/slide_desc" />

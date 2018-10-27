@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.core.view.ViewCompat;
@@ -109,6 +110,17 @@ public class TourActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // create example session in background
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Long time = System.currentTimeMillis();
+                SessionManager sessionManager = SessionManager.getInstance(context);
+                sessionManager.createExampleSession(context);
+                Log.d(TAG, String.format("Example Session created in %d seconds", (System.currentTimeMillis()-time)/1000));
+            }
+        });
     }
 
     private void addBottomDots(int currentPage) {
@@ -136,9 +148,6 @@ public class TourActivity extends AppCompatActivity {
 
     private void launchHomeScreen() {
         Config.setFirstTimeLaunch(context, false);
-
-        SessionManager sessionManager = SessionManager.getInstance(context);
-        sessionManager.createExampleSession(context);
 
         startActivity(new Intent(context, MainActivity.class));
         finish();

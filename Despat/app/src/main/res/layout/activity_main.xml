@@ -301,6 +301,15 @@
                 android:text="draw_surface" />
 
             <include layout="@layout/sysinfobox" />
+            
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
+                android:id="@+id/snackbarLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true">
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
         </de.volzo.despat.support.FixedAspectRatioFrameLayout>
 
@@ -350,15 +359,5 @@
         android:drawablePadding="10dp"
         app:iconSize="24dp"
     />
-
-
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/snackbarLayout"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </FrameLayout>
