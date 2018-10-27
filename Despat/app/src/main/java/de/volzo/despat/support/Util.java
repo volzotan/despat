@@ -21,6 +21,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -125,19 +126,26 @@ public class Util {
         return getFreeSpaceOnDevice(dir) / (1024f * 1024f);
     }
 
-    public static void saveEvent(Context context, int type, String payload) {
+    public static void saveEvent(final Context context, final int type, final String payload) {
 
-        AppDatabase db = AppDatabase.getAppDatabase(context);
-        EventDao eventDao = db.eventDao();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                AppDatabase db = AppDatabase.getAppDatabase(context);
+                EventDao eventDao = db.eventDao();
 
-        // TODO: check if RecordingSession is active and associate it with the event/error
+                // TODO: check if RecordingSession is active and associate it with the event/error
 
-        Event event = new Event();
-        event.setTimestamp(Calendar.getInstance().getTime());
-        event.setType(type);
-        event.setPayload(payload);
+                Event event = new Event();
+                event.setTimestamp(Calendar.getInstance().getTime());
+                event.setType(type);
+                event.setPayload(payload);
 
-        eventDao.insert(event);
+                eventDao.insert(event);
+
+            }
+        });
+
     }
 
 

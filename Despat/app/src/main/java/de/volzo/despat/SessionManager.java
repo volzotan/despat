@@ -16,6 +16,7 @@ import android.util.Size;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -493,55 +494,75 @@ public class SessionManager {
         Long captureId = captureDao.insert(dummyCapture)[0];
 
         AssetManager assetManager = context.getAssets();
-        String csvFilename = "exampledataset.csv";
 
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(assetManager.open(csvFilename), "UTF-8"));
+//        String datFilename = "exampledataset.dat";
+//        try {
+//            FileInputStream fis = new FileInputStream(assetManager.open(datFilename));
+//
+//            short[] data = new short[1];
+//            byte[] binary = new byte[2];
+//            int ret = 0;
+//            while (true) {
+//                ret = fis.read(binary);
+//
+//                if (ret <= 0) {
+//                    break;
+//                }
+//
+//                data[0] = (short) ((binary[1] << 8) + binary[0]);
+//            }
+//        } catch (IOException e) {
+//            Log.e(TAG, "loading failed", e);
+//        }
 
-            int count = 0;
-            String line;
-            Position pos;
-            String[] data;
-            while ((line = reader.readLine()) != null) {
-                if (count == 0) {
-                    count++;
-                    continue;
-                }
-
-                pos = new Position();
-                pos.setCaptureId(captureId);
-
-                data = line.split("\\|");
-
-                try {
-                    pos.setTypeId(Integer.parseInt(data[2]));
-                    pos.setRecognitionConfidence(Float.parseFloat(data[3]));
-                    pos.setLatitude(Double.parseDouble(data[4]));
-                    pos.setLongitude(Double.parseDouble(data[5]));
-                    pos.setMinx(Float.parseFloat(data[6]));
-                    pos.setMiny(Float.parseFloat(data[7]));
-                    pos.setMaxx(Float.parseFloat(data[8]));
-                    pos.setMaxy(Float.parseFloat(data[9]));
-
-                    positionDao.insert(pos);
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, "skipped line: " + count);
-                }
-
-                count++;
-            }
-        } catch (IOException e) {
-            Log.w(TAG, "loading example dataset CSVs failed", e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    Log.w(TAG, "closing CSV reader failed", e);
-                }
-            }
-        }
+//        String csvFilename = "exampledataset.csv";
+//        BufferedReader reader = null;
+//        try {
+//            reader = new BufferedReader(new InputStreamReader(assetManager.open(csvFilename), "UTF-8"));
+//
+//            int count = 0;
+//            String line;
+//            Position pos;
+//            String[] data;
+//            while ((line = reader.readLine()) != null) {
+//                if (count == 0) {
+//                    count++;
+//                    continue;
+//                }
+//
+//                pos = new Position();
+//                pos.setCaptureId(captureId);
+//
+//                data = line.split("\\|");
+//
+//                try {
+//                    pos.setTypeId(Integer.parseInt(data[2]));
+//                    pos.setRecognitionConfidence(Float.parseFloat(data[3]));
+//                    pos.setLatitude(Double.parseDouble(data[4]));
+//                    pos.setLongitude(Double.parseDouble(data[5]));
+//                    pos.setMinx(Float.parseFloat(data[6]));
+//                    pos.setMiny(Float.parseFloat(data[7]));
+//                    pos.setMaxx(Float.parseFloat(data[8]));
+//                    pos.setMaxy(Float.parseFloat(data[9]));
+//
+//                    positionDao.insert(pos);
+//                } catch (NumberFormatException e) {
+//                    Log.w(TAG, "skipped line: " + count);
+//                }
+//
+//                count++;
+//            }
+//        } catch (IOException e) {
+//            Log.w(TAG, "loading example dataset CSVs failed", e);
+//        } finally {
+//            if (reader != null) {
+//                try {
+//                    reader.close();
+//                } catch (IOException e) {
+//                    Log.w(TAG, "closing CSV reader failed", e);
+//                }
+//            }
+//        }
 
     }
 
