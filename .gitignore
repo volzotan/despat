@@ -38,3 +38,7 @@ visualization/bahnhof_tiles
 visualization/css/bootstrap.css.map
 visualization/css/bootstrap.min.css.map
 visualization/data
+Despat/app/src/main/assets/frcnn_inception_v2.pb
+Despat/app/src/main/assets/ssd_mobilenet_v1.pb
+Despat/app/src/main/assets/ssd_mobilenet_v1_fpn.pb
+google_maps_api.xml
