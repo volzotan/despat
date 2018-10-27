@@ -287,7 +287,6 @@ public class CameraController2 extends CameraController {
                 width = camconfig.getZoomRegion().width();
                 height = camconfig.getZoomRegion().height();
             }
-
             final int stream_width = width;
             final int stream_height = height;
             surfaceTexture.setDefaultBufferSize(stream_width, stream_height);
@@ -337,6 +336,8 @@ public class CameraController2 extends CameraController {
             previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             previewRequestBuilder.addTarget(surface);
 
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, camconfig.getExposureCompensation());
+
             stillRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             if (camconfig.isFormatJpg()) stillRequestBuilder.addTarget(imageReaderJpg.getSurface());
             if (camconfig.isFormatRaw()) stillRequestBuilder.addTarget(imageReaderRaw.getSurface());
@@ -350,6 +351,9 @@ public class CameraController2 extends CameraController {
                 previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, camconfig.getZoomRegion());
                 stillRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, camconfig.getZoomRegion());
             }
+
+            // Exposure Compensation
+            stillRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, camconfig.getExposureCompensation());
 
             // JPEG Quality
             stillRequestBuilder.set(CaptureRequest.JPEG_QUALITY, camconfig.getJpegQuality());

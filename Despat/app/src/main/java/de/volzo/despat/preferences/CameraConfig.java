@@ -18,6 +18,8 @@ public class CameraConfig { // implements Serializable {
 //    private SerializableRect zoomRegion;
     private Rect zoomRegion;
 
+    private int exposureCompensation;
+
     private boolean endCaptureWithoutUnlockingFocus;
     private int numberOfBurstImages;
     private byte jpegQuality;
@@ -34,6 +36,8 @@ public class CameraConfig { // implements Serializable {
 
         this.formatJpg = Config.FORMAT_JPG;
         this.formatRaw = Config.FORMAT_RAW;
+
+        this.exposureCompensation = Config.EXPOSURE_COMPENSATION;
 
         this.endCaptureWithoutUnlockingFocus = Config.END_CAPTURE_WITHOUT_UNLOCKING_FOCUS;
         this.numberOfBurstImages = Config.NUMBER_OF_BURST_IMAGES;
@@ -105,6 +109,14 @@ public class CameraConfig { // implements Serializable {
 
     public void setZoomRegion(Rect zoomRegion) {
         this.zoomRegion = zoomRegion;
+    }
+
+    public int getExposureCompensation() {
+        return exposureCompensation;
+    }
+
+    public void setExposureCompensation(int exposureCompensation) {
+        this.exposureCompensation = exposureCompensation;
     }
 
     public boolean isEndCaptureWithoutUnlockingFocus() {

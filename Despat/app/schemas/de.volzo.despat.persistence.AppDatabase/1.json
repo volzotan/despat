@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "baef3300035f7d8b619267cc0fd88f55",
+    "identityHash": "b06c5db1d1131caa1e7c3ef6e4ba5a98",
     "entities": [
       {
         "tableName": "Status",
@@ -86,7 +86,7 @@
       },
       {
         "tableName": "Session",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `image_width` INTEGER NOT NULL, `image_height` INTEGER NOT NULL, `exclusion_image` BLOB, `compressed_image` TEXT, `homography_matrix` TEXT, `resumed` INTEGER NOT NULL, `exposure_threshold` REAL, `exposure_compensation` REAL, `detectorconfig_detector` TEXT, `detectorconfig_tilesize` INTEGER, `cameraconfig_persistentCamera` INTEGER, `cameraconfig_shutterInterval` INTEGER, `cameraconfig_legacyCameraController` INTEGER, `cameraconfig_formatJpg` INTEGER, `cameraconfig_formatRaw` INTEGER, `cameraconfig_zoomRegion` TEXT, `cameraconfig_endCaptureWithoutUnlockingFocus` INTEGER, `cameraconfig_numberOfBurstImages` INTEGER, `cameraconfig_jpegQuality` INTEGER, `cameraconfig_meteringMaxTime` INTEGER, `cameraconfig_runMediascannerAfterCapture` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `start` TEXT, `end` TEXT, `latitude` REAL, `longitude` REAL, `image_width` INTEGER NOT NULL, `image_height` INTEGER NOT NULL, `exclusion_image` BLOB, `compressed_image` TEXT, `homography_matrix` TEXT, `resumed` INTEGER NOT NULL, `exposure_threshold` REAL, `exposure_compensation` REAL, `detectorconfig_detector` TEXT, `detectorconfig_tilesize` INTEGER, `cameraconfig_persistentCamera` INTEGER, `cameraconfig_shutterInterval` INTEGER, `cameraconfig_legacyCameraController` INTEGER, `cameraconfig_formatJpg` INTEGER, `cameraconfig_formatRaw` INTEGER, `cameraconfig_zoomRegion` TEXT, `cameraconfig_exposureCompensation` INTEGER, `cameraconfig_endCaptureWithoutUnlockingFocus` INTEGER, `cameraconfig_numberOfBurstImages` INTEGER, `cameraconfig_jpegQuality` INTEGER, `cameraconfig_meteringMaxTime` INTEGER, `cameraconfig_runMediascannerAfterCapture` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -218,6 +218,12 @@
             "fieldPath": "cameraConfig.zoomRegion",
             "columnName": "cameraconfig_zoomRegion",
             "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cameraConfig.exposureCompensation",
+            "columnName": "cameraconfig_exposureCompensation",
+            "affinity": "INTEGER",
             "notNull": false
           },
           {
@@ -716,7 +722,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"baef3300035f7d8b619267cc0fd88f55\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"b06c5db1d1131caa1e7c3ef6e4ba5a98\")"
     ]
   }
 }

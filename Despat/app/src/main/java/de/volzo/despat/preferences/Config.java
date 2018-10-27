@@ -62,8 +62,12 @@ public class Config {
     // use fixed ISO value. null=disabled | v1 only
     public static final Integer FIXED_ISO_VALUE                     = 200;
 
-    // over- or underexposure compensation | v1 only
-    public static final int EXPOSURE_COMPENSATION                   = 0;
+    // over- or underexposure compensation
+    public static final int EXPOSURE_COMPENSATION                   = 5;
+
+    // over- or underexposure compensation
+    // applied to a second image (ignored when 0) | v2 only
+    public static final int SECOND_IMAGE_EXPOSURE_COMPENSATION      = 10;
 
     // set the JPEG image quality | v2 only
     public static final byte JPEG_QUALITY                           = 60;

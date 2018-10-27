@@ -188,6 +188,22 @@ public class DeviceInfo {
             sb.append(String.format("%20s", checkForNullString(parameters.get("SENSOR_MAX_ANALOG_SENSITIVITY"))));
             sb.append("\n");
 
+            sb.append(String.format("%-20s", "  exposure range:"));
+            info = "---";
+            try {
+                info = parameters.get("CONTROL_AE_COMPENSATION_RANGE");
+            } catch (Exception e) {}
+            sb.append(String.format("%20s", info));
+            sb.append("\n");
+
+            sb.append(String.format("%-20s", "  exposure steps:"));
+            info = "---";
+            try {
+                info = parameters.get("CONTROL_AE_COMPENSATION_STEP");
+            } catch (Exception e) {}
+            sb.append(String.format("%20s", info));
+            sb.append("\n");
+
             sb.append(String.format("%-20s", "  max exposure [ms]:"));
             info = "---";
             try {
