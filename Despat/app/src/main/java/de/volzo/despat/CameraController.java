@@ -27,7 +27,7 @@ public abstract class CameraController {
     public abstract void openCamera() throws Exception;
     public abstract void closeCamera();
 
-    public abstract void startMetering() throws Exception;
+    public abstract void startMetering(Integer optionalExposureCompensation) throws Exception;
     public abstract void captureImages() throws Exception;
 
     public abstract boolean isDead();
@@ -50,8 +50,8 @@ public abstract class CameraController {
     }
 
     void sendBroadcast(Context context, String path) {
-        Intent intent = new Intent(Broadcast.PICTURE_TAKEN);
-        if (path != null) intent.putExtra(Broadcast.DATA_PICTURE_PATH, path);
+        Intent intent = new Intent(Broadcast.IMAGE_TAKEN);
+        if (path != null) intent.putExtra(Broadcast.DATA_IMAGE_PATH, path);
         context.sendBroadcast(intent);
     }
 

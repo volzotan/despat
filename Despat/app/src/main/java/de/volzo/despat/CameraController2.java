@@ -526,7 +526,7 @@ public class CameraController2 extends CameraController {
 
     };
 
-    public void startMetering() throws IllegalAccessException {
+    public void startMetering(Integer optionalExposureCompensation) throws IllegalAccessException {
 
         // TODO:
 //        double random = Math.random();
@@ -551,6 +551,13 @@ public class CameraController2 extends CameraController {
             setup3AControls(previewRequestBuilder);
             state = STATE_WAITING_FOR_3A_CONVERGENCE;
             captureTimer = SystemClock.elapsedRealtime();
+
+            if (optionalExposureCompensation != null) {
+                Log.wtf(TAG, Integer.toString(optionalExposureCompensation));
+
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, optionalExposureCompensation);
+                stillRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, optionalExposureCompensation);
+            }
 
             if (captureSession == null) {
                 // TODO: try to recover instead of killing the camera
@@ -748,7 +755,7 @@ public class CameraController2 extends CameraController {
                         // TODO: move broadcast code to controllerCallback
                         sendBroadcast(context, filename);
 
-                        if (controllerCallback != null) controllerCallback.captureComplete();
+                        // if (controllerCallback != null) controllerCallback.captureComplete();
 
                         unlockFocus();
                     }
@@ -822,10 +829,6 @@ public class CameraController2 extends CameraController {
                         // (must be happen after the cancel AF request has been processed and the image was written to disk)
 
                         Log.d(TAG, "# unlockedFocus CaptureCompleted");
-
-                        if (controllerCallback != null) {
-                            controllerCallback.captureComplete();
-                        }
                     }
                 }
             }, backgroundHandler);
@@ -834,6 +837,10 @@ public class CameraController2 extends CameraController {
             if (textureView != null) {
                 state = STATE_PREVIEW;
                 captureSession.setRepeatingRequest(previewRequest, preCaptureCallback, backgroundHandler);
+            }
+
+            if (controllerCallback != null) {
+                controllerCallback.captureComplete();
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();

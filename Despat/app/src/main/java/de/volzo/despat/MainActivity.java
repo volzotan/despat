@@ -446,8 +446,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             String action = intent.getAction();
 
             switch (action) {
-                case Broadcast.PICTURE_TAKEN:
-                    String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
+                case Broadcast.IMAGE_TAKEN:
+                    String path = intent.getStringExtra(Broadcast.DATA_IMAGE_PATH);
                     Log.d("image taken", "path: " + path);
                     updatePreviewImage();
                     break;
@@ -568,7 +568,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void registerAllReceivers() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Broadcast.PICTURE_TAKEN);
+        filter.addAction(Broadcast.IMAGE_TAKEN);
         filter.addAction(Broadcast.SHOW_MESSAGE);
         registerReceiver(broadcastReceiver, filter);
     }

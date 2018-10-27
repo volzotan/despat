@@ -147,7 +147,7 @@ public class Orchestrator extends BroadcastReceiver {
                     Log.d(TAG, "+++ display on");
                     break;
 
-                case Broadcast.PICTURE_TAKEN:
+                case Broadcast.IMAGE_TAKEN:
 
                     String processName = Util.getProcessName(context);
                     if (processName == null) {
@@ -162,9 +162,13 @@ public class Orchestrator extends BroadcastReceiver {
                             Log.w(TAG, "image taken while no recordingSession is active");
                             break;
                         }
-                        String path = intent.getStringExtra(Broadcast.DATA_PICTURE_PATH);
+                        String path = intent.getStringExtra(Broadcast.DATA_IMAGE_PATH);
                         if (path != null) {
-                            session.addCapture(new File(path));
+                            session.addCapture(
+                                    new File(path),
+                                    intent.getLongExtra(Broadcast.DATA_IMAGE_EXPOSURETIME, -1),
+                                    intent.getLongExtra(Broadcast.DATA_IMAGE_APERTURE, -1),
+                                    intent.getIntExtra(Broadcast.DATA_IMAGE_AUTOFOCUSSTATE, -1));
                         } else {
                             Log.w(TAG, "path missing. capture could not be saved");
                         }

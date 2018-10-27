@@ -109,7 +109,7 @@ public class Despat extends Application {
         f.addAction(Broadcast.HEARTBEAT_SERVICE);
         f.addAction(Broadcast.UPLOAD_SERVICE);
         f.addAction(Broadcast.COMMAND_SERVICE);
-        f.addAction(Broadcast.PICTURE_TAKEN);
+        f.addAction(Broadcast.IMAGE_TAKEN);
         f.addAction(Broadcast.NEXT_SHUTTER_INVOCATION);
         f.addAction(Broadcast.ERROR_OCCURED);
 

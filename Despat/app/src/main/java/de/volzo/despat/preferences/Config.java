@@ -63,7 +63,7 @@ public class Config {
     public static final Integer FIXED_ISO_VALUE                     = 200;
 
     // over- or underexposure compensation
-    public static final int EXPOSURE_COMPENSATION                   = 5;
+    public static final int EXPOSURE_COMPENSATION                   = 0;
 
     // over- or underexposure compensation
     // applied to a second image (ignored when 0) | v2 only

@@ -326,7 +326,7 @@ public class SessionManager {
         return true;
     }
 
-    public void addCapture(File image) throws NotRecordingException {
+    public void addCapture(File image, long exposureTime, long aperture, int autofocusState) throws NotRecordingException {
         if (!isActive()) throw new NotRecordingException();
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
@@ -369,6 +369,9 @@ public class SessionManager {
         Capture capture = new Capture();
         capture.setSessionId(session.getId());
         capture.setRecordingTime(Calendar.getInstance().getTime());
+        capture.setExposureTime(exposureTime);
+        capture.setAperture(aperture);
+        capture.setAutofocusState(autofocusState);
         capture.setProcessed_detector(false);
         capture.setProcessed_compressor(false);
         capture.setImage(image);
@@ -430,6 +433,14 @@ public class SessionManager {
         HomographyPointDao pointDao = database.homographyPointDao();
         CaptureDao captureDao = database.captureDao();
         PositionDao positionDao = database.positionDao();
+
+        List<Session> existingSessions = sessionDao.getAll();
+        for (Session session : existingSessions) {
+            if (session.getSessionName() != null && session.getSessionName().equals("Example Dataset")) {
+                Log.w(TAG, "Example Dataset already existing. Not creating new one.");
+                return;
+            }
+        }
 
         Session example = new Session();
 

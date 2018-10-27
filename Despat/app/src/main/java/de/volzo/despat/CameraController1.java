@@ -163,9 +163,9 @@ public class CameraController1 extends CameraController implements Camera.Previe
     }
 
     @Override
-    public void startMetering() {
+    public void startMetering(Integer optionalExposureCompensation) {
         try {
-            precapture(true, true);
+            precapture(true, true, optionalExposureCompensation);
         } catch (Exception e) {
             reportFailAndClose("metering failed", e);
         }
@@ -215,7 +215,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
 //        }
     }
 
-    private void precapture(boolean runAF, boolean runAE) throws Exception {
+    private void precapture(boolean runAF, boolean runAE, Integer optionalExposureCompensation) throws Exception {
         Log.d(TAG, "# precapture");
 
         autoFocusResult = null;
@@ -244,7 +244,11 @@ public class CameraController1 extends CameraController implements Camera.Previe
 
         // AE - exposure compensation
         try {
-            params.setExposureCompensation(Config.EXPOSURE_COMPENSATION);
+            if (optionalExposureCompensation != null) {
+                params.setExposureCompensation(optionalExposureCompensation);
+            } else {
+                params.setExposureCompensation(Config.EXPOSURE_COMPENSATION);
+            }
             camera.setParameters(params);
         } catch (RuntimeException re) {
             Log.w(TAG, "setting exposure compensation params failed. value higher/lower than maxExposureCompensation?", re);

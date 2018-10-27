@@ -34,6 +34,15 @@ public class Capture {
     @ColumnInfo(name = "image_path")
     private File image;
 
+    @ColumnInfo(name = "exposure_time")
+    private long exposureTime;
+
+    @ColumnInfo(name = "aperture")
+    private long aperture;
+
+    @ColumnInfo(name = "autofocus_state")
+    private int autofocusState;
+
     @ColumnInfo(name = "processed_detector")
     private boolean processed_detector;
 
@@ -70,6 +79,30 @@ public class Capture {
 
     public void setImage(File image) {
         this.image = image;
+    }
+
+    public long getExposureTime() {
+        return exposureTime;
+    }
+
+    public void setExposureTime(long exposureTime) {
+        this.exposureTime = exposureTime;
+    }
+
+    public long getAperture() {
+        return aperture;
+    }
+
+    public void setAperture(long aperture) {
+        this.aperture = aperture;
+    }
+
+    public int getAutofocusState() {
+        return autofocusState;
+    }
+
+    public void setAutofocusState(int autofocusState) {
+        this.autofocusState = autofocusState;
     }
 
     public boolean isProcessed_detector() {

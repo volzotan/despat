@@ -59,11 +59,16 @@ public class ShutterService extends Service {
     public static final String NOTIFICATION_CHANNEL_ID  = "de.volzo.despat.notificationchannel.ShutterService";
 
     private static final int STATE_INIT                 = 0;
+
     private static final int STATE_CAMERA_READY         = 1;
     private static final int STATE_BUSY                 = 2;
+
     private static final int STATE_ERROR                = 3;
     private static final int STATE_RESTART              = 4;
     private static final int STATE_SHUTDOWN             = 5;
+
+    private static final int STATE_SECOND_IMAGE         = 6;
+    private static final int STATE_SECOND_IMAGE_BUSY    = 7;
 
     Context context;
     Handler handler;
@@ -138,8 +143,6 @@ public class ShutterService extends Service {
             SessionDao sessionDao = db.sessionDao();
             Session session = sessionDao.getLast();
             this.camconfig = session.getCameraConfig();
-
-            Log.wtf(TAG, Integer.toString(this.camconfig.getShutterInterval()));
         } catch (Exception e) {
             Log.e(TAG, "Camera Config missing");
         }
@@ -294,19 +297,26 @@ public class ShutterService extends Service {
     }
 
     private void triggerCamera() {
-
-        if (Config.RERUN_METERING_BEFORE_CAPTURE) {
+        if (state == STATE_SECOND_IMAGE) {
             try {
-                camera.startMetering();
+                state = STATE_SECOND_IMAGE_BUSY;
+                camera.startMetering(camconfig.getSecondImageExposureCompensation());
+            } catch (Exception e) {
+                eventMalfunction("starting metering failed (2nd image)", e);
+                restartCameraAfterMalfunction();
+            }
+        } else if (Config.RERUN_METERING_BEFORE_CAPTURE) {
+            try {
                 state = STATE_BUSY;
+                camera.startMetering(camconfig.getExposureCompensation());
             } catch (Exception e) {
                 eventMalfunction("starting metering failed", e);
                 restartCameraAfterMalfunction();
             }
         } else {
             try {
-                camera.captureImages();
                 state = STATE_BUSY;
+                camera.captureImages();
             } catch (Exception e) {
                 eventMalfunction("capturing image failed", e);
             }
@@ -367,9 +377,13 @@ public class ShutterService extends Service {
     }
 
     private void eventCaptureComplete() {
-        state = STATE_CAMERA_READY;
+        if (state != STATE_SECOND_IMAGE_BUSY && camconfig.getSecondImageExposureCompensation() != 0) {
+            state = STATE_SECOND_IMAGE;
+            handler.post(shutterReleaseRunnable);
+        } else {
+            state = STATE_CAMERA_READY;
 
-        if (!Config.getPersistentCamera(context)) {
+            if (!Config.getPersistentCamera(context)) {
 
 //            Handler handler = new Handler();
 //            handler.postDelayed(new Runnable() {
@@ -378,6 +392,7 @@ public class ShutterService extends Service {
                     shutdownCamera();
 //                }
 //            }, 500);
+            }
         }
     }
 
@@ -542,6 +557,11 @@ public class ShutterService extends Service {
     private final BroadcastReceiver shutterReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
+            if (state == STATE_SECOND_IMAGE) {
+                triggerCamera();
+                return;
+            }
 
             Util.setHeartbeatManually(context, ShutterService.class);
 
