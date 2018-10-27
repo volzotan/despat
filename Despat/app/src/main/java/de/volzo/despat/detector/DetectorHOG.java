@@ -121,7 +121,7 @@ public class DetectorHOG extends Detector {
                 try {
                     surface.clearCanvas();
                     // imageSize from method, not from class instance
-                    surface.addBoxes(imageSize, rects, surface.paintGreen);
+                    surface.addBoxes(imageSize, rects, surface.paintMain);
                 } catch (Exception e) {
                     Log.e(TAG, "displaying results failed. unable to draw on canvas", e);
                 }

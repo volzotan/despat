@@ -10,14 +10,17 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import de.volzo.despat.R;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.core.content.ContextCompat;
 
 public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -27,13 +30,13 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
     private boolean interactive = false;
 
     public Paint paintBlack = null;
-    public Paint paintGreen = null;
+    public Paint paintMain = null;
     public Paint paintRed = null;
     private SurfaceHolder holder = null;
     private final Context context;
 
     List<RectF> rectanglesBlack = new ArrayList<RectF>();
-    List<RectF> rectanglesGreen = new ArrayList<RectF>();
+    List<RectF> rectanglesMain = new ArrayList<RectF>();
     List<RectF> rectanglesRed = new ArrayList<RectF>();
 
     private float startX = 0;
@@ -73,10 +76,11 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
         paintBlack.setStyle(Paint.Style.STROKE);
         paintBlack.setStrokeWidth(1.0f);
 
-        paintGreen = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintGreen.setColor(Color.GREEN);
-        paintGreen.setStyle(Paint.Style.STROKE);
-        paintGreen.setStrokeWidth(2.0f);
+        paintMain = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintMain.setColor(ContextCompat.getColor(context, R.color.colorAccent));
+        paintMain.setStyle(Paint.Style.STROKE);
+        paintMain.setAlpha(255/10);
+        paintMain.setStrokeWidth(2.0f);
 
         paintRed = new Paint(Paint.ANTI_ALIAS_FLAG);
         paintRed.setColor(Color.RED);
@@ -144,13 +148,13 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
         if (paint == paintBlack) {
             rectanglesBlack.addAll(rectangles);
-        } else if (paint == paintGreen) {
-            rectanglesGreen.addAll(rectangles);
+        } else if (paint == paintMain) {
+            rectanglesMain.addAll(rectangles);
         } else if (paint == paintRed) {
             rectanglesRed.addAll(rectangles);
         } else {
             // defaultColor
-            rectanglesGreen.addAll(rectangles);
+            rectanglesMain.addAll(rectangles);
         }
 
         invalidate();
@@ -164,8 +168,8 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
             canvas.drawRect(rect, paintBlack);
         }
 
-        for (RectF rect : rectanglesGreen) {
-            canvas.drawRect(rect, paintGreen);
+        for (RectF rect : rectanglesMain) {
+            canvas.drawRect(rect, paintMain);
         }
 
         for (RectF rect : rectanglesRed) {
@@ -187,7 +191,7 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
                     startX = event.getX();
                     startY = event.getY();
 
-                    canvas.drawCircle(event.getX(), event.getY(), 100, paintGreen);
+                    canvas.drawCircle(event.getX(), event.getY(), 100, paintMain);
                     holder.unlockCanvasAndPost(canvas);
                     return true;
                 }
@@ -215,7 +219,7 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
                     canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
                     Rect r = new Rect((int) startX, (int) startY, (int) event.getX(), (int) event.getY());
-                    canvas.drawRect(r, paintGreen);
+                    canvas.drawRect(r, paintMain);
 
                     holder.unlockCanvasAndPost(canvas);
                 }

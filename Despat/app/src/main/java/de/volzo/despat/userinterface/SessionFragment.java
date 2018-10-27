@@ -1,8 +1,13 @@
 package de.volzo.despat.userinterface;
 
 import android.content.Context;
+import android.graphics.RectF;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
+
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Size;
 import android.view.LayoutInflater;
@@ -96,15 +101,36 @@ public class SessionFragment extends Fragment {
             Glide.with(context).load(R.drawable.missing_img).into(ivCompressedPreview);
         }
 
-        DrawSurface drawSurface = view.findViewById(R.id.drawSurface_session);
-        List<Position> positions = positionDao.getAllBySession(session.getId());
-        try {
-            Detector detector = new DetectorSSD(context);
-            Size imageSize = session.getImageSize();
-            detector.display(drawSurface, imageSize, detector.positionsToRectangles(positions), session.getDetectorConfig());
-        } catch (Exception e) {
-            Log.e(TAG, "drawing results failed", e);
-        }
+        // TODO: draw static overlay for perfomance (PNG with alpha channel) instead of using a canvas
+
+        // draw detection boxes (do calculations not on UI thread)
+        final DrawSurface drawSurface = view.findViewById(R.id.drawSurface_session);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                AppDatabase database = AppDatabase.getAppDatabase(context);
+                PositionDao positionDao = database.positionDao();
+                List<Position> positions = positionDao.getAllBySession(session.getId());
+                try {
+                    final Detector detector = new DetectorSSD(context);
+                    final Size imageSize = session.getImageSize();
+                    final List<RectF> rectangles = detector.positionsToRectangles(positions);
+
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (detector != null && drawSurface != null) {
+                                detector.display(drawSurface, imageSize, rectangles, session.getDetectorConfig());
+                            } else {
+                                Log.w(TAG, "drawing boxes failed. surface not available.");
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "drawing results failed", e);
+                }
+            }
+        });
 
         tvSessionSummary.setText("TODO"); // TODO
 
