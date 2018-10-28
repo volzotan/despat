@@ -28,8 +28,6 @@ public class Config {
     public static final String DATEFORMAT_SHORT                     = "yyyy-MM-dd HH:mm:ss";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
 
-    public static final boolean DELETE_AFTER_RECOGNITION            = true;
-
     public static final float IMGROLL_FREE_SPACE_THRESHOLD          = 300; // in MB
     public static final boolean IMGROLL_DELETE_IF_FULL              = false;
 
@@ -61,13 +59,6 @@ public class Config {
 
     // use fixed ISO value. null=disabled | v1 only
     public static final Integer FIXED_ISO_VALUE                     = 200;
-
-    // over- or underexposure compensation
-    public static final int EXPOSURE_COMPENSATION                   = 0;
-
-    // over- or underexposure compensation
-    // applied to a second image (ignored when 0) | v2 only
-    public static final int SECOND_IMAGE_EXPOSURE_COMPENSATION      = 10;
 
     // set the JPEG image quality | v2 only
     public static final byte JPEG_QUALITY                           = 60;
@@ -132,14 +123,32 @@ public class Config {
     // below threshold
     public static final float STOP_SESSION_AT_LOW_BATT_THRESHOLD    = 3;
 
+
     // ---------------------------------------------------------------------------------------------
+
+    public static final String  DEFAULT_DEVICE_NAME                         = android.os.Build.MODEL;
+    public static final boolean DEFAULT_RESUME_AFTER_REBOOT                 = true;
+    public static final boolean DEFAULT_SHOW_TOOLTIPS                       = true;
+    public static final boolean DEFAULT_ENABLE_RECOGNITION                  = true;
+    public static final boolean DEFAULT_DELETE_AFTER_RECOGNITION            = true;
+    public static final File    DEFAULT_WORKING_DIRECTORY                   = null; //context.getApplicationInfo().dataDir; //new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final boolean DEFAULT_PERSISTENT_CAMERA                   = true;
+    public static final boolean DEFAULT_LEGACY_CAMERA_CONTROLLER            = false;
+    public static final int     DEFAULT_SHUTTER_INTERVAL                    = 10 * 1000; // in ms
+    public static final int     DEFAULT_EXPOSURE_COMPENSATION               = 0;
+    public static final int     DEFAULT_SECOND_IMAGE_EXPOSURE_COMPENSATION  = 0;
+    public static final String  DEFAULT_NETWORK_FIDELITY                    = "low";
+    public static final boolean DEFAULT_PHONE_HOME                          = false;
+    public static final String  DEFAULT_SERVER_ADDRESS                      = "http://zoltep.de";   // format protocol://example.com
+    public static final long    DEFAULT_MIN_SYNC_INTERVAL                   = 5 * 60 * 1000;        // at most every X ms
+    public static final long    DEFAULT_HEARTBEAT_INTERVAL                  = 15 * 60 * 1000L;      // Minimum interval is 15m
+    public static final long    DEFAULT_MIN_HEARTBEAT_INTERVAL              = 2 * 60 * 1000;        // at most every X ms
+    public static final long    DEFAULT_UPLOAD_INTERVAL                     = 15 * 60 * 1000L;
 
     /**
      * DEVICE NAME
      */
-    public static final String DEFAULT_DEVICE_NAME                  = android.os.Build.MODEL;
     public static final String KEY_DEVICE_NAME                      = "de.volzo.despat.deviceName";
-
     public static String getDeviceName(Context context) {
         return getProperty(context, KEY_DEVICE_NAME, DEFAULT_DEVICE_NAME);
     }
@@ -150,9 +159,7 @@ public class Config {
     /**
      * RESUME AFTER REBOOT
      */
-    public static final boolean DEFAULT_RESUME_AFTER_REBOOT         = true;
     public static final String KEY_RESUME_AFTER_REBOOT              = "de.volzo.despat.resumeAfterReboot";
-
     public static boolean getResumeAfterReboot(Context context) {
         return getPropertyBoolean(context, KEY_RESUME_AFTER_REBOOT, DEFAULT_RESUME_AFTER_REBOOT);
     }
@@ -163,9 +170,7 @@ public class Config {
     /**
      * SHOW TOOLTIPS
      */
-    public static final boolean DEFAULT_SHOW_TOOLTIPS               = true;
     public static final String KEY_SHOW_TOOLTIPS                    = "de.volzo.despat.showTooltips";
-
     public static boolean getShowTooltips(Context context) {
         return getPropertyBoolean(context, KEY_RESUME_AFTER_REBOOT, DEFAULT_RESUME_AFTER_REBOOT);
     }
@@ -174,15 +179,39 @@ public class Config {
     }
 
     /**
+     * ENABLE RECOGNITION
+     */
+    public static final String KEY_ENABLE_RECOGNITION               = "de.volzo.despat.enableRecognition";
+    public static boolean getEnableRecognition(Context context) {
+        return getPropertyBoolean(context, KEY_ENABLE_RECOGNITION, DEFAULT_ENABLE_RECOGNITION);
+    }
+    public static void setEnableRecognition(Context context, boolean enableRecognition) {
+        setProperty(context, KEY_ENABLE_RECOGNITION, enableRecognition);
+    }
+
+    /**
+     * DELETE AFTER RECOGNITION
+     */
+    public static final String KEY_DELETE_AFTER_RECOGNITION          = "de.volzo.despat.deleteAfterRecognition";
+    public static boolean getDeleteAfterRecognition(Context context) {
+        return getPropertyBoolean(context, KEY_DELETE_AFTER_RECOGNITION, DEFAULT_DELETE_AFTER_RECOGNITION);
+    }
+    public static void setDeleteAfterRecognition(Context context, boolean deleteAfterRecognition) {
+        setProperty(context, KEY_DELETE_AFTER_RECOGNITION, deleteAfterRecognition);
+    }
+
+    /**
      * WORKING DIRECTORY
      */
-    //public static final File DEFAULT_WORKING_DIRECTORY              = context.getApplicationInfo().dataDir; //new File(Environment.getExternalStorageDirectory(), ("despat"));
     public static final String KEY_WORKING_DIRECTORY                = "de.volzo.despat.workingDirectory";
-
     public static final File getWorkingDirectory(Context context) {
         String fh = getProperty(context, KEY_WORKING_DIRECTORY, "");
         if (fh == null || fh.equals("")) {
-            return new File(context.getApplicationInfo().dataDir);
+            if (DEFAULT_WORKING_DIRECTORY != null) {
+                return DEFAULT_WORKING_DIRECTORY;
+            } else {
+                return new File(context.getApplicationInfo().dataDir);
+            }
         }
         return new File(fh);
     }
@@ -194,19 +223,18 @@ public class Config {
      * for every capture.
      * Does not allow the device to sleep in between captures
      */
-    public static final boolean DEFAULT_PERSISTENT_CAMERA           = true;
     public static final String KEY_PERSISTENT_CAMERA                = "de.volzo.despat.persistentCamera";
-
     public static final boolean getPersistentCamera(Context context) {
         return getPropertyBoolean(context, KEY_PERSISTENT_CAMERA, DEFAULT_PERSISTENT_CAMERA);
+    }
+    public static void setPersistentCamera(Context context, boolean persistentCamera) {
+        setProperty(context, KEY_PERSISTENT_CAMERA, persistentCamera);
     }
 
     /**
      * LEGACY CAMERA CONTROLLER
      */
-    public static final boolean DEFAULT_LEGACY_CAMERA_CONTROLLER    = false;
     public static final String KEY_LEGACY_CAMERA_CONTROLLER         = "de.volzo.despat.legacyCameraController";
-
     public static final boolean getLegacyCameraController(Context context) {
         return getPropertyBoolean(context, KEY_LEGACY_CAMERA_CONTROLLER, DEFAULT_LEGACY_CAMERA_CONTROLLER);
     }
@@ -219,39 +247,60 @@ public class Config {
      * compensation of scheduling irregularities)
      * if PERSISTENT_CAMERA is _enabled_ DEFAULT_SHUTTER_INTERVAL can be shorter than 6s.
      */
-    public static final int DEFAULT_SHUTTER_INTERVAL                = 10 * 1000; // in ms
     public static final String KEY_SHUTTER_INTERVAL                 = "de.volzo.despat.shutterInterval";
-
     public static int getShutterInterval(Context context) {
         return getPropertyInt(context, KEY_SHUTTER_INTERVAL, DEFAULT_SHUTTER_INTERVAL);
     }
-
     public static void setShutterInterval(Context context, int shutterInterval) {
         setProperty(context, KEY_SHUTTER_INTERVAL, shutterInterval);
+    }
+
+    /**
+     * EXPOSURE COMPENSATION
+     *
+     * over- or underexposure compensation
+     *
+     */
+    public static final String KEY_EXPOSURE_COMPENSATION            = "de.volzo.despat.exposureCompensation";
+    public static int getExposureCompensation(Context context) {
+        return getPropertyInt(context, KEY_EXPOSURE_COMPENSATION, DEFAULT_EXPOSURE_COMPENSATION);
+    }
+    public static void setExposureCompensation(Context context, int exposureCompensation) {
+        setProperty(context, KEY_EXPOSURE_COMPENSATION, exposureCompensation);
+    }
+
+    /**
+     * SECOND IMAGE EXPOSURE COMPENSATION
+     *
+     * over- or underexposure compensation
+     * applied to a second image
+     * (no second image is taken when value == 0) | v2 only
+     *
+     */
+    public static final String KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION   = "de.volzo.despat.secondImageExposureCompensation";
+    public static int getSecondImageExposureCompensation(Context context) {
+        return getPropertyInt(context, KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION, DEFAULT_SECOND_IMAGE_EXPOSURE_COMPENSATION);
+    }
+    public static void setSecondImageExposureCompensation(Context context, int secondImageExposureCompensation) {
+        setProperty(context, KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION, secondImageExposureCompensation);
     }
 
     /**
      * NETWORK FIDELITY
      *
      */
-    public static final String DEFAULT_NETWORK_FIDELITY             = "low";
     public static final String KEY_NETWORK_FIDELITY                 = "de.volzo.despat.networkFidelity";
-
     public static String getNetworkFidelity(Context context) {
         return getProperty(context, KEY_NETWORK_FIDELITY, DEFAULT_NETWORK_FIDELITY);
     }
-
     public static void setNetworkFidelity(Context context, int networkFidelity) {
         setProperty(context, KEY_NETWORK_FIDELITY, networkFidelity);
     }
 
-
     /**
      * PHONE HOME
      */
-    public static final boolean DEFAULT_PHONE_HOME                  = false;
     public static final String KEY_PHONE_HOME                       = "de.volzo.despat.phoneHome";
-
     public static final boolean getPhoneHome(Context context) {
         return getPropertyBoolean(context, KEY_PHONE_HOME, DEFAULT_PHONE_HOME);
     }
@@ -259,13 +308,10 @@ public class Config {
     /**
      * SERVER ADDRESS
      */
-    public static final String DEFAULT_SERVER_ADDRESS               = "http://zoltep.de";   // format protocol://example.com
     public static final String KEY_SERVER_ADDRESS                   = "de.volzo.despat.serverAddress";
-
     public static String getServerAddress(Context context) {
         return getProperty(context, KEY_SERVER_ADDRESS, DEFAULT_SERVER_ADDRESS);
     }
-
     public static void setServerAddress(Context context, String serverAddress) {
         setProperty(context, KEY_SERVER_ADDRESS, serverAddress);
     }
@@ -273,13 +319,10 @@ public class Config {
     /**
      * MIN SYNC INTERVAL
      */
-    public static final long DEFAULT_MIN_SYNC_INTERVAL              = 5 * 60 * 1000;        // at most every X ms
     public static final String KEY_MIN_SYNC_INTERVAL                = "de.volzo.despat.minSyncInterval";
-
     public static long getMinSyncInterval(Context context) {
         return getPropertyLong(context, KEY_MIN_SYNC_INTERVAL, DEFAULT_MIN_SYNC_INTERVAL);
     }
-
     public static void setMinSyncInterval(Context context, long minSyncInterval) {
         setProperty(context, KEY_MIN_SYNC_INTERVAL, minSyncInterval);
     }
@@ -287,13 +330,10 @@ public class Config {
     /**
      * HEARTBEAT INTERVAL
      */
-    public static final long DEFAULT_HEARTBEAT_INTERVAL             = 15 * 60 * 1000L;      // Minimum interval is 15m
     public static final String KEY_HEARTBEAT_INTERVAL               = "de.volzo.despat.heartbeatInterval";
-
     public static long getHeartbeatInterval(Context context) {
         return getPropertyLong(context, KEY_HEARTBEAT_INTERVAL, DEFAULT_HEARTBEAT_INTERVAL);
     }
-
     public static void setHeartbeatInterval(Context context, String heartbeatInterval) {
         setProperty(context, KEY_HEARTBEAT_INTERVAL, heartbeatInterval);
     }
@@ -301,13 +341,10 @@ public class Config {
     /**
      * MIN HEARTBEAT INTERVAL
      */
-    public static final long DEFAULT_MIN_HEARTBEAT_INTERVAL              = 2 * 60 * 1000;        // at most every X ms
     public static final String KEY_MIN_HEARTBEAT_INTERVAL                = "de.volzo.despat.minHeartbeatInterval";
-
     public static long getMinHeartbeatInterval(Context context) {
         return getPropertyLong(context, KEY_MIN_HEARTBEAT_INTERVAL, DEFAULT_MIN_HEARTBEAT_INTERVAL);
     }
-
     public static void setMinHeartbeatInterval(Context context, long minHeartbeatInterval) {
         setProperty(context, KEY_MIN_HEARTBEAT_INTERVAL, minHeartbeatInterval);
     }
@@ -315,17 +352,13 @@ public class Config {
     /**
      * UPLOAD INTERVAL
      */
-    public static final long DEFAULT_UPLOAD_INTERVAL                = 15 * 60 * 1000L;
     public static final String KEY_UPLOAD_INTERVAL                  = "de.volzo.despat.uploadInterval";
-
     public static long getUploadInterval(Context context) {
         return getPropertyLong(context, KEY_UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL);
     }
-
     public static void setUploadInterval(Context context, String uploadInterval) {
         setProperty(context, KEY_UPLOAD_INTERVAL, uploadInterval);
     }
-
     public static String sanityCheckUploadInterval(Context context) {
         long value = getUploadInterval(context);
 
@@ -340,11 +373,9 @@ public class Config {
      * KEY LAST SYNC
      */
     public static final String KEY_LAST_SYNC                        = "de.volzo.despat.lastSync";
-
     public static Date getLastSync(Context context) {
         return getPropertyDate(context, KEY_LAST_SYNC, null);
     }
-
     public static void setLastSync(Context context, Date lastSync) {
         setPropertyDate(context, KEY_LAST_SYNC, lastSync);
     }
@@ -353,11 +384,9 @@ public class Config {
      * IMAGE FOLDER
      */
     public static final String KEY_IMAGE_FOLDER                     = "de.volzo.despat.imageFolder";
-
     public static File getImageFolder(Context context) {
         return new File(getProperty(context, KEY_IMAGE_FOLDER, getWorkingDirectory(context).getAbsolutePath()));
     }
-
     public static void setImageFolder(Context context, String imageFolder) {
         setProperty(context, KEY_IMAGE_FOLDER, imageFolder);
     }
@@ -366,11 +395,9 @@ public class Config {
      * FIRST TIME LAUNCH
      */
     public static final String KEY_FIRST_TIME_LAUNCH                = "de.volzo.despat.firstTimeLaunch";
-
     public static boolean getFirstTimeLaunch(Context context) {
         return getPropertyBoolean(context, KEY_FIRST_TIME_LAUNCH, true);
     }
-
     public static void setFirstTimeLaunch(Context context, boolean firstTimeLaunch) {
         setProperty(context, KEY_FIRST_TIME_LAUNCH, firstTimeLaunch);
     }
@@ -379,13 +406,37 @@ public class Config {
      * NEXT SHUTTER INVOCATION
      */
     public static final String KEY_NEXT_SHUTTER_SERVICE_INVOCATION  = "de.volzo.despat.nextShutterServiceInvocation";
-
     public static long getNextShutterServiceInvocation(Context context) {
         return getPropertyLong(context, KEY_NEXT_SHUTTER_SERVICE_INVOCATION, -1);
     }
-
     public static void setNextShutterServiceInvocation(Context context, long timestamp) {
         setProperty(context, KEY_NEXT_SHUTTER_SERVICE_INVOCATION, timestamp);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    public static void enableCTMode(Context context) {
+
+        Log.i(TAG, "enabling Compressed Time mode");
+
+        setEnableRecognition(context, false);
+        Log.i(TAG, "disabling Recognition");
+
+        setDeleteAfterRecognition(context, false);
+        Log.i(TAG, "deleting images after recognition is disabled");
+
+        setPersistentCamera(context, false);
+        Log.i(TAG, "persistent camera disabled");
+
+        setShutterInterval(context, 10 * 1000);
+        Log.i(TAG, "set shutter interval to 10s");
+
+        setExposureCompensation(context, 1);
+        Log.i(TAG, "slightly increased exposure compensation (+1)");
+
+        setSecondImageExposureCompensation(context, -10);
+        Log.i(TAG, "set second image exposure compensation (-10)");
+
     }
 
     // ---------------------------------------------------------------------------------------------

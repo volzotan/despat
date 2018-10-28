@@ -43,6 +43,11 @@ public class RecognitionService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "RecognitionService invoked");
 
+        if (!Config.getEnableRecognition(this)) {
+            Log.w(TAG, "Recognition disabled. aborting Recognition Service");
+            return;
+        }
+
 //        String action = intent.getAction();
 //
 //        if (action == null || action.length() == 0) {
@@ -120,7 +125,7 @@ public class RecognitionService extends IntentService {
             }
         }
 
-        if (Config.DELETE_AFTER_RECOGNITION) {
+        if (Config.getDeleteAfterRecognition(this)) {
             int deletecounter = 0;
             for (int i = 0; i < queue.size(); i++) {
                 Capture c = queue.get(i);

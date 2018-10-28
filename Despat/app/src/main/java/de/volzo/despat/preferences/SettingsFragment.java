@@ -124,6 +124,17 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         category.addPreference(prefShutterInterval);
         preferenceSummaryMap.put(prefShutterInterval, R.string.pref_summary_shutterInterval);
 
+        // NumberPicker cant deal with negative values right now
+//        NumberPickerPreference prefExposureCompensation = new NumberPickerPreference(context);
+//        prefExposureCompensation.setTitle(R.string.pref_title_exposureCompensation);
+//        prefExposureCompensation.setSummary(R.string.pref_summary_exposureCompensation);
+//        prefExposureCompensation.setMinValue(-10);
+//        prefExposureCompensation.setMaxValue(+10);
+//        prefExposureCompensation.setDefaultValue(Config.DEFAULT_EXPOSURE_COMPENSATION);
+//        prefExposureCompensation.setKey(Config.KEY_EXPOSURE_COMPENSATION);
+//        category.addPreference(prefExposureCompensation);
+//        preferenceSummaryMap.put(prefExposureCompensation, R.string.pref_summary_exposureCompensation);
+
         // NETWORK ---------------------------------------------------------------------------------
 
         category = new PreferenceCategory(context);

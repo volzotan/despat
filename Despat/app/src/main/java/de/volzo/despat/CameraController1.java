@@ -247,7 +247,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
             if (optionalExposureCompensation != null) {
                 params.setExposureCompensation(optionalExposureCompensation);
             } else {
-                params.setExposureCompensation(Config.EXPOSURE_COMPENSATION);
+                params.setExposureCompensation(Config.getExposureCompensation(context));
             }
             camera.setParameters(params);
         } catch (RuntimeException re) {

@@ -38,8 +38,8 @@ public class CameraConfig { // implements Serializable {
         this.formatJpg = Config.FORMAT_JPG;
         this.formatRaw = Config.FORMAT_RAW;
 
-        this.exposureCompensation = Config.EXPOSURE_COMPENSATION;
-        this.secondImageExposureCompensation = Config.SECOND_IMAGE_EXPOSURE_COMPENSATION;
+        this.exposureCompensation = Config.getExposureCompensation(context);
+        this.secondImageExposureCompensation = Config.getSecondImageExposureCompensation(context);
 
         this.endCaptureWithoutUnlockingFocus = Config.END_CAPTURE_WITHOUT_UNLOCKING_FOCUS;
         this.numberOfBurstImages = Config.NUMBER_OF_BURST_IMAGES;
