@@ -5,8 +5,10 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import de.volzo.despat.preferences.Config;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static androidx.room.ForeignKey.CASCADE;
@@ -36,6 +38,9 @@ public class Benchmark {
 
     @ColumnInfo(name = "detector")
     private String detector;
+
+    @ColumnInfo(name = "tilesize")
+    private int tilesize;
 
     @ColumnInfo(name = "inference_time")
     private double inferenceTime;
@@ -80,11 +85,54 @@ public class Benchmark {
         this.detector = detector;
     }
 
+    public int getTilesize() {
+        return tilesize;
+    }
+
+    public void setTilesize(int tilesize) {
+        this.tilesize = tilesize;
+    }
+
     public double getInferenceTime() {
         return inferenceTime;
     }
 
     public void setInferenceTime(double inferenceTime) {
         this.inferenceTime = inferenceTime;
+    }
+
+    public String toString() {
+        String typeString = "";
+
+        switch (type) {
+            case TYPE_IMAGE: {
+                typeString = "image";
+                break;
+            }
+            case TYPE_TILE: {
+                typeString = "tile";
+                break;
+            }
+            default: {
+                typeString = "unknown";
+                break;
+            }
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat(Config.DATEFORMAT_SHORT);
+        StringBuilder sb = new StringBuilder();
+        sb.append("["); sb.append(id); sb.append("]");
+        sb.append(" ");
+        sb.append(sdf.format(timestamp));
+        sb.append(" ");
+        sb.append(typeString);
+        sb.append(" ");
+        sb.append(detector);
+        sb.append("@");
+        sb.append(tilesize);
+        sb.append(" | ");
+        sb.append(inferenceTime);
+
+        return sb.toString();
     }
 }

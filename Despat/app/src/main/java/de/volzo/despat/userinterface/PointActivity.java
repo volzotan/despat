@@ -1,30 +1,24 @@
 package de.volzo.despat.userinterface;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
-import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +26,6 @@ import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
-import de.volzo.despat.preferences.Config;
 
 public class PointActivity extends AppCompatActivity implements
         View.OnTouchListener,

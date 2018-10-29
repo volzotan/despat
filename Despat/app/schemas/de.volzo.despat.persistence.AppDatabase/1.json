@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f41195167d29835f6641f5b17085394c",
+    "identityHash": "8a47ef7ae18a5fe51fc23cf666cb054f",
     "entities": [
       {
         "tableName": "Status",
@@ -674,7 +674,7 @@
       },
       {
         "tableName": "Benchmark",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER, `timestamp` TEXT, `type` INTEGER NOT NULL, `detector` TEXT, `inference_time` REAL NOT NULL, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER, `timestamp` TEXT, `type` INTEGER NOT NULL, `detector` TEXT, `tilesize` INTEGER NOT NULL, `inference_time` REAL NOT NULL, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -705,6 +705,12 @@
             "columnName": "detector",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "tilesize",
+            "columnName": "tilesize",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "inferenceTime",
@@ -746,7 +752,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"f41195167d29835f6641f5b17085394c\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"8a47ef7ae18a5fe51fc23cf666cb054f\")"
     ]
   }
 }

@@ -10,8 +10,6 @@ import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
 
-import org.acra.annotation.AcraCore;
-
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
@@ -21,7 +19,7 @@ import de.volzo.despat.support.DeviceInfo;
 import de.volzo.despat.support.ProximitySensor;
 import de.volzo.despat.support.Util;
 
-@AcraCore(buildConfigClass = BuildConfig.class)
+//@AcraCore(buildConfigClass = BuildConfig.class)
 public class Despat extends Application {
 
     public static String TAG = Despat.class.getSimpleName();

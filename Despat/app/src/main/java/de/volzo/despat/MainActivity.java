@@ -13,11 +13,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -38,7 +40,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.github.chrisbanes.photoview.PhotoViewAttacher;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -49,6 +50,8 @@ import androidx.core.content.res.ResourcesCompat;
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Benchmark;
+import de.volzo.despat.persistence.BenchmarkDao;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
@@ -58,6 +61,7 @@ import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.support.DeviceInfo;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.ConfigureActivity;
@@ -343,6 +347,46 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void runTestCode() {
 
+        final Context context = this;
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    long start = System.currentTimeMillis();
+
+                    List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
+                    DetectorSSD detector;
+
+                    detector = new DetectorSSD(context);
+                    detector.init(new DetectorConfig("low", 600));
+                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+
+                    detector = new DetectorSSD(context);
+                    detector.init(new DetectorConfig("mid", 900));
+                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+
+                    detector = new DetectorSSD(context);
+                    detector.init(new DetectorConfig("high", 900));
+                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+
+                    Log.wtf(TAG, "Benchmarking done in " + (System.currentTimeMillis()-start));
+
+                } catch (Exception e) {
+                    Log.wtf(TAG, "fail", e);
+                }
+            }
+        });
+
+        AppDatabase database = AppDatabase.getAppDatabase(context);
+        BenchmarkDao benchmarkDao = database.benchmarkDao();
+        List<Benchmark> benchmarks = benchmarkDao.getAllOfType(Benchmark.TYPE_IMAGE);
+
+        for (Benchmark b : benchmarks) {
+            Log.d(TAG, b.toString());
+        }
+
+//        Config.enableCTMode(this);
 
 //        AppDatabase db = AppDatabase.getAppDatabase(this);
 //        SessionDao sessionDao = db.sessionDao();

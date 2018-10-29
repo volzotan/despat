@@ -113,6 +113,9 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
+    public void runBenchmark(int imageWidth, int imageHeight) {}
+
+    @Override
     public void display(DrawSurface surface, final Size imageSize, List<RectF> rectangles, final DetectorConfig detectorConfig) {
         final List<RectF> rects = rectangles;
         surface.setCallback(new DrawSurface.DrawSurfaceCallback() {

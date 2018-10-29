@@ -1,30 +1,23 @@
 package de.volzo.despat.userinterface;
 
-import android.app.ActionBar;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Rect;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
-import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.volzo.despat.CameraController;
-import de.volzo.despat.CameraController2;
 import de.volzo.despat.R;
 import de.volzo.despat.SessionManager;
 import de.volzo.despat.preferences.CameraConfig;
@@ -59,7 +52,6 @@ public class ConfigureActivity extends AppCompatActivity {
         final TextView tvInterval = (TextView) findViewById(R.id.tv_shutterInterval_value);
 
         final SeekBar sbInterval = (SeekBar) findViewById(R.id.sb_interval);
-//        sbInterval.setMin(3);
         sbInterval.setMax(120-sbIntervalMin);
         sbInterval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -78,6 +70,12 @@ public class ConfigureActivity extends AppCompatActivity {
             }
         });
         sbInterval.setProgress((int) (Config.getShutterInterval(activity)/1000 - sbIntervalMin));
+
+        RelativeLayout rlIntervalSeekbar = findViewById(R.id.layout_intervalSeekbar);
+        TextView tvNetworkIndicator = new TextView(this);
+        tvNetworkIndicator.setText("foo");
+        tvNetworkIndicator.setX(23.0f);
+        rlIntervalSeekbar.addView(tvNetworkIndicator);
 
 //        final SeekBar sbNetworkFidelity = (SeekBar) findViewById(R.id.sb_networkFidelity);
 //        sbNetworkFidelity.setMax(2);

@@ -149,8 +149,55 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
+    public void runBenchmark(int imageWidth, int imageHeight) {
+        AppDatabase db = AppDatabase.getAppDatabase(context);
+        BenchmarkDao benchmarkDao = db.benchmarkDao();
+        long fullImageTimer = System.currentTimeMillis();
+        stopwatch.reset();
+        stopwatch.start("tileManager init");
+        Bitmap emptyBitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
+        tileManager = new TileManager(emptyBitmap, TILESIZE_INPUT, TILESIZE_OUTPUT);
+        stopwatch.stop("tileManager init");
+
+        List<Detector.Recognition> results;
+
+        for (TileManager.Tile tile : tileManager.getAllTiles()){
+            stopwatch.start("totalInference");
+            Bitmap crop = tileManager.getTileImage(tile);
+            results = tfInterface.recognizeImage(crop);
+            crop.recycle();
+            double totalInferenceTime = stopwatch.stop("totalInference");
+
+            Benchmark benchmark = new Benchmark();
+            benchmark.setDetector(this.detectorConfig.getDetector());
+            benchmark.setTilesize(this.detectorConfig.getTilesize());
+            benchmark.setTimestamp(Calendar.getInstance().getTime());
+            benchmark.setType(Benchmark.TYPE_TILE);
+            benchmark.setInferenceTime(totalInferenceTime);
+            benchmarkDao.insert(benchmark);
+
+            // tile.setResults(results); EVIL
+            tileManager.passResult(tile, results);
+            Log.d(TAG, "tile done: " + tile);
+        }
+
+        Benchmark benchmark = new Benchmark();
+        benchmark.setDetector(this.detectorConfig.getDetector());
+        benchmark.setTilesize(this.detectorConfig.getTilesize());
+        benchmark.setTimestamp(Calendar.getInstance().getTime());
+        benchmark.setType(Benchmark.TYPE_IMAGE);
+        benchmark.setInferenceTime(System.currentTimeMillis() - fullImageTimer);
+        benchmarkDao.insert(benchmark);
+
+        stopwatch.print();
+        tileManager.close();
+        emptyBitmap.recycle();
+
+        Log.d(TAG, "Total Benchmark time: " + benchmark.getInferenceTime());
+    }
+
+    @Override
     public List<Detector.Recognition> run() {
-//        Log.i(TAG, "Running detection on image " + currTimestamp);
 
         List<Detector.Recognition> results;
 
@@ -168,6 +215,7 @@ public class DetectorSSD extends Detector {
             Benchmark benchmark = new Benchmark();
 //            benchmark.setSessionId(session.getId());
             benchmark.setDetector(this.detectorConfig.getDetector());
+            benchmark.setTilesize(this.detectorConfig.getTilesize());
             benchmark.setTimestamp(Calendar.getInstance().getTime());
             benchmark.setType(Benchmark.TYPE_TILE);
             benchmark.setInferenceTime(totalInferenceTime);
@@ -175,11 +223,12 @@ public class DetectorSSD extends Detector {
 
             // tile.setResults(results); EVIL
             tileManager.passResult(tile, results);
-            System.out.println("tile done: " + tile);
+            Log.d(TAG, "tile done: " + tile);
         }
 
         Benchmark benchmark = new Benchmark();
         benchmark.setDetector(this.detectorConfig.getDetector());
+        benchmark.setTilesize(this.detectorConfig.getTilesize());
         benchmark.setTimestamp(Calendar.getInstance().getTime());
         benchmark.setType(Benchmark.TYPE_IMAGE);
         benchmark.setInferenceTime(System.currentTimeMillis() - fullImageTimer);

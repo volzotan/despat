@@ -135,6 +135,14 @@ public class DeviceInfo {
             return info;
         }
 
+        public int getWidth() {
+            return width;
+        }
+
+        public int getHeight() {
+            return height;
+        }
+
         public String toString() {
             StringBuilder sb = new StringBuilder();
             String info;

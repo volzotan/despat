@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.maps.MapView;
 
 import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 
 import de.volzo.despat.R;
 

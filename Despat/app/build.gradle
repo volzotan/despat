@@ -37,17 +37,24 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.material:material:1.0.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.gms:play-services-maps:16.0.0'
+
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+
+    // Test Suites
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0-alpha4', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testImplementation 'junit:junit:4.12'
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+
+    // Google Maps
+    implementation 'com.google.android.gms:play-services-maps:16.0.0'
 
     // openCV for HOG and the compressor
     implementation project(':openCVLibrary310')
@@ -59,29 +66,28 @@ dependencies {
     // Photoview to preview pitch-zoomable images
     implementation 'com.github.chrisbanes:PhotoView:2.0.0'
 
-
-    // Volley for the Web-Interface
+    // Volley for HTTP
     implementation 'com.android.volley:volley:1.1.0'
 
     // osmdroid for OSM support
     implementation 'org.osmdroid:osmdroid-android:6.0.1'
 
-    // glide for displaying compressed images
+    // glide for displaying images
     implementation ("com.github.bumptech.glide:glide:4.8.0") {
         exclude group: "com.android.support"
     }
 
     // MPAndroidChart for Session plots
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+    // implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 
     // ToggleButtons for ConfigureActivity Network Fidelity
-//    implementation 'com.anthonymandra:ToggleButtons:3.0.0'
+    // implementation 'com.anthonymandra:ToggleButtons:3.0.0'
 
     // ACRA for bug reporting
-    def acraVersion = '5.0.0'
-    implementation "ch.acra:acra-http:$acraVersion"
-    implementation "ch.acra:acra-notification:$acraVersion"
-    implementation "ch.acra:acra-limiter:$acraVersion"
+//    def acraVersion = '5.0.0'
+//    implementation "ch.acra:acra-http:$acraVersion"
+//    implementation "ch.acra:acra-notification:$acraVersion"
+//    implementation "ch.acra:acra-limiter:$acraVersion"
 
     // Room Database
     implementation 'androidx.room:room-runtime:2.0.0'

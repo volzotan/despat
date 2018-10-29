@@ -272,8 +272,7 @@ public class Config {
     /**
      * SECOND IMAGE EXPOSURE COMPENSATION
      *
-     * over- or underexposure compensation
-     * applied to a second image
+     * over- or underexposure compensation applied to a second image
      * (no second image is taken when value == 0) | v2 only
      *
      */
@@ -287,7 +286,6 @@ public class Config {
 
     /**
      * NETWORK FIDELITY
-     *
      */
     public static final String KEY_NETWORK_FIDELITY                 = "de.volzo.despat.networkFidelity";
     public static String getNetworkFidelity(Context context) {

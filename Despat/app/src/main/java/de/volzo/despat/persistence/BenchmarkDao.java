@@ -14,6 +14,9 @@ public interface BenchmarkDao {
     @Query("SELECT * FROM benchmark")
     List<Benchmark> getAll();
 
+    @Query("SELECT * FROM benchmark WHERE type = :type")
+    List<Benchmark> getAllOfType(int type);
+
     @Query("SELECT * FROM benchmark WHERE detector = :detector")
     List<Benchmark> getAllByDetector(String detector);
 

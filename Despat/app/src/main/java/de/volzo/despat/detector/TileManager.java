@@ -30,12 +30,15 @@ public class TileManager {
 
 
     public TileManager(File filename, int tilesize, int outputsize) {
+        this(BitmapFactory.decodeFile(filename.getAbsolutePath()), tilesize, outputsize);
+        this.filename = filename;
+    }
+
+    public TileManager(Bitmap bitmap, int tilesize, int outputsize) {
         this.tilesize = tilesize;
         this.outputsize = outputsize;
 
-        this.filename = filename;
-
-        image = BitmapFactory.decodeFile(filename.getAbsolutePath());
+        image = bitmap;
 
         int imagewidth = image.getWidth();
         int imageheight = image.getHeight();
