@@ -59,8 +59,6 @@ dependencies {
     // Photoview to preview pitch-zoomable images
     implementation 'com.github.chrisbanes:PhotoView:2.0.0'
 
-    // UsbSerial for Powerbrain
-    implementation 'com.github.felHR85:UsbSerial:4.5'
 
     // Volley for the Web-Interface
     implementation 'com.android.volley:volley:1.1.0'

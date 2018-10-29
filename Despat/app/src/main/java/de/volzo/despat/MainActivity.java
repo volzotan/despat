@@ -588,11 +588,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         stopProgressBarUpdate();
 
-        if (powerbrain != null) {
-            powerbrain.disconnect();
-            powerbrain = null;
-        }
-
         despat.closeCamera();
 
         unregisterAllReceivers();
