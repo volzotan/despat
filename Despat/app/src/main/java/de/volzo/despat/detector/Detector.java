@@ -1,6 +1,7 @@
 package de.volzo.despat.detector;
 
 
+import android.content.Context;
 import android.graphics.RectF;
 import android.util.Size;
 
@@ -18,11 +19,19 @@ public abstract class Detector {
 
     float CONFIDENCE_THRESHOLD = 0.5f;
 
-    public abstract void init(DetectorConfig detectorConfig) throws Exception;
+    public Context context;
+    public DetectorConfig detectorConfig;
+
+    public Detector(Context context, DetectorConfig detectorConfig) {
+        this.context = context;
+        this.detectorConfig = detectorConfig;
+    }
+
+    public abstract void init() throws Exception;
     public abstract void load(File fullFilename);
     public abstract List<Recognition> run() throws Exception;
     public abstract void save() throws Exception;
-    public abstract void runBenchmark(int width, int height);
+    public abstract void runBenchmark();
     public abstract void display(DrawSurface surface, Size imageSize, List<RectF> rectangles, DetectorConfig detectorConfig);
 
     public List<RectF> positionsToRectangles(List<Position> results) {

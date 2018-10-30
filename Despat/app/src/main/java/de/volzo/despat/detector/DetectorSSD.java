@@ -28,10 +28,6 @@ public class DetectorSSD extends Detector {
 
     private static final String TAG = DetectorSSD.class.getSimpleName();
 
-    private Context context;
-
-    private DetectorConfig detectorConfig;
-
     private TensorFlowInterface tfInterface;
     private Stopwatch stopwatch;
 
@@ -60,15 +56,10 @@ public class DetectorSSD extends Detector {
 
     private TileManager tileManager = null;
 
-    public DetectorSSD(Context context) {
-        this.context = context;
-    }
+    public DetectorSSD(Context context, DetectorConfig detectorConfig) throws Exception {
+        super(context, detectorConfig);
 
-    @Override
-    public void init(DetectorConfig detectorConfig) throws Exception {
-
-        this.detectorConfig = detectorConfig;
-        TILESIZE_INPUT = detectorConfig.getTilesize();
+        TILESIZE_INPUT = this.detectorConfig.getTilesize();
 
         switch (this.detectorConfig.getDetector()) {
             case "low": {
@@ -90,6 +81,10 @@ public class DetectorSSD extends Detector {
                 throw new Exception("undefined detector selected");
             }
         }
+    }
+
+    @Override
+    public void init() throws Exception {
 
 //        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
 //        ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
@@ -149,13 +144,13 @@ public class DetectorSSD extends Detector {
     }
 
     @Override
-    public void runBenchmark(int imageWidth, int imageHeight) {
+    public void runBenchmark() {
         AppDatabase db = AppDatabase.getAppDatabase(context);
         BenchmarkDao benchmarkDao = db.benchmarkDao();
         long fullImageTimer = System.currentTimeMillis();
         stopwatch.reset();
         stopwatch.start("tileManager init");
-        Bitmap emptyBitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
+        Bitmap emptyBitmap = Bitmap.createBitmap(3000, 2000, Bitmap.Config.ARGB_8888);
         tileManager = new TileManager(emptyBitmap, TILESIZE_INPUT, TILESIZE_OUTPUT);
         stopwatch.stop("tileManager init");
 

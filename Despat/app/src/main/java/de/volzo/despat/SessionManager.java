@@ -517,54 +517,54 @@ public class SessionManager {
 //            Log.e(TAG, "loading failed", e);
 //        }
 
-//        String csvFilename = "exampledataset.csv";
-//        BufferedReader reader = null;
-//        try {
-//            reader = new BufferedReader(new InputStreamReader(assetManager.open(csvFilename), "UTF-8"));
-//
-//            int count = 0;
-//            String line;
-//            Position pos;
-//            String[] data;
-//            while ((line = reader.readLine()) != null) {
-//                if (count == 0) {
-//                    count++;
-//                    continue;
-//                }
-//
-//                pos = new Position();
-//                pos.setCaptureId(captureId);
-//
-//                data = line.split("\\|");
-//
-//                try {
-//                    pos.setTypeId(Integer.parseInt(data[2]));
-//                    pos.setRecognitionConfidence(Float.parseFloat(data[3]));
-//                    pos.setLatitude(Double.parseDouble(data[4]));
-//                    pos.setLongitude(Double.parseDouble(data[5]));
-//                    pos.setMinx(Float.parseFloat(data[6]));
-//                    pos.setMiny(Float.parseFloat(data[7]));
-//                    pos.setMaxx(Float.parseFloat(data[8]));
-//                    pos.setMaxy(Float.parseFloat(data[9]));
-//
-//                    positionDao.insert(pos);
-//                } catch (NumberFormatException e) {
-//                    Log.w(TAG, "skipped line: " + count);
-//                }
-//
-//                count++;
-//            }
-//        } catch (IOException e) {
-//            Log.w(TAG, "loading example dataset CSVs failed", e);
-//        } finally {
-//            if (reader != null) {
-//                try {
-//                    reader.close();
-//                } catch (IOException e) {
-//                    Log.w(TAG, "closing CSV reader failed", e);
-//                }
-//            }
-//        }
+        String csvFilename = "exampledataset.csv";
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(assetManager.open(csvFilename), "UTF-8"));
+
+            int count = 0;
+            String line;
+            Position pos;
+            String[] data;
+            while ((line = reader.readLine()) != null) {
+                if (count == 0) {
+                    count++;
+                    continue;
+                }
+
+                pos = new Position();
+                pos.setCaptureId(captureId);
+
+                data = line.split("\\|");
+
+                try {
+                    pos.setTypeId(Integer.parseInt(data[2]));
+                    pos.setRecognitionConfidence(Float.parseFloat(data[3]));
+                    pos.setLatitude(Double.parseDouble(data[4]));
+                    pos.setLongitude(Double.parseDouble(data[5]));
+                    pos.setMinx(Float.parseFloat(data[6]));
+                    pos.setMiny(Float.parseFloat(data[7]));
+                    pos.setMaxx(Float.parseFloat(data[8]));
+                    pos.setMaxy(Float.parseFloat(data[9]));
+
+                    positionDao.insert(pos);
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, "skipped line: " + count);
+                }
+
+                count++;
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "loading example dataset CSVs failed", e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    Log.w(TAG, "closing CSV reader failed", e);
+                }
+            }
+        }
 
     }
 

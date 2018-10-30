@@ -26,6 +26,9 @@ public interface PositionDao {
     @Query("SELECT COUNT(*) FROM position WHERE capture_id IN (SELECT id FROM capture WHERE session_id = :sessionId)")
     int getCountBySession(long sessionId);
 
+    @Query("SELECT * FROM position WHERE (latitude IS NULL OR longitude IS NULL) AND capture_id IN (SELECT id FROM capture WHERE session_id = :sessionId)")
+    List<Position> getAllWithoutLatLonBySession(long sessionId);
+
     @Insert
     void insert(Position... positions);
 

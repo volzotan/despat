@@ -38,6 +38,7 @@ import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Util;
 
 public class HomographyPointListFragment extends Fragment implements
@@ -261,6 +262,11 @@ public class HomographyPointListFragment extends Fragment implements
         markerList.add(mapUtil.createMarker(MapUtil.DespatMarker.TYPE_CORRESPONDING_POINT, newPoint.getLocation(), "corresponding point " + newPoint.getId()));
         mapUtil.clearAllMarkersOnMap();
         mapUtil.placeMarkersOnMap(markerList);
+
+        Integer count = homographyPointDao.getCountBySession(session.getId());
+        if (count != null && count >= 4) {
+            Orchestrator.runHomographyService(this.getActivity(), session.getId());
+        }
     }
 
     class HomographyPointRecyclerViewAdapter extends RecyclerView.Adapter<HomographyPointRecyclerViewAdapter.ViewHolder> {

@@ -111,16 +111,7 @@ public class TourActivity extends AppCompatActivity {
             }
         });
 
-        // create example session in background
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                Long time = System.currentTimeMillis();
-                SessionManager sessionManager = SessionManager.getInstance(context);
-                sessionManager.createExampleSession(context);
-                Log.d(TAG, String.format("Example Session created in %d seconds", (System.currentTimeMillis()-time)/1000));
-            }
-        });
+        MainActivity.runInitializationTasks(context);
     }
 
     private void addBottomDots(int currentPage) {

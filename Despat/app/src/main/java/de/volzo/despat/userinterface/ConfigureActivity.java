@@ -2,10 +2,12 @@ package de.volzo.despat.userinterface;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,14 +17,22 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.w3c.dom.Text;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import de.volzo.despat.CameraController2;
 import de.volzo.despat.R;
 import de.volzo.despat.SessionManager;
+import de.volzo.despat.detector.Detector;
+import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.preferences.DetectorConfig;
+import de.volzo.despat.support.DeviceInfo;
 import de.volzo.despat.support.Util;
 
 public class ConfigureActivity extends AppCompatActivity {
@@ -50,13 +60,56 @@ public class ConfigureActivity extends AppCompatActivity {
         etSessionName.setText(Util.getMostlyUniqueRandomString(activity));
 
         final TextView tvInterval = (TextView) findViewById(R.id.tv_shutterInterval_value);
-
         final SeekBar sbInterval = (SeekBar) findViewById(R.id.sb_interval);
+
+//        final HashMap<String, TextView> marker = new HashMap<>();
+//        final HashMap<String, Long> computationTime = new HashMap<>();
+//        RelativeLayout rlIntervalSeekbar = findViewById(R.id.layout_intervalSeekbar);
+//        for (String fidelity : new String[] {"low", "mid", "high"}) {
+//            TextView tv = new TextView(this);
+//            tv.setText(fidelity);
+//            tv.setTag(fidelity);
+//            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+//            params.addRule(RelativeLayout.BELOW, sbInterval.getId());
+//            rlIntervalSeekbar.addView(tv, params);
+//            marker.put(fidelity, tv);
+//
+//            try {
+//                List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(this);
+//                Size imageSize = new Size(cameras.get(0).getHeight(), cameras.get(0).getWidth());
+//                Detector detector = new DetectorSSD(this, new DetectorConfig(fidelity, 900));
+//                Long time = ((DetectorSSD) detector).estimateComputationTime(imageSize);
+//                computationTime.put(fidelity, time);
+//            } catch (Exception e) {
+//                Log.e(TAG, "setting indicators failed", e);
+//            }
+//        }
+
         sbInterval.setMax(120-sbIntervalMin);
         sbInterval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvInterval.setText(String.format("%ds", progress+sbIntervalMin));
+
+//                for (Map.Entry<String, TextView> m : marker.entrySet()) {
+//                    Long time = computationTime.get(m.getKey()) / 1000;
+//
+//                    int paddingLeft = sbInterval.getPaddingLeft();
+//                    int paddingRight = sbInterval.getPaddingRight();
+//                    int width = sbInterval.getWidth();
+//
+//                    float pixelProSec = (width - paddingLeft - paddingRight) / sbInterval.getMax();
+//                    TextView tv = m.getValue();
+//                    float xpos = paddingLeft + pixelProSec * (time-sbIntervalMin);
+//
+//                    if (xpos < width) {
+//                        tv.setX(xpos);
+//                        tv.setVisibility(View.VISIBLE);
+//                    } else {
+//                        tv.setVisibility(View.INVISIBLE);
+//                        Log.d(TAG, "Seekbar marker " + tv.getText() + " invisible");
+//                    }
+//                }
             }
 
             @Override
@@ -70,12 +123,6 @@ public class ConfigureActivity extends AppCompatActivity {
             }
         });
         sbInterval.setProgress((int) (Config.getShutterInterval(activity)/1000 - sbIntervalMin));
-
-        RelativeLayout rlIntervalSeekbar = findViewById(R.id.layout_intervalSeekbar);
-        TextView tvNetworkIndicator = new TextView(this);
-        tvNetworkIndicator.setText("foo");
-        tvNetworkIndicator.setX(23.0f);
-        rlIntervalSeekbar.addView(tvNetworkIndicator);
 
 //        final SeekBar sbNetworkFidelity = (SeekBar) findViewById(R.id.sb_networkFidelity);
 //        sbNetworkFidelity.setMax(2);
@@ -180,6 +227,18 @@ public class ConfigureActivity extends AppCompatActivity {
     }
 
     private void setDetectorButtonStates(String state, String[] values, List<ToggleButton> buttons) {
+
+        try {
+            List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(this);
+            Size imageSize = new Size(cameras.get(0).getHeight(), cameras.get(0).getWidth());
+            Detector detector = new DetectorSSD(this, new DetectorConfig(state, 900));
+            Long time = ((DetectorSSD) detector).estimateComputationTime(imageSize);
+
+            TextView tv = findViewById(R.id.tv_estimatedComputationTime);
+            tv.setText(String.format("%d seconds", time/1000));
+        } catch (Exception e) {
+            Log.e(TAG, "estimating computation time failed", e);
+        }
 
         for (int i=0; i<buttons.size(); i++) {
             buttons.get(i).setTextColor(ContextCompat.getColor(activity, R.color.white));

@@ -25,19 +25,18 @@ public class DetectorHOG extends Detector {
 
     private static final String TAG = DetectorHOG.class.getSimpleName();
 
-    Context context;
     Stopwatch stopwatch;
 
     HOGDescriptor hog;
     File image;
     Size imageSize;
 
-    public DetectorHOG(Context context) {
-        this.context = context;
+    public DetectorHOG(Context context, DetectorConfig detectorConfig) {
+        super(context, detectorConfig);
     }
 
     @Override
-    public void init(DetectorConfig detectorConfig) throws Exception {
+    public void init() throws Exception {
 
         stopwatch = new Stopwatch();
         stopwatch.start("HOG init");
@@ -113,7 +112,7 @@ public class DetectorHOG extends Detector {
     }
 
     @Override
-    public void runBenchmark(int imageWidth, int imageHeight) {}
+    public void runBenchmark() {}
 
     @Override
     public void display(DrawSurface surface, final Size imageSize, List<RectF> rectangles, final DetectorConfig detectorConfig) {

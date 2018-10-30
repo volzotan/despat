@@ -20,6 +20,9 @@ public interface HomographyPointDao {
     @Query("SELECT * FROM homographypoint WHERE session_id = :sessionId")
     List<HomographyPoint> getAllBySession(long sessionId);
 
+    @Query("SELECT COUNT(*) FROM homographypoint WHERE session_id = :sessionId")
+    Integer getCountBySession(long sessionId);
+
     @Query("SELECT * FROM homographypoint WHERE session_id = :sessionId ORDER BY modification_time DESC LIMIT 1")
     HomographyPoint getLastFromSession(long sessionId);
 

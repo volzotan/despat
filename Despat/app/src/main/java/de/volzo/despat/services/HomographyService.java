@@ -41,16 +41,23 @@ public class HomographyService extends IntentService {
         Bundle args = intent.getExtras();
         Long sessionId = args.getLong(ARG_SESSION_ID);
 
-        if (sessionId == null) {
-            Log.e(TAG, "session id missing");
-            return;
-        }
-
         AppDatabase db = AppDatabase.getAppDatabase(this);
         SessionDao sessionDao = db.sessionDao();
         CaptureDao captureDao = db.captureDao();
         PositionDao positionDao = db.positionDao();
         HomographyPointDao homographyPointDao = db.homographyPointDao();
+
+        if (sessionId == null) {
+            Log.e(TAG, "session id missing");
+            return;
+        }
+
+        Session session = sessionDao.getById(sessionId);
+
+        if (session == null) {
+            Log.e(TAG, "no session found for id: " + sessionId);
+            return;
+        }
 
         List<HomographyPoint> points = homographyPointDao.getAllBySession(sessionId);
 
@@ -65,18 +72,14 @@ public class HomographyService extends IntentService {
         }
 
         List<Position> positions = positionDao.getAllBySession(sessionId);
-        Session session = sessionDao.getById(sessionId);
-
-        if (session == null) {
-            Log.e(TAG, "no session found for id: " + sessionId);
-            return;
-        }
-
-        List<Session> sessions = sessionDao.getAll();
 
         try {
             HomographyCalculator hcalc = new HomographyCalculator();
             hcalc.loadPoints(points);
+
+            session.setHomographyMatrix(hcalc.getHomographyMatrix());
+            sessionDao.update(session);
+
             hcalc.convertPoints(positions);
         } catch (Exception e) {
             Log.e(TAG, "homography operation failed", e);

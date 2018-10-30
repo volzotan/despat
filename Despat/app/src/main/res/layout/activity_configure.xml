@@ -100,12 +100,6 @@
                 android:layout_below="@+id/tv_shutterInterval"
                 android:layout_toLeftOf="@+id/tv_shutterInterval_value" />
 
-            <TextView
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:layout_below="@+id/sb_interval"
-                android:text="foo"/>
-
             <!-- style="@style/Widget.AppCompat.SeekBar.Discrete" -->
 
         </RelativeLayout>
@@ -210,6 +204,26 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_below="@+id/tv_detector">
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_below="@+id/toggleContainerNetworkFidelity">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Estimated computation time per image:"/>
+
+                <TextView
+                    android:id="@+id/tv_estimatedComputationTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="undefined"/>
+
             </LinearLayout>
 
         </RelativeLayout>

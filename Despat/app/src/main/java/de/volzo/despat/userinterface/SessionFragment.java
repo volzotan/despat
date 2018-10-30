@@ -27,12 +27,15 @@ import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.CaptureDao;
+import de.volzo.despat.persistence.HomographyPoint;
+import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.AspectRatioImageView;
 import de.volzo.despat.support.Util;
 
@@ -73,10 +76,17 @@ public class SessionFragment extends Fragment {
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
         SessionDao sessionDao = db.sessionDao();
-        CaptureDao captureDao = db.captureDao();
         PositionDao positionDao = db.positionDao();
+        HomographyPointDao homographyPointDao = db.homographyPointDao();
 
         final Session session = sessionDao.getById(sessionId);
+
+        List<Position> unconvertedPositions = positionDao.getAllWithoutLatLonBySession(sessionId);
+        List<HomographyPoint> points = homographyPointDao.getAllBySession(sessionId);
+        if (unconvertedPositions != null && unconvertedPositions.size() > 0 && points.size() >= 4) {
+            Log.d(TAG, "Session contains unconverted positions. Starting HomographyService");
+            Orchestrator.runHomographyService(context, sessionId);
+        }
 
         AspectRatioImageView ivCompressedPreview = (AspectRatioImageView) view.findViewById(R.id.compressedpreview);
         TextView tvSessionSummary = (TextView) view.findViewById(R.id.tvSessionSummary);
@@ -112,7 +122,7 @@ public class SessionFragment extends Fragment {
                 PositionDao positionDao = database.positionDao();
                 List<Position> positions = positionDao.getAllBySession(session.getId());
                 try {
-                    final Detector detector = new DetectorSSD(context);
+                    final Detector detector = new DetectorSSD(context, session.getDetectorConfig());
                     final Size imageSize = session.getImageSize();
                     final List<RectF> rectangles = detector.positionsToRectangles(positions);
 

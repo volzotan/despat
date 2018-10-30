@@ -119,7 +119,7 @@ public class SessionActivity extends AppCompatActivity implements
         } else if (homographyPoints == null || homographyPoints.size() < 4) {
             int diff = 4 - homographyPoints.size();
             errorMessage = String.format(activity.getString(R.string.error_export_tooFewHomographyPoints), diff);
-        } else if (positions.get(0).getLatitude() == null) {
+        } else if (positions.get(positions.size()-1).getLatitude() == null) {
             errorMessage = activity.getString(R.string.error_export_noTransformedCoordinates);
         }
 

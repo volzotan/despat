@@ -326,7 +326,7 @@ public class Orchestrator extends BroadcastReceiver {
         Log.d(TAG, "CompressorService started");
 
         if (Util.isServiceRunning(context, CompressorService.class)) {
-            Log.d(TAG, "CompressorService already running");
+            Log.w(TAG, "CompressorService already running");
         }
 
         Intent compressorIntent = new Intent(context, CompressorService.class);
@@ -335,6 +335,11 @@ public class Orchestrator extends BroadcastReceiver {
 
     public static void runCompressorService(Context context, long sessionId) {
         Log.d(TAG, "CompressorService started (for single session)");
+
+        if (Util.isServiceRunning(context, CompressorService.class)) {
+            Log.w(TAG, "CompressorService already running");
+        }
+
         Intent compressorIntent = new Intent(context, CompressorService.class);
         compressorIntent.putExtra(CompressorService.ARG_SESSION_ID, sessionId);
         context.startService(compressorIntent);
@@ -342,6 +347,11 @@ public class Orchestrator extends BroadcastReceiver {
 
     public static void runHomographyService(Context context, long sessionId) {
         Log.d(TAG, "HomographyService started");
+
+        if (Util.isServiceRunning(context, HomographyService.class)) {
+            Log.w(TAG, "HomographyService already running");
+        }
+
         Intent homographyIntent = new Intent(context, HomographyService.class);
         homographyIntent.putExtra(HomographyService.ARG_SESSION_ID, sessionId);
         context.startService(homographyIntent);
@@ -349,6 +359,11 @@ public class Orchestrator extends BroadcastReceiver {
 
     public static void runRecognitionService(Context context, long sessionId) {
         Log.d(TAG, "RecognitionService started");
+
+        if (Util.isServiceRunning(context, RecognitionService.class)) {
+            Log.w(TAG, "RecognitionService already running");
+        }
+
         Intent recognitionIntent = new Intent(context, RecognitionService.class);
         recognitionIntent.putExtra(RecognitionService.ARG_SESSION_ID, sessionId);
         context.startService(recognitionIntent);

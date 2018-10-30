@@ -347,33 +347,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void runTestCode() {
 
-        final Context context = this;
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String[] fidelitySettings = new String[]{"low", "mid", "high"};
-
-                    List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
-                    Size imageSize = new Size(cameras.get(0).getHeight(), cameras.get(0).getWidth());
-
-                    for (String fidelity : fidelitySettings) {
-                        Detector detector = new DetectorSSD(context);
-                        detector.init(new DetectorConfig(fidelity, 800));
-                        Long time = ((DetectorSSD) detector).estimateComputationTime(imageSize);
-
-                        if (time == null) {
-                            detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
-                        } else {
-                            Log.wtf(TAG, String.format("%s: %d", fidelity, time));
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.w(TAG, e);
-                }
-            }
-        });
-
 //        Config.enableCTMode(this);
 
 //        AppDatabase db = AppDatabase.getAppDatabase(this);
@@ -446,6 +419,43 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //                Log.e(TAG, "drawing results failed", e);
 //            }
 //        }
+    }
+
+    public static void runInitializationTasks(final Context context) {
+
+        // create example session in background
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Long time = System.currentTimeMillis();
+                Log.i(TAG, "creating Example Session");
+                SessionManager sessionManager = SessionManager.getInstance(context);
+                sessionManager.createExampleSession(context);
+                Log.d(TAG, String.format("Example Session created in %d seconds", (System.currentTimeMillis()-time)/1000));
+            }
+        });
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String[] fidelitySettings = new String[]{"low", "mid", "high"};
+
+                    for (String fidelity : fidelitySettings) {
+                        Detector detector = new DetectorSSD(context, new DetectorConfig(fidelity, 1000));
+                        detector.init();
+                        Long time = ((DetectorSSD) detector).estimateComputationTime(new Size(1000, 1000));
+
+                        // if no time could be estimated, there a no/not enough Benchmarks in the db
+                        if (time == null) {
+                            detector.runBenchmark();
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.w(TAG, "Creating Benchmarks failed", e);
+                }
+            }
+        });
     }
 
     @Override
@@ -911,9 +921,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void runRecognizer() {
         try {
-            detector = new DetectorSSD(activity);
+            detector = new DetectorSSD(activity, new DetectorConfig("low", 600));
 //            detector = new DetectorHOG(activity);
-            detector.init(new DetectorConfig("low", 600));
+            detector.init();
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
             List<Detector.Recognition> detections = detector.run();
             detector.display((DrawSurface) findViewById(R.id.drawSurface), new Size(4320, 3240), detector.recognitionsToRectangles(detections), null);

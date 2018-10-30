@@ -92,6 +92,8 @@ public class HomographyCalculator {
 
         h = Calib3d.findHomography(src, dst);
 
+        Log.d(TAG, "Homography matrix calculated");
+
 //        Log.d(TAG, h.dump());
     }
 
@@ -123,7 +125,14 @@ public class HomographyCalculator {
         MatOfPoint2f dst = new MatOfPoint2f();
 
         src.fromList(imagePoints);
-
         Core.perspectiveTransform(src, dst, this.h);
+        List<Point> mapPoints = dst.toList();
+
+        for (int i=0; i<positions.size(); i++) {
+            Position p = positions.get(i);
+            Point latlon = mapPoints.get(i);
+            p.setLatitude(latlon.x);
+            p.setLongitude(latlon.y);
+        }
     }
 }

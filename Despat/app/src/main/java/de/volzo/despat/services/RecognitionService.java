@@ -99,9 +99,8 @@ public class RecognitionService extends IntentService {
 
         Detector detector;
         try {
-            detector = new DetectorSSD(this);
-//            detector = new DetectorHOG(activity);
-            detector.init(session.getDetectorConfig());
+            detector = new DetectorSSD(this, session.getDetectorConfig());
+            detector.init();
         } catch (Exception e) {
             Log.e(TAG, "detector init failed", e);
             return;

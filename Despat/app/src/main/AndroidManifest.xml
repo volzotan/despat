@@ -99,6 +99,11 @@
             android:label="Compressor Service"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
+            android:name=".services.HomographyService"
+            android:exported="false"
+            android:label="Homography Service"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
             android:name=".services.HeartbeatService"
             android:exported="false"
             android:label="Heartbeat Service"

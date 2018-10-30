@@ -109,6 +109,8 @@ public class Config {
     // logcat text file directory
     public static final File LOGCAT_DIR                             = new File(Environment.getExternalStorageDirectory(), "despat");
 
+    // TODO: change that to app data directory, ie: /data/data/de.volzo.despat/tmp
+
     // Session export temp directory
     public static final File TMP_DIR                                = new File(new File(Environment.getExternalStorageDirectory(), "despat"), "tmp");
 
