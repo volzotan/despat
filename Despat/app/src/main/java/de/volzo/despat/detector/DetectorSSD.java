@@ -160,7 +160,7 @@ public class DetectorSSD extends Detector {
         stopwatch.stop("tileManager init");
 
         List<Detector.Recognition> results;
-        List<TileManager.Tile> tiles = tileManager.getAllTiles().subList(0, 3);
+        List<TileManager.Tile> tiles = tileManager.getAllTiles().subList(0, 4);
 
         for (TileManager.Tile tile : tiles){
             stopwatch.start("totalInference");
@@ -185,14 +185,14 @@ public class DetectorSSD extends Detector {
         tileManager.close();
         emptyBitmap.recycle();
 
-        Log.d(TAG, "Total Benchmark time: " + Long.toString(fullImageTimer-System.currentTimeMillis()));
+        Log.d(TAG, "Total Benchmark time: " + Long.toString(System.currentTimeMillis()-fullImageTimer));
     }
 
     public Long estimateComputationTime(Size imageSize) {
         AppDatabase database = AppDatabase.getAppDatabase(context);
         BenchmarkDao benchmarkDao = database.benchmarkDao();
 
-        TileManager emptyTileManager = new TileManager(imageSize, TILESIZE_OUTPUT);
+        TileManager emptyTileManager = new TileManager(imageSize, TILESIZE_INPUT);
         List<Benchmark> benchmarks = benchmarkDao.getLast3ByDetectorOfType(detectorConfig.getDetector(), Benchmark.TYPE_TILE);
 
         if (benchmarks == null || benchmarks.size() == 0) {

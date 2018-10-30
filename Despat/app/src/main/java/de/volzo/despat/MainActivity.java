@@ -348,55 +348,31 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     private void runTestCode() {
 
         final Context context = this;
-//        AsyncTask.execute(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                try {
-//                    long start = System.currentTimeMillis();
-//
-//                    List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
-//                    DetectorSSD detector;
-//
-//                    detector = new DetectorSSD(context);
-//                    detector.init(new DetectorConfig("low", 600));
-//                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
-//
-//                    detector = new DetectorSSD(context);
-//                    detector.init(new DetectorConfig("mid", 900));
-//                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
-//
-//                    detector = new DetectorSSD(context);
-//                    detector.init(new DetectorConfig("high", 900));
-//                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
-//
-//                    Log.wtf(TAG, "Benchmarking done in " + (System.currentTimeMillis()-start));
-//
-//                } catch (Exception e) {
-//                    Log.wtf(TAG, "fail", e);
-//                }
-//            }
-//        });
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String[] fidelitySettings = new String[]{"low", "mid", "high"};
 
-        try {
+                    List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
+                    Size imageSize = new Size(cameras.get(0).getHeight(), cameras.get(0).getWidth());
 
-            List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
-            Size imageSize = new Size(cameras.get(0).getHeight(),  cameras.get(0).getWidth());
+                    for (String fidelity : fidelitySettings) {
+                        Detector detector = new DetectorSSD(context);
+                        detector.init(new DetectorConfig(fidelity, 800));
+                        Long time = ((DetectorSSD) detector).estimateComputationTime(imageSize);
 
-            Detector detectorLow = new DetectorSSD(context);
-            detectorLow.init(new DetectorConfig("low", 600));
-            Log.wtf(TAG, String.format("low: %d", ((DetectorSSD) detectorLow).estimateComputationTime(imageSize)));
-
-            Detector detectorMid = new DetectorSSD(context);
-            detectorLow.init(new DetectorConfig("mid", 900));
-            Log.wtf(TAG, String.format("mid: %d", ((DetectorSSD) detectorMid).estimateComputationTime(imageSize)));
-
-            Detector detectorHigh = new DetectorSSD(context);
-            detectorLow.init(new DetectorConfig("hjgh", 900));
-            Log.wtf(TAG, String.format("high: %d", ((DetectorSSD) detectorHigh).estimateComputationTime(imageSize)));
-        } catch (Exception e) {
-            Log.w(TAG, e);
-        }
+                        if (time == null) {
+                            detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+                        } else {
+                            Log.wtf(TAG, String.format("%s: %d", fidelity, time));
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.w(TAG, e);
+                }
+            }
+        });
 
 //        Config.enableCTMode(this);
 
