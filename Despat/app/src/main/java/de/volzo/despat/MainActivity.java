@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -79,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     Despat despat;
     MainActivity activity = this;
 
-    PowerbrainConnector powerbrain;
     Detector detector;
 
     TextureView textureView;
@@ -348,42 +348,54 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     private void runTestCode() {
 
         final Context context = this;
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
+//        AsyncTask.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                try {
+//                    long start = System.currentTimeMillis();
+//
+//                    List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
+//                    DetectorSSD detector;
+//
+//                    detector = new DetectorSSD(context);
+//                    detector.init(new DetectorConfig("low", 600));
+//                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+//
+//                    detector = new DetectorSSD(context);
+//                    detector.init(new DetectorConfig("mid", 900));
+//                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+//
+//                    detector = new DetectorSSD(context);
+//                    detector.init(new DetectorConfig("high", 900));
+//                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+//
+//                    Log.wtf(TAG, "Benchmarking done in " + (System.currentTimeMillis()-start));
+//
+//                } catch (Exception e) {
+//                    Log.wtf(TAG, "fail", e);
+//                }
+//            }
+//        });
 
-                try {
-                    long start = System.currentTimeMillis();
+        try {
 
-                    List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
-                    DetectorSSD detector;
+            List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
+            Size imageSize = new Size(cameras.get(0).getHeight(),  cameras.get(0).getWidth());
 
-                    detector = new DetectorSSD(context);
-                    detector.init(new DetectorConfig("low", 600));
-                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+            Detector detectorLow = new DetectorSSD(context);
+            detectorLow.init(new DetectorConfig("low", 600));
+            Log.wtf(TAG, String.format("low: %d", ((DetectorSSD) detectorLow).estimateComputationTime(imageSize)));
 
-                    detector = new DetectorSSD(context);
-                    detector.init(new DetectorConfig("mid", 900));
-                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
+            Detector detectorMid = new DetectorSSD(context);
+            detectorLow.init(new DetectorConfig("mid", 900));
+            Log.wtf(TAG, String.format("mid: %d", ((DetectorSSD) detectorMid).estimateComputationTime(imageSize)));
 
-                    detector = new DetectorSSD(context);
-                    detector.init(new DetectorConfig("high", 900));
-                    detector.runBenchmark(cameras.get(0).getWidth(), cameras.get(0).getHeight());
-
-                    Log.wtf(TAG, "Benchmarking done in " + (System.currentTimeMillis()-start));
-
-                } catch (Exception e) {
-                    Log.wtf(TAG, "fail", e);
-                }
-            }
-        });
-
-        AppDatabase database = AppDatabase.getAppDatabase(context);
-        BenchmarkDao benchmarkDao = database.benchmarkDao();
-        List<Benchmark> benchmarks = benchmarkDao.getAllOfType(Benchmark.TYPE_IMAGE);
-
-        for (Benchmark b : benchmarks) {
-            Log.d(TAG, b.toString());
+            Detector detectorHigh = new DetectorSSD(context);
+            detectorLow.init(new DetectorConfig("hjgh", 900));
+            Log.wtf(TAG, String.format("high: %d", ((DetectorSSD) detectorHigh).estimateComputationTime(imageSize)));
+        } catch (Exception e) {
+            Log.w(TAG, e);
         }
 
 //        Config.enableCTMode(this);

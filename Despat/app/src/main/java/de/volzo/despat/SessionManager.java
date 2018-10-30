@@ -32,6 +32,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.persistence.AppDatabase;
+import de.volzo.despat.persistence.Benchmark;
+import de.volzo.despat.persistence.BenchmarkDao;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Event;

@@ -160,8 +160,9 @@ public class DetectorSSD extends Detector {
         stopwatch.stop("tileManager init");
 
         List<Detector.Recognition> results;
+        List<TileManager.Tile> tiles = tileManager.getAllTiles().subList(0, 3);
 
-        for (TileManager.Tile tile : tileManager.getAllTiles()){
+        for (TileManager.Tile tile : tiles){
             stopwatch.start("totalInference");
             Bitmap crop = tileManager.getTileImage(tile);
             results = tfInterface.recognizeImage(crop);
@@ -178,22 +179,34 @@ public class DetectorSSD extends Detector {
 
             // tile.setResults(results); EVIL
             tileManager.passResult(tile, results);
-            Log.d(TAG, "tile done: " + tile);
         }
-
-        Benchmark benchmark = new Benchmark();
-        benchmark.setDetector(this.detectorConfig.getDetector());
-        benchmark.setTilesize(this.detectorConfig.getTilesize());
-        benchmark.setTimestamp(Calendar.getInstance().getTime());
-        benchmark.setType(Benchmark.TYPE_IMAGE);
-        benchmark.setInferenceTime(System.currentTimeMillis() - fullImageTimer);
-        benchmarkDao.insert(benchmark);
 
         stopwatch.print();
         tileManager.close();
         emptyBitmap.recycle();
 
-        Log.d(TAG, "Total Benchmark time: " + benchmark.getInferenceTime());
+        Log.d(TAG, "Total Benchmark time: " + Long.toString(fullImageTimer-System.currentTimeMillis()));
+    }
+
+    public Long estimateComputationTime(Size imageSize) {
+        AppDatabase database = AppDatabase.getAppDatabase(context);
+        BenchmarkDao benchmarkDao = database.benchmarkDao();
+
+        TileManager emptyTileManager = new TileManager(imageSize, TILESIZE_OUTPUT);
+        List<Benchmark> benchmarks = benchmarkDao.getLast3ByDetectorOfType(detectorConfig.getDetector(), Benchmark.TYPE_TILE);
+
+        if (benchmarks == null || benchmarks.size() == 0) {
+            return null;
+        }
+
+        float avg = 0;
+        for (Benchmark b : benchmarks) {
+            avg += b.getInferenceTime();
+        }
+
+        avg = avg/benchmarks.size();
+
+        return (long) avg * emptyTileManager.getAllTiles().size();
     }
 
     @Override

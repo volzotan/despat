@@ -20,6 +20,9 @@ public interface BenchmarkDao {
     @Query("SELECT * FROM benchmark WHERE detector = :detector")
     List<Benchmark> getAllByDetector(String detector);
 
+    @Query("SELECT * FROM benchmark WHERE detector = :detector AND type = :type DESC LIMIT 3")
+    List<Benchmark> getLast3ByDetectorOfType(String detector, int type);
+
     @Insert
     void insert(Benchmark... benchmarks);
 

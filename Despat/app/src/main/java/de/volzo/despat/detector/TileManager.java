@@ -46,21 +46,11 @@ public class TileManager {
         init(new Size(imagewidth, imageheight));
     }
 
-//    public TileManager(File filename) {
-//        this.filename = filename;
-//
-//        image = BitmapFactory.decodeFile(filename.getAbsolutePath());
-//
-//        int imagewidth = image.getWidth();
-//        int imageheight = image.getHeight();
-//
-//        init(new Size(imagewidth, imageheight));
-//    }
-
     /*
      * Initializes an empty TileManager which should _not_ be used to try to access image tile
      * contents. Only usecase is to obtain information about the placement and size of the
-     * tiling for an overlay on the compressed image during visualization.
+     * tiling for an overlay on the compressed image during visualization or
+     * estimating computation time
      *
      */
     public TileManager(Size imageSize, int tilesize) {
