@@ -207,8 +207,16 @@ public class HomographyPointListFragment extends Fragment implements
 
     // Fragment
 
-    public void onHomographyPointListSelectionListener(HomographyPoint homographyPoint) {
+    public void onHomographyPointListSelectionListener(HomographyPoint homographyPoint, int position) {
+        AppDatabase database = AppDatabase.getAppDatabase(getContext());
+        HomographyPointDao homographyPointDao = database.homographyPointDao();
 
+        homographyPointDao.delete(homographyPoint);
+
+        ((HomographyPointRecyclerViewAdapter) recyclerView.getAdapter()).data.remove(homographyPoint);
+        recyclerView.getAdapter().notifyItemRemoved(position);
+//        recyclerView.getAdapter().notifyDataSetChanged();
+//        recyclerView.getAdapter().notifyItemRangeChanged(position, position+1);
     }
 
     public void onHomographyPointAddListener(Session session) {
@@ -275,7 +283,7 @@ public class HomographyPointListFragment extends Fragment implements
 
         private Context context;
         private final HomographyPointListFragment listener;
-        private List<HomographyPoint> data;
+        public List<HomographyPoint> data;
 
         public HomographyPointRecyclerViewAdapter(Context context, List<HomographyPoint> data, HomographyPointListFragment listener) {
             this.context = context;
@@ -314,7 +322,7 @@ public class HomographyPointListFragment extends Fragment implements
                 @Override
                 public void onClick(View v) {
                     if (listener != null) {
-                        listener.onHomographyPointListSelectionListener(holder.point);
+                        listener.onHomographyPointListSelectionListener(holder.point, holder.getAdapterPosition());
                     }
                 }
             });

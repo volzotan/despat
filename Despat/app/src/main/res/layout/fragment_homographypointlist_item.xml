@@ -18,6 +18,8 @@
         android:id="@+id/bt_homography_delete"
         android:text="DELETE"
         android:drawableRight="@drawable/ic_baseline_delete"
+        android:drawableTint="@color/white"
+        android:drawablePadding="4dp"
         android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"/>
