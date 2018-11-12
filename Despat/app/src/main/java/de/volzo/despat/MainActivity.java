@@ -439,9 +439,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void run() {
                 try {
-                    String[] fidelitySettings = new String[]{"low", "mid", "high"};
-
-                    for (String fidelity : fidelitySettings) {
+                    for (String fidelity : DetectorSSD.FIDELITY_MODE) {
                         Detector detector = new DetectorSSD(context, new DetectorConfig(fidelity, 1000));
                         detector.init();
                         Long time = ((DetectorSSD) detector).estimateComputationTime(new Size(1000, 1000));
@@ -921,7 +919,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     public void runRecognizer() {
         try {
-            detector = new DetectorSSD(activity, new DetectorConfig("low", 600));
+            detector = new DetectorSSD(activity, new DetectorConfig(DetectorSSD.FIDELITY_MODE[0], 600));
 //            detector = new DetectorHOG(activity);
             detector.init();
             detector.load(new File(Config.getImageFolder(activity), "test.jpg"));

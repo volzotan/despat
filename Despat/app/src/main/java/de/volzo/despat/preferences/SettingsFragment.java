@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import de.volzo.despat.R;
+import de.volzo.despat.detector.DetectorSSD;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -144,8 +145,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         ListPreference prefNetworkFidelity = new ListPreference(context);
         prefNetworkFidelity.setTitle(R.string.pref_title_networkFidelity);
         prefNetworkFidelity.setSummary(R.string.pref_summary_networkFidelity);
-        prefNetworkFidelity.setEntryValues(new String[] {"low", "mid", "high"});
-        prefNetworkFidelity.setEntries(new String[] {"Low-fidelity", "Medium-Fidelity", "High-Fidelity"});
+        prefNetworkFidelity.setEntryValues(DetectorSSD.FIDELITY_MODE);
+        prefNetworkFidelity.setEntries(DetectorSSD.FIDELITY_MODE);
         prefNetworkFidelity.setDefaultValue(Config.DEFAULT_NETWORK_FIDELITY);
         prefNetworkFidelity.setKey(Config.KEY_NETWORK_FIDELITY);
         category.addPreference(prefNetworkFidelity);

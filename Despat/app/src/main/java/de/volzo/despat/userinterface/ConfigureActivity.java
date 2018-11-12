@@ -145,31 +145,30 @@ public class ConfigureActivity extends AppCompatActivity {
 
         LinearLayout toggleLayout = findViewById(R.id.toggleContainerNetworkFidelity);
         final List<ToggleButton> detector_buttons = new ArrayList<>();
-        final String[] detector_values = {"low", "mid", "high"};
 
         View.OnClickListener buttonClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String state = (String) v.getTag();
-                setDetectorButtonStates(state, detector_values, detector_buttons);
+                setDetectorButtonStates(state, DetectorSSD.FIDELITY_MODE, detector_buttons);
             }
         };
 
-        for (String value : detector_values) {
+        for (String value : DetectorSSD.FIDELITY_MODE) {
             ToggleButton button = new ToggleButton(this);
             button.setTag(value);
             button.setText(value);
             button.setTextOff(value);
             button.setTextOn(value);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            layoutParams.weight = 1.0f / detector_values.length;
+            layoutParams.weight = 1.0f / DetectorSSD.FIDELITY_MODE.length;
             button.setLayoutParams(layoutParams);
             toggleLayout.addView(button);
             detector_buttons.add(button);
             button.setOnClickListener(buttonClickListener);
         }
 
-        setDetectorButtonStates(Config.getNetworkFidelity(activity), detector_values, detector_buttons);
+        setDetectorButtonStates(Config.getNetworkFidelity(activity), DetectorSSD.FIDELITY_MODE, detector_buttons);
 
 //        Button btSetTime = (Button) findViewById(R.id.bt_setTime);
 //        btSetTime.setOnClickListener(new View.OnClickListener() {
@@ -201,7 +200,7 @@ public class ConfigureActivity extends AppCompatActivity {
                 String fidelity = Config.getNetworkFidelity(context);
                 for (int i=0; i<detector_buttons.size(); i++) {
                     if (detector_buttons.get(i).isChecked()) {
-                        fidelity = detector_values[i];
+                        fidelity = DetectorSSD.FIDELITY_MODE[i];
                     }
                 }
                 DetectorConfig detectorConfig = new DetectorConfig(fidelity, 700); // TODO
@@ -235,7 +234,11 @@ public class ConfigureActivity extends AppCompatActivity {
             Long time = ((DetectorSSD) detector).estimateComputationTime(imageSize);
 
             TextView tv = findViewById(R.id.tv_estimatedComputationTime);
-            tv.setText(String.format("%d seconds", time/1000));
+            if (time != null) {
+                tv.setText(String.format("%d seconds", time / 1000));
+            } else {
+                tv.setText("(could not be computed)");
+            }
         } catch (Exception e) {
             Log.e(TAG, "estimating computation time failed", e);
         }

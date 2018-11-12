@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import de.volzo.despat.R;
+import de.volzo.despat.detector.DetectorSSD;
 
 /**
  * Created by volzotan on 20.12.16.
@@ -139,7 +140,7 @@ public class Config {
     public static final int     DEFAULT_SHUTTER_INTERVAL                    = 10 * 1000; // in ms
     public static final int     DEFAULT_EXPOSURE_COMPENSATION               = 0;
     public static final int     DEFAULT_SECOND_IMAGE_EXPOSURE_COMPENSATION  = 0;
-    public static final String  DEFAULT_NETWORK_FIDELITY                    = "low";
+    public static final String  DEFAULT_NETWORK_FIDELITY                    = DetectorSSD.FIDELITY_MODE[0];
     public static final boolean DEFAULT_PHONE_HOME                          = false;
     public static final String  DEFAULT_SERVER_ADDRESS                      = "http://zoltep.de";   // format protocol://example.com
     public static final long    DEFAULT_MIN_SYNC_INTERVAL                   = 5 * 60 * 1000;        // at most every X ms

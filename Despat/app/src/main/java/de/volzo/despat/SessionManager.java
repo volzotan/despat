@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import de.volzo.despat.detector.Detector;
+import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Benchmark;
 import de.volzo.despat.persistence.BenchmarkDao;
@@ -470,7 +471,7 @@ public class SessionManager {
         cameraConfig.setShutterInterval(10000);
         example.setCameraConfig(cameraConfig);
 
-        DetectorConfig detectorConfig = new DetectorConfig("low", 1000);
+        DetectorConfig detectorConfig = new DetectorConfig(DetectorSSD.FIDELITY_MODE[0], 1000);
         example.setDetectorConfig(detectorConfig);
 
         Long sessionId = sessionDao.insert(example)[0];

@@ -28,6 +28,8 @@ public class DetectorSSD extends Detector {
 
     private static final String TAG = DetectorSSD.class.getSimpleName();
 
+    public static final String[] FIDELITY_MODE = {"low", "high"};
+
     private TensorFlowInterface tfInterface;
     private Stopwatch stopwatch;
 
@@ -67,11 +69,11 @@ public class DetectorSSD extends Detector {
                 TILESIZE_OUTPUT = 300;
                 break;
             }
-            case "mid": {
-                TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_inception_v2.pb";
-                TILESIZE_OUTPUT = TILESIZE_INPUT;
-                break;
-            }
+//            case "mid": {
+//                TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_inception_v2.pb";
+//                TILESIZE_OUTPUT = TILESIZE_INPUT;
+//                break;
+//            }
             case "high": {
                 TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_fpn.pb";
                 TILESIZE_OUTPUT = 640;
