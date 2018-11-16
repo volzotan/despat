@@ -237,6 +237,7 @@ public class ConfigureActivity extends AppCompatActivity {
             if (time != null) {
                 tv.setText(String.format("%d seconds", time / 1000));
             } else {
+                Log.w(TAG, "Benchmark times for fidelity computation time estimation are missing");
                 tv.setText("(could not be computed)");
             }
         } catch (Exception e) {

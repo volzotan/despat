@@ -15,12 +15,16 @@ limitations under the License.
 
 package de.volzo.despat.detector;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Trace;
+import android.os.storage.StorageManager;
+import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,6 +36,8 @@ import java.util.Vector;
 import org.tensorflow.Graph;
 import org.tensorflow.Operation;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
+
+import de.volzo.despat.support.Util;
 
 /**
  * Wrapper for frozen detection models trained using the Tensorflow Object Detection API:
@@ -70,7 +76,9 @@ public class TensorFlowInterface {
      * @param labelFilename The filepath of label file for classes.
      */
     public static TensorFlowInterface create(
+            final Context context,
             final AssetManager assetManager,
+            final StorageManager storageManager,
             final String modelFilename,
             final String labelFilename,
             final int inputSize) throws IOException {
@@ -88,7 +96,19 @@ public class TensorFlowInterface {
         }
         br.close();
 
-        d.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
+//        d.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
+
+        String path = Util.getObbMountDir(context, storageManager);
+        InputStream modelInputStream = null;
+        try {
+            modelInputStream = new FileInputStream(path + "/" + modelFilename);
+            d.inferenceInterface = new TensorFlowInferenceInterface(modelInputStream);
+        } catch (Exception e) {
+            Log.e(TAG, "initializing tf failed", e);
+            throw e;
+        } finally {
+            modelInputStream.close();
+        }
 
         final Graph g = d.inferenceInterface.graph();
 

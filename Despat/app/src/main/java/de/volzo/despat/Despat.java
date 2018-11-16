@@ -3,12 +3,25 @@ package de.volzo.despat;
 import android.app.Application;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.res.AssetManager;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.PowerManager;
+import android.os.storage.OnObbStateChangeListener;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.util.Log;
 import android.view.TextureView;
 import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.CameraConfig;
@@ -30,6 +43,9 @@ public class Despat extends Application {
     private SystemController systemController;
 
     private PowerManager.WakeLock wakeLock;
+
+    private StorageManager storageManager;
+    private OnObbStateChangeListener obbListener;
 
     private ProximitySensor proximitySensor;
 
@@ -89,6 +105,13 @@ public class Despat extends Application {
 //        proximitySensor = new ProximitySensor(this);
 
         printSysinfo();
+
+        try {
+            mountObb();
+        } catch (Exception e) {
+            Log.e(TAG, "mounting OBB failed", e);
+        }
+
     }
 
     private void initOrchestrator() {
@@ -116,6 +139,84 @@ public class Despat extends Application {
 
     private void printSysinfo() {
         Log.i(TAG, new DeviceInfo(context).toString());
+    }
+
+    private void mountObb() throws Exception {
+
+        storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
+        final String pathObb = Util.getObbPath(this);
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(pathObb));
+        } catch (IOException e) {
+            Log.e(TAG, "missing write external storage permissions");
+            throw e;
+        }
+
+//        try {
+//            ObbInfo info = ObbScanner.getObbInfo(pathObb);
+//            Log.i(TAG, "obb filename: " + info.filename);
+//            Log.i(TAG, "obb package name: " + info.packageName);
+//            Log.i(TAG, "obb flags: " + Integer.toString(info.flags));
+//            Log.i(TAG, "obb version: " + Integer.toString(info.version));
+//        } catch (Exception e) {
+//            Log.e(TAG, "scanning failed", e);
+//        }
+
+        if (storageManager.isObbMounted(pathObb)) {
+            Log.i(TAG, "OBB already mounted at: " + storageManager.getMountedObbPath(pathObb));
+            return;
+        }
+
+        if (!(new File(pathObb)).exists()) {
+            Log.e(TAG, "OBB file is missing");
+            throw new Exception("missing OBB file: " + pathObb);
+        }
+
+        obbListener = new OnObbStateChangeListener() {
+            @Override
+            public void onObbStateChange(String path, int state) {
+                super.onObbStateChange(path, state);
+
+                Log.wtf(TAG, "mount callback");
+
+                switch (state) {
+                    case OnObbStateChangeListener.MOUNTED: {
+                        Log.i(TAG, "OBB mounted: " + storageManager.getMountedObbPath(pathObb));
+                        break;
+                    }
+                    case OnObbStateChangeListener.UNMOUNTED: {
+                        Log.i(TAG, "OBB unmounted");
+                        break;
+                    }
+                    case OnObbStateChangeListener.ERROR_ALREADY_MOUNTED: {
+                        Log.e(TAG, "mounting failed: already mounted");
+                        break;
+                    }
+                    case OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT: {
+                        Log.e(TAG, "mounting failed: could not mount");
+                        break;
+                    }
+                    case OnObbStateChangeListener.ERROR_INTERNAL: {
+                        Log.e(TAG, "mounting failed: error internal");
+                        break;
+                    }
+                    case OnObbStateChangeListener.ERROR_PERMISSION_DENIED: {
+                        Log.e(TAG, "mounting failed: error permission denied");
+                        break;
+                    }
+                    default: {
+                        Log.wtf(TAG, "path: " + path + " " + Integer.toString(state));
+                    }
+                }
+            }
+        };
+
+        storageManager.mountObb(pathObb, null, obbListener);
+    }
+
+    public StorageManager getStorageManager() {
+        return storageManager;
     }
 
     @Override

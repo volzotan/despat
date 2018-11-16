@@ -2,6 +2,7 @@ package de.volzo.despat.detector;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Debug;
@@ -16,11 +17,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.volzo.despat.Despat;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Benchmark;
 import de.volzo.despat.persistence.BenchmarkDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.preferences.DetectorConfig;
+import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.support.Stopwatch;
 
@@ -28,14 +31,14 @@ public class DetectorSSD extends Detector {
 
     private static final String TAG = DetectorSSD.class.getSimpleName();
 
-    public static final String[] FIDELITY_MODE = {"low", "high"};
+    public static final String[] FIDELITY_MODE = {"low", "mid", "high"};
 
     private TensorFlowInterface tfInterface;
     private Stopwatch stopwatch;
 
     private int TILESIZE_INPUT = 800;
     private int TILESIZE_OUTPUT = 300;
-    private String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
+    private String TF_OD_API_MODEL_FILE = "ssd_mobilenet_v1.pb";
 
 //    private static final int TILESIZE_INPUT = 1000;
 //    private static final int TILESIZE_OUTPUT = 1000;
@@ -65,17 +68,18 @@ public class DetectorSSD extends Detector {
 
         switch (this.detectorConfig.getDetector()) {
             case "low": {
-                TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
+//                TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1.pb";
+                TF_OD_API_MODEL_FILE = "ssd_mobilenet_v1.pb";
                 TILESIZE_OUTPUT = 300;
                 break;
             }
-//            case "mid": {
-//                TF_OD_API_MODEL_FILE = "file:///android_asset/frcnn_inception_v2.pb";
-//                TILESIZE_OUTPUT = TILESIZE_INPUT;
-//                break;
-//            }
+            case "mid": {
+                TF_OD_API_MODEL_FILE = "frcnn_inception_v2.pb";
+                TILESIZE_OUTPUT = TILESIZE_INPUT;
+                break;
+            }
             case "high": {
-                TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_fpn.pb";
+                TF_OD_API_MODEL_FILE = "ssd_mobilenet_v1_fpn.pb";
                 TILESIZE_OUTPUT = 640;
                 break;
             }
@@ -111,10 +115,12 @@ public class DetectorSSD extends Detector {
         }
 
         stopwatch = new Stopwatch();
-
+        Despat despat = Util.getDespat(context);
         try {
             tfInterface = TensorFlowInterface.create(
+                    context,
                     context.getAssets(),
+                    despat.getStorageManager(),
                     TF_OD_API_MODEL_FILE,
                     TF_OD_API_LABELS_FILE,
                     TILESIZE_OUTPUT

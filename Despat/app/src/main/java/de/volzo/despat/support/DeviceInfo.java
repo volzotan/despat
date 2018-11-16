@@ -1,9 +1,12 @@
 package de.volzo.despat.support;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Build;
+import android.util.Log;
 import android.util.Size;
 
 import java.text.SimpleDateFormat;
@@ -18,12 +21,16 @@ import de.volzo.despat.preferences.Config;
 
 public class DeviceInfo {
 
+    private static final String TAG = DeviceInfo.class.getSimpleName();
+
     String vendor;
     String identifier;
     String id;
     String version;
+    String buildType;
     String name;
-    String despatVersion;
+    String despatVersionName;
+    int despatVersionCode;
     String despatBuildTime;
 
     List<CameraInfo> cameras;
@@ -37,8 +44,10 @@ public class DeviceInfo {
         identifier = android.os.Build.MODEL;
         id = Config.getUniqueDeviceId(context);
         version = Build.VERSION.RELEASE;
+        buildType = BuildConfig.BUILD_TYPE;
         name = Config.getDeviceName(context);
-        despatVersion = "";
+        despatVersionName = BuildConfig.VERSION_NAME;
+        despatVersionCode = BuildConfig.VERSION_CODE;
         despatBuildTime = (new SimpleDateFormat(Config.DATEFORMAT_SHORT, Config.LOCALE)).format(BuildConfig.buildTime);
 
         try {
@@ -78,12 +87,20 @@ public class DeviceInfo {
         sb.append(String.format("%20s",  version));
         sb.append("\n");
 
+        sb.append(String.format("%-20s", "Build  type:"));
+        sb.append(String.format("%20s",  buildType));
+        sb.append("\n");
+
         sb.append(String.format("%-20s", "Device name:"));
         sb.append(String.format("%20s",  name));
         sb.append("\n");
 
+        sb.append(String.format("%-20s", "Despat version name:"));
+        sb.append(String.format("%20s",  despatVersionName));
+        sb.append("\n");
+
         sb.append(String.format("%-20s", "Despat version:"));
-        sb.append(String.format("%20s",  despatVersion));
+        sb.append(String.format("%20d",  despatVersionCode));
         sb.append("\n");
 
         sb.append(String.format("%-20s", "Despat buildTime:"));

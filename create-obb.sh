@@ -1,0 +1,1 @@
+~/Library/Android/sdk/tools/bin/jobb -d Despat/OBB -o main.1.de.volzo.despat.obb -pn de.volzo.despat -pv 1 -v

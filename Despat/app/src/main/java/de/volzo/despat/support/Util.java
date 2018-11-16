@@ -13,6 +13,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.content.res.ObbInfo;
+import android.content.res.ObbScanner;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -27,6 +29,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
+import android.os.storage.OnObbStateChangeListener;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import com.google.android.material.snackbar.Snackbar;
@@ -42,6 +47,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,6 +70,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
+import de.volzo.despat.BuildConfig;
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
 import de.volzo.despat.MainActivity;
@@ -405,6 +412,26 @@ public class Util {
         i.putExtra(Intent.EXTRA_STREAM, fileUri);
         i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         context.startActivity(Intent.createChooser(i, "Share session data"));
+    }
+
+    public static String getObbPath(Context context) {
+        String packageName = context.getPackageName();
+        String obbDir = context.getObbDir().getAbsolutePath();
+        String version = Integer.toString(BuildConfig.VERSION_CODE);
+        String obbName = "main." + version + "." + packageName + ".obb";
+        return obbDir + "/" + obbName;
+    }
+
+    public static void loadObb(Context context) {
+        // TODO
+    }
+
+    public static String getObbMountDir(Context context, StorageManager storageManager) {
+        if (!storageManager.isObbMounted(getObbPath(context))) {
+            return null;
+        }
+
+        return storageManager.getMountedObbPath(getObbPath(context));
     }
 
     public static void playSound(Context context) {
