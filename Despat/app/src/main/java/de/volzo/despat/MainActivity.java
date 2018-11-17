@@ -5,12 +5,12 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -22,6 +22,8 @@ import android.provider.Settings;
 
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.google.android.material.snackbar.Snackbar;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,12 +49,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-import androidx.core.content.res.ResourcesCompat;
 import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
-import de.volzo.despat.persistence.Benchmark;
-import de.volzo.despat.persistence.BenchmarkDao;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
@@ -62,7 +61,6 @@ import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
-import de.volzo.despat.support.DeviceInfo;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.ConfigureActivity;
@@ -343,9 +341,34 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         updateSysInfobox();
 
         runTestCode();
+
+        File obbFile = new File(Util.getObbPath(this);
+        if (!obbFile.exists()) {
+            Log.e(TAG, "OBB file missing: " + obbFile.getAbsolutePath());
+
+            AlertDialog.Builder builder;
+            builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+            builder.setTitle("Missing components")
+                    .setMessage("During installation the required detection algorithms have not been downloaded")
+                    .setPositiveButton("Download manually", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO
+                        }
+                    })
+                    .setNegativeButton("Ignore", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {}
+                    })
+
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 
     private void runTestCode() {
+
+//        float foo = 12.3f;
+//        byte[] arr = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(foo).array();
+//        float foo2 = ByteBuffer.allocate(4).getFloat();
 
 //        Config.enableCTMode(this);
 
@@ -399,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //        HomographyCalculator hcalc = new HomographyCalculator();
 //        hcalc.test(this);
 
-        //        btSettings.callOnClick();
+                //        btSettings.callOnClick();
 
 //        startCapturing.callOnClick();
 //        btConfig.callOnClick();

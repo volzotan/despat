@@ -171,14 +171,14 @@ public class Despat extends Application {
         if (!(new File(pathObb)).exists()) {
             Log.e(TAG, "OBB file is missing");
             throw new Exception("missing OBB file: " + pathObb);
+
+            // TODO: start download
         }
 
         obbListener = new OnObbStateChangeListener() {
             @Override
             public void onObbStateChange(String path, int state) {
                 super.onObbStateChange(path, state);
-
-                Log.wtf(TAG, "mount callback");
 
                 switch (state) {
                     case OnObbStateChangeListener.MOUNTED: {

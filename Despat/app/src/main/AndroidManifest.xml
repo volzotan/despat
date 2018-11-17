@@ -23,6 +23,9 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
+    <!-- OBB loading -->
+    <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
+
     <application
         android:name=".Despat"
         android:allowBackup="true"
