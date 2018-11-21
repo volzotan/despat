@@ -53,6 +53,10 @@ dependencies {
     })
     testImplementation 'junit:junit:4.12'
 
+    // Obb Downloading
+    implementation project(path: ':googleplaylicenselibrary')
+    implementation project(path: ':googleplaydownloaderlibrary')
+
     // Google Maps
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
 
