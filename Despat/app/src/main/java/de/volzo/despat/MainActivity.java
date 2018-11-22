@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         setContentView(R.layout.activity_main);
 
-        Log.i(TAG, "despat MainActivity init");
+        Log.i(TAG, "MainActivity init");
 
         despat = ((Despat) getApplicationContext());
 
@@ -342,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         runTestCode();
 
-        File obbFile = new File(Util.getObbPath(this);
+        File obbFile = new File(Util.getObbPath(this));
         if (!obbFile.exists()) {
             Log.e(TAG, "OBB file missing: " + obbFile.getAbsolutePath());
 
@@ -588,7 +589,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     protected void onDestroy() {
         super.onDestroy();
         cleanup();
-        Log.i(TAG, "application exit");
+        Log.i(TAG, "MainActivity destroy");
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        Log.i(TAG, "MainActivity configuration changed");
     }
 
     @Override

@@ -139,12 +139,16 @@ public class Despat extends Application {
 
     private void printSysinfo() {
         Log.i(TAG, new DeviceInfo(context).toString());
+        Log.i(TAG, Config.print(context));
     }
 
     private void mountObb() throws Exception {
 
-        storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
-        final String pathObb = Util.getObbPath(this);
+        if (storageManager == null) {
+            storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
+        }
+
+        String pathObb = Util.getObbPath(this);
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(pathObb));
@@ -175,6 +179,32 @@ public class Despat extends Application {
             // TODO: start download
         }
 
+        if (obbListener == null) {
+            Log.i(TAG, "obbListener created");
+            createObbListener(pathObb);
+        }
+
+        storageManager.mountObb(pathObb, null, obbListener);
+    }
+
+    private void unmountObb() {
+
+        if (storageManager == null) {
+            Log.i(TAG, "no storage manager present. Unmounting OBBs unnecessary");
+            return;
+        }
+
+        String pathObb = Util.getObbPath(this);
+
+        if (obbListener == null) {
+            Log.i(TAG, "obbListener created");
+            createObbListener(pathObb);
+        }
+
+        storageManager.unmountObb(pathObb, true, obbListener);
+    }
+
+    private void createObbListener(final String pathObb) {
         obbListener = new OnObbStateChangeListener() {
             @Override
             public void onObbStateChange(String path, int state) {
@@ -212,7 +242,6 @@ public class Despat extends Application {
             }
         };
 
-        storageManager.mountObb(pathObb, null, obbListener);
     }
 
     public StorageManager getStorageManager() {
@@ -225,6 +254,7 @@ public class Despat extends Application {
 
         Log.i(TAG, "despat terminate.");
         closeCamera();
+        unmountObb();
         Util.saveEvent(this, Event.EventType.SHUTDOWN, null);
     }
 

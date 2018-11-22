@@ -342,7 +342,7 @@ public class Config {
     /**
      * MIN HEARTBEAT INTERVAL
      */
-    public static final String KEY_MIN_HEARTBEAT_INTERVAL                = "de.volzo.despat.minHeartbeatInterval";
+    public static final String KEY_MIN_HEARTBEAT_INTERVAL           = "de.volzo.despat.minHeartbeatInterval";
     public static long getMinHeartbeatInterval(Context context) {
         return getPropertyLong(context, KEY_MIN_HEARTBEAT_INTERVAL, DEFAULT_MIN_HEARTBEAT_INTERVAL);
     }
@@ -621,5 +621,91 @@ public class Config {
         if (DEFAULT_SHUTTER_INTERVAL < 6000) throw new Exception("shutter interval shorter than 6s");
 
 
+    }
+
+    private static String strip(String inp) {
+        String[] segments = inp.split("\\.");
+        return segments[segments.length-1];
+    }
+
+    public static String print(Context context) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(" \n");
+        sb.append("----------------------------------------\n");
+
+//        sb.append(String.format("%-20s", "IMGROLL_FREE_SPACE_THRESHOLD"));
+//        sb.append(String.format("%20f\n", Config.IMGROLL_FREE_SPACE_THRESHOLD));
+//
+//        sb.append(String.format("%-20s", "IMGROLL_DELETE_IF_FULL"));
+//        sb.append(String.format("%20s\n", Config.IMGROLL_DELETE_IF_FULL));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_DEVICE_NAME)));
+        sb.append(String.format("%20s\n", getDeviceName(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_RESUME_AFTER_REBOOT)));
+        sb.append(String.format("%20s\n", getResumeAfterReboot(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_SHOW_TOOLTIPS)));
+        sb.append(String.format("%20s\n", getShowTooltips(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_ENABLE_RECOGNITION)));
+        sb.append(String.format("%20s\n", getEnableRecognition(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_DELETE_AFTER_RECOGNITION)));
+        sb.append(String.format("%20s\n", getDeleteAfterRecognition(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_WORKING_DIRECTORY)));
+        sb.append(String.format("%20s\n", getWorkingDirectory(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_PERSISTENT_CAMERA)));
+        sb.append(String.format("%20s\n", getPersistentCamera(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_LEGACY_CAMERA_CONTROLLER)));
+        sb.append(String.format("%20s\n", getLegacyCameraController(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_SHUTTER_INTERVAL)));
+        sb.append(String.format("%20s\n", getShutterInterval(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_EXPOSURE_COMPENSATION)));
+        sb.append(String.format("%20s\n", getExposureCompensation(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION)));
+        sb.append(String.format("%20s\n", getSecondImageExposureCompensation(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_NETWORK_FIDELITY)));
+        sb.append(String.format("%20s\n", getNetworkFidelity(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_PHONE_HOME)));
+        sb.append(String.format("%20s\n", getPhoneHome(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_SERVER_ADDRESS)));
+        sb.append(String.format("%20s\n", getServerAddress(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_MIN_SYNC_INTERVAL)));
+        sb.append(String.format("%20s\n", getMinSyncInterval(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_HEARTBEAT_INTERVAL)));
+        sb.append(String.format("%20s\n", getHeartbeatInterval(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_MIN_HEARTBEAT_INTERVAL)));
+        sb.append(String.format("%20s\n", getMinHeartbeatInterval(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_UPLOAD_INTERVAL)));
+        sb.append(String.format("%20s\n", getUploadInterval(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_LAST_SYNC)));
+        sb.append(String.format("%20s\n", getLastSync(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_IMAGE_FOLDER)));
+        sb.append(String.format("%20s\n", getImageFolder(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_FIRST_TIME_LAUNCH)));
+        sb.append(String.format("%20s\n", getFirstTimeLaunch(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_NEXT_SHUTTER_SERVICE_INVOCATION)));
+        sb.append(String.format("%20s\n", getNextShutterServiceInvocation(context)));
+
+        return sb.toString();
     }
 }

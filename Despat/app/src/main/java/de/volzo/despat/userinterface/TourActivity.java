@@ -58,6 +58,8 @@ public class TourActivity extends AppCompatActivity {
         this.context = this;
         this.activity = this;
 
+        Log.d(TAG, "TourActivity init");
+
         // Making notification bar transparent
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
@@ -112,6 +114,30 @@ public class TourActivity extends AppCompatActivity {
         });
 
         MainActivity.runInitializationTasks(context);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "TourActivity pause");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "TourActivity resume");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "TourActivity stop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "TourActivity destroy");
     }
 
     private void addBottomDots(int currentPage) {
