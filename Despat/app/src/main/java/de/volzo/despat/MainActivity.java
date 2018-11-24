@@ -67,7 +67,7 @@ import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.ConfigureActivity;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.userinterface.SessionListActivity;
-import de.volzo.despat.userinterface.SettingsActivity2;
+import de.volzo.despat.userinterface.SettingsActivity;
 import de.volzo.despat.web.Sync;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         btSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(activity, SettingsActivity2.class);
+                Intent intent = new Intent(activity, SettingsActivity.class);
                 startActivity(intent);
             }
         });

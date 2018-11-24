@@ -8,7 +8,7 @@ import android.preference.PreferenceManager;
 
 import de.volzo.despat.preferences.SettingsFragment;
 
-public class SettingsActivity2 extends Activity {
+public class SettingsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

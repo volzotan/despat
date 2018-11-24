@@ -57,7 +57,7 @@
             android:name=".userinterface.ConfigureActivity"
             android:screenOrientation="sensorLandscape" />
         <activity
-            android:name=".userinterface.SettingsActivity2" />
+            android:name=".userinterface.SettingsActivity" />
         <activity
             android:name=".userinterface.OsmActivity"
             android:label="@string/title_activity_osm" />
