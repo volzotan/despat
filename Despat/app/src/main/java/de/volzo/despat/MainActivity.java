@@ -58,6 +58,7 @@ import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.CameraConfig;
+import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.services.Orchestrator;
 import de.volzo.despat.support.Broadcast;
@@ -363,6 +364,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
     private void runTestCode() {
 
+//        Intent intent = new Intent(activity, SettingsActivity.class);
+//        startActivity(intent);
+
 //        float foo = 12.3f;
 //        byte[] arr = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(foo).array();
 //        float foo2 = ByteBuffer.allocate(4).getFloat();
@@ -507,8 +511,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
             switch (action) {
                 case Broadcast.IMAGE_TAKEN:
-                    String path = intent.getStringExtra(Broadcast.DATA_IMAGE_PATH);
-                    Log.d("image taken", "path: " + path);
+                    CaptureInfo info = (CaptureInfo) intent.getSerializableExtra(Broadcast.DATA_IMAGE_CAPTUREINFO);
+                    Log.d("image taken", "path: " + info.getFilename());
                     updatePreviewImage();
                     break;
 

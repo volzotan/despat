@@ -58,6 +58,7 @@ import java.util.concurrent.TimeoutException;
 
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.CameraConfig;
+import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.DeviceInfo;
@@ -751,7 +752,40 @@ public class CameraController2 extends CameraController {
                         // just because the broadcast is sent, the image may not yet be available
 
                         // TODO: move broadcast code to controllerCallback
-                        sendBroadcast(context, filename);
+
+//                        if (android.os.Build.VERSION.SDK_INT >= 28) {
+//                            Map<String, CaptureResult> physicalCameraResults = result.getPhysicalCameraResults();
+//                            Log.wtf(TAG, "TotalCaptureResult physicalCameraResults:");
+//                            for (Map.Entry entry : physicalCameraResults.entrySet()) {
+//                                Log.wtf(TAG, String.format("%s : %s", entry.getKey(), entry.getValue()));
+//                            }
+//                        }
+//                        List<CaptureResult.Key<?>> resultKeys = result.getKeys();
+//                        Log.wtf(TAG, "Result Keys:");
+//                        for (CaptureResult.Key key : resultKeys) {
+//                            Log.wtf(TAG, String.format("%s : %s", key, result.get(key)));
+//                        }
+
+
+                        Float lensAperture = result.get(CaptureResult.LENS_APERTURE);
+                        Long exposureTime = result.get(CaptureResult.SENSOR_EXPOSURE_TIME); // in ns
+                        Integer sensitivity = result.get(CaptureResult.SENSOR_SENSITIVITY);
+
+                        CaptureInfo info = new CaptureInfo(filename);
+                        info.setSequenceNumber(n);
+
+                        if (lensAperture != null) {
+                            info.setAperture(lensAperture);
+                        }
+                        if (exposureTime != null) {
+                            exposureTime /= (1000 * 1000);
+                            info.setExposureTime(exposureTime);
+                        }
+                        if (sensitivity != null) {
+                            info.setIso(sensitivity);
+                        }
+
+                        sendBroadcast(context, info);
 
                         // if (controllerCallback != null) controllerCallback.captureComplete();
 

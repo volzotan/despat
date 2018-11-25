@@ -38,7 +38,10 @@ public class Capture {
     private long exposureTime;
 
     @ColumnInfo(name = "aperture")
-    private long aperture;
+    private double aperture;
+
+    @ColumnInfo(name = "iso")
+    private int iso;
 
     @ColumnInfo(name = "autofocus_state")
     private int autofocusState;
@@ -89,12 +92,20 @@ public class Capture {
         this.exposureTime = exposureTime;
     }
 
-    public long getAperture() {
+    public double getAperture() {
         return aperture;
     }
 
-    public void setAperture(long aperture) {
+    public void setAperture(double aperture) {
         this.aperture = aperture;
+    }
+
+    public int getIso() {
+        return iso;
+    }
+
+    public void setIso(int iso) {
+        this.iso = iso;
     }
 
     public int getAutofocusState() {

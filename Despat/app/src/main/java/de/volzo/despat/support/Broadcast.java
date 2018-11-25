@@ -18,10 +18,7 @@ public class Broadcast {
     public static final String CAMERA_STATE_CHANGED         = "de.volzo.despat.CAMERA_STATE_CHANGED";
 
     public static final String IMAGE_TAKEN                  = "de.volzo.despat.IMAGE_TAKEN";
-    public static final String DATA_IMAGE_PATH              = "de.volzo.despat.DATA_IMAGE_PATH";
-    public static final String DATA_IMAGE_EXPOSURETIME      = "de.volzo.despat.DATA_IMAGE_EXPOSURETIME";
-    public static final String DATA_IMAGE_APERTURE          = "de.volzo.despat.DATA_IMAGE_APERTURE";
-    public static final String DATA_IMAGE_AUTOFOCUSSTATE    = "de.volzo.despat.DATA_IMAGE_AUTOFOCUSSTATE";
+    public static final String DATA_IMAGE_CAPTUREINFO       = "de.volzo.despat.DATA_IMAGE_CAPTUREINFO";
 
     public static final String NEXT_SHUTTER_INVOCATION      = "de.volzo.despat.NEXT_SHUTTER_INVOCATION";
     public static final String DATA_TIME                    = "de.volzo.despat.DATA_TIME";

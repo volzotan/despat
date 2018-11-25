@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
 
@@ -49,9 +50,9 @@ public abstract class CameraController {
         return null;
     }
 
-    void sendBroadcast(Context context, String path) {
+    void sendBroadcast(Context context, CaptureInfo info) {
         Intent intent = new Intent(Broadcast.IMAGE_TAKEN);
-        if (path != null) intent.putExtra(Broadcast.DATA_IMAGE_PATH, path);
+        if (info != null) intent.putExtra(Broadcast.DATA_IMAGE_CAPTUREINFO, info);
         context.sendBroadcast(intent);
     }
 

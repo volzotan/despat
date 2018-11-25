@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import de.volzo.despat.persistence.Event;
+import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.support.Util;
@@ -431,7 +432,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
         } else {
             Log.d(TAG, "# captureComplete");
 
-            sendBroadcast(context, imageFullPath.getAbsolutePath());
+            sendBroadcast(context, new CaptureInfo(imageFullPath.getAbsolutePath()));
 
             if (controllerCallback != null) {
                 controllerCallback.captureComplete();

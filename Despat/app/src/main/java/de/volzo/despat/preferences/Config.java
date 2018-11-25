@@ -58,7 +58,7 @@ public class Config {
     public static final Integer FIXED_ISO_VALUE                     = 200;
 
     // set the JPEG image quality | v2 only
-    public static final byte JPEG_QUALITY                           = 60;
+    public static final byte JPEG_QUALITY                           = 75;
 
     // maximal time the AF/AE/AWB metering functions
     // may try to find a fix before shutter is

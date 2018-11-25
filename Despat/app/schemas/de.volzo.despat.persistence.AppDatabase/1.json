@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "8a47ef7ae18a5fe51fc23cf666cb054f",
+    "identityHash": "f6e5823f81d192ce1b613b3ab824a8be",
     "entities": [
       {
         "tableName": "Status",
@@ -274,7 +274,7 @@
       },
       {
         "tableName": "Capture",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `recording_time` TEXT, `image_path` TEXT, `exposure_time` INTEGER NOT NULL, `aperture` INTEGER NOT NULL, `autofocus_state` INTEGER NOT NULL, `processed_detector` INTEGER NOT NULL, `processed_compressor` INTEGER NOT NULL, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `recording_time` TEXT, `image_path` TEXT, `exposure_time` INTEGER NOT NULL, `aperture` REAL NOT NULL, `iso` INTEGER NOT NULL, `autofocus_state` INTEGER NOT NULL, `processed_detector` INTEGER NOT NULL, `processed_compressor` INTEGER NOT NULL, FOREIGN KEY(`session_id`) REFERENCES `Session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -309,6 +309,12 @@
           {
             "fieldPath": "aperture",
             "columnName": "aperture",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iso",
+            "columnName": "iso",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -752,7 +758,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"8a47ef7ae18a5fe51fc23cf666cb054f\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"f6e5823f81d192ce1b613b3ab824a8be\")"
     ]
   }
 }

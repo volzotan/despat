@@ -121,7 +121,11 @@ public class Compressor implements Callable<Integer> {
         time_add = System.currentTimeMillis();
 
         for (File f : images) {
-            add(f);
+            try {
+                add(f);
+            } catch (Exception e) {
+                Log.e(TAG, "adding failed", e);
+            }
             Log.d(TAG, "image added: " + counter);
         }
 
@@ -213,7 +217,13 @@ public class Compressor implements Callable<Integer> {
                 continue;
             }
 
-            add(c.getImage());
+            try {
+                add(c.getImage());
+            } catch (Exception e) {
+                Log.e(TAG, "adding to compressor failed", e);
+                Util.saveErrorEvent(context, session.getId(), "compression error", e);
+                return;
+            }
             c.setProcessed_compressor(true);
             captureDao.update(c);
 
@@ -250,13 +260,17 @@ public class Compressor implements Callable<Integer> {
         mat = Mat.zeros(this.height, this.width, CvType.CV_16UC1);
     }
 
-    public void add(File path) {
+    public void add(File path) throws Exception {
         if (counter >= 255) {
             Log.e(TAG, "overflow imminent. image ignored.");
             return;
         }
 
         Mat imgMat = Imgcodecs.imread(path.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+
+        if (imgMat.empty()) {
+            throw new Exception("image empty. not added to compressor");
+        }
 
         Imgproc.resize(imgMat, imgMat, new Size(this.width, this.height));
 

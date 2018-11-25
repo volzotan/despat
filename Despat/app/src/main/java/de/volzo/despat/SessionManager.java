@@ -47,6 +47,7 @@ import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
 import de.volzo.despat.preferences.CameraConfig;
+import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
@@ -330,7 +331,7 @@ public class SessionManager {
         return true;
     }
 
-    public void addCapture(File image, long exposureTime, long aperture, int autofocusState) throws NotRecordingException {
+    public void addCapture(CaptureInfo info) throws NotRecordingException {
         if (!isActive()) throw new NotRecordingException();
 
         AppDatabase db = AppDatabase.getAppDatabase(context);
@@ -373,12 +374,13 @@ public class SessionManager {
         Capture capture = new Capture();
         capture.setSessionId(session.getId());
         capture.setRecordingTime(Calendar.getInstance().getTime());
-        capture.setExposureTime(exposureTime);
-        capture.setAperture(aperture);
-        capture.setAutofocusState(autofocusState);
+        capture.setExposureTime(info.getExposureTime());
+        capture.setAperture(info.getAperture());
+        capture.setIso(info.getIso());
+        capture.setAutofocusState(info.getAutofocusState());
         capture.setProcessed_detector(false);
         capture.setProcessed_compressor(false);
-        capture.setImage(image);
+        capture.setImage(new File(info.getFilename()));
 
         captureDao.insert(capture);
 

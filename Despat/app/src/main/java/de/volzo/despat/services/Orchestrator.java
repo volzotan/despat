@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,12 +21,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import de.volzo.despat.CameraController;
 import de.volzo.despat.SessionManager;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.CameraConfig;
+import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.NotificationUtil;
@@ -162,13 +165,9 @@ public class Orchestrator extends BroadcastReceiver {
                             Log.w(TAG, "image taken while no recordingSession is active");
                             break;
                         }
-                        String path = intent.getStringExtra(Broadcast.DATA_IMAGE_PATH);
-                        if (path != null) {
-                            session.addCapture(
-                                    new File(path),
-                                    intent.getLongExtra(Broadcast.DATA_IMAGE_EXPOSURETIME, -1),
-                                    intent.getLongExtra(Broadcast.DATA_IMAGE_APERTURE, -1),
-                                    intent.getIntExtra(Broadcast.DATA_IMAGE_AUTOFOCUSSTATE, -1));
+                        CaptureInfo info = (CaptureInfo) intent.getSerializableExtra(Broadcast.DATA_IMAGE_CAPTUREINFO);
+                        if (info != null) {
+                            session.addCapture(info);
                         } else {
                             Log.w(TAG, "path missing. capture could not be saved");
                         }
