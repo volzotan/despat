@@ -35,8 +35,8 @@ public class CameraConfig { // implements Serializable {
         this.shutterInterval = Config.getShutterInterval(context);
         this.legacyCameraController = Config.getLegacyCameraController(context);
 
-        this.formatJpg = Config.FORMAT_JPG;
-        this.formatRaw = Config.FORMAT_RAW;
+        this.formatJpg = Config.getFormatJpg(context);
+        this.formatRaw = Config.getFormatRaw(context);
 
         this.exposureCompensation = Config.getExposureCompensation(context);
         this.secondImageExposureCompensation = Config.getSecondImageExposureCompensation(context);

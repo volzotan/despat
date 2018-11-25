@@ -70,15 +70,24 @@
     <string name="pref_title_extended">Extended Settings</string>
     <string name="pref_summary_extended"></string>
 
+    <string name="pref_summary_introExtended">Extended settings</string>
+
     <string name="pref_title_enableRecognition">Enable Object Detection</string>
     <string name="pref_summary_enableRecognition">Run an object detection algorithm on the captured image</string>
     <string name="pref_title_deleteAfterRecognition">Delete After Processing</string>
     <string name="pref_summary_deleteAfterRecognition">Permanently delete captured images after processing</string>
 
+    <string name="pref_title_formatJpg">Save JPEGs</string>
+    <string name="pref_summary_formatJpg"></string>
+    <string name="pref_title_formatRaw">Save RAWs</string>
+    <string name="pref_summary_formatRaw"></string>
     <string name="pref_title_exposureCompensation">Exposure compensation</string>
     <string name="pref_summary_exposureCompensation">Brightness change for every image: %s</string>
     <string name="pref_title_secondImageExposureCompensation">Exposure compensation 2nd image</string>
     <string name="pref_summary_secondImageExposureCompensation">Brightness change for every second image: %s</string>
+
+    <string name="pref_title_enableCTmode">Enable CT mode</string>
+    <string name="pref_summary_enableCTmode">Apply CT-style preset</string>
 
 
     <string name="title_activity_maps">Map</string>

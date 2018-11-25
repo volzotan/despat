@@ -40,10 +40,6 @@ public class Config {
 
     // ---------------------------------------------------------------------------------------------
 
-    // jpegs and/or raw | v2 only
-    public static final boolean FORMAT_JPG                          = true;
-    public static final boolean FORMAT_RAW                          = false;
-
     // display a preview on the main activity
     public static final boolean START_CAMERA_ON_ACTIVITY_START      = true;
 
@@ -133,11 +129,18 @@ public class Config {
     public static final boolean DEFAULT_DELETE_AFTER_RECOGNITION            = true;
     public static final File    DEFAULT_WORKING_DIRECTORY                   = null;
     public static final File    DEFAULT_TEMP_DIRECTORY                      = null;
+
     public static final boolean DEFAULT_PERSISTENT_CAMERA                   = true;
     public static final boolean DEFAULT_LEGACY_CAMERA_CONTROLLER            = false;
     public static final int     DEFAULT_SHUTTER_INTERVAL                    = 10 * 1000; // in ms
+
+    // jpegs and/or raw | v2 only
+    public static final boolean DEFAULT_FORMAT_JPG                          = true;
+    public static final boolean DEFAULT_FORMAT_RAW                          = false;
+
     public static final int     DEFAULT_EXPOSURE_COMPENSATION               = 0;
     public static final int     DEFAULT_SECOND_IMAGE_EXPOSURE_COMPENSATION  = 0;
+
     public static final String  DEFAULT_NETWORK_FIDELITY                    = DetectorSSD.FIDELITY_MODE[0];
     public static final boolean DEFAULT_PHONE_HOME                          = false;
     public static final String  DEFAULT_SERVER_ADDRESS                      = "http://zoltep.de";   // format protocol://example.com
@@ -274,6 +277,27 @@ public class Config {
     public static void setShutterInterval(Context context, int shutterInterval) {
         setProperty(context, KEY_SHUTTER_INTERVAL, shutterInterval);
     }
+
+    /**
+     * FORMAT JPG
+     *
+     * take a JPEG picture | v2 only
+     */
+    public static final String KEY_FORMAT_JPG                       = "de.volzo.despat.formatJpg";
+    public static final boolean getFormatJpg(Context context) {
+        return getPropertyBoolean(context, KEY_FORMAT_JPG, DEFAULT_FORMAT_JPG);
+    }
+
+    /**
+     * FORMAT RAW
+     *
+     * take a RAW picture | v2 only
+     */
+    public static final String KEY_FORMAT_RAW                       = "de.volzo.despat.formatRaw";
+    public static final boolean getFormatRaw(Context context) {
+        return getPropertyBoolean(context, KEY_FORMAT_RAW, DEFAULT_FORMAT_RAW);
+    }
+
 
     /**
      * EXPOSURE COMPENSATION
@@ -502,59 +526,6 @@ public class Config {
 
     // ----
 
-    public static String sanityCheckDeviceName(Context context) {
-        return null;
-    }
-
-    public static String sanityCheckShutterInterval(Context context) {
-        long value = getShutterInterval(context);
-
-        if (value < 6000) {
-            return "Shutter interval is shorter than 6000ms";
-        }
-
-        if (value > 6 * 60 * 1000) {
-            return "Shutter interval is longer than 6 minutes";
-        }
-
-        return null;
-    }
-
-    public static String sanityCheckImageFolder(Context context) {
-        File imageFolder = getImageFolder(context);
-
-        // check if all folders are existing
-        if (!imageFolder.isDirectory()) {
-            // not existing. create
-            Log.i(TAG, "Directory IMAGE_FOLDER ( " + imageFolder.getAbsolutePath() + " ) missing. creating...");
-            imageFolder.mkdirs();
-        }
-
-        return null; // TODO: add checks for writability, etc...
-    }
-
-    public static String sanityCheckServerAddress(Context context) {
-        String value = getServerAddress(context);
-
-        if (value.startsWith("http://") || value.startsWith("https://")) {
-            return null;
-        }
-
-        return "not a valid URL. Should start with \"http://\" or \"https://\"";
-    }
-
-    public static String sanityCheckHeartbeatInterval(Context context) {
-        long value = getHeartbeatInterval(context);
-
-        if (value < 15 * 60 * 1000) {
-            return "Heartbeat interval is shorter than 15 minutes";
-        }
-
-        return null;
-    }
-
-    // ----
-
     private static void setProperty(Context context, String key, String value) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
@@ -630,13 +601,12 @@ public class Config {
 
     // ---
 
-    public static void validate() throws Exception {
+    public static void validate(Context context) throws Exception {
 
         if (IMAGE_FILEEXTENSION == null) throw new Exception("image fileextension missing");
 
-        if (!Config.FORMAT_JPG && !Config.FORMAT_RAW) throw new Exception("no image format selected");
+        if (!Config.getFormatJpg(context) && !Config.getFormatRaw(context)) throw new Exception("no image format selected");
         if (DEFAULT_SHUTTER_INTERVAL < 6000) throw new Exception("shutter interval shorter than 6s");
-
 
     }
 

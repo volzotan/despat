@@ -14,10 +14,14 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.preference.TwoStatePreference;
+import android.util.Log;
 
 import java.util.HashMap;
+import java.util.List;
 
+import de.volzo.despat.CameraController2;
 import de.volzo.despat.R;
+import de.volzo.despat.support.DeviceInfo;
 
 public class SettingsExtendedFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -69,6 +73,27 @@ public class SettingsExtendedFragment extends PreferenceFragment implements Shar
         category.setTitle("Camera");
         screen.addPreference(category);
 
+        SwitchPreference prefFormatJpg = new SwitchPreference(context);
+        prefFormatJpg.setTitle(context.getString(R.string.pref_title_formatJpg));
+        prefFormatJpg.setSummary(context.getString(R.string.pref_summary_formatJpg));
+        prefFormatJpg.setDefaultValue(Config.DEFAULT_FORMAT_JPG);
+        prefFormatJpg.setKey(Config.KEY_FORMAT_JPG);
+        category.addPreference(prefFormatJpg);
+
+        SwitchPreference prefFormatRaw = new SwitchPreference(context);
+        prefFormatRaw.setTitle(context.getString(R.string.pref_title_formatRaw));
+        prefFormatRaw.setSummary(context.getString(R.string.pref_summary_formatRaw));
+        prefFormatRaw.setDefaultValue(Config.DEFAULT_FORMAT_RAW);
+        prefFormatRaw.setKey(Config.KEY_FORMAT_RAW);
+        category.addPreference(prefFormatRaw);
+
+        try {
+            List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
+            prefFormatRaw.setEnabled(cameras.get(0).getRawSupport());
+        } catch (Exception e) {
+            Log.e(TAG, "checking for RAW format capabilities failed", e);
+        }
+
         final String[] EXPOSURE_VALUES = {
                 "-10", "-9", "-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1",
                 "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
@@ -92,6 +117,22 @@ public class SettingsExtendedFragment extends PreferenceFragment implements Shar
         prefSecondImageExposureCompensation.setKey(Config.KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION);
         category.addPreference(prefSecondImageExposureCompensation);
         preferenceSummaryMap.put(prefSecondImageExposureCompensation, R.string.pref_summary_secondImageExposureCompensation);
+
+        category = new PreferenceCategory(context);
+        category.setTitle("Actions");
+        screen.addPreference(category);
+
+        Preference prefEnableCTmode = new Preference(context);
+        prefEnableCTmode.setTitle(context.getString(R.string.pref_title_enableCTmode));
+        prefEnableCTmode.setSummary(context.getString(R.string.pref_summary_enableCTmode));
+        prefEnableCTmode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Config.enableCTMode(context);
+                return false;
+            }
+        });
+        category.addPreference(prefEnableCTmode);
 
         setPreferenceScreen(screen);
     }

@@ -553,8 +553,6 @@ public class CameraController2 extends CameraController {
             captureTimer = SystemClock.elapsedRealtime();
 
             if (optionalExposureCompensation != null) {
-                Log.wtf(TAG, Integer.toString(optionalExposureCompensation));
-
                 previewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, optionalExposureCompensation);
                 stillRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, optionalExposureCompensation);
             }
@@ -949,7 +947,9 @@ public class CameraController2 extends CameraController {
                     }
                 }
 
-                infos.add(new DeviceInfo.CameraInfo(id, direction, resolution, getCameraParametersInternal(context, id)));
+                boolean rawSupport = contains(characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES), CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW);
+
+                infos.add(new DeviceInfo.CameraInfo(id, direction, resolution, rawSupport, getCameraParametersInternal(context, id)));
             } catch (Exception e) {}
         }
 

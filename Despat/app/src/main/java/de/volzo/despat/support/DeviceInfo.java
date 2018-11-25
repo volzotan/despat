@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.hardware.camera2.CameraCharacteristics;
 import android.os.Build;
 import android.util.Log;
 import android.util.Size;
@@ -135,13 +136,15 @@ public class DeviceInfo {
         String direction;
         int width;
         int height;
+        boolean rawSupport;
         HashMap<String, String> parameters;
 
-        public CameraInfo(String id, String direction, Size resolution, HashMap<String, String> parameters) {
+        public CameraInfo(String id, String direction, Size resolution, boolean rawSupport, HashMap<String, String> parameters) {
             this.id = id;
             this.direction = direction;
             this.width = resolution.getWidth();
             this.height = resolution.getHeight();
+            this.rawSupport = rawSupport;
             this.parameters = parameters;
         }
 
@@ -158,6 +161,10 @@ public class DeviceInfo {
 
         public int getHeight() {
             return height;
+        }
+
+        public boolean getRawSupport() {
+            return rawSupport;
         }
 
         public String toString() {
@@ -178,6 +185,10 @@ public class DeviceInfo {
 
             sb.append(String.format("%-20s", "camera resolution:"));
             sb.append(String.format(Config.LOCALE, "%20.2f", (width*height)/1000000.0));
+            sb.append("\n");
+
+            sb.append(String.format("%-20s", "RAW support:"));
+            sb.append(String.format(Config.LOCALE, "%20b", rawSupport));
             sb.append("\n");
 
             sb.append(String.format("%-20s", "parameters:"));
