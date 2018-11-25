@@ -106,7 +106,7 @@ public class SessionExporter {
         }
 
         // create tmp dir
-        File tmpdir = Config.TMP_DIR;
+        File tmpdir = Config.getTempDirectory(context);
 
         try {
             Util.deleteDirectory(tmpdir);

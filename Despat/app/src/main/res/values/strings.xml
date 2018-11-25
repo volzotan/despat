@@ -61,13 +61,25 @@
     </string>
     <string name="pref_title_shutterInterval">Shutter interval</string>
     <string name="pref_summary_shutterInterval">capture image every: %d milliseconds</string>
-    <string name="pref_title_exposureCompensation">Exposure compensation</string>
-    <string name="pref_summary_exposureCompensation">Brightness change for every image: %d</string>
 
     <string name="pref_title_phoneHome">Data upload</string>
     <string name="pref_summary_phoneHome">upload data to the server</string>
     <string name="pref_title_serverAddress">Server address</string>
     <string name="pref_summary_serverAddress">%s</string>
+
+    <string name="pref_title_extended">Extended Settings</string>
+    <string name="pref_summary_extended"></string>
+
+    <string name="pref_title_enableRecognition">Enable Object Detection</string>
+    <string name="pref_summary_enableRecognition">Run an object detection algorithm on the captured image</string>
+    <string name="pref_title_deleteAfterRecognition">Delete After Processing</string>
+    <string name="pref_summary_deleteAfterRecognition">Permanently delete captured images after processing</string>
+
+    <string name="pref_title_exposureCompensation">Exposure compensation</string>
+    <string name="pref_summary_exposureCompensation">Brightness change for every image: %s</string>
+    <string name="pref_title_secondImageExposureCompensation">Exposure compensation 2nd image</string>
+    <string name="pref_summary_secondImageExposureCompensation">Brightness change for every second image: %s</string>
+
 
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_osm">OsmActivity</string>

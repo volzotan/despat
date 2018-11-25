@@ -369,35 +369,6 @@ public class Util {
         return dist;
     }
 
-    public static void disableDoze() {
-//        try {
-//            Process process = Runtime.getRuntime().exec("adb shell dumpsys deviceidle disable");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-        BufferedReader bufferedReader = null;
-
-        try {
-            Process process = Runtime.getRuntime().exec("dumpsys deviceidle disable");
-
-            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            String line = "";
-            while ((line = bufferedReader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-        } catch (IOException e) {
-            Log.w("print", "IOException", e);
-        } finally {
-            try {
-                if (bufferedReader != null) bufferedReader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     public static void shareFile(Context context, File f) throws Exception {
 

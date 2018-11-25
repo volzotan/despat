@@ -90,22 +90,18 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         // remove launcher theme
         setTheme(R.style.AppTheme);
-
         super.onCreate(savedInstanceState);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-
         setContentView(R.layout.activity_main);
 
         Log.i(TAG, "MainActivity init");
 
         despat = ((Despat) getApplicationContext());
 
-//        Util.disableDoze();
         whitelistAppForDoze(activity);
-
         if (!checkPermissionsAreGiven(activity)) {
             requestPermissions(activity);
         } else {
@@ -939,13 +935,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
         imagesInMemory.setText(Integer.toString(imgroll.getNumberOfSavedImages()));
         freeSpaceInternal.setText(Float.toString(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(this))));
-        freeSpaceExternal.setText("");
-        batteryInternal.setText(Integer.toString(systemController.getBatteryLevel()));
-        batteryExternal.setText("");
+        freeSpaceExternal.setText("---");
+        batteryInternal.setText(Integer.toString(systemController.getBatteryLevel()) + "°C");
+        batteryExternal.setText("---");
         stateCharging.setText(Boolean.toString(systemController.getBatteryChargingState()));
-        temperatureDevice.setText("");
+        temperatureDevice.setText("---");
         temperatureBattery.setText(Float.toString(systemController.getBatteryTemperature()));
-        dozeWhitelisted.setText("?");
+        dozeWhitelisted.setText(Boolean.toString(checkWhitelistingForDoze(activity)));
     }
 
     public void runRecognizer() {

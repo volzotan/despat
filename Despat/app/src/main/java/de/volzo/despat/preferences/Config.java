@@ -112,9 +112,6 @@ public class Config {
 
     // TODO: change that to app data directory, ie: /data/data/de.volzo.despat/tmp
 
-    // Session export temp directory
-    public static final File TMP_DIR                                = new File(new File(Environment.getExternalStorageDirectory(), "despat"), "tmp");
-
     // dateformat used for the logcat file name
     public static final String DATEFORMAT_LOGFILE                   = "yyyy-MM-dd_HH-mm-ss.SSS";
 
@@ -134,7 +131,8 @@ public class Config {
     public static final boolean DEFAULT_SHOW_TOOLTIPS                       = true;
     public static final boolean DEFAULT_ENABLE_RECOGNITION                  = true;
     public static final boolean DEFAULT_DELETE_AFTER_RECOGNITION            = true;
-    public static final File    DEFAULT_WORKING_DIRECTORY                   = null; //context.getApplicationInfo().dataDir; //new File(Environment.getExternalStorageDirectory(), ("despat"));
+    public static final File    DEFAULT_WORKING_DIRECTORY                   = null;
+    public static final File    DEFAULT_TEMP_DIRECTORY                      = null;
     public static final boolean DEFAULT_PERSISTENT_CAMERA                   = true;
     public static final boolean DEFAULT_LEGACY_CAMERA_CONTROLLER            = false;
     public static final int     DEFAULT_SHUTTER_INTERVAL                    = 10 * 1000; // in ms
@@ -213,7 +211,26 @@ public class Config {
             if (DEFAULT_WORKING_DIRECTORY != null) {
                 return DEFAULT_WORKING_DIRECTORY;
             } else {
-                return new File(context.getApplicationInfo().dataDir);
+                return new File(Environment.getExternalStorageDirectory(), ("despat"));
+//                return new File(context.getApplicationInfo().dataDir);
+            }
+        }
+        return new File(fh);
+    }
+
+    /**
+     * TEMP DIRECTORY
+     *
+     * Session export temp directory
+     */
+    public static final String KEY_TEMP_DIRECTORY                   = "de.volzo.despat.tempDirectory";
+    public static final File getTempDirectory(Context context) {
+        String fh = getProperty(context, KEY_TEMP_DIRECTORY, "");
+        if (fh == null || fh.equals("")) {
+            if (DEFAULT_TEMP_DIRECTORY != null) {
+                return DEFAULT_TEMP_DIRECTORY;
+            } else {
+                return new File(context.getApplicationInfo().dataDir, "tmp");
             }
         }
         return new File(fh);
@@ -266,10 +283,10 @@ public class Config {
      */
     public static final String KEY_EXPOSURE_COMPENSATION            = "de.volzo.despat.exposureCompensation";
     public static int getExposureCompensation(Context context) {
-        return getPropertyInt(context, KEY_EXPOSURE_COMPENSATION, DEFAULT_EXPOSURE_COMPENSATION);
+        return Integer.parseInt(getProperty(context, KEY_EXPOSURE_COMPENSATION, Integer.toString(DEFAULT_EXPOSURE_COMPENSATION)));
     }
     public static void setExposureCompensation(Context context, int exposureCompensation) {
-        setProperty(context, KEY_EXPOSURE_COMPENSATION, exposureCompensation);
+        setProperty(context, KEY_EXPOSURE_COMPENSATION, Integer.toString(exposureCompensation));
     }
 
     /**
@@ -281,10 +298,10 @@ public class Config {
      */
     public static final String KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION   = "de.volzo.despat.secondImageExposureCompensation";
     public static int getSecondImageExposureCompensation(Context context) {
-        return getPropertyInt(context, KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION, DEFAULT_SECOND_IMAGE_EXPOSURE_COMPENSATION);
+        return Integer.parseInt(getProperty(context, KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION, Integer.toString(DEFAULT_SECOND_IMAGE_EXPOSURE_COMPENSATION)));
     }
     public static void setSecondImageExposureCompensation(Context context, int secondImageExposureCompensation) {
-        setProperty(context, KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION, secondImageExposureCompensation);
+        setProperty(context, KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION, Integer.toString(secondImageExposureCompensation));
     }
 
     /**

@@ -1,6 +1,7 @@
 package de.volzo.despat.preferences;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
@@ -15,9 +16,7 @@ import android.preference.SwitchPreference;
 import android.preference.TwoStatePreference;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import de.volzo.despat.R;
 import de.volzo.despat.detector.DetectorSSD;
@@ -37,6 +36,27 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
         // Load the preferences from an XML resource
         // addPreferencesFromResource(R.xml.preferences);
+
+//        final PreferenceScreen extendedPref = (PreferenceScreen) findPreference("childPrefId");
+//        extendedPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//            @Override
+//            public boolean onPreferenceClick(Preference preference) {
+//                Intent intent = new Intent(PreferenceActivity.this, YourSettings.class);
+//                intent.setAction("ShowChildPref");
+//                startActivity(intent);
+//                return true;
+//            }
+//        });
+
+        Intent intent = getActivity().getIntent();
+        if (intent.getAction() != null && intent.getAction().equals("extended")) {
+//            setPreferenceScreen(childPref);
+        } else {
+            setPreferenceScreen(prepareMainScreen());
+        }
+    }
+
+    private PreferenceScreen prepareMainScreen() {
 
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
         PreferenceCategory category;
@@ -173,7 +193,26 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 //        category.addPreference(prefServerAddress);
 //        preferenceSummaryMap.put(prefServerAddress, R.string.pref_summary_serverAddress);
 
-        setPreferenceScreen(screen);
+        // EXTENDED --------------------------------------------------------------------------------
+
+        category = new PreferenceCategory(context);
+        category.setTitle("Extended");
+        screen.addPreference(category);
+
+        Preference extendedPreference = new Preference(context);
+        extendedPreference.setTitle(context.getString(R.string.pref_title_extended));
+        extendedPreference.setSummary(context.getString(R.string.pref_summary_extended));
+        extendedPreference.setFragment(SettingsExtendedFragment.class.getName());
+        category.addPreference(extendedPreference);
+
+//        extendedPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//            @Override
+//            public boolean onPreferenceClick(Preference preference) {
+//                return false;
+//            }
+//        });
+
+        return screen;
     }
 
     @Override

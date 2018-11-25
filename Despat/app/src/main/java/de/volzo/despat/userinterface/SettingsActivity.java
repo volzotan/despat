@@ -4,11 +4,18 @@ package de.volzo.despat.userinterface;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import de.volzo.despat.R;
+import de.volzo.despat.preferences.Config;
+import de.volzo.despat.preferences.SettingsExtendedFragment;
 import de.volzo.despat.preferences.SettingsFragment;
 
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends AppCompatActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +28,25 @@ public class SettingsActivity extends Activity {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
+    }
+
+    @Override
+    public boolean onPreferenceStartFragment(PreferenceFragment preferenceFragment, Preference preference) {
+
+        final Bundle args = preference.getExtras();
+//        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
+//                getClassLoader(),
+//                preference.getFragment(),
+//                args);
+//        fragment.setArguments(args);
+
+        // getSupportFragmentManager
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsExtendedFragment())
+                .addToBackStack(null)
+                .commit();
+
+        return true;
     }
 
     @Override
