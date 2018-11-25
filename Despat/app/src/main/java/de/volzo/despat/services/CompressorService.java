@@ -8,6 +8,7 @@ import android.util.Log;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.Compressor;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.CaptureDao;
@@ -28,6 +29,11 @@ public class CompressorService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "CompressorService invoked");
+
+        if (!Config.getEnableCompressorService(this)) {
+            Log.w(TAG, "Compression disabled. aborting Compressor Service");
+            return;
+        }
 
         AppDatabase db = AppDatabase.getAppDatabase(this);
         SessionDao sessionDao = db.sessionDao();

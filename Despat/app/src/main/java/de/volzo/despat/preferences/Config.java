@@ -125,7 +125,8 @@ public class Config {
     public static final String  DEFAULT_DEVICE_NAME                         = android.os.Build.MODEL;
     public static final boolean DEFAULT_RESUME_AFTER_REBOOT                 = true;
     public static final boolean DEFAULT_SHOW_TOOLTIPS                       = true;
-    public static final boolean DEFAULT_ENABLE_RECOGNITION                  = true;
+    public static final boolean DEFAULT_ENABLE_RECOGNITION_SERVICE          = true;
+    public static final boolean DEFAULT_ENABLE_COMPRESSOR_SERVICE           = true;
     public static final boolean DEFAULT_DELETE_AFTER_RECOGNITION            = true;
     public static final File    DEFAULT_WORKING_DIRECTORY                   = null;
     public static final File    DEFAULT_TEMP_DIRECTORY                      = null;
@@ -183,14 +184,25 @@ public class Config {
     }
 
     /**
-     * ENABLE RECOGNITION
+     * ENABLE RECOGNITION SERVICE
      */
-    public static final String KEY_ENABLE_RECOGNITION               = "de.volzo.despat.enableRecognition";
-    public static boolean getEnableRecognition(Context context) {
-        return getPropertyBoolean(context, KEY_ENABLE_RECOGNITION, DEFAULT_ENABLE_RECOGNITION);
+    public static final String KEY_ENABLE_RECOGNITION_SERVICE        = "de.volzo.despat.enableRecognitionService";
+    public static boolean getEnableRecognitionService(Context context) {
+        return getPropertyBoolean(context, KEY_ENABLE_RECOGNITION_SERVICE, DEFAULT_ENABLE_RECOGNITION_SERVICE);
     }
-    public static void setEnableRecognition(Context context, boolean enableRecognition) {
-        setProperty(context, KEY_ENABLE_RECOGNITION, enableRecognition);
+    public static void setEnableRecognitionService(Context context, boolean enableRecognitionService) {
+        setProperty(context, KEY_ENABLE_RECOGNITION_SERVICE, enableRecognitionService);
+    }
+
+    /**
+     * ENABLE COMPRESSOR SERVICE
+     */
+    public static final String KEY_ENABLE_COMPRESSOR_SERVICE        = "de.volzo.despat.enableCompressorService";
+    public static boolean getEnableCompressorService(Context context) {
+        return getPropertyBoolean(context, KEY_ENABLE_COMPRESSOR_SERVICE, DEFAULT_ENABLE_COMPRESSOR_SERVICE);
+    }
+    public static void setEnableCompressorService(Context context, boolean enableCompressorService) {
+        setProperty(context, KEY_ENABLE_COMPRESSOR_SERVICE, enableCompressorService);
     }
 
     /**
@@ -461,7 +473,7 @@ public class Config {
 
         Log.i(TAG, "enabling Compressed Time mode");
 
-        setEnableRecognition(context, false);
+        setEnableRecognitionService(context, false);
         Log.i(TAG, "disabling Recognition");
 
         setDeleteAfterRecognition(context, false);
@@ -636,8 +648,11 @@ public class Config {
         sb.append(String.format("%-20s", strip(Config.KEY_SHOW_TOOLTIPS)));
         sb.append(String.format("%20s\n", getShowTooltips(context)));
 
-        sb.append(String.format("%-20s", strip(Config.KEY_ENABLE_RECOGNITION)));
-        sb.append(String.format("%20s\n", getEnableRecognition(context)));
+        sb.append(String.format("%-20s", strip(Config.KEY_ENABLE_RECOGNITION_SERVICE)));
+        sb.append(String.format("%20s\n", getEnableRecognitionService(context)));
+
+        sb.append(String.format("%-20s", strip(Config.KEY_ENABLE_COMPRESSOR_SERVICE)));
+        sb.append(String.format("%20s\n", getEnableCompressorService(context)));
 
         sb.append(String.format("%-20s", strip(Config.KEY_DELETE_AFTER_RECOGNITION)));
         sb.append(String.format("%20s\n", getDeleteAfterRecognition(context)));

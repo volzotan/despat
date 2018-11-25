@@ -43,7 +43,7 @@ public class RecognitionService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "RecognitionService invoked");
 
-        if (!Config.getEnableRecognition(this)) {
+        if (!Config.getEnableRecognitionService(this)) {
             Log.w(TAG, "Recognition disabled. aborting Recognition Service");
             return;
         }

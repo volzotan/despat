@@ -55,12 +55,19 @@ public class SettingsExtendedFragment extends PreferenceFragment implements Shar
         category.setTitle("General");
         screen.addPreference(category);
 
-        SwitchPreference prefEnableRecognition = new SwitchPreference(context);
-        prefEnableRecognition.setTitle(context.getString(R.string.pref_title_enableRecognition));
-        prefEnableRecognition.setSummary(context.getString(R.string.pref_summary_enableRecognition));
-        prefEnableRecognition.setDefaultValue(Config.DEFAULT_ENABLE_RECOGNITION);
-        prefEnableRecognition.setKey(Config.KEY_ENABLE_RECOGNITION);
-        category.addPreference(prefEnableRecognition);
+        SwitchPreference prefEnableRecognitionService = new SwitchPreference(context);
+        prefEnableRecognitionService.setTitle(context.getString(R.string.pref_title_enableRecognitionService));
+        prefEnableRecognitionService.setSummary(context.getString(R.string.pref_summary_enableRecognitionService));
+        prefEnableRecognitionService.setDefaultValue(Config.DEFAULT_ENABLE_RECOGNITION_SERVICE);
+        prefEnableRecognitionService.setKey(Config.KEY_ENABLE_RECOGNITION_SERVICE);
+        category.addPreference(prefEnableRecognitionService);
+
+        SwitchPreference prefEnableCompressorService = new SwitchPreference(context);
+        prefEnableCompressorService.setTitle(context.getString(R.string.pref_title_enableCompressorService));
+        prefEnableCompressorService.setSummary(context.getString(R.string.pref_summary_enableCompressorService));
+        prefEnableCompressorService.setDefaultValue(Config.DEFAULT_ENABLE_COMPRESSOR_SERVICE);
+        prefEnableCompressorService.setKey(Config.KEY_ENABLE_COMPRESSOR_SERVICE);
+        category.addPreference(prefEnableCompressorService);
 
         SwitchPreference prefDeleteAfterRecognition = new SwitchPreference(context);
         prefDeleteAfterRecognition.setTitle(context.getString(R.string.pref_title_deleteAfterRecognition));
