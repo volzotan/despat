@@ -435,7 +435,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
             sendBroadcast(context, new CaptureInfo(imageFullPath.getAbsolutePath()));
 
             if (controllerCallback != null) {
-                controllerCallback.captureComplete();
+                controllerCallback.captureComplete(null);
             }
 
             shutterCount = 0;

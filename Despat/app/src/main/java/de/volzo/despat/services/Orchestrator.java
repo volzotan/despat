@@ -169,7 +169,7 @@ public class Orchestrator extends BroadcastReceiver {
                         if (info != null) {
                             session.addCapture(info);
                         } else {
-                            Log.w(TAG, "path missing. capture could not be saved");
+                            Log.w(TAG, "CaptureInfo/path missing. capture could not be saved");
                         }
 
                         ArrayList<String> addInfo = new ArrayList<>();

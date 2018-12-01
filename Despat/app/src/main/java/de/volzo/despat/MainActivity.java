@@ -604,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         if (Config.START_CAMERA_ON_ACTIVITY_START) {
             if (checkPermissionsAreGiven(activity)) {
                 try {
-                    Size imageSize = CameraController2.getImageSize(activity);
+                    Size imageSize = CameraController2.getImageSize(activity, Config.getCameraDevice(this));
 
                     // TODO:
                     CameraConfig cameraConfig = new CameraConfig(activity);
@@ -745,7 +745,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         final CameraController.ControllerCallback callback = new CameraController.ControllerCallback() {
             @Override
-            public void captureComplete() {
+            public void captureComplete(CaptureInfo info) {
                 MainActivity.this.runOnUiThread(new Runnable() {
                     public void run() {
                         Handler handler = new Handler();

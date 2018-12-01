@@ -56,6 +56,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.CaptureInfo;
@@ -131,14 +132,16 @@ public class CameraController2 extends CameraController {
 //        backgroundHandler = new Handler(Looper.myLooper());
     }
 
+    public static String[] getAvailableCameras(Context context) throws Exception {
+        CameraManager cman = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        return cman.getCameraIdList();
+    }
+
     public void openCamera() throws Exception {
         try {
             cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-
-            String[] cameraIdList = cameraManager.getCameraIdList();
-            Log.d(TAG, "found " + cameraIdList.length + " cameras");
-            String cameraId = cameraIdList[0];
-            characteristics = cameraManager.getCameraCharacteristics(cameraId);
+            String cameraId = camconfig.getCameraDevice();
+            characteristics = cameraManager.getCameraCharacteristics(camconfig.getCameraDevice());
 
             if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
@@ -787,9 +790,9 @@ public class CameraController2 extends CameraController {
 
                         sendBroadcast(context, info);
 
-                        // if (controllerCallback != null) controllerCallback.captureComplete();
+//                        if (controllerCallback != null) controllerCallback.captureComplete(info);
 
-                        unlockFocus();
+                        unlockFocus(info);
                     }
                 }
 
@@ -834,13 +837,13 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    private void unlockFocus() {
+    private void unlockFocus(CaptureInfo info) {
         Log.d(TAG, "# unlockFocus");
 
-        // evil hack for lineage on MOTO E
+        // TODO: evil hack for lineage on MOTO E
         if (camconfig.isEndCaptureWithoutUnlockingFocus()) {
             if (controllerCallback != null) {
-                controllerCallback.captureComplete();
+                controllerCallback.captureComplete(info);
             }
             return;
         }
@@ -872,7 +875,7 @@ public class CameraController2 extends CameraController {
             }
 
             if (controllerCallback != null) {
-                controllerCallback.captureComplete();
+                controllerCallback.captureComplete(info);
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -940,10 +943,9 @@ public class CameraController2 extends CameraController {
         return cameraDevice == null;
     }
 
-    public static Size getImageSize(Context context) throws Exception {
+    public static Size getImageSize(Context context, String cameraId) throws Exception {
         CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-        String[] cameraIdList = cameraManager.getCameraIdList();
-        CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraIdList[0]);
+        CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraId);
         return characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG)[0];
     }
 
@@ -990,10 +992,15 @@ public class CameraController2 extends CameraController {
         return infos;
     }
 
-    public HashMap<String, String> getCameraParameters() {
+    public HashMap<String, String> getCameraParameters(String cameraId) {
         try {
             CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-            return getCameraParametersInternal(context, cameraManager.getCameraIdList()[0]);
+            if (cameraId != null) {
+                return getCameraParametersInternal(context, cameraId);
+            } else {
+                Log.e(TAG, "no camera specified, using default device (0)");
+                return getCameraParametersInternal(context, cameraManager.getCameraIdList()[0]);
+            }
         } catch (CameraAccessException cae) {
             Log.e(TAG, "retrieving camera parameters failed", cae);
             return null;
@@ -1370,11 +1377,10 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    private void logHardwareLevel() {
+    private void logHardwareLevel(String cameraId) {
 
         try {
             CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-            String cameraId = cameraManager.getCameraIdList()[0];
             CameraCharacteristics cameraCharacteristics = manager.getCameraCharacteristics(cameraId);
 
             int deviceLevel = cameraCharacteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);

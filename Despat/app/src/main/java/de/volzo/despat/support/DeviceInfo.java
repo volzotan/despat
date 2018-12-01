@@ -155,6 +155,14 @@ public class DeviceInfo {
             return info;
         }
 
+        public String getId() {
+            return id;
+        }
+
+        public String getDirection() {
+            return direction;
+        }
+
         public int getWidth() {
             return width;
         }

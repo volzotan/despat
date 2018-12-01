@@ -8,6 +8,7 @@ import java.io.Serializable;
 
 public class CameraConfig { // implements Serializable {
 
+    private String cameraDevice;
     private boolean persistentCamera;
     private int shutterInterval;
     private boolean legacyCameraController;
@@ -31,6 +32,7 @@ public class CameraConfig { // implements Serializable {
     public CameraConfig() {}
 
     public CameraConfig(Context context) {
+        this.cameraDevice = Config.getCameraDevice(context);
         this.persistentCamera = Config.getPersistentCamera(context);
         this.shutterInterval = Config.getShutterInterval(context);
         this.legacyCameraController = Config.getLegacyCameraController(context);
@@ -47,6 +49,14 @@ public class CameraConfig { // implements Serializable {
 
         this.meteringMaxTime = Config.METERING_MAX_TIME;
         this.runMediascannerAfterCapture = Config.RUN_MEDIASCANNER_AFTER_CAPTURE;
+    }
+
+    public String getCameraDevice() {
+        return cameraDevice;
+    }
+
+    public void setCameraDevice(String cameraDevice) {
+        this.cameraDevice = cameraDevice;
     }
 
     public boolean getPersistentCamera() {

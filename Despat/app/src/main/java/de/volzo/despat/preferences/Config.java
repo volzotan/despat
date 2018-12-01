@@ -60,6 +60,9 @@ public class Config {
     // set the JPEG image quality | v2 only
     public static final byte JPEG_QUALITY                           = 75;
 
+    // brightness threshold for 2nd image | v2 only
+    public static final float BRIGHTNESS_THRESHOLD                  = 10.0f;
+
     // maximal time the AF/AE/AWB metering functions
     // may try to find a fix before shutter is
     // released anyway
@@ -131,6 +134,7 @@ public class Config {
     public static final File    DEFAULT_WORKING_DIRECTORY                   = null;
     public static final File    DEFAULT_TEMP_DIRECTORY                      = null;
 
+    public static final String  DEFAULT_CAMERA_DEVICE                       = "0";
     public static final boolean DEFAULT_PERSISTENT_CAMERA                   = true;
     public static final boolean DEFAULT_LEGACY_CAMERA_CONTROLLER            = false;
     public static final int     DEFAULT_SHUTTER_INTERVAL                    = 10 * 1000; // in ms
@@ -249,6 +253,20 @@ public class Config {
             }
         }
         return new File(fh);
+    }
+
+    /**
+     * CAMERA_DEVICE
+     *
+     * Choose the Camera Device which is used for preview and capturing.
+     * Relevant phones with several back cameras.
+     */
+    public static final String KEY_CAMERA_DEVICE                    = "de.volzo.despat.cameraDevice";
+    public static final String getCameraDevice(Context context) {
+        return getProperty(context, KEY_CAMERA_DEVICE, DEFAULT_CAMERA_DEVICE);
+    }
+    public static void setPersistentCamera(Context context, String cameraDevice) {
+        setProperty(context, KEY_CAMERA_DEVICE, cameraDevice);
     }
 
     /**

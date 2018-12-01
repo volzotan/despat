@@ -158,7 +158,7 @@ public class SessionManager {
             if (zoomRegion != null) {
                 session.setImageSize(new Size(zoomRegion.width(), zoomRegion.height()));
             } else {
-                session.setImageSize(CameraController2.getImageSize(context));
+                session.setImageSize(CameraController2.getImageSize(context, cameraConfig.getCameraDevice()));
             }
         } catch (Exception e) {
             Log.w(TAG, "unable to set image size in session");

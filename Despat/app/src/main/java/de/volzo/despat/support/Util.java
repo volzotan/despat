@@ -369,6 +369,13 @@ public class Util {
         return dist;
     }
 
+    public static float computeBrightnessValue(long exposureTime, double aperture, int iso) {
+
+        Log.wtf(TAG, String.format("%d | %f | %d", exposureTime, aperture, iso));
+
+        return 0.0f;
+    }
+
 
     public static void shareFile(Context context, File f) throws Exception {
 

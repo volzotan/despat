@@ -25,6 +25,7 @@ import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.CameraConfig;
+import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.support.ImageRollover;
 import de.volzo.despat.SessionManager;
 import de.volzo.despat.SystemController;
@@ -376,14 +377,29 @@ public class ShutterService extends Service {
         }
     }
 
-    private void eventCaptureComplete() {
-        if (state != STATE_SECOND_IMAGE_BUSY && camconfig.getSecondImageExposureCompensation() != 0) {
-            state = STATE_SECOND_IMAGE;
-            handler.post(shutterReleaseRunnable);
-        } else {
-            state = STATE_CAMERA_READY;
+    private void eventCaptureComplete(CaptureInfo info) {
+        if (info == null) {
+            Log.e(TAG, "CaptureInfo empty");
 
-            if (!Config.getPersistentCamera(context)) {
+            if (state != STATE_SECOND_IMAGE_BUSY && camconfig.getSecondImageExposureCompensation() != 0) {
+                state = STATE_SECOND_IMAGE;
+                handler.post(shutterReleaseRunnable);
+            } else {
+                state = STATE_CAMERA_READY;
+                if (!Config.getPersistentCamera(context)) {
+                    shutdownCamera();
+                }
+            }
+        } else {
+            if (state != STATE_SECOND_IMAGE_BUSY
+                    && camconfig.getSecondImageExposureCompensation() != 0
+                    && Util.computeBrightnessValue(info.getExposureTime(), info.getAperture(), info.getIso()) >= Config.BRIGHTNESS_THRESHOLD) {
+                state = STATE_SECOND_IMAGE;
+                handler.post(shutterReleaseRunnable);
+            } else {
+                state = STATE_CAMERA_READY;
+
+                if (!Config.getPersistentCamera(context)) {
 
 //            Handler handler = new Handler();
 //            handler.postDelayed(new Runnable() {
@@ -392,6 +408,7 @@ public class ShutterService extends Service {
                     shutdownCamera();
 //                }
 //            }, 500);
+                }
             }
         }
     }
@@ -532,10 +549,10 @@ public class ShutterService extends Service {
         }
 
         @Override
-        public void captureComplete() {
+        public void captureComplete(CaptureInfo info) {
             Log.d(TAG, ":: captureComplete");
 
-            eventCaptureComplete();
+            eventCaptureComplete(info);
         }
 
         @Override

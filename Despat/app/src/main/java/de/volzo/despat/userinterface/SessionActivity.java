@@ -52,11 +52,12 @@ public class SessionActivity extends AppCompatActivity implements
 
     Session session;
 
-    private String[] tabtitles = {"Info", "Points", "Errors"};
+    private String[] tabtitles = {"Dataset", "Points", "Errors", "Info"};
     private Fragment[] tabfragments = {
             new SessionFragment(),
             new HomographyPointListFragment(),
-            new ErrorEventListFragment()
+            new ErrorEventListFragment(),
+            new InfoFragment()
     };
 
     ViewPager viewPager;

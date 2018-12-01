@@ -16,9 +16,15 @@ import android.preference.SwitchPreference;
 import android.preference.TwoStatePreference;
 import android.util.Log;
 
+import java.lang.reflect.Constructor;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import de.volzo.despat.CameraController2;
 import de.volzo.despat.R;
 import de.volzo.despat.support.DeviceInfo;
@@ -80,6 +86,32 @@ public class SettingsExtendedFragment extends PreferenceFragment implements Shar
         category.setTitle("Camera");
         screen.addPreference(category);
 
+        String[] cameraIds = {};
+        String[] cameraIdEntries = {};
+        try {
+            List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(context);
+
+            cameraIds = new String[cameras.size()];
+            cameraIdEntries = new String[cameras.size()];
+            for (int i=0; i<cameras.size(); i++) {
+                DeviceInfo.CameraInfo info = cameras.get(i);
+                cameraIds[i] = info.getId();
+                cameraIdEntries[i] = String.format("[%s] %s", info.getId(), info.getDirection());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "getting available cameras failed", e);
+        }
+
+        ListPreference prefCameraDevice = new ListPreference(context);
+        prefCameraDevice.setTitle(R.string.pref_title_cameraDevice);
+        prefCameraDevice.setSummary(R.string.pref_summary_cameraDevice);
+        prefCameraDevice.setEntryValues(cameraIds);
+        prefCameraDevice.setEntries(cameraIdEntries);
+        prefCameraDevice.setDefaultValue(Config.DEFAULT_CAMERA_DEVICE);
+        prefCameraDevice.setKey(Config.KEY_CAMERA_DEVICE);
+        category.addPreference(prefCameraDevice);
+        preferenceSummaryMap.put(prefCameraDevice, R.string.pref_summary_cameraDevice);
+
         SwitchPreference prefFormatJpg = new SwitchPreference(context);
         prefFormatJpg.setTitle(context.getString(R.string.pref_title_formatJpg));
         prefFormatJpg.setSummary(context.getString(R.string.pref_summary_formatJpg));
@@ -125,21 +157,21 @@ public class SettingsExtendedFragment extends PreferenceFragment implements Shar
         category.addPreference(prefSecondImageExposureCompensation);
         preferenceSummaryMap.put(prefSecondImageExposureCompensation, R.string.pref_summary_secondImageExposureCompensation);
 
-        category = new PreferenceCategory(context);
-        category.setTitle("Actions");
-        screen.addPreference(category);
-
-        Preference prefEnableCTmode = new Preference(context);
-        prefEnableCTmode.setTitle(context.getString(R.string.pref_title_enableCTmode));
-        prefEnableCTmode.setSummary(context.getString(R.string.pref_summary_enableCTmode));
-        prefEnableCTmode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                Config.enableCTMode(context);
-                return false;
-            }
-        });
-        category.addPreference(prefEnableCTmode);
+//        category = new PreferenceCategory(context);
+//        category.setTitle("Actions");
+//        screen.addPreference(category);
+//
+//        Preference prefEnableCTmode = new Preference(context);
+//        prefEnableCTmode.setTitle(context.getString(R.string.pref_title_enableCTmode));
+//        prefEnableCTmode.setSummary(context.getString(R.string.pref_summary_enableCTmode));
+//        prefEnableCTmode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//            @Override
+//            public boolean onPreferenceClick(Preference preference) {
+//                Config.enableCTMode(context);
+//                return false;
+//            }
+//        });
+//        category.addPreference(prefEnableCTmode);
 
         setPreferenceScreen(screen);
     }
