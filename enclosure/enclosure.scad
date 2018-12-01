@@ -27,8 +27,8 @@ wb         = 1.2;
 seal_thickness = 1; // private
 heat_inset_diam = 4.1;
 
-screw_inset     = true;
-heat_inset      = false;
+screw_inset     = false;
+heat_inset      = true;
 
 seal_hard       = false; 
 seal_rubber     = true;
@@ -38,7 +38,8 @@ seal_flex       = false;
 //include<phone_MOTOE2.scad>;
 //include<phone_MOTOZ1.scad>;
 //include<phone_ZTEAXON7.scad>;
-include<phone_MOTOG5S.scad>;
+//include<phone_MOTOG5S.scad>;
+include<phone_LGG6.scad>;
 //include<phone_GENERIC.scad>;
 
 //translate([11, 11, 8]) motoE();
@@ -85,13 +86,11 @@ include<phone_MOTOG5S.scad>;
 ////            latch(distance=-1.3);
 ////            translate([0, 14.5-1.3, 0]) latch_knob();
 ////        }
-//
-//        translate([sizeBot[0]/2-(44/2)+44, sizeBot[1]+.1, 3.5]) rotate([90, 0, 180]) socket_normal();
 //        
 //        translate([95.1, 12.7, 7.2]) color("green") wedge_semiflex_motoZ();
 //    }
 //    
-//    translate([25+0, -10, -1]) cube([sizeBot[0]+20, sizeBot[1]+20, sizeBot[2]+20]);
+////    translate([25+0, -10, -1]) cube([sizeBot[0]+20, sizeBot[1]+20, sizeBot[2]+20]);
 //}
 
 // --------------------------- TEST ----------------------------
@@ -134,7 +133,8 @@ include<phone_MOTOG5S.scad>;
 // --------------------------- TEST3 ---------------------------
 
 //bottom();
-////translate([0, 0, 50]) color("blue") phone();
+//translate([12, 10, 25]) color("blue") phone();
+//translate([12, 10, 7.1]) color("blue") phone();
 //translate([0, sizeTopF[1], sizeBot[2] + sizeTopF[2] + 0.2]) rotate([180, 0, 0]) top_flat();
 //translate([0, 0, sizeBot[2]-0.5+0.1]) color("grey") seal();
 //
@@ -154,21 +154,21 @@ include<phone_MOTOG5S.scad>;
 
 //top();
 //translate([0, 104]) top_flat();
-//bottom();
+bottom();
 //
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal();
 //seal2D();
 //translate([0, 0, 1.3]) rotate([0, 0, 0]) seal_cutout();
-translate([0, -2.1-08-1, 0]) socket_nut_wedge();
+//translate([0, -2.1-08-1, 0]) socket_nut_wedge();
 
-translate([0, 0]) {
-    latch(distance=-1.7); 
-    translate([0, 14.5-1.7, 0]) latch_knob();
-}
-translate([13, 0]) mirror([1, 0]) {
-    latch(distance=-1.7); 
-    translate([0, 14.5-1.7, 0]) latch_knob();
-}
+//translate([0, 0]) {
+//    latch(distance=-1.7); 
+//    translate([0, 14.5-1.7, 0]) latch_knob();
+//}
+//translate([13, 0]) mirror([1, 0]) {
+//    latch(distance=-1.7); 
+//    translate([0, 14.5-1.7, 0]) latch_knob();
+//}
 ////translate([20, 10]) rotate([90, 0, 0]) socket_normal(); 
 ////
 //translate([33, 20, 5.5]) rotate([90, 180, 0]) mirror([0, 0]) hinge_bottom(screwed=true);
