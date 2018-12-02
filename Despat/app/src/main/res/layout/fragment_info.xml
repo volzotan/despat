@@ -15,7 +15,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="Temperature" />
+            android:text="Exposure" />
+
+        <com.jjoe64.graphview.GraphView
+            android:id="@+id/graph_exposure"
+            android:layout_width="match_parent"
+            android:layout_height="200dip" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Temperature [°C]" />
 
         <com.jjoe64.graphview.GraphView
             android:id="@+id/graph_temperature"
@@ -26,10 +37,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="Exposure" />
+            android:text="Battery" />
 
         <com.jjoe64.graphview.GraphView
-            android:id="@+id/graph_exposure"
+            android:id="@+id/graph_battery"
+            android:layout_width="match_parent"
+            android:layout_height="200dip" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Free Space [mb]" />
+
+        <com.jjoe64.graphview.GraphView
+            android:id="@+id/graph_freeSpace"
             android:layout_width="match_parent"
             android:layout_height="200dip" />
 

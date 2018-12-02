@@ -393,7 +393,7 @@ public class ShutterService extends Service {
         } else {
             if (state != STATE_SECOND_IMAGE_BUSY
                     && camconfig.getSecondImageExposureCompensation() != 0
-                    && Util.computeBrightnessValue(info.getExposureTime(), info.getAperture(), info.getIso()) >= Config.BRIGHTNESS_THRESHOLD) {
+                    && Util.computeExposureValue(info.getExposureTime(), info.getAperture(), info.getIso()) >= Config.BRIGHTNESS_THRESHOLD) {
                 state = STATE_SECOND_IMAGE;
                 handler.post(shutterReleaseRunnable);
             } else {

@@ -369,13 +369,31 @@ public class Util {
         return dist;
     }
 
-    public static float computeBrightnessValue(long exposureTime, double aperture, int iso) {
-
-        Log.wtf(TAG, String.format("%d | %f | %d", exposureTime, aperture, iso));
-
-        return 0.0f;
+    private static double linearInterpolate(double a, double b, double f) {
+        // return (a * (1.0 - f)) + (b * f);
+        return a - ((a-b) * (1.0-f));
     }
 
+    /* Calculates an exposure value
+     *
+     * exposureTime is expected to be ms
+     *
+     * Exposure with 1/4000 at f/22 and ISO 100 is equal to ~1.0 (extremly bright scene for AE)
+     * Exposure with 1/2000 at f/16 and ISO 200 is equal to 3.0 (3 EV less light)
+     */
+    public static double computeExposureValue(long exposureTime, double aperture, int iso) {
+
+        // Log.wtf(TAG, String.format("%f | %f | %d", exposureTime, aperture, iso));
+
+        // convert exposureTime from ms to a floating point value of seconds (i.e. 0.5 --> half second)
+        double exposureFraction = exposureTime/1000d;
+
+        double shutter_repr     = Math.log(exposureFraction)/Math.log(2) + 13;
+        double aperture_repr    = linearInterpolate(10, 1, (Math.log(aperture)/Math.log(2))/4.5d);
+        double iso_repr         = Math.log(iso/100d)/Math.log(2) + 1;
+
+        return shutter_repr + aperture_repr + iso_repr;
+    }
 
     public static void shareFile(Context context, File f) throws Exception {
 

@@ -83,6 +83,9 @@ dependencies {
         exclude group: "com.android.support"
     }
 
+    // Session plots
+    implementation 'com.jjoe64:graphview:4.2.2'
+
     // MPAndroidChart for Session plots
     // implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 

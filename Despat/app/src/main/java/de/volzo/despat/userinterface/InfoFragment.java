@@ -89,6 +89,20 @@ public class InfoFragment extends Fragment {
         DataPoint datapoints[];
         LineGraphSeries<DataPoint> series;
 
+        // Exposure
+
+        List<Capture> captures = captureDao.getAllBySession(sessionId);
+        graph = (GraphView) view.findViewById(R.id.graph_exposure);
+        datapoints = new DataPoint[captures.size()];
+        for (int i=0; i<captures.size(); i++) {
+            Capture c = captures.get(i);
+            datapoints[i] = new DataPoint(i, Util.computeExposureValue(c.getExposureTime(), c.getAperture(), c.getIso()));
+        }
+        series = new LineGraphSeries<DataPoint>(datapoints);
+        graph.addSeries(series);
+
+        // Temperature
+
         List<Status> status;
         if (session.getEnd() != null) {
             status = statusDao.getAllBetween(session.getStart(), session.getEnd());
@@ -104,11 +118,22 @@ public class InfoFragment extends Fragment {
         series = new LineGraphSeries<DataPoint>(datapoints);
         graph.addSeries(series);
 
-        List<Capture> captures = captureDao.getAllBySession(sessionId);
-        graph = (GraphView) view.findViewById(R.id.graph_exposure);
-        datapoints = new DataPoint[captures.size()];
-        for (int i=0; i<captures.size(); i++) {
-            datapoints[i] = new DataPoint(i, captures.get(i).getAperture());
+        // Battery
+
+        graph = (GraphView) view.findViewById(R.id.graph_battery);
+        datapoints = new DataPoint[status.size()];
+        for (int i=0; i<status.size(); i++) {
+            datapoints[i] = new DataPoint(i, status.get(i).getBatteryInternal());
+        }
+        series = new LineGraphSeries<DataPoint>(datapoints);
+        graph.addSeries(series);
+
+        // Free Space
+
+        graph = (GraphView) view.findViewById(R.id.graph_freeSpace);
+        datapoints = new DataPoint[status.size()];
+        for (int i=0; i<status.size(); i++) {
+            datapoints[i] = new DataPoint(i, status.get(i).getFreeSpaceInternal());
         }
         series = new LineGraphSeries<DataPoint>(datapoints);
         graph.addSeries(series);
