@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -96,9 +97,20 @@ public class InfoFragment extends Fragment {
         datapoints = new DataPoint[captures.size()];
         for (int i=0; i<captures.size(); i++) {
             Capture c = captures.get(i);
-            datapoints[i] = new DataPoint(i, Util.computeExposureValue(c.getExposureTime(), c.getAperture(), c.getIso()));
+            datapoints[i] = new DataPoint(c.getRecordingTime(), Util.computeExposureValue(c.getExposureTime(), c.getAperture(), c.getIso()));
         }
         series = new LineGraphSeries<DataPoint>(datapoints);
+//        // set date label formatter
+//        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(graph.getContext()));
+//        graph.getGridLabelRenderer().setNumHorizontalLabels(captures.size());
+//        // set manual x bounds to have nice steps
+//        graph.getViewport().setMinX(captures.get(0).getRecordingTime().getTime());
+//        graph.getViewport().setMaxX(captures.get(captures.size()-1).getRecordingTime().getTime());
+//        graph.getViewport().setXAxisBoundsManual(true);
+//        // as we use dates as labels, the human rounding to nice readable numbers is not necessary
+//        graph.getGridLabelRenderer().setHumanRounding(false);
+        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
+
         graph.addSeries(series);
 
         // Temperature

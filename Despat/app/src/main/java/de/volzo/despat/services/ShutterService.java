@@ -378,38 +378,31 @@ public class ShutterService extends Service {
     }
 
     private void eventCaptureComplete(CaptureInfo info) {
+
         if (info == null) {
             Log.e(TAG, "CaptureInfo empty");
+        }
 
-            if (state != STATE_SECOND_IMAGE_BUSY && camconfig.getSecondImageExposureCompensation() != 0) {
+        if (state != STATE_SECOND_IMAGE_BUSY && camconfig.getSecondImageExposureCompensation() != 0) {
+            if (info != null && Config.getExposureThreshold(context) > 1.0) {
+                if (Util.computeExposureValue(info.getExposureTime(), info.getAperture(), info.getIso()) <= Config.getExposureThreshold(context)) {
+                    state = STATE_SECOND_IMAGE;
+                    handler.post(shutterReleaseRunnable);
+                    return;
+                }
+
+                // else: camera ready
+
+            } else { // info is null: take second image
                 state = STATE_SECOND_IMAGE;
                 handler.post(shutterReleaseRunnable);
-            } else {
-                state = STATE_CAMERA_READY;
-                if (!Config.getPersistentCamera(context)) {
-                    shutdownCamera();
-                }
+                return;
             }
-        } else {
-            if (state != STATE_SECOND_IMAGE_BUSY
-                    && camconfig.getSecondImageExposureCompensation() != 0
-                    && Util.computeExposureValue(info.getExposureTime(), info.getAperture(), info.getIso()) >= Config.BRIGHTNESS_THRESHOLD) {
-                state = STATE_SECOND_IMAGE;
-                handler.post(shutterReleaseRunnable);
-            } else {
-                state = STATE_CAMERA_READY;
+        }
 
-                if (!Config.getPersistentCamera(context)) {
-
-//            Handler handler = new Handler();
-//            handler.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-                    shutdownCamera();
-//                }
-//            }, 500);
-                }
-            }
+        state = STATE_CAMERA_READY;
+        if (!Config.getPersistentCamera(context)) {
+            shutdownCamera();
         }
     }
 

@@ -134,8 +134,8 @@ public class SettingsExtendedFragment extends PreferenceFragment implements Shar
         }
 
         final String[] EXPOSURE_VALUES = {
-                "-10", "-9", "-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1",
-                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+                "-12", "-11", "-10", "-9", "-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1",
+                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
 
         ListPreference prefExposureCompensation = new ListPreference(context);
         prefExposureCompensation.setTitle(R.string.pref_title_exposureCompensation);
@@ -156,6 +156,16 @@ public class SettingsExtendedFragment extends PreferenceFragment implements Shar
         prefSecondImageExposureCompensation.setKey(Config.KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION);
         category.addPreference(prefSecondImageExposureCompensation);
         preferenceSummaryMap.put(prefSecondImageExposureCompensation, R.string.pref_summary_secondImageExposureCompensation);
+
+        NumberPickerPreference prefExposureThreshold = new NumberPickerPreference(context);
+        prefExposureThreshold.setTitle(R.string.pref_title_exposureThreshold);
+        prefExposureThreshold.setSummary(R.string.pref_summary_exposureThreshold);
+        prefExposureThreshold.setMinValue(0); //2.0);
+        prefExposureThreshold.setMaxValue(50); //50.0);
+        prefExposureThreshold.setDefaultValue(Config.DEFAULT_EXPOSURE_THRESHOLD);
+        prefExposureThreshold.setKey(Config.KEY_EXPOSURE_THRESHOLD);
+        category.addPreference(prefExposureThreshold);
+        preferenceSummaryMap.put(prefExposureThreshold, R.string.pref_summary_exposureThreshold);
 
 //        category = new PreferenceCategory(context);
 //        category.setTitle("Actions");

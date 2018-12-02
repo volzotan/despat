@@ -84,7 +84,12 @@ public class NumberPickerPreference extends DialogPreference {
 
         } else { // Set default state
 
-            currentValue = (int) defaultValue;
+            if (defaultValue instanceof Float) {
+                currentValue = Math.round((float) defaultValue);
+            } else {
+                currentValue = (int) defaultValue;
+            }
+
             persistInt(currentValue);
         }
     }

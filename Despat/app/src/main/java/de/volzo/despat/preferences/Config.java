@@ -60,9 +60,6 @@ public class Config {
     // set the JPEG image quality | v2 only
     public static final byte JPEG_QUALITY                           = 75;
 
-    // brightness threshold for 2nd image | v2 only
-    public static final float BRIGHTNESS_THRESHOLD                  = 10.0f;
-
     // maximal time the AF/AE/AWB metering functions
     // may try to find a fix before shutter is
     // released anyway
@@ -145,6 +142,7 @@ public class Config {
 
     public static final int     DEFAULT_EXPOSURE_COMPENSATION               = 0;
     public static final int     DEFAULT_SECOND_IMAGE_EXPOSURE_COMPENSATION  = 0;
+    public static final float   DEFAULT_EXPOSURE_THRESHOLD                  = 10f;
 
     public static final String  DEFAULT_NETWORK_FIDELITY                    = DetectorSSD.FIDELITY_MODE[0];
     public static final boolean DEFAULT_PHONE_HOME                          = false;
@@ -356,6 +354,20 @@ public class Config {
     }
     public static void setSecondImageExposureCompensation(Context context, int secondImageExposureCompensation) {
         setProperty(context, KEY_SECOND_IMAGE_EXPOSURE_COMPENSATION, Integer.toString(secondImageExposureCompensation));
+    }
+
+    /**
+     * EXPOSURE THRESHOLD
+     *
+     * exposure value must be less than threshold to trigger 2nd capture
+     * (disabled if threshold is 0) | v2 only
+     */
+    public static final String KEY_EXPOSURE_THRESHOLD               = "de.volzo.despat.exposureThreshold";
+    public static float getExposureThreshold(Context context) {
+        return getPropertyInt(context, KEY_EXPOSURE_THRESHOLD, Math.round(DEFAULT_EXPOSURE_THRESHOLD));
+    }
+    public static void setExposureThreshold(Context context, float exposureThreshold) {
+        setProperty(context, KEY_EXPOSURE_THRESHOLD, exposureThreshold);
     }
 
     /**
@@ -584,6 +596,13 @@ public class Config {
         editor.commit();
     }
 
+    private static void setProperty(Context context, String key, float value) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putFloat(key, value);
+        editor.commit();
+    }
+
     private static String getProperty(Context context, String key, String defaultValue) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getString(key, defaultValue);
@@ -602,6 +621,11 @@ public class Config {
     private static boolean getPropertyBoolean(Context context, String key, boolean defaultValue) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(key, defaultValue);
+    }
+
+    private static float getPropertyFloat(Context context, String key, float defaultValue) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        return settings.getFloat(key, defaultValue);
     }
 
     private static Date getPropertyDate(Context context, String key, Date defaultValue) {

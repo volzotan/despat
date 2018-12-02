@@ -89,6 +89,8 @@
     <string name="pref_summary_exposureCompensation">Brightness change for every image: %s</string>
     <string name="pref_title_secondImageExposureCompensation">Exposure compensation 2nd image</string>
     <string name="pref_summary_secondImageExposureCompensation">Brightness change for every second image: %s</string>
+    <string name="pref_title_exposureThreshold">Exposure Threshold</string>
+    <string name="pref_summary_exposureThreshold">Exposure value must be below %s to trigger 2nd image capture</string>
 
     <string name="pref_title_enableCTmode">Enable CT mode</string>
     <string name="pref_summary_enableCTmode">Apply CT-style preset</string>
