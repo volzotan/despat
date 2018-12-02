@@ -22,7 +22,7 @@ tol_depth = 0.4;
 translate_cavity = [sizeBot[0]-(phoneWidth)-6, 10, 7];
 lensHole = [
     translate_cavity[0]+phoneWidth-lensHoleDistance, 
-    translate_cavity[1]+phoneDepth/2-3
+    translate_cavity[1]+phoneDepth/2-4
 ];
 
 module phone() {
