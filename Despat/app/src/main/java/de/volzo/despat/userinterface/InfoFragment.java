@@ -1,49 +1,31 @@
 package de.volzo.despat.userinterface;
 
 import android.content.Context;
-import android.graphics.RectF;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import androidx.fragment.app.Fragment;
 import de.volzo.despat.R;
-import de.volzo.despat.SessionManager;
-import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
-import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
-import de.volzo.despat.persistence.Position;
 import de.volzo.despat.persistence.PositionDao;
 import de.volzo.despat.persistence.Session;
 import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.persistence.Status;
 import de.volzo.despat.persistence.StatusDao;
-import de.volzo.despat.preferences.Config;
-import de.volzo.despat.services.Orchestrator;
-import de.volzo.despat.support.AspectRatioImageView;
 import de.volzo.despat.support.Util;
 
 
@@ -72,11 +54,6 @@ public class InfoFragment extends Fragment {
         Bundle args = getArguments();
         final long sessionId = args.getLong(SessionActivity.ARG_SESSION_ID);
 
-        if (sessionId <= 0) {
-            Log.e(TAG, "invalid session ID for detail view: " + sessionId);
-            return null;
-        }
-
         AppDatabase db = AppDatabase.getAppDatabase(context);
         StatusDao statusDao = db.statusDao();
         SessionDao sessionDao = db.sessionDao();
@@ -94,11 +71,28 @@ public class InfoFragment extends Fragment {
 
         List<Capture> captures = captureDao.getAllBySession(sessionId);
         graph = (GraphView) view.findViewById(R.id.graph_exposure);
-        datapoints = new DataPoint[captures.size()];
+
+
+        List<DataPoint> datapointsList = new ArrayList<>();
         for (int i=0; i<captures.size(); i++) {
             Capture c = captures.get(i);
-            datapoints[i] = new DataPoint(c.getRecordingTime(), Util.computeExposureValue(c.getExposureTime(), c.getAperture(), c.getIso()));
+
+            Date recTime = c.getRecordingTime();
+            double exposureValue = Util.computeExposureValue(c.getExposureTime(), c.getAperture(), c.getIso());
+
+            if (recTime == null) {
+                Log.w(TAG, "invalid recordingTime for datapoint " + i);
+                continue;
+            }
+
+            if (exposureValue <= 0.0) {
+                Log.w(TAG, "invalid exposureValue for datapoint " + i);
+                continue;
+            }
+
+            datapointsList.add(new DataPoint(recTime, exposureValue));
         }
+        datapoints = datapointsList.toArray(new DataPoint[0]);
         series = new LineGraphSeries<DataPoint>(datapoints);
 //        // set date label formatter
 //        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(graph.getContext()));
@@ -110,6 +104,9 @@ public class InfoFragment extends Fragment {
 //        // as we use dates as labels, the human rounding to nice readable numbers is not necessary
 //        graph.getGridLabelRenderer().setHumanRounding(false);
         graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
+
+//        graph.getViewport().setYAxisBoundsManual(true);
+//        graph.getViewport().setMinY(0);
 
         graph.addSeries(series);
 
@@ -130,6 +127,10 @@ public class InfoFragment extends Fragment {
         series = new LineGraphSeries<DataPoint>(datapoints);
         graph.addSeries(series);
 
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(0);
+        graph.getViewport().setMaxY(50);
+
         // Battery
 
         graph = (GraphView) view.findViewById(R.id.graph_battery);
@@ -140,6 +141,10 @@ public class InfoFragment extends Fragment {
         series = new LineGraphSeries<DataPoint>(datapoints);
         graph.addSeries(series);
 
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(0);
+        graph.getViewport().setMaxY(100);
+
         // Free Space
 
         graph = (GraphView) view.findViewById(R.id.graph_freeSpace);
@@ -149,6 +154,9 @@ public class InfoFragment extends Fragment {
         }
         series = new LineGraphSeries<DataPoint>(datapoints);
         graph.addSeries(series);
+
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(0);
 
 //
 //        List<Position> unconvertedPositions = positionDao.getAllWithoutLatLonBySession(sessionId);
