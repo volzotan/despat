@@ -137,8 +137,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         NumberPickerPreference prefShutterInterval = new NumberPickerPreference(context);
         prefShutterInterval.setTitle(R.string.pref_title_shutterInterval);
         prefShutterInterval.setSummary(R.string.pref_summary_shutterInterval);
-        prefShutterInterval.setMinValue(2);
-        prefShutterInterval.setMaxValue(120);
+        prefShutterInterval.setMinValue(Config.MIN_SHUTTER_INTERVAL);
+        prefShutterInterval.setMaxValue(Config.MAX_SHUTTER_INTERVAL);
         prefShutterInterval.setFactor(1000);
         prefShutterInterval.setDefaultValue(Config.DEFAULT_SHUTTER_INTERVAL);
         prefShutterInterval.setKey(Config.KEY_SHUTTER_INTERVAL);

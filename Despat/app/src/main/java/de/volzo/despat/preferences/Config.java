@@ -65,7 +65,9 @@ public class Config {
     // released anyway
     // if v2 is used on a legacy device, this time is
     // always used fully for metering
-    public static final int METERING_MAX_TIME                       = 1500;
+    public static final int METERING_MAX_TIME                       = 2000;
+
+    public static final boolean BROADCAST_PREVIEW_DETAILS           = false;
 
     // make captured images immediately available to
     // the android gallery app | v2 only
@@ -92,6 +94,9 @@ public class Config {
     public static final long CAMERA_RESTART_TIME_WINDOW             = 60 * 1000;
 
     public static final long CAMERA_RESTART_MAX_NUMBER              = 8;
+
+    public static final int MIN_SHUTTER_INTERVAL                    = 2;    // in s
+    public static final int MAX_SHUTTER_INTERVAL                    = 240;  // in s
 
     // ---------------------------------------------------------------------------------------------
 

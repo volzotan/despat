@@ -185,7 +185,7 @@ public class InfoFragment extends Fragment {
 //            Glide.with(context).load(R.drawable.missing_img).into(ivCompressedPreview);
 //        }
 //
-//        // TODO: draw static overlay for perfomance (PNG with alpha channel) instead of using a canvas
+//        // TODO: draw static overlay for performance (PNG with alpha channel) instead of using a canvas
 //
 //        // draw detection boxes (do calculations not on UI thread)
 //        final DrawSurface drawSurface = view.findViewById(R.id.drawSurface_session);

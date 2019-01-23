@@ -116,6 +116,8 @@ public class CameraController2 extends CameraController {
     private long captureTimer;
     private Future<Integer> devicePositionFuture;
 
+    private long lastPreviewInfoBroadcastSent = -1;
+
     public CameraController2(Context context, ControllerCallback controllerCallback, TextureView textureView, CameraConfig camconfig) {
         this.context = context;
         this.controllerCallback = controllerCallback;
@@ -466,6 +468,10 @@ public class CameraController2 extends CameraController {
                 case STATE_WAITING_FOR_3A_CONVERGENCE: {
                     boolean readyToCapture = false;
 
+                    if (Config.BROADCAST_PREVIEW_DETAILS) {
+                        broadcastPreviewDetails(result);
+                    }
+
                     if (!noAF) {
                         Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
                         if (afState == null) break;
@@ -474,6 +480,7 @@ public class CameraController2 extends CameraController {
                         readyToCapture =
                                 (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
                                         afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED);
+
                     }
 
                     // If we are running on an non-legacy device, we should also wait until
@@ -1310,6 +1317,36 @@ public class CameraController2 extends CameraController {
             }
         }
         return false;
+    }
+
+    private void broadcastPreviewDetails(CaptureResult r) {
+
+        if ((System.currentTimeMillis() - lastPreviewInfoBroadcastSent) < 1000) {
+            return;
+        } else {
+            lastPreviewInfoBroadcastSent = System.currentTimeMillis();
+        }
+
+        Float lensAperture = r.get(CaptureResult.LENS_APERTURE);
+        Long exposureTime = r.get(CaptureResult.SENSOR_EXPOSURE_TIME); // in ns
+        Integer sensitivity = r.get(CaptureResult.SENSOR_SENSITIVITY);
+
+        CaptureInfo info = new CaptureInfo(null);
+
+        if (lensAperture != null) {
+            info.setAperture(lensAperture);
+        }
+        if (exposureTime != null) {
+            exposureTime /= (1000 * 1000);
+            info.setExposureTime(exposureTime);
+        }
+        if (sensitivity != null) {
+            info.setIso(sensitivity);
+        }
+
+        Intent intent = new Intent(Broadcast.PREVIEW_INFO);
+        intent.putExtra(Broadcast.DATA_IMAGE_CAPTUREINFO, info);
+        context.sendBroadcast(intent);
     }
 
     private void printCaptureStats(CaptureResult r) {

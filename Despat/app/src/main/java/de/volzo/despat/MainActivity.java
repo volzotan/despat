@@ -510,13 +510,21 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             String action = intent.getAction();
 
             switch (action) {
-                case Broadcast.IMAGE_TAKEN:
+                case Broadcast.IMAGE_TAKEN: {
                     CaptureInfo info = (CaptureInfo) intent.getSerializableExtra(Broadcast.DATA_IMAGE_CAPTUREINFO);
                     Log.d("image taken", "path: " + info.getFilename());
                     updatePreviewImage();
                     break;
+                }
 
-                case Broadcast.SHOW_MESSAGE:
+                case Broadcast.PREVIEW_INFO: {
+                    CaptureInfo info = (CaptureInfo) intent.getSerializableExtra(Broadcast.DATA_IMAGE_CAPTUREINFO);
+                    double ev = Util.computeExposureValue(info.getExposureTime(), info.getAperture(), info.getIso());
+                    Toast.makeText(context, String.format("Preview Info: %f", ev), Toast.LENGTH_SHORT);
+                    break;
+                }
+
+                case Broadcast.SHOW_MESSAGE: {
 
                     String message = intent.getStringExtra(Broadcast.DATA_MESSAGE);
                     String reason = intent.getStringExtra(Broadcast.DATA_REASON);
@@ -535,6 +543,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     ).show();
 
                     break;
+                }
             }
         }
     };
@@ -640,6 +649,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void registerAllReceivers() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Broadcast.IMAGE_TAKEN);
+        filter.addAction(Broadcast.PREVIEW_INFO);
         filter.addAction(Broadcast.SHOW_MESSAGE);
         registerReceiver(broadcastReceiver, filter);
     }

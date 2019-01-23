@@ -18,6 +18,7 @@ public class Broadcast {
     public static final String CAMERA_STATE_CHANGED         = "de.volzo.despat.CAMERA_STATE_CHANGED";
 
     public static final String IMAGE_TAKEN                  = "de.volzo.despat.IMAGE_TAKEN";
+    public static final String PREVIEW_INFO                 = "de.volzo.despat.PREVIEW_INFO";
     public static final String DATA_IMAGE_CAPTUREINFO       = "de.volzo.despat.DATA_IMAGE_CAPTUREINFO";
 
     public static final String NEXT_SHUTTER_INVOCATION      = "de.volzo.despat.NEXT_SHUTTER_INVOCATION";

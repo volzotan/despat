@@ -45,7 +45,7 @@ public class ConfigureActivity extends AppCompatActivity {
     public static final String DATA_CAMERA_CONFIG = "DATA_CAMERA_CONFIG";
     public static final String DATA_DETECTOR_CONFIG = "DATA_DETECTOR_CONFIG";
 
-    private final int sbIntervalMin = 3;
+    private final int sbIntervalMin = Config.MIN_SHUTTER_INTERVAL;
 
     ConfigureActivity activity;
 
@@ -85,7 +85,7 @@ public class ConfigureActivity extends AppCompatActivity {
 //            }
 //        }
 
-        sbInterval.setMax(120-sbIntervalMin);
+        sbInterval.setMax(Config.MAX_SHUTTER_INTERVAL-sbIntervalMin);
         sbInterval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
