@@ -149,12 +149,12 @@ if not os.path.exists(OUTPUT_FOLDER):
 
 images = []
 
-if (SOURCE.endswith(".jpg")):
+if (SOURCE.lower().endswith(".jpg")):
     images.append(SOURCE)
 else: 
     for root, dirs, files in os.walk(SOURCE):
        for f in files:
-           if (not f.endswith(".jpg")):
+           if (not f.lower().endswith(".jpg")):
                continue
            images.append(os.path.join(root, f))                    
 
@@ -336,8 +336,11 @@ import time
 
 counter = 0
 total_time = time.time()
+config = tf.ConfigProto(
+    device_count = {'GPU': 1} #0}
+)
 with detection_graph.as_default():                                
-    with tf.Session() as sess:
+    with tf.Session(config=config) as sess:
 
         for item in images:
             counter += 1

@@ -109,30 +109,113 @@ def classname_to_id(name):
 
 # input
 
-OUTPUT_FILENAME = "hamburg.txt"
+
+OUTPUT_FILENAME = "boxes_hongkong8.txt"
 DATA = [
     {
         "name": "default camera",
-        "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/hamburg_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_700px",
+        "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/19-01-02_hongkong8_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_1200px",
         "src": [
-            [630, 3205],
-            [4720, 2975],
-            [5287, 2614],
-            [2962, 2385],
-            [4889, 3529]
+            [681, 3986],
+            [929, 2620],
+            [1382, 2378],
+            [2977, 1169],
+            [4124, 2545],
+            [5052, 3960]
         ],
         "dst": [
-            [53.552405, 10.008568],
-            [53.552896, 10.008186],
-            [53.553016, 10.007925],
-            [53.552594, 10.007984],
-            [53.552897, 10.008380]
+            [22.284254, 114.156089],
+            [22.284213, 114.156182],
+            [22.284185, 114.156176],
+            [22.283587, 114.156535],
+            [22.284092, 114.156023],
+            [22.284164, 114.155961]
         ]
     }
 ]
 MISSING_TIMESTAMPS = True
-INTERVAL = 60
-startdate = datetime(2016, 7, 14, 11)
+INTERVAL = 5
+startdate = datetime(2019, 1, 2, 12)
+
+
+# OUTPUT_FILENAME = "hongkong4.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/19-01-01_hongkong4_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_1200px",
+#         "src": [
+#             [1120, 3309],
+#             [2335, 2289],
+#             [4504, 1480],
+#             [4673, 3052],
+#             [3657, 3741]
+#         ],
+#         "dst": [
+#             [22.284268, 114.156071],
+#             [22.284185, 114.156176],
+#             [22.283587, 114.156535],
+#             [22.284092, 114.156023],
+#             [22.284167, 114.156006]
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 5
+# startdate = datetime(2019, 1, 1, 12)
+
+
+# OUTPUT_FILENAME = "theaterplatz_spark.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Users/volzotan/Documents/DESPATDATASETS/19-01-22_theaterplatz_spark_annotation",
+#         "src": [
+#             [664, 810],
+#             [2215, 742],
+#             [2570, 475],
+#             [2829, 2413],
+#             [2192, 2549],
+#             [577, 2404]
+#         ],
+#         "dst": [
+#             [50.979912, 11.325297],
+#             [50.980058, 11.325737],
+#             [50.980134, 11.325817],
+#             [50.979817, 11.326141], 
+#             [50.979724, 11.325973],
+#             [50.979607, 11.325509]
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2019, 1, 22, 16)
+
+
+# OUTPUT_FILENAME = "hamburg.txt"
+# DATA = [
+#     {
+#         "name": "default camera",
+#         "input_dir" : "/Volumes/Galgamesh/despat_compressedtime/hamburg_annotation/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_JITTER_700px",
+#         "src": [
+#             [630, 3205],
+#             [4720, 2975],
+#             [5287, 2614],
+#             [2962, 2385],
+#             [4889, 3529]
+#         ],
+#         "dst": [
+#             [53.552405, 10.008568],
+#             [53.552896, 10.008186],
+#             [53.553016, 10.007925],
+#             [53.552594, 10.007984],
+#             [53.552897, 10.008380]
+#         ]
+#     }
+# ]
+# MISSING_TIMESTAMPS = True
+# INTERVAL = 60
+# startdate = datetime(2016, 7, 14, 11)
 
 
 # OUTPUT_FILENAME = "muenster.txt"
