@@ -35,6 +35,8 @@ import android.os.storage.StorageVolume;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import com.google.android.material.snackbar.Snackbar;
+
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -131,6 +133,20 @@ public class Util {
 
     public static float getFreeSpaceOnDeviceInMb(File dir) {
         return getFreeSpaceOnDevice(dir) / (1024f * 1024f);
+    }
+
+    public static File getExternalSDcards(Context context) {
+        File[] externalDirs = ContextCompat.getExternalFilesDirs(context, null);
+
+        // TODO: check for readability
+
+        // TODO: do not return /storage/SDCARDNUMBER/Android/de.volzo.despat/files but /storage/SDCARDNUMBER/despat
+
+        if (externalDirs.length > 1) {
+            return externalDirs[1];
+        } else {
+            return null;
+        }
     }
 
     public static void saveEvent(final Context context, final int type, final String payload) {

@@ -10,6 +10,7 @@ import android.os.Build;
 import android.util.Log;
 import android.util.Size;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,8 @@ public class DeviceInfo {
 
     List<CameraInfo> cameras;
 
-    float freeSpace;
+    float freeSpaceInternal;
+    float freeSpaceExternal;
     float batteryTemperature;
     boolean gyro;
 
@@ -55,7 +57,14 @@ public class DeviceInfo {
             cameras = CameraController2.getCameraInfo(context);
         } catch (Exception e) {}
 
-        freeSpace = Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(context));
+        freeSpaceInternal = 0;
+        freeSpaceExternal = -1;
+        List<File> imageFolders = Config.getImageFolders(context);
+        freeSpaceInternal = Util.getFreeSpaceOnDeviceInMb(imageFolders.get(0));
+        if (imageFolders.size() > 1) {
+            freeSpaceExternal = Util.getFreeSpaceOnDeviceInMb(imageFolders.get(1));
+        }
+
         SystemController systemController = new SystemController(context);
         batteryTemperature = systemController.getBatteryTemperature();
         SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -114,8 +123,12 @@ public class DeviceInfo {
             sb.append("----------------------------------------\n");
         }
 
-        sb.append(String.format("%-20s", "free space [mb]:"));
-        sb.append(String.format(Config.LOCALE, "%20.2f",  freeSpace));
+        sb.append(String.format("%-20s", "free space internal [mb]:"));
+        sb.append(String.format(Config.LOCALE, "%20.2f",  freeSpaceInternal));
+        sb.append("\n");
+
+        sb.append(String.format("%-20s", "free space external [mb]:"));
+        sb.append(String.format(Config.LOCALE, "%20.2f",  freeSpaceExternal));
         sb.append("\n");
 
         sb.append(String.format("%-20s", "batt temp [°C]:"));

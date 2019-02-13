@@ -458,7 +458,7 @@ public class SessionManager {
         example.setLongitude(11.038093);
 
         try {
-            File imageFolder = Config.getImageFolder(context);
+            File imageFolder = Config.getImageFolders(context).get(0);
             File compressedImage = new File(imageFolder, example.getSessionName() + ".jpg");
             Util.copyAssets(context, "exampledataset_compressedimage.jpg", compressedImage);
             example.setCompressedImage(compressedImage);

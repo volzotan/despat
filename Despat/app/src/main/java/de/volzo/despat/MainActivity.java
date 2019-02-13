@@ -832,7 +832,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             sb.append("no active recording session");
             sb.append("\n\n");
             sb.append("free space on device: ");
-            sb.append(String.format(Config.LOCALE, "%.0fmb", Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(activity))));
+            sb.append(String.format(Config.LOCALE, "%.0fmb", Util.getFreeSpaceOnDeviceInMb(Config.getImageFolders(activity).get(0))));
             tvGeneral.setText(sb.toString());
         }
 
@@ -948,7 +948,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             imagesTaken.setText(Integer.toString(sessionManager.getImagesTaken()));
         }
         imagesInMemory.setText(Integer.toString(imgroll.getNumberOfSavedImages()));
-        freeSpaceInternal.setText(Float.toString(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(this))));
+
+        float freeSpace = 0;
+        List<File> imageFolders = Config.getImageFolders(this);
+        for (File f : imageFolders) {
+            freeSpace += Util.getFreeSpaceOnDeviceInMb(f);
+        }
+        freeSpaceInternal.setText(Float.toString(freeSpace));
+
         freeSpaceExternal.setText("---");
         batteryInternal.setText(Integer.toString(systemController.getBatteryLevel()) + "°C");
         batteryExternal.setText("---");
@@ -963,7 +970,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             detector = new DetectorSSD(activity, new DetectorConfig(DetectorSSD.FIDELITY_MODE[0], 600));
 //            detector = new DetectorHOG(activity);
             detector.init();
-            detector.load(new File(Config.getImageFolder(activity), "test.jpg"));
+            detector.load(new File(Config.getImageFolders(activity).get(0), "test.jpg"));
             List<Detector.Recognition> detections = detector.run();
             detector.display((DrawSurface) findViewById(R.id.drawSurface), new Size(4320, 3240), detector.recognitionsToRectangles(detections), null);
         } catch (Exception e) {
@@ -971,7 +978,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         }
 
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
-        imageView.setImageBitmap(BitmapFactory.decodeFile(new File(Config.getImageFolder(activity), "test.jpg").getAbsolutePath())); // TODO: glide
+        imageView.setImageBitmap(BitmapFactory.decodeFile(new File(Config.getImageFolders(activity).get(0), "test.jpg").getAbsolutePath())); // TODO: glide
 
 //        // remove the textureView from the preview
 //        FixedAspectRatioFrameLayout aspectRatioLayout = (FixedAspectRatioFrameLayout) findViewById(R.id.aspectratio_layout);

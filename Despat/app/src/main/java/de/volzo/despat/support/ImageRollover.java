@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.preferences.Config;
@@ -28,7 +29,34 @@ public class ImageRollover {
 
     public ImageRollover(Context context, String suffix) {
         this.context = context;
-        this.dir = Config.getImageFolder(context);
+
+        List<File> imageFolders = Config.getImageFolders(context);
+
+        this.dir = imageFolders.get(0);
+        File dir_alt = null;
+
+        try {
+            dir_alt = imageFolders.get(1);
+        } catch (Exception e) {
+            Log.wtf(TAG, e);
+        }
+
+        if (dir_alt != null && dir_alt != this.dir) {
+            long freeSpaceinBytes = Util.getFreeSpaceOnDevice(dir);
+            if (freeSpaceinBytes < 0) {
+                Log.w(TAG, "could not determine free space in imgroll directoy");
+            } else if (freeSpaceinBytes < Config.IMGROLL_FREE_SPACE_THRESHOLD_SWITCH) {
+                freeSpaceinBytes = Util.getFreeSpaceOnDevice(dir_alt);
+                if (freeSpaceinBytes < 0) {
+                    Log.w(TAG, "could not determine free space in alternative imgroll directoy");
+                } else if (freeSpaceinBytes > Config.IMGROLL_FREE_SPACE_THRESHOLD_SWITCH) {
+                    this.dir = dir_alt;
+                    Log.i(TAG, "switched to alt directory");
+                }
+            }
+        }
+
+        Log.wtf(TAG, this.dir.getAbsolutePath());
 
         if (suffix == null) suffix = ".jpg";
 
@@ -139,7 +167,7 @@ public class ImageRollover {
         Log.d(TAG, "imageRollover running");
 
         long freeSpace = Util.getFreeSpaceOnDevice(dir);
-        long diff = ((long) Config.IMGROLL_FREE_SPACE_THRESHOLD) * 1024 * 1024 - freeSpace;
+        long diff = ((long) Config.IMGROLL_FREE_SPACE_THRESHOLD_DELETE) * 1024 * 1024 - freeSpace;
 
         float freeSpaceMB = freeSpace / (1024.f * 1024.f);
         float diffMB = diff / (1024.f * 1024.f);

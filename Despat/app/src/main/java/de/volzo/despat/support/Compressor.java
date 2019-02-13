@@ -94,7 +94,7 @@ public class Compressor implements Callable<Integer> {
         long time_unstore = 0;
         long time_toJpeg = 0;
 
-        File imageFolder = Config.getImageFolder(context);
+        File imageFolder = Config.getImageFolders(context).get(0);
         List<File> images = new ArrayList<File>();
 
         for (final File fileEntry : imageFolder.listFiles()) {
@@ -191,7 +191,7 @@ public class Compressor implements Callable<Integer> {
 
         init(session.getImageWidth(), session.getImageHeight());
 
-        File imageFolder = Config.getImageFolder(context);
+        File imageFolder = Config.getImageFolders(context).get(0);
         File compressedImagePath = new File(imageFolder, session.getSessionName() + ".jpg");
         File compressedStorePath = new File(imageFolder, session.getSessionName() + ".pgm");
         if (compressedStorePath.exists()) {

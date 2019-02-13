@@ -4,7 +4,9 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.util.Log;
 
+import java.io.File;
 import java.util.Calendar;
+import java.util.List;
 
 import de.volzo.despat.Despat;
 import de.volzo.despat.support.ImageRollover;
@@ -43,8 +45,15 @@ public class HeartbeatService extends JobService {
 
         status.setTimestamp(Calendar.getInstance().getTime());
         status.setNumberImagesInMemory(imgroll.getNumberOfSavedImages()); // TODO: only JPEGs
-        status.setFreeSpaceInternal(Util.getFreeSpaceOnDeviceInMb(Config.getImageFolder(this)));
-        status.setFreeSpaceExternal(-1); // TODO
+
+        List<File> imageFolders = Config.getImageFolders(this);
+        status.setFreeSpaceInternal(Util.getFreeSpaceOnDeviceInMb(imageFolders.get(0)));
+        if (imageFolders.size() > 1) {
+            status.setFreeSpaceExternal(Util.getFreeSpaceOnDeviceInMb(imageFolders.get(1)));
+        } else {
+            status.setFreeSpaceExternal(-1);
+        }
+
         status.setBatteryInternal(systemController.getBatteryLevel());
         status.setBatteryExternal(-1); // TODO
         status.setStateCharging(systemController.getBatteryChargingState());

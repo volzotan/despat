@@ -11,11 +11,14 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import de.volzo.despat.R;
 import de.volzo.despat.detector.DetectorSSD;
+import de.volzo.despat.support.Util;
 
 /**
  * Created by volzotan on 20.12.16.
@@ -29,8 +32,10 @@ public class Config {
     public static final String DATEFORMAT_SHORT                     = "yyyy-MM-dd HH:mm:ss";
     public static final String IMAGE_FILEEXTENSION                  = ".jpg";
 
-    public static final float IMGROLL_FREE_SPACE_THRESHOLD          = 300; // in MB
+    public static final float IMGROLL_FREE_SPACE_THRESHOLD_DELETE   = 300; // in MB
     public static final boolean IMGROLL_DELETE_IF_FULL              = false;
+
+    public static final float IMGROLL_FREE_SPACE_THRESHOLD_SWITCH   = 1024 * 1024 * 1000f; // in Bytes
 
     public static final String SYNC_AUTHORITY                       = "de.volzo.despat.web.provider";
     public static final String SYNC_ACCOUNT_TYPE                    = "de.volzo.despat.servpat";
@@ -470,14 +475,39 @@ public class Config {
     }
 
     /**
-     * IMAGE FOLDER
+     * IMAGE FOLDERS
      */
-    public static final String KEY_IMAGE_FOLDER                     = "de.volzo.despat.imageFolder";
-    public static File getImageFolder(Context context) {
-        return new File(getProperty(context, KEY_IMAGE_FOLDER, getWorkingDirectory(context).getAbsolutePath()));
+    public static final String KEY_IMAGE_FOLDERS                    = "de.volzo.despat.imageFolders";
+    public static List<File> getImageFolders(Context context) {
+        List<File> flist = new ArrayList<>();
+
+        String files = getProperty(context, KEY_IMAGE_FOLDERS, null);
+
+        if (files != null && !files.isEmpty()) {
+            for (String f : files.split(",")) {
+                if (f == null || f.isEmpty()) continue;
+                flist.add(new File(f));
+            }
+        } else { // default image folders
+
+            // main directory on internal storage
+            flist.add(new File(getWorkingDirectory(context).getAbsolutePath()));
+
+            // secondary directory on mounted external SD card
+            flist.add(Util.getExternalSDcards(context));
+        }
+
+        return flist;
     }
-    public static void setImageFolder(Context context, String imageFolder) {
-        setProperty(context, KEY_IMAGE_FOLDER, imageFolder);
+    public static void setImageFolder(Context context, List<File> imageFolders) {
+        StringBuilder sb = new StringBuilder();
+
+        for (File f : imageFolders) {
+            sb.append(f.getAbsolutePath());
+            sb.append(",");
+        }
+
+        setProperty(context, KEY_IMAGE_FOLDERS, sb.toString());
     }
 
     /**
@@ -531,16 +561,18 @@ public class Config {
     // ---------------------------------------------------------------------------------------------
 
     public static void init(Context context) {
-        File imageFolder = Config.getImageFolder(context);
+        List<File> imageFolders = Config.getImageFolders(context);
 
-        if(!imageFolder.isDirectory()) {
-            if(imageFolder.exists()) {
-                Log.wtf(TAG, "Image Folder " + imageFolder.getAbsoluteFile() + " exists but is no directory");
-                return;
+        for (File imageFolder : imageFolders) {
+            if (!imageFolder.isDirectory()) {
+                if (imageFolder.exists()) {
+                    Log.wtf(TAG, "Image Folder " + imageFolder.getAbsoluteFile() + " exists but is no directory");
+                    return;
+                }
+
+                imageFolder.mkdirs();
+                Log.i(TAG, "created directory: " + imageFolder.getAbsoluteFile());
             }
-
-            imageFolder.mkdirs();
-            Log.i(TAG, "created directory: " + imageFolder.getAbsoluteFile());
         }
     }
 
@@ -746,8 +778,8 @@ public class Config {
         sb.append(String.format("%-20s", strip(Config.KEY_LAST_SYNC)));
         sb.append(String.format("%20s\n", getLastSync(context)));
 
-        sb.append(String.format("%-20s", strip(Config.KEY_IMAGE_FOLDER)));
-        sb.append(String.format("%20s\n", getImageFolder(context)));
+        sb.append(String.format("%-20s", strip(Config.KEY_IMAGE_FOLDERS)));
+        sb.append(String.format("%20s\n", getImageFolders(context)));
 
         sb.append(String.format("%-20s", strip(Config.KEY_FIRST_TIME_LAUNCH)));
         sb.append(String.format("%20s\n", getFirstTimeLaunch(context)));
