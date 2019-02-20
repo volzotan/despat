@@ -1,5 +1,3 @@
-var dataset_name = "dataset_bahnhof",
-    dataset_path = null;
 
 var mapproviders = [
     {
@@ -119,59 +117,129 @@ window.onerror = function(message, source, lineno, colno, error) {
 };
 
 if (window.location.hash) {
+
     dataset_path = "data/" + window.location.hash.substring(1) + ".json";
+    retrieveDatasetFileViaRequest(dataset_path);
+
 } else {
-    throw "no dataset specified";
+
+    document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+    $("#overlay").hide();
+    $("#overlayLoad").show();
+
+    // throw "no dataset specified";
 }
 
-d3.json(dataset_path, function(input) {
+function retrieveDatasetFileViaRequest(dataset_path) { 
+    d3.json(dataset_path, function(input) {
 
-    input["mapprovider"] = mapproviders;
-    dataset = input;
+        if (input === null) {
+            throw("input dataset missing");
+        }
+
+        d3.text("data/" + input["data"], function(error, raw) {
+            if (error) throw error;
+
+            start(input, raw);
+        });
+    });
+}
+
+function handleFileSelect(evt) {
+
+    $("#overlay").show();
+    $("#overlayLoad").hide();
+
+    var files = evt.target.files; // FileList object
+
+    for (var i = 0, f; f = files[i]; i++) {
+
+        console.log("---- Load file ----");
+        console.log("name: " + f.name);
+        console.log("type: " + f.type);
+        console.log("size: " + f.size);
+        console.log("lmod: " + f.lastModifiedDate.toLocaleDateString());
+
+        if (f.type != "application/zip") {
+            throw new Error("not a ZIP file");
+        }
+
+        var zip = new JSZip();
+        zip.loadAsync(f).then(function(zip) {
+            
+            // check if all required files are present:
+            var dataset_file = zip.file("dataset.json");
+
+            if (dataset_file === null) {
+                throw new Error("File dataset.json is missing in the ZIP archive");
+            }
+
+            dataset_file.async("string").then(function(result) {
+                var dataset = JSON.parse(result);
+                console.log(dataset["data"]);
+
+                var box_file = zip.file(dataset["data"])
+
+                if (box_file === null) {
+                    throw new Error("File " + dataset["data"] + " is missing in the ZIP archive");
+                }
+
+                box_file.async("string").then(function(result) {
+                    start(dataset, result);
+                });    
+            });
+        });
+    }
+}
+
+function start(dataset_json, boxes_text) {
+
+    $("#overlayLoad").hide();
+
+    dataset = dataset_json;
+    dataset["mapprovider"] = mapproviders;
 
     var center = dataset["sessions"][0]["position"];                                                                  // TODO
     initProjection(center);
 
     drawLayerMap(mapproviders[initialMapProvider]["tilefunc"]);
 
-    d3.text("data/" + dataset["data"], function(error, raw) {
-        if (error) throw error;
+    boxes = d3.dsvFormat("|").parse(boxes_text);
 
-        boxes = d3.dsvFormat("|").parse(raw);
+    boxes.forEach((box, index) => {
+        // var coord = projection([box.lon, box.lat]), // lonlat!
+        item = Array(11);
 
-        boxes.forEach((box, index) => {
-            // var coord = projection([box.lon, box.lat]), // lonlat!
-            item = Array(11);
+        var coords = projection([box["lon"], box["lat"]]);
 
-            var coords = projection([box["lon"], box["lat"]]);
+        item[0] = parseDate(box["timestamp"]);
+        item[1] = box["device"];
+        item[2] = box["class"];
+        item[3] = box["confidence"];
+        item[4] = coords[1];
+        item[5] = coords[0];
+        item[6] = box["minx"];
+        item[7] = box["miny"];
+        item[8] = box["maxx"];
+        item[9] = box["maxy"];
+        item[10] = +box["action"];
 
-            item[0] = parseDate(box["timestamp"]);
-            item[1] = box["device"];
-            item[2] = box["class"];
-            item[3] = box["confidence"];
-            item[4] = coords[1];
-            item[5] = coords[0];
-            item[6] = box["minx"];
-            item[7] = box["miny"];
-            item[8] = box["maxx"];
-            item[9] = box["maxy"];
-            item[10] = +box["action"];
+        if (item[0] === null) {
+            item[0] = parseDateFallback(box["timestamp"]);
+        }
 
-            if (item[0] === null) {
-                item[0] = parseDateFallback(box["timestamp"]);
-            }
-
-            boxes[index] = item;
-        });
-
-        // boxes = boxes.slice(0, 100);
-
-        buildGraph(dataset["datasets"], dataset["corresponding_points"], null);
-        buildUI(dataset);
-
-        $("#overlay").hide();
+        boxes[index] = item;
     });
-});
+
+    // boxes = boxes.slice(0, 100);
+
+    buildGraph(dataset["datasets"], dataset["corresponding_points"], null);
+    buildUI(dataset);
+
+    $("#overlay").hide();
+
+}
 
 var clickFunction = function () {
 
