@@ -1,0 +1,85 @@
+header {
+    background: #481E70;
+}
+
+.hero {
+    background: #481E70;
+    
+ /*   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.1)), url("../images/hamburg_hero.jpg");
+    background-size: cover;
+
+    background-position: bottom;
+    background-repeat: no-repeat;*/
+    
+
+    padding-bottom: 0;
+}
+
+section {
+    padding: 30px 0;
+}
+
+h2 {
+    font-size: 1.8em;
+}
+
+p {
+    font-size: 1.1em;
+}
+
+.heroimage {
+    padding-bottom: 0;
+    height: 570px;
+}
+
+.heroimage img {
+    -webkit-border-top-left-radius: 3px;
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.imagebutton {
+    position: absolute;
+    top: 93%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+}
+
+.imagebutton img {
+    width: 220px;
+}
+
+.text-container {
+    max-width: 1140px;
+}
+
+.button-line {
+  display: flex;
+  list-style: none;
+}
+
+/*.textbg {
+    background-color: #111;
+    padding: 6px;
+}*/
+
+.button.alt a {
+    background: #333;
+    border: 1px solid #222;
+}
+
+.button.alt a:hover {
+    background: #481E70;
+    border: 1px solid #31144d;
+    color: #FFF;
+}
+
+.button.alt img {
+    width: auto;
+    vertical-align: middle;
+    padding-right: 10px;
+}
