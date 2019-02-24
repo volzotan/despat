@@ -425,7 +425,7 @@ public class Util {
         Uri fileUri = FileProvider.getUriForFile(context, "de.volzo.despat.fileprovider", f);
 
         Intent i = new Intent(Intent.ACTION_SEND);
-        i.setType("application/csv");
+        i.setType("application/zip");
         i.putExtra(Intent.EXTRA_STREAM, fileUri);
         i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         context.startActivity(Intent.createChooser(i, "Share session data"));

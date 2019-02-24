@@ -82,11 +82,11 @@ public class SessionExporter {
         StatusDao statusDao = db.statusDao();
 
         // files:
-        // compressedimage.jpg
-        // positions.csv
-        // status.csv
-        // correspondingpoints.csv
-        // info.json // session name, camera name, ...
+        // 1) compressedimage.jpg
+        // 2) positions.csv
+        // 3) status.csv
+        // 4) correspondingpoints.csv
+        // 5) info.json // session name, camera name, ...
 
         if (session == null) {
             Log.e(TAG, "session null");
@@ -117,7 +117,8 @@ public class SessionExporter {
 
         List<File> files = new ArrayList<File>();
 
-        // compressed image
+        // 1) compressedimage.jpg
+
         if (session.getCompressedImage() == null || !session.getCompressedImage().exists()) {
             Log.w(TAG, "compressed image missing");
         } else {
@@ -128,7 +129,8 @@ public class SessionExporter {
             Log.d(TAG, "copied compressed image file: " + session.getCompressedImage().getName());
         }
 
-        // positions
+        // 2) positions.csv
+
         List<Position> positions = positionDao.getAllBySession(session.getId());
         List<Capture> captures = captureDao.getAllBySession(session.getId());
         HashMap<Long, Date> captureTimestamps = new HashMap<>();
@@ -144,7 +146,8 @@ public class SessionExporter {
             throw new Exception("writing detections.csv failed");
         }
 
-        // status
+        // 3) status.csv
+
         List<Status> statuses = statusDao.getAllBetween(session.getStart(), session.getEnd());
         try {
             File exportFile = new File(tmpdir, "status.csv");
@@ -155,7 +158,8 @@ public class SessionExporter {
             throw new Exception("writing status.csv failed");
         }
 
-        // corresponding points
+        // 4) correspondingpoints.csv
+
         List<HomographyPoint> homographyPoints = homographyPointDao.getAllBySession(session.getId());
         try {
             File exportFile = new File(tmpdir, "correspondingpoints.csv");
@@ -166,7 +170,8 @@ public class SessionExporter {
             throw new Exception("writing correspondingpoints.csv failed");
         }
 
-        // info
+        // 5) info.json
+
         try {
             File exportFile = new File(tmpdir, "info.json");
             writeInfoToFile(exportFile, session, homographyPoints);

@@ -238,7 +238,7 @@ public class Config {
             if (DEFAULT_WORKING_DIRECTORY != null) {
                 return DEFAULT_WORKING_DIRECTORY;
             } else {
-                return new File(Environment.getExternalStorageDirectory(), ("despat"));
+                return new File(Environment.getExternalStorageDirectory(), "despat");
 //                return new File(context.getApplicationInfo().dataDir);
             }
         }
@@ -257,7 +257,8 @@ public class Config {
             if (DEFAULT_TEMP_DIRECTORY != null) {
                 return DEFAULT_TEMP_DIRECTORY;
             } else {
-                return new File(context.getApplicationInfo().dataDir, "tmp");
+                return new File(Environment.getExternalStorageDirectory(), "despat/tmp");
+//                return new File(context.getApplicationInfo().dataDir, "tmp");
             }
         }
         return new File(fh);
