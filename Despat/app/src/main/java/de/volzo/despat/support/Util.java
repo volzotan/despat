@@ -123,16 +123,21 @@ public class Util {
     public static long getFreeSpaceOnDevice(File dir) {
         try {
             return (new StatFs(dir.getPath())).getAvailableBytes();
-        } catch (IllegalArgumentException e) {
+        } catch (NullPointerException | IllegalArgumentException e) {
             // either the path is invalid or there is absolutely no space left
-            Log.e(TAG, "free space could not be determined. path: " + dir.getAbsolutePath());
+            if (dir != null) {
+                Log.e(TAG, "free space could not be determined. path: " + dir.getAbsolutePath());
+            } else {
+                Log.e(TAG, "free space could not be determined. path is null");
+            }
             return -1;
         }
     }
 
 
     public static float getFreeSpaceOnDeviceInMb(File dir) {
-        return getFreeSpaceOnDevice(dir) / (1024f * 1024f);
+        long freeSpace = getFreeSpaceOnDevice(dir);
+        return freeSpace > 0 ? freeSpace / (1024f * 1024f) : -1;
     }
 
     public static File getExternalSDcards(Context context) {

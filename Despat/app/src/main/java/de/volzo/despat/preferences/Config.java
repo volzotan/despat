@@ -564,7 +564,7 @@ public class Config {
         List<File> imageFolders = Config.getImageFolders(context);
 
         for (File imageFolder : imageFolders) {
-            if (!imageFolder.isDirectory()) {
+            if (imageFolder != null && !imageFolder.isDirectory()) {
                 if (imageFolder.exists()) {
                     Log.wtf(TAG, "Image Folder " + imageFolder.getAbsoluteFile() + " exists but is no directory");
                     return;
