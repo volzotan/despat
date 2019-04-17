@@ -2,8 +2,8 @@
   link: /visualize/
   new_window: true
   highlight: false
-- name: Guide
-  link: /guide/
+- name: Guides
+  link: /guides/
   new_window: false
   highlight: false
 - name: About

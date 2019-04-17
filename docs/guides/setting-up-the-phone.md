@@ -1,4 +1,7 @@
-
+---
+layout: guide
+title: Setting up the phone
+---
 
 # External Sources
 

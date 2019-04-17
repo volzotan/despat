@@ -1,5 +1,13 @@
+html {
+    background: #252525;
+}
+
 header {
     background: #481E70;
+}
+
+footer {
+    background: #252525;
 }
 
 .hero {
@@ -92,4 +100,12 @@ section .image img {
     width: auto;
     vertical-align: middle;
     padding-right: 10px;
+}
+
+.guide-list {
+    list-style: none;
+}
+
+.guide-list li {
+    padding: 10px;
 }
