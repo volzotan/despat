@@ -1,5 +1,7 @@
 package de.volzo.despat.persistence;
 
+import android.util.Log;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -8,6 +10,8 @@ import java.util.Date;
 
 @Entity
 public class Event {
+
+    private static final String TAG = Event.class.getSimpleName();
 
     @PrimaryKey(autoGenerate = true)
     private long id;
@@ -53,6 +57,48 @@ public class Event {
         this.payload = payload;
     }
 
+    public String getTypeAsString() {
+        switch (type) {
+            case EventType.INIT:
+                return "INIT";
+            case EventType.BOOT:
+                return "BOOT";
+            case EventType.SHUTDOWN:
+                return "SHUTDOWN";
+            case EventType.SESSION_START:
+                return "SESSION_START";
+            case EventType.SESSION_STOP:
+                return "SESSION_STOP";
+            case EventType.SESSION_RESTART:
+                return "SESSION_RESTART";
+            case EventType.INFO:
+                return "INFO";
+            case EventType.ERROR:
+                return "ERROR";
+            case EventType.SCHEDULE_GLITCH:
+                return "SCHEDULE_GLITCH";
+            case EventType.SLEEP_MODE_CHANGE:
+                return "SLEEP_MODE_CHANGE";
+            case EventType.DISPLAY_ON:
+                return "DISPLAY_ON";
+            case EventType.DISPLAY_OFF:
+                return "DISPLAY_OFF";
+            case EventType.SYNC:
+                return "SYNC";
+            case EventType.LOW_BATTERY_STOP:
+                return "LOW_BATTERY_STOP";
+            case EventType.LOW_MEMORY_STOP:
+                return "LOW_MEMORY_STOP";
+            case EventType.WAKELOCK_ACQUIRE:
+                return "WAKELOCK_ACQUIRE";
+            case EventType.WAKELOCK_RELEASE:
+                return "WAKELOCK_RELEASE";
+            default:
+                Log.w(TAG, "undefined EventType");
+                return "UNDEFINED";
+        }
+    }
+
     public class EventType {
 
         // device
@@ -87,5 +133,6 @@ public class Event {
         // wakelock
         public static final int WAKELOCK_ACQUIRE    = 90;
         public static final int WAKELOCK_RELEASE    = 91;
+
     }
 }

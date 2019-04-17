@@ -27,6 +27,8 @@ import de.volzo.despat.detector.Detector;
 import de.volzo.despat.detector.DetectorSSD;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.CaptureDao;
+import de.volzo.despat.persistence.Event;
+import de.volzo.despat.persistence.EventDao;
 import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Position;
@@ -142,7 +144,52 @@ public class SessionFragment extends Fragment {
             }
         });
 
-        tvSessionSummary.setText("TODO"); // TODO
+        StringBuilder sb = new StringBuilder();
+        sb.append("TODO\n"); // TODO
+
+        EventDao eventDao = db.eventDao();
+        List<Event> events = eventDao.getAllBetween(session.getStart(), session.getEnd());
+        for (Event e : events) {
+            switch (e.getType()) {
+
+                case Event.EventType.INIT:
+                    sb.append("INIT");
+                    sb.append("\n");
+                    break;
+
+                case Event.EventType.BOOT:
+                    sb.append("BOOT");
+                    sb.append("\n");
+                    break;
+
+                case Event.EventType.SHUTDOWN:
+                    sb.append("SHUTDOWN");
+                    sb.append("\n");
+                    break;
+
+                case Event.EventType.INFO:
+                    sb.append("INFO ");
+                    sb.append(e.getPayload());
+                    sb.append("\n");
+                    break;
+
+                case Event.EventType.ERROR:
+                    sb.append("ERROR");
+                    sb.append("\n");
+                    break;
+
+                case Event.EventType.SCHEDULE_GLITCH:
+                    sb.append("SCHEDULE_GLITCH");
+                    sb.append("\n");
+                    break;
+
+                default:
+//                    sb.append("-");
+//                    sb.append("\n");
+                    break;
+            }
+        }
+        tvSessionSummary.setText(sb.toString());
 
         tvName.setText(session.getSessionName());
         if (session.getCameraConfig() != null) {

@@ -31,6 +31,7 @@ import java.util.List;
 import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.ErrorEvent;
+import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Position;
@@ -41,7 +42,8 @@ import de.volzo.despat.support.SessionExporter;
 
 public class SessionActivity extends AppCompatActivity implements
         SessionFragment.OnSessionActionSelectionListener,
-        ErrorEventListFragment.OnErrorEventListSelectionListener {
+        ErrorEventListFragment.OnErrorEventListSelectionListener,
+        EventListFragment.OnEventListSelectionListener {
 
     private static final String TAG = SessionActivity.class.getSimpleName();
 
@@ -52,11 +54,12 @@ public class SessionActivity extends AppCompatActivity implements
 
     Session session;
 
-    private String[] tabtitles = {"Dataset", "Points", "Errors", "Info"};
+    private String[] tabtitles = {"Dataset", "Points", "Errors", "Events", "Info"};
     private Fragment[] tabfragments = {
             new SessionFragment(),
             new HomographyPointListFragment(),
             new ErrorEventListFragment(),
+            new EventListFragment(),
             new InfoFragment()
     };
 
@@ -158,6 +161,11 @@ public class SessionActivity extends AppCompatActivity implements
 
     @Override
     public void onErrorEventListSelection(ErrorEvent errorEvent) {
+
+    }
+
+    @Override
+    public void onEventListSelection(Event event) {
 
     }
 

@@ -351,6 +351,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     .setPositiveButton("Download manually", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // TODO
+
+                            Snackbar.make(
+                                    activity.findViewById(R.id.snackbarLayout),
+                                    "TODO: not implemented yet.",
+                                    Snackbar.LENGTH_SHORT
+                            ).show();
                         }
                     })
                     .setNegativeButton("Ignore", new DialogInterface.OnClickListener() {
