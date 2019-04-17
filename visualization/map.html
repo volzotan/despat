@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="css/toggle.min.css" />
 <style>
 
+    ul {
+        list-style: none;
+    }
+
     #overlay {
         position: fixed;
         width: 100%;
@@ -166,9 +170,20 @@
 </div>
 
 <div id="overlayLoad">
-    <div class="overlayLoader">
-        Load exported Dataset as ZIP</br>
+    <div class="overlayLoader" style="text-align: center;">
+        Load exported dataset as ZIP
+        </br>
+        </br>
         <input type="file" id="files" name="files[]" multiple />
+
+        </br>
+        </br>
+        or explore example datasets:
+        <ul>
+            <li><a href="http://despat.de/visualize#dataset_erfurt">Erfurt Station</a>
+            <li><a href="http://despat.de/visualize#dataset_summaery">Weimar Summaery Festival</a>
+        </ul>
+
     </div>
 </div>
 

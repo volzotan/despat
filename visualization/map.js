@@ -169,10 +169,10 @@ function handleFileSelect(evt) {
         zip.loadAsync(f).then(function(zip) {
             
             // check if all required files are present:
-            var dataset_file = zip.file("dataset.json");
+            var dataset_file = zip.file("info.json");
 
             if (dataset_file === null) {
-                throw new Error("File dataset.json is missing in the ZIP archive");
+                throw new Error("File info.json is missing in the ZIP archive");
             }
 
             dataset_file.async("string").then(function(result) {
@@ -734,6 +734,11 @@ function drawLayerSym() {
 }
 
 function draw_timeBar(classname, redraw) {
+
+    if (boxes.length < 1) {
+        console.log("no detections.");
+        return;
+    }
 
     var timeMinMax = d3.extent(boxes, function(d) { return d[0]; }),
         binNumber = 200,
