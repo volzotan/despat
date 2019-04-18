@@ -110,6 +110,92 @@ public class InfoFragment extends Fragment {
 
         graph.addSeries(series);
 
+        // Exposure Time
+
+        graph = (GraphView) view.findViewById(R.id.graph_exposureTime);
+
+        datapointsList = new ArrayList<>();
+        for (int i=0; i<captures.size(); i++) {
+            Capture c = captures.get(i);
+
+            Date recTime = c.getRecordingTime();
+            double value = c.getExposureTime();
+
+            if (recTime == null) {
+                Log.w(TAG, "invalid recordingTime for datapoint " + i);
+                continue;
+            }
+
+            if (value <= 0.0) {
+                Log.w(TAG, "invalid exposureTime for datapoint " + i);
+                continue;
+            }
+
+            datapointsList.add(new DataPoint(recTime, value));
+        }
+        datapoints = datapointsList.toArray(new DataPoint[0]);
+        series = new LineGraphSeries<DataPoint>(datapoints);
+        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
+        graph.addSeries(series);
+
+        // Aperture
+
+        graph = (GraphView) view.findViewById(R.id.graph_aperture);
+
+        datapointsList = new ArrayList<>();
+        for (int i=0; i<captures.size(); i++) {
+            Capture c = captures.get(i);
+
+            Date recTime = c.getRecordingTime();
+            double value = c.getAperture();
+
+            if (recTime == null) {
+                Log.w(TAG, "invalid recordingTime for datapoint " + i);
+                continue;
+            }
+
+            if (value <= 0.0) {
+                Log.w(TAG, "invalid exposureTime for datapoint " + i);
+                continue;
+            }
+
+            datapointsList.add(new DataPoint(recTime, value));
+        }
+        datapoints = datapointsList.toArray(new DataPoint[0]);
+        series = new LineGraphSeries<DataPoint>(datapoints);
+        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
+        graph.addSeries(series);
+
+
+        // Aperture
+
+        graph = (GraphView) view.findViewById(R.id.graph_iso);
+
+        datapointsList = new ArrayList<>();
+        for (int i=0; i<captures.size(); i++) {
+            Capture c = captures.get(i);
+
+            Date recTime = c.getRecordingTime();
+            double value = c.getIso();
+
+            if (recTime == null) {
+                Log.w(TAG, "invalid recordingTime for datapoint " + i);
+                continue;
+            }
+
+            if (value <= 0.0) {
+                Log.w(TAG, "invalid exposureTime for datapoint " + i);
+                continue;
+            }
+
+            datapointsList.add(new DataPoint(recTime, value));
+        }
+        datapoints = datapointsList.toArray(new DataPoint[0]);
+        series = new LineGraphSeries<DataPoint>(datapoints);
+        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
+        graph.addSeries(series);
+
+
         // Temperature
 
         List<Status> status;
