@@ -787,7 +787,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     }
                 } else {
                     try {
-                        camera.captureImages();
+                        camera.captureImages(null);
                     } catch (Exception e) {
                         Log.e(TAG, "capturing image failed");
                     }

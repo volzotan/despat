@@ -29,7 +29,7 @@ public abstract class CameraController {
     public abstract void closeCamera();
 
     public abstract void startMetering(Integer optionalExposureCompensation) throws Exception;
-    public abstract void captureImages() throws Exception;
+    public abstract void captureImages(String filenameSuffix) throws Exception;
 
     public abstract boolean isDead();
 

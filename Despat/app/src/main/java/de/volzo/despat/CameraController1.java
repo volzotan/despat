@@ -173,7 +173,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
     }
 
     @Override
-    public void captureImages() throws Exception {
+    public void captureImages(String filenameSuffix) throws Exception {
         Log.d(TAG, "# captureImages");
 
         if (camera == null) {
@@ -181,7 +181,7 @@ public class CameraController1 extends CameraController implements Camera.Previe
         }
 
         shutterCount = 0;
-        releaseShutter();
+        releaseShutter(); // TODO: use filenameSuffix
 
 //        for (int i=0; i<Config.NUMBER_OF_BURST_IMAGES; i++) { // TODO
 //            try {

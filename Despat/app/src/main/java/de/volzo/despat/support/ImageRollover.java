@@ -149,9 +149,14 @@ public class ImageRollover {
         return new File(this.dir, str);
     }
 
-    public File getTimestampAsFullFilename(int sequenceNumber) {
-        String str = Long.toString(System.currentTimeMillis()) + "_" + sequenceNumber + fileextension;
-        return new File(this.dir, str);
+    public File getTimestampAsFullFilename(String filenameSuffix) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(System.currentTimeMillis());
+        if (filenameSuffix != null) {
+            sb.append(filenameSuffix);
+        }
+        sb.append(fileextension);
+        return new File(this.dir, sb.toString());
     }
 
     public void run() {

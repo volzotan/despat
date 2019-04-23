@@ -579,7 +579,7 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    public void captureImages() throws Exception {
+    public void captureImages(String filenameSuffix) throws Exception {
         if (cameraDevice == null) {
             Log.e(TAG, "camera device missing");
             throw new IllegalAccessException("camera device missing");
@@ -589,7 +589,7 @@ public class CameraController2 extends CameraController {
 //        double random = Math.random();
 //        if (random > 0.95) throw new IllegalAccessException("test");
 
-        captureStillPicture(false); // TODO: metering successful
+        captureStillPicture(false, filenameSuffix); // TODO: metering successful
     }
 
     private void purgeImageReaderAndSaver() {
@@ -649,7 +649,7 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    private void captureStillPicture(boolean meteringSuccessful) {
+    private void captureStillPicture(boolean meteringSuccessful, final String filenameSuffix) {
         try {
             if (cameraDevice == null) {
                 Log.e(TAG, "cameraDevice missing");
@@ -691,8 +691,8 @@ public class CameraController2 extends CameraController {
                     ImageSaver jpgImageSaver = jpgResultQueue.get(n);
                     ImageSaver rawImageSaver = rawResultQueue.get(n);
 
-                    if (jpgImageSaver != null) jpgImageSaver.setFilename(jpgImgroll.getTimestampAsFullFilename(n));
-                    if (rawImageSaver != null) rawImageSaver.setFilename(rawImgroll.getTimestampAsFullFilename(n));
+                    if (jpgImageSaver != null) jpgImageSaver.setFilename(jpgImgroll.getTimestampAsFullFilename(filenameSuffix));
+                    if (rawImageSaver != null) rawImageSaver.setFilename(rawImgroll.getTimestampAsFullFilename(filenameSuffix));
                 }
 
                 @Override

@@ -317,7 +317,7 @@ public class ShutterService extends Service {
         } else {
             try {
                 state = STATE_BUSY;
-                camera.captureImages();
+                camera.captureImages(null);
             } catch (Exception e) {
                 eventMalfunction("capturing image failed", e);
             }
@@ -530,7 +530,11 @@ public class ShutterService extends Service {
             Log.d(TAG, ":: cameraFocused (" + afSuccessful + ")");
 
             try {
-                camera.captureImages();
+                String suffix = null;
+                if (state == STATE_SECOND_IMAGE || state == STATE_SECOND_IMAGE_BUSY) {
+                    suffix = "_1";
+                }
+                camera.captureImages(suffix);
             } catch (Exception e) {
                 eventMalfunction("capturing images failed", e);
             }
