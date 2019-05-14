@@ -9,6 +9,30 @@
         list-style: none;
     }
 
+    #files {
+        display: none;
+    }
+
+    .inputfile + label {
+        font-size: 1.0em;
+        font-weight: 700;
+        color: white;
+        background-color: #333;
+        display: inline-block;
+        padding: 7px;
+        border-radius: 5px;
+    }
+
+    .inputfile:focus + label,
+    .inputfile + label:hover {
+        background-color: #481E70;
+    }
+
+    .datasetList {
+        margin: 0;
+        padding: 0;
+    }
+
     #overlay {
         position: fixed;
         width: 100%;
@@ -171,18 +195,23 @@
 
 <div id="overlayLoad">
     <div class="overlayLoader" style="text-align: center;">
-        Load exported dataset as ZIP
-        </br>
-        </br>
-        <input type="file" id="files" name="files[]" multiple />
+        <p>
+            Open an exported dataset as ZIP
+        </p>
 
-        </br>
-        </br>
-        or explore example datasets:
-        <ul>
-            <li><a href="http://despat.de/visualize#dataset_erfurt">Erfurt Station</a>
-            <li><a href="http://despat.de/visualize#dataset_summaery">Weimar Summaery Festival</a>
-        </ul>
+        <p>
+            <input type="file" name="archive-selection" id="files" name="files[]" class="inputfile" multiple />
+            <label for="files">Choose File</label>
+        </p>
+
+        <p>or explore one of the example datasets:</p>     
+
+        <p>
+            <ul class="datasetList">
+                <li><a href="http://despat.de/visualize#dataset_erfurt">Erfurt Station</a>
+                <li><a href="http://despat.de/visualize#dataset_summaery">Weimar Summaery Festival</a>
+            </ul>
+        </p>
 
     </div>
 </div>
