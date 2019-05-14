@@ -157,6 +157,17 @@ public class Despat extends Application {
             throw e;
         }
 
+        if (!(new File(pathObb)).exists()) {
+            Log.e(TAG, "OBB file is missing: " + pathObb);
+            Log.e(TAG, "Searched directories: ");
+            for (File f : context.getObbDirs()) {
+                Log.e(TAG, f.toString());
+            }
+            throw new Exception("missing OBB file: " + pathObb);
+
+            // TODO: start download
+        }
+
 //        try {
 //            ObbInfo info = ObbScanner.getObbInfo(pathObb);
 //            Log.i(TAG, "obb filename: " + info.filename);
@@ -170,13 +181,6 @@ public class Despat extends Application {
         if (storageManager.isObbMounted(pathObb)) {
             Log.i(TAG, "OBB already mounted at: " + storageManager.getMountedObbPath(pathObb));
             return;
-        }
-
-        if (!(new File(pathObb)).exists()) {
-            Log.e(TAG, "OBB file is missing");
-            throw new Exception("missing OBB file: " + pathObb);
-
-            // TODO: start download
         }
 
         if (obbListener == null) {
@@ -212,7 +216,7 @@ public class Despat extends Application {
 
                 switch (state) {
                     case OnObbStateChangeListener.MOUNTED: {
-                        Log.i(TAG, "OBB mounted: " + storageManager.getMountedObbPath(pathObb));
+                        Log.i(TAG, "OBB mounted: " + storageManager.getMountedObbPath(pathObb) + " | " + pathObb);
                         break;
                     }
                     case OnObbStateChangeListener.UNMOUNTED: {

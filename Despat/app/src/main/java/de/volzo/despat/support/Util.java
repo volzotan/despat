@@ -431,12 +431,31 @@ public class Util {
         context.startActivity(Intent.createChooser(i, "Share session data"));
     }
 
+    /* Checks a list of possible OBB filenames
+     * for a versionNumber of 3:
+     * [main.3.de.volzo.despat.obb, main.2.de.volzo.despat.obb, ...]
+     */
     public static String getObbPath(Context context) {
+        int versionNumber = BuildConfig.VERSION_CODE;
+        String version = Integer.toString(versionNumber);
         String packageName = context.getPackageName();
-        String obbDir = context.getObbDir().getAbsolutePath();
-        String version = Integer.toString(BuildConfig.VERSION_CODE);
-        String obbName = "main." + version + "." + packageName + ".obb";
-        return obbDir + "/" + obbName;
+
+        String defaultObbName = context.getObbDir().getAbsolutePath() + "/" + "main." + version + "." + packageName + ".obb";
+
+        for (File obbDir : context.getObbDirs()) {
+            for (int i = versionNumber; i >= 1; i--) {
+                String obbName = obbDir + "/" + "main." + i + "." + packageName + ".obb";
+
+                File f = new File(obbName);
+                if (!f.exists()) {
+                    continue;
+                }
+
+                return obbName;
+            }
+        }
+
+        return defaultObbName;
     }
 
     public static void loadObb(Context context) {
