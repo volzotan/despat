@@ -145,50 +145,7 @@ public class SessionFragment extends Fragment {
         });
 
         StringBuilder sb = new StringBuilder();
-        sb.append("TODO\n"); // TODO
-
-        EventDao eventDao = db.eventDao();
-        List<Event> events = eventDao.getAllBetween(session.getStart(), session.getEnd());
-        for (Event e : events) {
-            switch (e.getType()) {
-
-                case Event.EventType.INIT:
-                    sb.append("INIT");
-                    sb.append("\n");
-                    break;
-
-                case Event.EventType.BOOT:
-                    sb.append("BOOT");
-                    sb.append("\n");
-                    break;
-
-                case Event.EventType.SHUTDOWN:
-                    sb.append("SHUTDOWN");
-                    sb.append("\n");
-                    break;
-
-                case Event.EventType.INFO:
-                    sb.append("INFO ");
-                    sb.append(e.getPayload());
-                    sb.append("\n");
-                    break;
-
-                case Event.EventType.ERROR:
-                    sb.append("ERROR");
-                    sb.append("\n");
-                    break;
-
-                case Event.EventType.SCHEDULE_GLITCH:
-                    sb.append("SCHEDULE_GLITCH");
-                    sb.append("\n");
-                    break;
-
-                default:
-//                    sb.append("-");
-//                    sb.append("\n");
-                    break;
-            }
-        }
+//        sb.append("TODO\n"); // TODO
         tvSessionSummary.setText(sb.toString());
 
         tvName.setText(session.getSessionName());
