@@ -171,7 +171,21 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         btSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Sync.run(activity, MainActivity.class, true);
+                if (Config.getPhoneHome(activity)) {
+                    Sync.run(activity, MainActivity.class, true);
+                } else {
+                    Snackbar phoneHomeSnackbar = Snackbar.make(
+                            activity.findViewById(R.id.snackbarLayout),
+                            "Syncing not enabled.",
+                            Snackbar.LENGTH_LONG);
+                    phoneHomeSnackbar.setAction("enable", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Config.setPhoneHome(activity, true);
+                        }
+                    });
+                    phoneHomeSnackbar.show();
+                }
             }
         });
 

@@ -399,6 +399,9 @@ public class Config {
     public static final boolean getPhoneHome(Context context) {
         return getPropertyBoolean(context, KEY_PHONE_HOME, DEFAULT_PHONE_HOME);
     }
+    public static void setPhoneHome(Context context, boolean phoneHome) {
+        setProperty(context, KEY_PHONE_HOME, phoneHome);
+    }
 
     /**
      * SERVER ADDRESS

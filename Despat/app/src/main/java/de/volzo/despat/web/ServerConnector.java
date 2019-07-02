@@ -320,7 +320,13 @@ public class ServerConnector {
             @Override
             public void onErrorResponse(VolleyError error) {
 
-                Log.e(TAG, String.format(Config.LOCALE, "sending data to server failed: %s", error)); //%d", error.networkResponse.statusCode));
+                String statusCode = "-";
+
+                if (error.networkResponse != null) {
+                    statusCode = Integer.toString(error.networkResponse.statusCode);
+                }
+
+                Log.e(TAG, String.format(Config.LOCALE, "sending data to server failed: [%s] %s", statusCode, error));
 
                 // TODO: fire toast
 
