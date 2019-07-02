@@ -34,6 +34,7 @@ import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
+import de.volzo.despat.web.Sync;
 
 
 public class ShutterService extends Service {
@@ -599,8 +600,13 @@ public class ShutterService extends Service {
                     Intent stopIntent = new Intent(context, Orchestrator.class);
                     stopIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
                     stopIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_STOP);
-                    stopIntent.putExtra(Orchestrator.REASON, "low battery");
+                    stopIntent.putExtra(Orchestrator.REASON, "low battery (stop via broadcast)");
                     context.sendBroadcast(stopIntent);
+                }
+
+                // force sync so that servpat knows that the low-battery event occured
+                if (Config.getPhoneHome(context)) {
+                    Sync.run(context, ShutterService.class, true);
                 }
 
                 return;

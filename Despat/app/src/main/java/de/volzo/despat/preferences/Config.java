@@ -160,7 +160,7 @@ public class Config {
     public static final long    DEFAULT_MIN_SYNC_INTERVAL                   = 5 * 60 * 1000;        // at most every X ms
     public static final long    DEFAULT_HEARTBEAT_INTERVAL                  = 15 * 60 * 1000L;      // Minimum interval is 15m
     public static final long    DEFAULT_MIN_HEARTBEAT_INTERVAL              = 2 * 60 * 1000;        // at most every X ms
-    public static final long    DEFAULT_UPLOAD_INTERVAL                     = 15 * 60 * 1000L;
+    public static final long    DEFAULT_UPLOAD_INTERVAL                     = 60 * 60 * 1000L;
 
     /**
      * DEVICE NAME

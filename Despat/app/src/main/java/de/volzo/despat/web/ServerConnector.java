@@ -273,6 +273,15 @@ public class ServerConnector {
                 o.put("captureId", capture.getId());
                 o.put("sessionId", capture.getSessionId());
                 o.put("recordingTime", dateFormat.format(capture.getRecordingTime()));
+                o.put("exposureTime", capture.getExposureTime());
+                o.put("aperture", capture.getAperture());
+                o.put("iso", capture.getIso());
+
+                Double exposureValue = Util.computeExposureValue(capture.getExposureTime(), capture.getAperture(), capture.getIso());
+                if (exposureValue < 0) {
+                    exposureValue = -1.0;
+                }
+                o.put("exposureValue", exposureValue);
 
                 arr.put(o);
             }

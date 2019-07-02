@@ -141,6 +141,13 @@ public class SessionManager {
         recognitionIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
         context.sendBroadcast(recognitionIntent);
 
+        if (Config.getPhoneHome(context)) {
+            Intent uploadIntent = new Intent(context, Orchestrator.class);
+            uploadIntent.putExtra(Orchestrator.SERVICE, Broadcast.UPLOAD_SERVICE);
+            uploadIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
+            context.sendBroadcast(uploadIntent);
+        }
+
         Despat despat = Util.getDespat(context);
 
         session = new Session();
@@ -261,7 +268,7 @@ public class SessionManager {
     public void stopRecordingSession(String reason) throws NotRecordingException {
         if (!isActive()) throw new NotRecordingException();
 
-        Log.d(TAG, "stop RecordingSession [" + session.getSessionName() + "]");
+        Log.i(TAG, "stop RecordingSession [" + session.getSessionName() + "]");
 
         Intent heartbeatIntent = new Intent(context, Orchestrator.class);
         heartbeatIntent.putExtra(Orchestrator.SERVICE, Broadcast.HEARTBEAT_SERVICE);
