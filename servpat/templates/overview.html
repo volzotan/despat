@@ -20,6 +20,8 @@
 
 {% endif %}
 
+<h4><span class="">status</span></h4>
+
 <table class="table table-sm table-bordered table-striped ">
   <thead class="thead-inverse">
     <tr>
@@ -33,7 +35,8 @@
       <th class="text-right">free space</br>SD-card</th>
       <th class="text-right">battery</br>built-in</th>
       <!-- <th class="text-right">battery</br>external</th> -->
-      <th class="text-right">charging</th>
+      <!-- <th class="text-right">charging</th> -->
+      <th class="text-right">temperature</br>battery</th>
     </tr>
   </thead>
   <tbody>
@@ -49,7 +52,8 @@
       <td class="col-md-1 text-right">{{ entry.freeSpaceExternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right {% if entry.batteryInternal < 20 %} bg-danger {% endif %}">{{ entry.batteryInternal | round | int | suppressnegative }}</td>
       <!-- <td class="col-md-1 text-right">{{ entry.batteryExternal | round | int | suppressnegative }}</td> -->
-      <td class="col-md-1 text-center {% if entry.stateCharging < 1 %} bg-danger {% else %} bg-success {% endif %}">{{ entry.stateCharging | bool }}</td>
+      <!-- <td class="col-md-1 text-center {% if entry.stateCharging < 1 %} bg-danger {% else %} bg-success {% endif %}">{{ entry.stateCharging | bool }}</td> -->
+      <td class="col-md-1 text-right">{{ entry.temperatureBattery | round | int }}</td>
     </tr>
     {% else %}
     <tr>
@@ -67,6 +71,8 @@
     {% endfor %}
   </tbody>
 </table>
+
+<h4><span class="">sessions</span></h4>
 
 <table class="table table-sm table-bordered table-striped ">
   <thead class="thead-inverse">
@@ -111,6 +117,8 @@
   </tbody>
 </table>
 
+<h4><span class="">captures</span></h4>
+
 <table class="table table-sm table-bordered table-striped ">
   <thead class="thead-inverse">
     <tr>
@@ -141,6 +149,8 @@
     {% endfor %}
   </tbody>
 </table>
+
+<h4><span class="">events</span></h4>
 
 <table class="table table-sm table-bordered table-striped ">
   <thead class="thead-inverse">
@@ -176,6 +186,8 @@
   </tbody>
 </table>
 
+<h4><span class="">commands</span></h4>
+
 <table class="table table-sm table-bordered table-striped ">
   <thead class="thead-inverse">
     <tr>
@@ -206,6 +218,8 @@
     {% endfor %}
   </tbody>
 </table>
+
+<h4><span class="">uploads</span></h4>
 
 <table class="table table-sm table-bordered table-striped ">
   <thead class="thead-inverse">
