@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "03e7c27fd190748c5b3cff99189aeebf",
+    "identityHash": "e7e61301fc7d8bc4cbfef5a08067f9da",
     "entities": [
       {
         "tableName": "Status",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` TEXT, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature_device` REAL NOT NULL, `temperature_battery` REAL NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` TEXT, `images_taken` INTEGER NOT NULL, `images_in_memory` INTEGER NOT NULL, `free_space_internal` REAL NOT NULL, `free_space_external` REAL NOT NULL, `battery_internal` INTEGER NOT NULL, `battery_external` INTEGER NOT NULL, `state_charging` INTEGER NOT NULL, `temperature_device` REAL NOT NULL, `temperature_battery` REAL NOT NULL, `free_memory_heap` INTEGER NOT NULL, `free_memory_heap_native` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -72,6 +72,18 @@
             "fieldPath": "temperatureBattery",
             "columnName": "temperature_battery",
             "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "freeMemoryHeap",
+            "columnName": "free_memory_heap",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "freeMemoryHeapNative",
+            "columnName": "free_memory_heap_native",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -764,7 +776,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"03e7c27fd190748c5b3cff99189aeebf\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"e7e61301fc7d8bc4cbfef5a08067f9da\")"
     ]
   }
 }

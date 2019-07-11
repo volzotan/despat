@@ -204,6 +204,9 @@ public class ServerConnector {
                 o.put("temperatureDevice", status.getTemperatureDevice());
                 o.put("temperatureBattery", status.getTemperatureBattery());
 
+                o.put("freeMemoryHeap", status.getFreeMemoryHeap());
+                o.put("freeMemoryHeapNative", status.getFreeMemoryHeapNative());
+
                 arr.put(o);
             }
 
@@ -274,11 +277,15 @@ public class ServerConnector {
                 o.put("sessionId", capture.getSessionId());
                 o.put("recordingTime", dateFormat.format(capture.getRecordingTime()));
                 o.put("exposureTime", capture.getExposureTime());
-                o.put("aperture", capture.getAperture());
+                if (!Double.isNaN(capture.getAperture())) {
+                    o.put("aperture", capture.getAperture());
+                } else {
+                    o.put("aperture", -1);
+                }
                 o.put("iso", capture.getIso());
 
-                Double exposureValue = Util.computeExposureValue(capture.getExposureTime(), capture.getAperture(), capture.getIso());
-                if (exposureValue < 0) {
+                double exposureValue = Util.computeExposureValue(capture.getExposureTime(), capture.getAperture(), capture.getIso());
+                if (exposureValue < 0 || Double.isNaN(exposureValue)) {
                     exposureValue = -1.0;
                 }
                 o.put("exposureValue", exposureValue);

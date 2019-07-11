@@ -43,6 +43,12 @@ public class Status {
     @ColumnInfo(name = "temperature_battery")
     private float temperatureBattery;
 
+    @ColumnInfo(name = "free_memory_heap")
+    private long freeMemoryHeap;
+
+    @ColumnInfo(name = "free_memory_heap_native")
+    private long freeMemoryHeapNative;
+
     public long getId() {
         return id;
     }
@@ -129,5 +135,21 @@ public class Status {
 
     public void setTemperatureBattery(float temperatureBattery) {
         this.temperatureBattery = temperatureBattery;
+    }
+
+    public long getFreeMemoryHeap() {
+        return freeMemoryHeap;
+    }
+
+    public void setFreeMemoryHeap(long freeMemoryHeap) {
+        this.freeMemoryHeap = freeMemoryHeap;
+    }
+
+    public long getFreeMemoryHeapNative() {
+        return freeMemoryHeapNative;
+    }
+
+    public void setFreeMemoryHeapNative(long freeMemoryHeapNative) {
+        this.freeMemoryHeapNative = freeMemoryHeapNative;
     }
 }

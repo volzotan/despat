@@ -2,6 +2,7 @@ package de.volzo.despat.services;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
+import android.os.Debug;
 import android.util.Log;
 
 import java.io.File;
@@ -72,6 +73,16 @@ public class HeartbeatService extends JobService {
         }
 
         status.setTemperatureBattery(systemController.getBatteryTemperature());
+
+//        final Runtime runtime = Runtime.getRuntime();
+//        final long usedMemInMB=(runtime.totalMemory() - runtime.freeMemory()) / 1048576L;
+//        final long maxHeapSizeInMB=runtime.maxMemory() / 1048576L;
+//        final long availHeapSizeInMB = maxHeapSizeInMB - usedMemInMB;
+//        Log.wtf(TAG, "available memory: " + availHeapSizeInMB);
+
+        Runtime runtime = Runtime.getRuntime();
+        status.setFreeMemoryHeap(runtime.totalMemory() - runtime.freeMemory());
+        status.setFreeMemoryHeapNative(Debug.getNativeHeapSize() - Debug.getNativeHeapFreeSize());
 
         AppDatabase db = AppDatabase.getAppDatabase(despat);
         StatusDao statusDao = db.statusDao();

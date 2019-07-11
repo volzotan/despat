@@ -1357,12 +1357,42 @@ public class CameraController2 extends CameraController {
 
         if (exposureTime != null) exposureTime /= (1000 * 1000);
 
-        Log.d(TAG, String.format(Config.LOCALE, "f/: %.1f | t: %dms | iso: %d | EV: %f",
-                lensAperture,
-                exposureTime,
-                sensitivity,
-                Util.computeExposureValue(exposureTime, lensAperture, sensitivity)
-        ));
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("f/: ");
+        if (lensAperture != null) {
+            sb.append(String.format("%.1f", lensAperture));
+        } else {
+            sb.append("---");
+        }
+        sb.append(" | ");
+
+        sb.append("t: ");
+        if (exposureTime != null) {
+            sb.append(String.format("%dms", exposureTime));
+        } else {
+            sb.append("---");
+        }
+        sb.append(" | ");
+
+        sb.append("iso: ");
+        if (sensitivity != null) {
+            sb.append(String.format("%d", sensitivity));
+        } else {
+            sb.append("---");
+        }
+        sb.append(" | ");
+
+        sb.append("EV: ");
+        if (lensAperture != null && exposureTime != null && sensitivity != null) {
+            sb.append(String.format("%f",
+                    Util.computeExposureValue(exposureTime, lensAperture, sensitivity)
+            ));
+        } else {
+            sb.append("---");
+        }
+
+        Log.d(TAG, sb.toString());
     }
 
     private void logCameraAutomaticModeState(int afState, int aeState) {
