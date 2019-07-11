@@ -44,7 +44,7 @@ def overview(option):
     data_status = query_db("SELECT * FROM status WHERE deviceId LIKE (?) ORDER BY datetime(timestamp) DESC", (filter_device,))
     data_session = query_db("SELECT * FROM session WHERE deviceId LIKE (?) ORDER BY datetime(start) DESC", (filter_device,))
     data_capture = query_db("SELECT * FROM capture WHERE deviceId LIKE (?) ORDER BY datetime(recordingTime) DESC", (filter_device,))
-    data_event 	= query_db("SELECT * FROM event WHERE deviceId LIKE (?) AND type NOT IN (?, ?) ORDER BY datetime(timestamp) DESC", (filter_device, 90, 91))
+    data_event 	= query_db("SELECT * FROM event WHERE deviceId LIKE (?) AND type NOT IN (?, ?, ?) ORDER BY datetime(timestamp) DESC", (filter_device, 70, 90, 91)) # SYNC, WAKELOCK_ACQUIRE, WAKELOCK_RELEASE
     data_upload = query_db("SELECT * FROM upload WHERE deviceId LIKE (?) ORDER BY datetime(timestamp) DESC", (filter_device,))
 
     graph_status = None
@@ -159,7 +159,10 @@ def status():
 	                s["stateCharging"],
 
                     s["temperatureDevice"],
-                    s["temperatureBattery"]
+                    s["temperatureBattery"],
+
+                    s["freeMemoryHeap"],
+                    s["freeMemoryHeapNative"]
                 ]
 
 	    db = get_db()
@@ -177,8 +180,10 @@ def status():
 	    						batteryExternal, 
 	    						stateCharging,
                                 temperatureDevice,
-                                temperatureBattery
-	    	) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
+                                temperatureBattery,
+                                freeMemoryHeap,
+                                freeMemoryHeapNative
+	    	) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
 	    db.commit()
 
     return ("", 204)
@@ -255,6 +260,8 @@ def capture():
         print ("no capture to import")
         return ("", 204)
 
+    print(content)
+
     for c in content:
 
         # insert into db
@@ -263,7 +270,12 @@ def capture():
 
                     c["captureId"],
                     c["sessionId"],
-                    time_to_store(c["recordingTime"])]
+                    time_to_store(c["recordingTime"]),
+                    c["exposureTime"],
+                    c["aperture"],
+                    c["iso"],
+                    c["exposureValue"]
+        ]
 
         db = get_db()
         db.execute("""
@@ -271,8 +283,12 @@ def capture():
                                     serverTimestamp, 
                                     captureId,
                                     sessionId, 
-                                    recordingTime
-            ) values (?, ?, ?, ?, ?)""", values)
+                                    recordingTime,
+                                    exposureTime,
+                                    aperture,
+                                    iso,
+                                    exposureValue
+            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
         db.commit()
 
     return ("", 204)
@@ -490,6 +506,13 @@ def eventtype_filter(e):
         return e
 
 
+@app.template_filter("bytetomegabyte")
+def bytetomegabyte_filter(byte):
+    if byte is None:
+        return ""
+    return float(byte) / (1024 * 1024)
+
+
 @app.template_filter("location")
 def location_filter(loc):
     if loc is None or len(loc) != 2:
@@ -545,6 +568,19 @@ def timediff_filter(i):
 
     return "".join(ret)
 
+
+@app.template_filter("round2")
+def round2_filter(data):
+    if data is None:
+        return ""
+    return "{:.2f}".format(data)
+
+
+@app.template_filter("round4")
+def round4_filter(data):
+    if data is None:
+        return ""
+    return "{:.4f}".format(data)
 
 
 def get_filter(param):

@@ -26,7 +26,10 @@ create table status (
   stateCharging integer,
 
   temperatureDevice real,
-  temperatureBattery real
+  temperatureBattery real,
+
+  freeMemoryHeap integer,
+  freeMemoryHeapNative integer
 );
 
 create table session (
@@ -61,6 +64,10 @@ create table capture (
   captureId integer not null,
   sessionId integer,
   recordingTime text not null,
+  exposureTime real,
+  aperture real,
+  iso real,
+  exposureValue real,
   -- imagePath
 
   FOREIGN KEY(sessionid) REFERENCES session(id)

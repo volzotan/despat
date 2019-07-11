@@ -29,14 +29,14 @@
       <th>device id</th>
       <th>time</th>
       <th>device name</th>
-      <th class="text-right">images</br>taken</th>
-      <th class="text-right">images</br>in memory</th>
+      <th class="text-right">images</br>taken : in memory</th>
       <th class="text-right">free space</br>internal</th>
       <th class="text-right">free space</br>SD-card</th>
       <th class="text-right">battery</br>built-in</th>
       <!-- <th class="text-right">battery</br>external</th> -->
       <!-- <th class="text-right">charging</th> -->
       <th class="text-right">temperature</br>battery</th>
+      <th class="text-right">freeMemoryHeap</br>app : native</th>
     </tr>
   </thead>
   <tbody>
@@ -46,14 +46,14 @@
       <td class="col-md-2"><a href="{{ url_for("overview", option="all") }}?device={{ entry.deviceId }}">{{ entry.deviceId }}</a></td>
       <td class="col-md-2">{{ entry.timestamp | dateformat }}</td>
       <td class="col-md-1">{{ entry.deviceName }}</td>
-      <td class="col-md-1 text-right">{{ entry.imagesTaken | suppresszero }}</td>
-      <td class="col-md-1 text-right">{{ entry.imagesInMemory | suppresszero }}</td>
+      <td class="col-md-1 text-right">{{ entry.imagesTaken | suppresszero }} : {{ entry.imagesInMemory | suppresszero }}</td>
       <td class="col-md-1 text-right {% if entry.freeSpaceInternal < 100 %} bg-danger {% endif %}">{{ entry.freeSpaceInternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right">{{ entry.freeSpaceExternal | round | int | suppressnegative }}</td>
       <td class="col-md-1 text-right {% if entry.batteryInternal < 20 %} bg-danger {% endif %}">{{ entry.batteryInternal | round | int | suppressnegative }}</td>
       <!-- <td class="col-md-1 text-right">{{ entry.batteryExternal | round | int | suppressnegative }}</td> -->
       <!-- <td class="col-md-1 text-center {% if entry.stateCharging < 1 %} bg-danger {% else %} bg-success {% endif %}">{{ entry.stateCharging | bool }}</td> -->
       <td class="col-md-1 text-right">{{ entry.temperatureBattery | round | int }}</td>
+      <td class="col-md-1 text-right">{{ entry.freeMemoryHeap | bytetomegabyte | round4 }} : {{ entry.freeMemoryHeapNative | bytetomegabyte | round4 }}</td>
     </tr>
     {% else %}
     <tr>
@@ -126,6 +126,10 @@
       <th>device id</th>
       <th>captureId</th>
       <th>sessionId</th>
+      <th>exposureTime</th>
+      <th>aperture</th>
+      <th>iso</th>
+      <th>exposureValue</th>
       <th class="text-right">recordingTime</th>
     </tr>
   </thead>
@@ -134,17 +138,25 @@
     <tr>
       <td class="col-md-1">{{ entry.id }}</td>
       <td class="col-md-2"><a href="{{ url_for("device", device_id=entry.deviceId) }}">{{ entry.deviceId }}</a></td>
-      <td class="col-md-2">{{ entry.captureId }}</td>
+      <td class="col-md-1">{{ entry.captureId }}</td>
       <td class="col-md-2">{{ entry.sessionId }}</td>
-      <td class="col-md-5 text-right">{{ entry.recordingTime | dateformat }}</td>
+      <td class="col-md-1">{{ entry.exposureTime }}</td>
+      <td class="col-md-1">{{ entry.aperture | round2 }}</td>
+      <td class="col-md-1">{{ entry.iso }}</td>
+      <td class="col-md-1">{{ entry.exposureValue | round2 }}</td>
+      <td class="col-md-2 text-right">{{ entry.recordingTime | dateformat }}</td>
     </tr>
     {% else %}
     <tr>
       <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-1"> - </td>
+      <td class="col-md-1"> - </td>
       <td class="col-md-2"> - </td>
-      <td class="col-md-5"> - </td>
     </tr>
     {% endfor %}
   </tbody>
