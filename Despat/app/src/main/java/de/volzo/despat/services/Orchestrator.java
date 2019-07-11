@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
@@ -413,9 +414,12 @@ public class Orchestrator extends BroadcastReceiver {
             Intent shutterIntent = new Intent(context, Orchestrator.class);
             shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
             shutterIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
+            shutterIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
 
             PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
-                    ShutterService.REQUEST_CODE, shutterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    ShutterService.REQUEST_CODE,
+                    shutterIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
             long nextExecution = now + cameraConfig.getShutterInterval();
@@ -441,7 +445,10 @@ public class Orchestrator extends BroadcastReceiver {
              *
              * */
 
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
+//            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextExecution, alarmIntent);
+
+            nextExecution = SystemClock.elapsedRealtime() + cameraConfig.getShutterInterval();
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextExecution, alarmIntent);
         }
     }
 

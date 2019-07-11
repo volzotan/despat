@@ -90,8 +90,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         SwitchPreference prefResumeAfterReboot = new SwitchPreference(context);
         prefResumeAfterReboot.setTitle(context.getString(R.string.pref_title_resumeAfterReboot));
         prefResumeAfterReboot.setSummary(context.getString(R.string.pref_summary_resumeAfterReboot));
-        prefResumeAfterReboot.setDefaultValue(Config.DEFAULT_PERSISTENT_CAMERA);
-        prefResumeAfterReboot.setKey(Config.KEY_PERSISTENT_CAMERA);
+        prefResumeAfterReboot.setDefaultValue(Config.DEFAULT_RESUME_AFTER_REBOOT);
+        prefResumeAfterReboot.setKey(Config.KEY_RESUME_AFTER_REBOOT);
         category.addPreference(prefResumeAfterReboot);
 
         SwitchPreference prefShowTooltips = new SwitchPreference(context);
