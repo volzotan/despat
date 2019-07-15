@@ -260,8 +260,6 @@ def capture():
         print ("no capture to import")
         return ("", 204)
 
-    print(content)
-
     for c in content:
 
         # insert into db

@@ -353,8 +353,13 @@ public class SessionManager {
             Date now = Calendar.getInstance().getTime();
             long diff = now.getTime() - lastCap.getRecordingTime().getTime();
             long maxDiff = Config.getShutterInterval(context) + 3 * 1000;
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("diff: ");
+            sb.append(diff);
+
             if (diff > maxDiff) {
-                Util.saveEvent(context, Event.EventType.SCHEDULE_GLITCH, null);
+                Util.saveEvent(context, Event.EventType.SCHEDULE_GLITCH, sb.toString());
             }
         }
 

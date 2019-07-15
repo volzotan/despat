@@ -924,6 +924,10 @@ public class CameraController2 extends CameraController {
     public void closeCamera() {
         Log.d(TAG, "--> closeCamera");
 
+        if (devicePositionFuture != null && !devicePositionFuture.isCancelled()) {
+            devicePositionFuture.cancel(true);
+        }
+
         if ((jpgResultQueue != null && jpgResultQueue.size() > 0) ||
             (rawResultQueue != null && rawResultQueue.size() > 0)) {
             Log.w(TAG, "image saver queues not empty");

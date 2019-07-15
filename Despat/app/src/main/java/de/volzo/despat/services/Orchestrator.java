@@ -508,7 +508,13 @@ public class Orchestrator extends BroadcastReceiver {
         if (!alreadyScheduled) {
             ComponentName serviceComponent = new ComponentName(context, HeartbeatService.class);
             JobInfo.Builder builder = new JobInfo.Builder(HeartbeatService.JOB_ID, serviceComponent);
-            builder.setPeriodic(Config.getHeartbeatInterval(context));
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                builder.setPeriodic(Config.getHeartbeatInterval(context), 30*1000);
+            } else{
+                builder.setPeriodic(Config.getHeartbeatInterval(context));
+            }
+
             jobScheduler.schedule(builder.build());
         } else {
             Log.d(TAG, "Heartbeat Service already scheduled");

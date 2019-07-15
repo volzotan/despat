@@ -202,12 +202,16 @@ public class Util {
             errorEvent.setStacktrace(sw.toString());
         }
 
+        errorEventDao.insert(errorEvent);
+
         // FIXME: save ErrorEvent as Event too since I'm to lazy to add code for ErrorEvent syncing
 
         StringBuilder sb = new StringBuilder();
         sb.append(message);
         sb.append(" ");
-        sb.append(e.toString());
+        if (e != null) {
+            sb.append(e.toString());
+        }
         saveEvent(context, Event.EventType.ERROR, sb.toString());
 
     }

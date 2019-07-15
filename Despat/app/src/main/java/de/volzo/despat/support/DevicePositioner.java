@@ -143,7 +143,9 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
 
     @Override
     public Integer call() throws Exception {
-        while (orientation == null) {Thread.sleep(1);}
+        while (orientation == null) {
+            Thread.sleep(1);
+        }
         close();
         return orientation;
     }
