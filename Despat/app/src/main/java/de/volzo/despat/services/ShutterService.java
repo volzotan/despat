@@ -57,6 +57,7 @@ public class ShutterService extends Service {
     public static final String ARG_CAMERA_CONFIG        = "ARG_CAMERA_CONFIG";
 
     public static final int REQUEST_CODE                = 0x0100;
+    public static final int REQUEST_CODE_2              = 0x0101;
     public static final int FOREGROUND_NOTIFICATION_ID  = 0x0200;
     public static final String NOTIFICATION_CHANNEL_ID  = "de.volzo.despat.notificationchannel.ShutterService";
 

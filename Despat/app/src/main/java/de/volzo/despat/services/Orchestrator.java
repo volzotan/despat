@@ -45,6 +45,8 @@ public class Orchestrator extends BroadcastReceiver {
     public static final String OPERATION        = "operation";
     public static final String REASON           = "reason";
 
+    public static final String BACKUP           = "backup";
+
     public static final int OPERATION_START     = 1;
     public static final int OPERATION_STOP      = 2;
     public static final int OPERATION_ONCE      = 3;
@@ -254,6 +256,23 @@ public class Orchestrator extends BroadcastReceiver {
             return;
         }
 
+        boolean isBackup = intent.getBooleanExtra(BACKUP, false);
+        if (isBackup) {
+            Log.wtf(TAG, "backup alarm called");
+            Util.saveErrorEvent(context, "backup alarm has been invoked", null);
+
+            // cancel main alarm
+
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            PendingIntent alarmIntent = PendingIntent.getBroadcast(
+                    context,
+                    ShutterService.REQUEST_CODE_2,
+                    new Intent(context, Orchestrator.class),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            alarmManager.cancel(alarmIntent);
+            alarmIntent.cancel();
+        }
+
         switch (service) {
             case Broadcast.ALL_SERVICES:
                 if (operation == OPERATION_START) {
@@ -414,7 +433,7 @@ public class Orchestrator extends BroadcastReceiver {
             Intent shutterIntent = new Intent(context, Orchestrator.class);
             shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
             shutterIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
-            shutterIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+            shutterIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES); // not sure if actually needed
 
             PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
                     ShutterService.REQUEST_CODE,
@@ -449,6 +468,32 @@ public class Orchestrator extends BroadcastReceiver {
 
             nextExecution = SystemClock.elapsedRealtime() + cameraConfig.getShutterInterval();
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextExecution, alarmIntent);
+
+            // cancel backup
+
+            alarmIntent = PendingIntent.getBroadcast(
+                    context,
+                    ShutterService.REQUEST_CODE_2,
+                    new Intent(context, Orchestrator.class),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            alarmManager.cancel(alarmIntent);
+            alarmIntent.cancel();
+
+            // and schedule a new 2nd alarm for backup:
+
+            shutterIntent = new Intent(context, Orchestrator.class);
+            shutterIntent.putExtra(Orchestrator.SERVICE, Broadcast.SHUTTER_SERVICE);
+            shutterIntent.putExtra(Orchestrator.OPERATION, Orchestrator.OPERATION_START);
+            shutterIntent.putExtra(Orchestrator.BACKUP, true);
+            shutterIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+
+            alarmIntent = PendingIntent.getBroadcast(context,
+                    ShutterService.REQUEST_CODE_2,
+                    shutterIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+            nextExecution = SystemClock.elapsedRealtime() + cameraConfig.getShutterInterval() * 2;
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextExecution, alarmIntent);
         }
     }
 
@@ -458,8 +503,20 @@ public class Orchestrator extends BroadcastReceiver {
         } else {
             // alarm Manager
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            PendingIntent alarmIntent = PendingIntent.getBroadcast(context,
-                    ShutterService.REQUEST_CODE, new Intent(context, Orchestrator.class), PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent alarmIntent = PendingIntent.getBroadcast(
+                    context,
+                    ShutterService.REQUEST_CODE,
+                    new Intent(context, Orchestrator.class),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            alarmManager.cancel(alarmIntent);
+            alarmIntent.cancel();
+
+            // cancel backup
+            alarmIntent = PendingIntent.getBroadcast(
+                    context,
+                    ShutterService.REQUEST_CODE_2,
+                    new Intent(context, Orchestrator.class),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
             alarmManager.cancel(alarmIntent);
             alarmIntent.cancel();
         }

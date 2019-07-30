@@ -181,7 +181,14 @@ public class CameraController2 extends CameraController {
             try {
                 createCaptureSession();
             } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
+                StringBuilder sb = new StringBuilder();
+                sb.append("creating capture session failed. Error: ");
+                sb.append(e.toString());
+                if (e.getMessage() != null) {
+                    sb.append(" | error message: ");
+                    sb.append(e.getMessage());
+                }
+                Log.e(TAG, sb.toString());
                 reportFailAndClose("creating capture session failed", e);
             }
 
@@ -301,14 +308,14 @@ public class CameraController2 extends CameraController {
 
             int photoOrientation = 0;
             try {
-                Integer result = devicePositionFuture.get(500, TimeUnit.MILLISECONDS);
+                Integer result = devicePositionFuture.get(800, TimeUnit.MILLISECONDS);
                 if (result != null) photoOrientation = result;
             } catch (InterruptedException | ExecutionException e) {
                 Log.w(TAG, "device positioner interrupted");
                 Util.saveErrorEvent(context, "device positioner interrupted", e);
             } catch (TimeoutException e) {
                 Log.w(TAG, "device positioner timeout");
-                Util.saveErrorEvent(context, "device positioner timeout", null);
+                Util.saveErrorEvent(context, "device positioner timeout", e);
             } finally {
                 devicePositionFuture.cancel(true);
             }
@@ -733,6 +740,7 @@ public class CameraController2 extends CameraController {
                             }
                         } else {
                             Log.e(TAG, "ImageSaver has been removed, CaptureResult will be dropped");
+                            Util.saveEvent(context, Event.EventType.ERROR, "ImageSaver has been removed, CaptureResult will be dropped");
                         }
 
                         if (rawImageSaver != null) {
@@ -745,6 +753,7 @@ public class CameraController2 extends CameraController {
                             }
                         } else {
                             Log.e(TAG, "ImageSaver has been removed, CaptureResult will be dropped");
+                            Util.saveEvent(context, Event.EventType.ERROR, "ImageSaver has been removed, CaptureResult will be dropped");
                         }
 
                         if (jpgImageSaver != null) {
@@ -805,7 +814,9 @@ public class CameraController2 extends CameraController {
 
                 public void onCaptureFailed(@NonNull CameraCaptureSession session,
                                             @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
+
                     Log.d(TAG, "# onCaptureFailed");
+                    Util.saveErrorEvent(context,"capture failed", null);
 
                     // TODO: remove corresponding ImageSaver from queue
                 }
@@ -841,6 +852,7 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "# captureStill");
         } catch (CameraAccessException e) {
             e.printStackTrace();
+            Util.saveErrorEvent(context, "camera access failed", e);
         }
     }
 
@@ -886,6 +898,7 @@ public class CameraController2 extends CameraController {
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
+            Util.saveErrorEvent(context, "camera access failed", e);
         }
     }
 
@@ -915,6 +928,7 @@ public class CameraController2 extends CameraController {
                 }
             } catch (InterruptedException ie) {
                 Log.e(TAG, "lock could not be acquired", ie);
+                Util.saveErrorEvent(context, "lock could not be acquired", ie);
             } finally {
                 cameraOpenCloseLock.release();
             }
@@ -930,7 +944,8 @@ public class CameraController2 extends CameraController {
 
         if ((jpgResultQueue != null && jpgResultQueue.size() > 0) ||
             (rawResultQueue != null && rawResultQueue.size() > 0)) {
-            Log.w(TAG, "image saver queues not empty");
+
+            Log.w(TAG, "image saver queues not empty! jpg: " + jpgResultQueue.size() + " | raw: " + rawResultQueue.size());
 
             handler.postDelayed(closeRunnable, 1000);
         } else {
@@ -1228,7 +1243,7 @@ public class CameraController2 extends CameraController {
                     context.sendBroadcast(intent);
 
                     // error broadcast
-                    Util.saveErrorEvent(context, msg, null);
+                    Util.saveErrorEvent(context, msg, ise);
                 }
 
                 if (imageSaver != null && imageSaver.isComplete()) {
@@ -1503,7 +1518,10 @@ public class CameraController2 extends CameraController {
 
         // in case ImageSaver needs to be discarded before it's finished
         public void close() {
-            if (image != null) image.close();
+            if (image != null) {
+                image.close();
+                image = null;
+            }
         }
 
         void setFilename(File filename) {
@@ -1536,6 +1554,7 @@ public class CameraController2 extends CameraController {
                         e.printStackTrace();
                     } finally {
                         image.close();
+                        image = null;
                         closeOutput(output);
                     }
 
@@ -1552,6 +1571,7 @@ public class CameraController2 extends CameraController {
                         e.printStackTrace();
                     } finally {
                         image.close();
+                        image = null;
                         closeOutput(output);
                     }
 
@@ -1559,6 +1579,9 @@ public class CameraController2 extends CameraController {
 
                 default:
                     Log.e(TAG, "unknown image format to save");
+                    image.close();
+                    image = null;
+                    closeOutput(output);
                     return;
             }
 

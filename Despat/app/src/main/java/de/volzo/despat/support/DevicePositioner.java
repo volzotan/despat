@@ -31,10 +31,10 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
 
         sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+//        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+//        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void close() {
@@ -108,8 +108,8 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
             gravity = event.values;
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            geomagnetic = event.values;
+//        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+//            geomagnetic = event.values;
 //        if (gravity != null && geomagnetic != null) {
 //            float R[] = new float[9];
 //            float I[] = new float[9];
@@ -128,6 +128,9 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
         if (gravity != null) {
             orientation = getRotationFromAccelerometerOnly(gravity);
             Log.d(TAG, "positioner running on accelerometer only [" + orientation + "]");
+
+            // let it run just once
+            close();
         }
     }
 
@@ -144,7 +147,7 @@ public class DevicePositioner implements SensorEventListener, Callable<Integer> 
     @Override
     public Integer call() throws Exception {
         while (orientation == null) {
-            Thread.sleep(1);
+            Thread.sleep(10);
         }
         close();
         return orientation;

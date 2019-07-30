@@ -346,12 +346,6 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         ContentResolver.addPeriodicSync(Util.createSyncAccount(this), Config.SYNC_AUTHORITY, Bundle.EMPTY, 1 * 60);
 
-        registerAllReceivers();
-        startProgressBarUpdate();
-        updatePreviewImage();
-
-        updateSysInfobox();
-
         runTestCode();
 
         File obbFile = new File(Util.getObbPath(this));
@@ -594,17 +588,30 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         Log.d(TAG, "MainActivity Resume");
 
+        registerAllReceivers();
+        startProgressBarUpdate();
+        updatePreviewImage();
+        updateSysInfobox();
+
         textureView = (TextureView) findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
         if (textureView.isAvailable()) {
             startCamera(new CameraConfig(activity));
         }
 
+        setButtonStates();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Log.d(TAG, "MainActivity Start");
+
         registerAllReceivers();
         startProgressBarUpdate();
         updatePreviewImage();
-
-        setButtonStates();
+        updateSysInfobox();
     }
 
     @Override

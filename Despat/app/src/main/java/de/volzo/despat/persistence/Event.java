@@ -99,7 +99,7 @@ public class Event {
         }
     }
 
-    public class EventType {
+    public static class EventType {
 
         // device
         public static final int INIT                = 10;
