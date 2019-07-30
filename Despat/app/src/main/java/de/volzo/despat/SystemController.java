@@ -77,9 +77,7 @@ public class SystemController {
             public void onLocationChanged(Location location) {
                 Log.d(TAG, "location update");
 
-                if (locCallback != null) {
-                    locCallback.locationAcquired(location);
-                }
+                locCallback.locationAcquired(location);
             }
 
             @Override

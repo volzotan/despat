@@ -111,7 +111,7 @@ public class Config {
     public static final boolean BACKUP_LOGCAT                       = false;
 
     // redirect logcat output via -f to file
-    public static final boolean REDIRECT_LOGCAT                     = false;
+    public static final boolean REDIRECT_LOGCAT                     = true;
 
     // logcat text file directory
     public static final File LOGCAT_DIR                             = new File(Environment.getExternalStorageDirectory(), "despat");
@@ -161,6 +161,7 @@ public class Config {
     public static final long    DEFAULT_HEARTBEAT_INTERVAL                  = 15 * 60 * 1000L;      // Minimum interval is 15m
     public static final long    DEFAULT_MIN_HEARTBEAT_INTERVAL              = 2 * 60 * 1000;        // at most every X ms
     public static final long    DEFAULT_UPLOAD_INTERVAL                     = 60 * 60 * 1000L;
+    public static final long    DEFAULT_LOCATION_INTERVAL                   = 60 * 60 * 1000L;
 
     /**
      * DEVICE NAME
@@ -465,6 +466,17 @@ public class Config {
         }
 
         return null;
+    }
+
+    /**
+     * LOCATION INTERVAL
+     */
+    public static final String KEY_LOCATION_INTERVAL                = "de.volzo.despat.locationInterval";
+    public static long getLocationInterval(Context context) {
+        return getPropertyLong(context, KEY_LOCATION_INTERVAL, DEFAULT_LOCATION_INTERVAL);
+    }
+    public static void setLocationInterval(Context context, String locationInterval) {
+        setProperty(context, KEY_LOCATION_INTERVAL, locationInterval);
     }
 
     /**

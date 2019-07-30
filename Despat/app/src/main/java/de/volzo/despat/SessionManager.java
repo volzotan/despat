@@ -37,6 +37,8 @@ import de.volzo.despat.persistence.Benchmark;
 import de.volzo.despat.persistence.BenchmarkDao;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
+import de.volzo.despat.persistence.DeviceLocation;
+import de.volzo.despat.persistence.DeviceLocationDao;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
@@ -190,6 +192,15 @@ public class SessionManager {
             public void locationAcquired(Location location) {
 
                 try {
+                    AppDatabase db = AppDatabase.getAppDatabase(context);
+                    DeviceLocationDao deviceLocationDao = db.deviceLocationDao();
+                    DeviceLocation loc = new DeviceLocation();
+
+                    loc.setTimestamp(Calendar.getInstance().getTime());
+                    loc.setLocation(location);
+
+                    deviceLocationDao.insert(loc);
+
                     SessionManager.getInstance(context).setLocation(location);
                 } catch (NotRecordingException e) {
                     Log.w(TAG, "session already stopped when adding location");
@@ -713,7 +724,7 @@ public class SessionManager {
 
     // ---------------------------------------------------------------------------------------------
 
-    public class NotRecordingException extends Exception {
+    public static class NotRecordingException extends Exception {
 
     }
 }

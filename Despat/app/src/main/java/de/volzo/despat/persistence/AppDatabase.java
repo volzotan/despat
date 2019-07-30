@@ -13,7 +13,8 @@ import android.content.Context;
                         Position.class,
                         ErrorEvent.class,
                         Event.class,
-                        Benchmark.class},
+                        Benchmark.class,
+                        DeviceLocation.class},
                         version = 1)
 
 @TypeConverters(RoomConverter.class)
@@ -30,6 +31,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ErrorEventDao errorEventDao();
     public abstract EventDao eventDao();
     public abstract BenchmarkDao benchmarkDao();
+    public abstract DeviceLocationDao deviceLocationDao();
 
     public static AppDatabase getAppDatabase(Context context) {
         if (INSTANCE == null) {
@@ -49,6 +51,7 @@ public abstract class AppDatabase extends RoomDatabase {
         AppDatabase.destroyInstance();
         AppDatabase db = AppDatabase.getAppDatabase(context);
 
+        db.deviceLocationDao().dropTable();
         db.benchmarkDao().dropTable();
         db.eventDao().dropTable();
         db.errorEventDao().dropTable();

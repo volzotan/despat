@@ -280,12 +280,14 @@ public class Orchestrator extends BroadcastReceiver {
                     recognitionServiceStart();
                     heartbeatServiceStart();
                     uploadServiceStart();
+                    locationServiceStart();
                     Log.i(TAG, "all services started");
                 } else if (operation == OPERATION_STOP) {
                     shutterServiceStop();
                     recognitionServiceStop();
                     heartbeatServiceStop();
                     uploadServiceStop();
+                    locationServiceStop();
                     Log.i(TAG, "all running services stopped");
                 } else {
                     Log.w(TAG, "no operation command provided");
@@ -331,6 +333,18 @@ public class Orchestrator extends BroadcastReceiver {
                     uploadServiceStop();
                 } else if (operation == OPERATION_ONCE) {
                     uploadServiceOnce();
+                } else {
+                    Log.w(TAG, "no operation command provided");
+                }
+                break;
+
+            case Broadcast.LOCATION_SERVICE:
+                if (operation == OPERATION_START) {
+                    locationServiceStart();
+                } else if (operation == OPERATION_STOP) {
+                    locationServiceStop();
+                } else if (operation == OPERATION_ONCE) {
+                    locationServiceOnce();
                 } else {
                     Log.w(TAG, "no operation command provided");
                 }
@@ -528,7 +542,7 @@ public class Orchestrator extends BroadcastReceiver {
         Util.showSnackbar(context, "Recording stopped", reason);
     }
 
-    // ----------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
 
     private void recognitionServiceStart() {
 
@@ -547,7 +561,7 @@ public class Orchestrator extends BroadcastReceiver {
         // TODO
     }
 
-    // ----------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
 
     private void heartbeatServiceStart() {
         JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
@@ -592,7 +606,7 @@ public class Orchestrator extends BroadcastReceiver {
         jobScheduler.cancel(HeartbeatService.JOB_ID);
     }
 
-    // ----------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
 
     private void uploadServiceStart() {
         JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
@@ -642,6 +656,57 @@ public class Orchestrator extends BroadcastReceiver {
         jobScheduler.schedule(builder.build());
     }
 
+    // ---------------------------------------------------------------------------------------------
+
+    private void locationServiceStart() {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+
+        // already scheduled?
+        boolean alreadyScheduled = false;
+        List<JobInfo> allJobs = jobScheduler.getAllPendingJobs();
+        for (JobInfo j : allJobs) {
+            if (LocationService.JOB_ID == j.getId()) {
+                alreadyScheduled = true;
+                break;
+            }
+        }
+
+        if (!alreadyScheduled) {
+            ComponentName serviceComponent = new ComponentName(context, LocationService.class);
+            JobInfo.Builder builder = new JobInfo.Builder(LocationService.JOB_ID, serviceComponent);
+            builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                builder.setPeriodic(Config.getLocationInterval(context), 30*1000);
+            } else{
+                builder.setPeriodic(Config.getLocationInterval(context));
+            }
+
+            jobScheduler.schedule(builder.build());
+        } else {
+            Log.d(TAG, "Location Service already scheduled");
+        }
+    }
+
+    private void locationServiceStop() {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+        jobScheduler.cancel(LocationService.JOB_ID);
+
+        // jobScheduler.cancelAll();
+    }
+
+    private void locationServiceOnce() {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+
+        ComponentName serviceComponent = new ComponentName(context, LocationService.class);
+        JobInfo.Builder builder = new JobInfo.Builder(LocationService.JOB_ID, serviceComponent);
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        builder.setMinimumLatency(0);
+        builder.setOverrideDeadline(1000);
+        jobScheduler.schedule(builder.build());
+    }
+
+    // ---------------------------------------------------------------------------------------------
 
     private void log(String action, String service, int operation, String reason) {
 

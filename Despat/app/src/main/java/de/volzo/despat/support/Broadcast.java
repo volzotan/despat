@@ -11,6 +11,7 @@ public class Broadcast {
     public static final String RECOGNITION_SERVICE          = "de.volzo.despat.RECOGNITION_SERVICE";
     public static final String HEARTBEAT_SERVICE            = "de.volzo.despat.HEARTBEAT_SERVICE";
     public static final String UPLOAD_SERVICE               = "de.volzo.despat.UPLOAD_SERVICE";
+    public static final String LOCATION_SERVICE             = "de.volzo.despat.LOCATION_SERVICE";
     public static final String COMMAND_SERVICE              = "de.volzo.despat.COMMAND_SERVICE";
 
     public static final String SHUTTER_SERVICE_TRIGGER      = "de.volzo.despat.SHUTTER_SERVICE_TRIGGER";
