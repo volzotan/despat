@@ -135,7 +135,7 @@ def status():
         return ("empty request", 400)
 
     if (len(content) == 0):
-    	print ("no status to import")
+    	print("no status to import")
     	return ("", 204)
 
     # insert into db

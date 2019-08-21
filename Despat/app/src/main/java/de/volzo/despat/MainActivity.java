@@ -876,6 +876,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     File img = lastCaptures.get(i).getImage();
                     if (img != null && img.exists()) {
                         newestImage = img;
+                        break;
                     }
                 }
             } catch (SessionManager.NotRecordingException e) {
