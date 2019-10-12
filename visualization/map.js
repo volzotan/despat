@@ -159,7 +159,10 @@ function handleFileSelect(evt) {
         console.log("name: " + f.name);
         console.log("type: " + f.type);
         console.log("size: " + f.size);
-        console.log("lmod: " + f.lastModifiedDate.toLocaleDateString());
+
+        if (f.lastModifiedDate != null) {
+            console.log("lmod: " + f.lastModifiedDate.toLocaleDateString());
+        }
 
         if (f.type != "application/zip") {
             throw new Error("not a ZIP file");
