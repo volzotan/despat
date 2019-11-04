@@ -24,11 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import de.volzo.despat.SessionManager;
 import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorSSD;
+import de.volzo.despat.detector.DetectorTensorFlowMobile;
 import de.volzo.despat.persistence.AppDatabase;
-import de.volzo.despat.persistence.CaptureDao;
-import de.volzo.despat.persistence.Event;
-import de.volzo.despat.persistence.EventDao;
 import de.volzo.despat.persistence.HomographyPoint;
 import de.volzo.despat.persistence.HomographyPointDao;
 import de.volzo.despat.persistence.Position;
@@ -124,7 +121,7 @@ public class SessionFragment extends Fragment {
                 PositionDao positionDao = database.positionDao();
                 List<Position> positions = positionDao.getAllBySession(session.getId());
                 try {
-                    final Detector detector = new DetectorSSD(context, session.getDetectorConfig());
+                    final Detector detector = new DetectorTensorFlowMobile(context, session.getDetectorConfig());
                     final Size imageSize = session.getImageSize();
                     final List<RectF> rectangles = detector.positionsToRectangles(positions);
 

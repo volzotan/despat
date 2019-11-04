@@ -1,6 +1,5 @@
 package de.volzo.despat.services;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.job.JobInfo;
@@ -9,21 +8,20 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.Size;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import de.volzo.despat.CameraController;
 import de.volzo.despat.SessionManager;
+import de.volzo.despat.detector.Detector;
+import de.volzo.despat.detector.DetectorTensorFlowMobile;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Event;
 import de.volzo.despat.persistence.Session;
@@ -31,6 +29,7 @@ import de.volzo.despat.persistence.SessionDao;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.preferences.Config;
+import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.support.NotificationUtil;
 import de.volzo.despat.support.Util;
@@ -84,7 +83,7 @@ public class Orchestrator extends BroadcastReceiver {
 
         String action       = intent.getAction();
         String service      = intent.getStringExtra(SERVICE);
-        int operation       = intent.getIntExtra(OPERATION, -1);
+        final int operation = intent.getIntExtra(OPERATION, -1);
         reason              = intent.getStringExtra(REASON);
 
         log(action, service, operation, reason);
@@ -241,6 +240,38 @@ public class Orchestrator extends BroadcastReceiver {
                     } catch (SessionManager.NotRecordingException nre) {
                         Log.w(TAG, "resuming recording session failed");
                     }
+                    break;
+
+                case Broadcast.COMMAND_RUN_BENCHMARK:
+                    Log.wtf(TAG, "COMMAND RUN BENCHMARK");
+
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Creating Benchmarks started");
+                            try {
+                                for (String fidelity : DetectorTensorFlowMobile.FIDELITY_MODE) {
+                                    Detector detector = new DetectorTensorFlowMobile(context, new DetectorConfig(fidelity, 1000)); // TODO: tilesize 1000 for all detectors? Is that overwritten somewhere?
+                                    detector.init();
+                                    Long time = ((DetectorTensorFlowMobile) detector).estimateComputationTime(new Size(1000, 1000));
+
+                                    // if no time could be estimated, there no/not enough Benchmarks in the db
+                                    if (time == null || operation > 0) {
+                                        if (operation > 0) {
+                                            Log.i(TAG, "running benchmark by force");
+                                        }
+
+                                        detector.runBenchmark();
+                                    } else {
+                                        Log.e(TAG, "no benchmark required");
+                                    }
+                                }
+                            } catch (Exception e) {
+                                Log.w(TAG, "Creating Benchmarks failed", e);
+                            }
+                        }
+                    });
+
                     break;
 
                 default:

@@ -3,25 +3,15 @@ package de.volzo.despat;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Camera;
 import android.graphics.Rect;
 import android.location.Location;
-import android.media.Image;
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,11 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorSSD;
+import de.volzo.despat.detector.DetectorTensorFlowMobile;
 import de.volzo.despat.persistence.AppDatabase;
-import de.volzo.despat.persistence.Benchmark;
-import de.volzo.despat.persistence.BenchmarkDao;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.DeviceLocation;
@@ -51,9 +38,7 @@ import de.volzo.despat.persistence.StatusDao;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.CaptureInfo;
 import de.volzo.despat.preferences.DetectorConfig;
-import de.volzo.despat.services.CompressorService;
 import de.volzo.despat.services.Orchestrator;
-import de.volzo.despat.services.RecognitionService;
 import de.volzo.despat.services.ShutterService;
 import de.volzo.despat.support.Broadcast;
 import de.volzo.despat.preferences.Config;
@@ -496,7 +481,7 @@ public class SessionManager {
         cameraConfig.setShutterInterval(10000);
         example.setCameraConfig(cameraConfig);
 
-        DetectorConfig detectorConfig = new DetectorConfig(DetectorSSD.FIDELITY_MODE[0], 1000);
+        DetectorConfig detectorConfig = new DetectorConfig(DetectorTensorFlowMobile.FIDELITY_MODE[0], 1000);
         example.setDetectorConfig(detectorConfig);
 
         Long sessionId = sessionDao.insert(example)[0];

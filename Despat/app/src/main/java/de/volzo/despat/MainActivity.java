@@ -28,6 +28,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
@@ -51,7 +53,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorSSD;
+import de.volzo.despat.detector.DetectorTensorFlowMobile;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
@@ -449,7 +451,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 //            CaptureDao captureDao = db.captureDao();
 //            List<Position> positions = positionDao.getAllBySession(lastSession.getId());
 //            try {
-//                Detector detector = new DetectorSSD(this);
+//                Detector detector = new DetectorTensorFlowMobile(this);
 //                detector.init();
 //                detector.load(captureDao.getLastFromSession(lastSession.getId()).getImage().getAbsoluteFile());
 //                detector.display((DrawSurface) findViewById(R.id.drawSurface), detector.positionsToRectangles(positions));
@@ -473,29 +475,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             }
         });
 
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (String fidelity : DetectorSSD.FIDELITY_MODE) {
-                        Detector detector = new DetectorSSD(context, new DetectorConfig(fidelity, 1000));
-                        detector.init();
-                        Long time = ((DetectorSSD) detector).estimateComputationTime(new Size(1000, 1000));
-
-                        // if no time could be estimated, there a no/not enough Benchmarks in the db
-                        if (time == null) {
-                            detector.runBenchmark();
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.w(TAG, "Creating Benchmarks failed", e);
-                }
-            }
-        });
+        // run Benchmark
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+        Intent localIntent = new Intent(Broadcast.COMMAND_RUN_BENCHMARK);
+        localBroadcastManager.sendBroadcast(localIntent);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         Log.d(TAG, "onActivityResult");
 
         if (resultCode != RESULT_OK) {
@@ -985,17 +974,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         freeSpaceInternal.setText(Float.toString(freeSpace));
 
         freeSpaceExternal.setText("---");
-        batteryInternal.setText(Integer.toString(systemController.getBatteryLevel()) + "°C");
+        batteryInternal.setText(Integer.toString(systemController.getBatteryLevel()) + "%");
         batteryExternal.setText("---");
         stateCharging.setText(Boolean.toString(systemController.getBatteryChargingState()));
         temperatureDevice.setText("---");
-        temperatureBattery.setText(Float.toString(systemController.getBatteryTemperature()));
+        temperatureBattery.setText(Float.toString(systemController.getBatteryTemperature()) + "°C");
         dozeWhitelisted.setText(Boolean.toString(checkWhitelistingForDoze(activity)));
     }
 
     public void runRecognizer() {
         try {
-            detector = new DetectorSSD(activity, new DetectorConfig(DetectorSSD.FIDELITY_MODE[0], 600));
+            detector = new DetectorTensorFlowMobile(activity, new DetectorConfig(DetectorTensorFlowMobile.FIDELITY_MODE[0], 600));
 //            detector = new DetectorHOG(activity);
             detector.init();
             detector.load(new File(Config.getImageFolders(activity).get(0), "test.jpg"));

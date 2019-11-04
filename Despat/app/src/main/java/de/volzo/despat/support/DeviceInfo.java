@@ -81,40 +81,40 @@ public class DeviceInfo {
         sb.append("\n");
         sb.append("----------------------------------------\n");
 
-        sb.append(String.format("%-20s", "Device vendor:"));
-        sb.append(String.format("%20s",  vendor));
+        sb.append(String.format("%-30s", "Device vendor:"));
+        sb.append(String.format("%30s",  vendor));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "Device identifier:"));
-        sb.append(String.format("%20s",  identifier));
+        sb.append(String.format("%-30s", "Device identifier:"));
+        sb.append(String.format("%30s",  identifier));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "Device id:"));
-        sb.append(String.format("%20s",  id));
+        sb.append(String.format("%-30s", "Device id:"));
+        sb.append(String.format("%30s",  id));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "Device version:"));
-        sb.append(String.format("%20s",  version));
+        sb.append(String.format("%-30s", "Device version:"));
+        sb.append(String.format("%30s",  version));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "Build  type:"));
-        sb.append(String.format("%20s",  buildType));
+        sb.append(String.format("%-30s", "Build  type:"));
+        sb.append(String.format("%30s",  buildType));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "Device name:"));
-        sb.append(String.format("%20s",  name));
+        sb.append(String.format("%-30s", "Device name:"));
+        sb.append(String.format("%30s",  name));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "Despat version name:"));
-        sb.append(String.format("%20s",  despatVersionName));
+        sb.append(String.format("%-30s", "Despat version name:"));
+        sb.append(String.format("%30s",  despatVersionName));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "Despat version:"));
+        sb.append(String.format("%-30s", "Despat version:"));
         sb.append(String.format("%20d",  despatVersionCode));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "Despat buildTime:"));
-        sb.append(String.format("%20s",  despatBuildTime));
+        sb.append(String.format("%-30s", "Despat buildTime:"));
+        sb.append(String.format("%30s",  despatBuildTime));
         sb.append("\n");
 
         sb.append("----------------------------------------\n");
@@ -123,20 +123,20 @@ public class DeviceInfo {
             sb.append("----------------------------------------\n");
         }
 
-        sb.append(String.format("%-20s", "free space internal [mb]:"));
+        sb.append(String.format("%-30s", "free space internal [mb]:"));
         sb.append(String.format(Config.LOCALE, "%20.2f",  freeSpaceInternal));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "free space external [mb]:"));
+        sb.append(String.format("%-30s", "free space external [mb]:"));
         sb.append(String.format(Config.LOCALE, "%20.2f",  freeSpaceExternal));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "batt temp [°C]:"));
+        sb.append(String.format("%-30s", "batt temp [°C]:"));
         sb.append(String.format(Config.LOCALE, "%20.1f",  batteryTemperature));
         sb.append("\n");
 
-        sb.append(String.format("%-20s", "gyro:"));
-        sb.append(String.format("%20s",  gyro));
+        sb.append(String.format("%-30s", "gyro:"));
+        sb.append(String.format("%30s",  gyro));
         sb.append("\n");
 
         sb.append("----------------------------------------\n");
@@ -192,85 +192,85 @@ public class DeviceInfo {
             StringBuilder sb = new StringBuilder();
             String info;
 
-            sb.append(String.format("%-20s", "camera id:"));
-            sb.append(String.format("%20s", id));
+            sb.append(String.format("%-30s", "camera id:"));
+            sb.append(String.format("%30s", id));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "camera direction:"));
-            sb.append(String.format("%20s", direction));
+            sb.append(String.format("%-30s", "camera direction:"));
+            sb.append(String.format("%30s", direction));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "camera img size:"));
-            sb.append(String.format("%20s", width + "x" + height));
+            sb.append(String.format("%-30s", "camera img size:"));
+            sb.append(String.format("%30s", width + "x" + height));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "camera resolution:"));
+            sb.append(String.format("%-30s", "camera resolution:"));
             sb.append(String.format(Config.LOCALE, "%20.2f", (width*height)/1000000.0));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "RAW support:"));
+            sb.append(String.format("%-30s", "RAW support:"));
             sb.append(String.format(Config.LOCALE, "%20b", rawSupport));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "parameters:"));
-            sb.append(String.format("%20s", parameters.size()));
+            sb.append(String.format("%-30s", "parameters:"));
+            sb.append(String.format("%30s", parameters.size()));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "  info:"));
-            sb.append(String.format("%20s", checkForNullString(parameters.get("INFO_VERSION"))));
+            sb.append(String.format("%-30s", "  info:"));
+            sb.append(String.format("%30s", checkForNullString(parameters.get("INFO_VERSION"))));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "  max zoom:"));
-            sb.append(String.format("%20s", parameters.get("SCALER_AVAILABLE_MAX_DIGITAL_ZOOM")));
+            sb.append(String.format("%-30s", "  max zoom:"));
+            sb.append(String.format("%30s", parameters.get("SCALER_AVAILABLE_MAX_DIGITAL_ZOOM")));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "  sensor size:"));
+            sb.append(String.format("%-30s", "  sensor size:"));
             info = "---";
             try {
                 info = parameters.get("SENSOR_INFO_PHYSICAL_SIZE");
                 info = String.format(Config.LOCALE, "%2.1fx%2.1f", Float.parseFloat(info.split("x")[0]), Float.parseFloat(info.split("x")[1]));
             } catch (Exception e) {}
-            sb.append(String.format("%20s", info));
+            sb.append(String.format("%30s", info));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "  pixel array:"));
+            sb.append(String.format("%-30s", "  pixel array:"));
             info = "---";
             try {
                 info = parameters.get("SENSOR_INFO_PIXEL_ARRAY_SIZE");
             } catch (Exception e) {}
-            sb.append(String.format("%20s", info));
+            sb.append(String.format("%30s", info));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "  max iso:"));
-            sb.append(String.format("%20s", checkForNullString(parameters.get("SENSOR_MAX_ANALOG_SENSITIVITY"))));
+            sb.append(String.format("%-30s", "  max iso:"));
+            sb.append(String.format("%30s", checkForNullString(parameters.get("SENSOR_MAX_ANALOG_SENSITIVITY"))));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "  exposure range:"));
+            sb.append(String.format("%-30s", "  exposure range:"));
             info = "---";
             try {
                 info = parameters.get("CONTROL_AE_COMPENSATION_RANGE");
             } catch (Exception e) {}
-            sb.append(String.format("%20s", info));
+            sb.append(String.format("%30s", info));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "  exposure steps:"));
+            sb.append(String.format("%-30s", "  exposure steps:"));
             info = "---";
             try {
                 info = parameters.get("CONTROL_AE_COMPENSATION_STEP");
             } catch (Exception e) {}
-            sb.append(String.format("%20s", info));
+            sb.append(String.format("%30s", info));
             sb.append("\n");
 
-            sb.append(String.format("%-20s", "  max exposure [ms]:"));
+            sb.append(String.format("%-30s", "  max exposure [ms]:"));
             info = "---";
             try {
                 info = Long.toString(TimeUnit.MILLISECONDS.convert(Long.parseLong(parameters.get("SENSOR_INFO_MAX_FRAME_DURATION")), TimeUnit.NANOSECONDS));
             } catch (Exception e) {}
-            sb.append(String.format("%20s", info));
+            sb.append(String.format("%30s", info));
             sb.append("\n");
 
-//            sb.append(String.format("%-20s", "  real pixel grid:"));
-//            sb.append(String.format("%20s", parameters.get("SENSOR_INFO_ACTIVE_ARRAY_SIZE")));
+//            sb.append(String.format("%-30s", "  real pixel grid:"));
+//            sb.append(String.format("%30s", parameters.get("SENSOR_INFO_ACTIVE_ARRAY_SIZE")));
 //            sb.append("\n");
 
 

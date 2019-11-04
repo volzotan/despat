@@ -16,8 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import de.volzo.despat.R;
-import de.volzo.despat.detector.DetectorSSD;
+import de.volzo.despat.detector.DetectorTensorFlowMobile;
 import de.volzo.despat.support.Util;
 
 /**
@@ -154,7 +153,7 @@ public class Config {
     public static final int     DEFAULT_SECOND_IMAGE_EXPOSURE_COMPENSATION  = 0;
     public static final float   DEFAULT_EXPOSURE_THRESHOLD                  = 10f;
 
-    public static final String  DEFAULT_NETWORK_FIDELITY                    = DetectorSSD.FIDELITY_MODE[0];
+    public static final String  DEFAULT_NETWORK_FIDELITY                    = DetectorTensorFlowMobile.FIDELITY_MODE[0];
     public static final boolean DEFAULT_PHONE_HOME                          = false;
     public static final String  DEFAULT_SERVER_ADDRESS                      = "http://zoltep.de";   // format protocol://example.com
     public static final long    DEFAULT_MIN_SYNC_INTERVAL                   = 5 * 60 * 1000;        // at most every X ms

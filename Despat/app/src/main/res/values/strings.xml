@@ -81,9 +81,9 @@
 
     <string name="pref_title_cameraDevice">Camera Device</string>
     <string name="pref_summary_cameraDevice">%s</string>
-    <string name="pref_title_formatJpg">Save JPEGs</string>
+    <string name="pref_title_formatJpg">Use JPEGs</string>
     <string name="pref_summary_formatJpg"></string>
-    <string name="pref_title_formatRaw">Save RAWs</string>
+    <string name="pref_title_formatRaw">Use RAWs</string>
     <string name="pref_summary_formatRaw"></string>
     <string name="pref_title_exposureCompensation">Exposure compensation</string>
     <string name="pref_summary_exposureCompensation">Brightness change for every image: %s</string>

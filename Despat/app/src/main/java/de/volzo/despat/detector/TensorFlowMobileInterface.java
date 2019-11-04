@@ -43,9 +43,9 @@ import de.volzo.despat.support.Util;
  * Wrapper for frozen detection models trained using the Tensorflow Object Detection API:
  * github.com/tensorflow/models/tree/master/research/object_detection
  */
-public class TensorFlowInterface {
+public class TensorFlowMobileInterface {
 
-    private static final String TAG = TensorFlowInterface.class.getSimpleName();
+    private static final String TAG = TensorFlowMobileInterface.class.getSimpleName();
 
     // Only return this many results.
     private static final int MAX_RESULTS = 100;
@@ -75,7 +75,7 @@ public class TensorFlowInterface {
      * @param modelFilename The filepath of the model GraphDef protocol buffer.
      * @param labelFilename The filepath of label file for classes.
      */
-    public static TensorFlowInterface create(
+    public static TensorFlowMobileInterface create(
             final Context context,
             final AssetManager assetManager,
             final StorageManager storageManager,
@@ -83,7 +83,7 @@ public class TensorFlowInterface {
             final String labelFilename,
             final int inputSize) throws IOException {
 
-        final TensorFlowInterface d = new TensorFlowInterface();
+        final TensorFlowMobileInterface d = new TensorFlowMobileInterface();
 
         InputStream labelsInput = null;
         String actualFilename = labelFilename.split("file:///android_asset/")[1];
@@ -148,7 +148,7 @@ public class TensorFlowInterface {
         return d;
     }
 
-    private TensorFlowInterface() {}
+    private TensorFlowMobileInterface() {}
 
     public List<Detector.Recognition> recognizeImage(final Bitmap bitmap) {
         // Log this method so that it can be analyzed with systrace.

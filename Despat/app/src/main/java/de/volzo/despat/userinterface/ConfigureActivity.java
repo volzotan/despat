@@ -2,7 +2,6 @@ package de.volzo.despat.userinterface;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Rect;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,23 +11,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import de.volzo.despat.CameraController2;
 import de.volzo.despat.R;
 import de.volzo.despat.SessionManager;
 import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorSSD;
+import de.volzo.despat.detector.DetectorTensorFlowMobile;
 import de.volzo.despat.preferences.CameraConfig;
 import de.volzo.despat.preferences.Config;
 import de.volzo.despat.preferences.DetectorConfig;
@@ -77,8 +71,8 @@ public class ConfigureActivity extends AppCompatActivity {
 //            try {
 //                List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(this);
 //                Size imageSize = new Size(cameras.get(0).getHeight(), cameras.get(0).getWidth());
-//                Detector detector = new DetectorSSD(this, new DetectorConfig(fidelity, 900));
-//                Long time = ((DetectorSSD) detector).estimateComputationTime(imageSize);
+//                Detector detector = new DetectorTensorFlowMobile(this, new DetectorConfig(fidelity, 900));
+//                Long time = ((DetectorTensorFlowMobile) detector).estimateComputationTime(imageSize);
 //                computationTime.put(fidelity, time);
 //            } catch (Exception e) {
 //                Log.e(TAG, "setting indicators failed", e);
@@ -150,25 +144,25 @@ public class ConfigureActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String state = (String) v.getTag();
-                setDetectorButtonStates(state, DetectorSSD.FIDELITY_MODE, detector_buttons);
+                setDetectorButtonStates(state, DetectorTensorFlowMobile.FIDELITY_MODE, detector_buttons);
             }
         };
 
-        for (String value : DetectorSSD.FIDELITY_MODE) {
+        for (String value : DetectorTensorFlowMobile.FIDELITY_MODE) {
             ToggleButton button = new ToggleButton(this);
             button.setTag(value);
             button.setText(value);
             button.setTextOff(value);
             button.setTextOn(value);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            layoutParams.weight = 1.0f / DetectorSSD.FIDELITY_MODE.length;
+            layoutParams.weight = 1.0f / DetectorTensorFlowMobile.FIDELITY_MODE.length;
             button.setLayoutParams(layoutParams);
             toggleLayout.addView(button);
             detector_buttons.add(button);
             button.setOnClickListener(buttonClickListener);
         }
 
-        setDetectorButtonStates(Config.getNetworkFidelity(activity), DetectorSSD.FIDELITY_MODE, detector_buttons);
+        setDetectorButtonStates(Config.getNetworkFidelity(activity), DetectorTensorFlowMobile.FIDELITY_MODE, detector_buttons);
 
 //        Button btSetTime = (Button) findViewById(R.id.bt_setTime);
 //        btSetTime.setOnClickListener(new View.OnClickListener() {
@@ -200,7 +194,7 @@ public class ConfigureActivity extends AppCompatActivity {
                 String fidelity = Config.getNetworkFidelity(context);
                 for (int i=0; i<detector_buttons.size(); i++) {
                     if (detector_buttons.get(i).isChecked()) {
-                        fidelity = DetectorSSD.FIDELITY_MODE[i];
+                        fidelity = DetectorTensorFlowMobile.FIDELITY_MODE[i];
                     }
                 }
                 DetectorConfig detectorConfig = new DetectorConfig(fidelity, 700); // TODO
@@ -230,8 +224,8 @@ public class ConfigureActivity extends AppCompatActivity {
         try {
             List<DeviceInfo.CameraInfo> cameras = CameraController2.getCameraInfo(this);
             Size imageSize = new Size(cameras.get(0).getHeight(), cameras.get(0).getWidth());
-            Detector detector = new DetectorSSD(this, new DetectorConfig(state, 900));
-            Long time = ((DetectorSSD) detector).estimateComputationTime(imageSize);
+            Detector detector = new DetectorTensorFlowMobile(this, new DetectorConfig(state, 900));
+            Long time = ((DetectorTensorFlowMobile) detector).estimateComputationTime(imageSize);
 
             TextView tv = findViewById(R.id.tv_estimatedComputationTime);
             if (time != null) {

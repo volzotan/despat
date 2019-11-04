@@ -13,6 +13,7 @@ import java.util.List;
 
 import de.volzo.despat.CameraController;
 import de.volzo.despat.Despat;
+import de.volzo.despat.R;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.CaptureDao;
 import de.volzo.despat.persistence.Event;
@@ -34,6 +35,13 @@ public class Sync {
 
         if (!Config.getPhoneHome(context)) {
             Log.d(TAG, "sync stopped. phoneHome set to false");
+            return;
+        }
+
+        String credentials_username = context.getResources().getString(R.string.server_username);
+
+        if (credentials_username == null || credentials_username.length() == 0) {
+            Log.e(TAG, "sync stopped. logindata missing");
             return;
         }
 

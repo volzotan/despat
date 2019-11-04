@@ -133,6 +133,7 @@ public class Despat extends Application {
         f.addAction(Broadcast.IMAGE_TAKEN);
         f.addAction(Broadcast.NEXT_SHUTTER_INVOCATION);
         f.addAction(Broadcast.ERROR_OCCURED);
+        f.addAction(Broadcast.COMMAND_RUN_BENCHMARK);
 
         registerReceiver(o, f);
     }

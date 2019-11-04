@@ -1,39 +1,32 @@
 package de.volzo.despat.detector;
 
-import android.app.ActivityManager;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
-import android.os.Debug;
 import android.util.Log;
 import android.util.Size;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import de.volzo.despat.Despat;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Benchmark;
 import de.volzo.despat.persistence.BenchmarkDao;
-import de.volzo.despat.persistence.Session;
 import de.volzo.despat.preferences.DetectorConfig;
 import de.volzo.despat.support.Util;
 import de.volzo.despat.userinterface.DrawSurface;
 import de.volzo.despat.support.Stopwatch;
 
-public class DetectorSSD extends Detector {
+public class DetectorTensorFlowMobile extends Detector {
 
-    private static final String TAG = DetectorSSD.class.getSimpleName();
+    private static final String TAG = DetectorTensorFlowMobile.class.getSimpleName();
 
     public static final String[] FIDELITY_MODE = {"low", "mid", "high"};
 
-    private TensorFlowInterface tfInterface;
+    private TensorFlowMobileInterface tfInterface;
     private Stopwatch stopwatch;
 
     private int TILESIZE_INPUT = 800;
@@ -61,7 +54,7 @@ public class DetectorSSD extends Detector {
 
     private TileManager tileManager = null;
 
-    public DetectorSSD(Context context, DetectorConfig detectorConfig) throws Exception {
+    public DetectorTensorFlowMobile(Context context, DetectorConfig detectorConfig) throws Exception {
         super(context, detectorConfig);
 
         TILESIZE_INPUT = this.detectorConfig.getTilesize();
@@ -117,7 +110,7 @@ public class DetectorSSD extends Detector {
         stopwatch = new Stopwatch();
         Despat despat = Util.getDespat(context);
         try {
-            tfInterface = TensorFlowInterface.create(
+            tfInterface = TensorFlowMobileInterface.create(
                     context,
                     context.getAssets(),
                     despat.getStorageManager(),
@@ -158,12 +151,12 @@ public class DetectorSSD extends Detector {
         long fullImageTimer = System.currentTimeMillis();
         stopwatch.reset();
         stopwatch.start("tileManager init");
-        Bitmap emptyBitmap = Bitmap.createBitmap(3000, 2000, Bitmap.Config.ARGB_8888);
+        Bitmap emptyBitmap = Bitmap.createBitmap(4000, 3000, Bitmap.Config.ARGB_8888);
         tileManager = new TileManager(emptyBitmap, TILESIZE_INPUT, TILESIZE_OUTPUT);
         stopwatch.stop("tileManager init");
 
         List<Detector.Recognition> results;
-        List<TileManager.Tile> tiles = tileManager.getAllTiles().subList(0, 4);
+        List<TileManager.Tile> tiles = tileManager.getAllTiles().subList(0, 6);
 
         for (TileManager.Tile tile : tiles){
             stopwatch.start("totalInference");

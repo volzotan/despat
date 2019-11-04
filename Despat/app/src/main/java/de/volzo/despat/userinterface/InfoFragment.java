@@ -282,7 +282,7 @@ public class InfoFragment extends Fragment {
 //                PositionDao positionDao = database.positionDao();
 //                List<Position> positions = positionDao.getAllBySession(session.getId());
 //                try {
-//                    final Detector detector = new DetectorSSD(context, session.getDetectorConfig());
+//                    final Detector detector = new DetectorTensorFlowMobile(context, session.getDetectorConfig());
 //                    final Size imageSize = session.getImageSize();
 //                    final List<RectF> rectangles = detector.positionsToRectangles(positions);
 //

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.volzo.despat.detector.Detector;
-import de.volzo.despat.detector.DetectorSSD;
+import de.volzo.despat.detector.DetectorTensorFlowMobile;
 import de.volzo.despat.persistence.AppDatabase;
 import de.volzo.despat.persistence.Capture;
 import de.volzo.despat.persistence.CaptureDao;
@@ -99,7 +99,7 @@ public class RecognitionService extends IntentService {
 
         Detector detector;
         try {
-            detector = new DetectorSSD(this, session.getDetectorConfig());
+            detector = new DetectorTensorFlowMobile(this, session.getDetectorConfig());
             detector.init();
         } catch (Exception e) {
             Log.e(TAG, "detector init failed", e);

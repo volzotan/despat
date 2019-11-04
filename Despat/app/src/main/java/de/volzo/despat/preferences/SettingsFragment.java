@@ -14,12 +14,11 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.preference.TwoStatePreference;
-import android.util.Log;
 
 import java.util.HashMap;
 
 import de.volzo.despat.R;
-import de.volzo.despat.detector.DetectorSSD;
+import de.volzo.despat.detector.DetectorTensorFlowMobile;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -165,8 +164,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         ListPreference prefNetworkFidelity = new ListPreference(context);
         prefNetworkFidelity.setTitle(R.string.pref_title_networkFidelity);
         prefNetworkFidelity.setSummary(R.string.pref_summary_networkFidelity);
-        prefNetworkFidelity.setEntryValues(DetectorSSD.FIDELITY_MODE);
-        prefNetworkFidelity.setEntries(DetectorSSD.FIDELITY_MODE);
+        prefNetworkFidelity.setEntryValues(DetectorTensorFlowMobile.FIDELITY_MODE);
+        prefNetworkFidelity.setEntries(DetectorTensorFlowMobile.FIDELITY_MODE);
         prefNetworkFidelity.setDefaultValue(Config.DEFAULT_NETWORK_FIDELITY);
         prefNetworkFidelity.setKey(Config.KEY_NETWORK_FIDELITY);
         category.addPreference(prefNetworkFidelity);
