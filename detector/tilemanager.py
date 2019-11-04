@@ -8,6 +8,10 @@ sys.path.append('..')
 from util.drawhelper import Drawhelper
 import util.converter
 
+# for the pass_ground_truth() calculations
+import shapely 
+from shapely.geometry import Polygon
+
 class TileManager(object):
 
     posx    = 0
@@ -67,7 +71,7 @@ class TileManager(object):
 
         for tile_id in self.tiles:
             tile = self.tiles[tile_id]
-            tile["result"] = None
+            tile["result"] = []
 
 
     def _crop_and_resize(self, crop_dim, outputsize):
@@ -137,7 +141,7 @@ class TileManager(object):
     def get_tile_image(self, tile_id):
         tile = self.tiles[tile_id]
         crop_dim = self._get_dim_for_tile(tile["x"], tile["y"])
-        
+
         resized = self._crop_and_resize(crop_dim, self.outputsize)
 
         # cropped = self.image.crop(crop_dim)
@@ -165,6 +169,65 @@ class TileManager(object):
         )
 
         #print(result)
+
+    """
+        pass XML-VOC ground truth data so detection bounding boxes can be matched to tiles
+        format: 
+                      x_min y_min, x_max, y_max
+            [{'box': [2555, 885, 2585, 999], 'class': 'person'}, ...]
+    """
+    def pass_ground_truth(self, data):
+
+        shapely_tiles = {}
+
+        for tile_id in self.tiles:
+            tile = self.tiles[tile_id]
+            dims = self._get_dim_for_tile(tile["x"], tile["y"])
+            shapely_tiles[tile_id] = Polygon([
+                [dims[0], dims[1]],
+                [dims[2], dims[1]], 
+                [dims[2], dims[3]], 
+                [dims[0], dims[3]]
+            ])
+
+        # for tile_id in shapely_tiles:
+        #     print(shapely_tiles[tile_id])
+
+        for datapoint in data:
+            box = datapoint["box"]
+            classname = datapoint["class"]
+
+            xmin = box[0]
+            ymin = box[1]
+            xmax = box[2]
+            ymax = box[3]
+
+            box_poly = Polygon([
+                [xmin, ymin],
+                [xmax, ymin],
+                [xmax, ymax],
+                [xmin, ymax]
+            ])
+
+            for tile_id in shapely_tiles:
+                intersection = box_poly.intersection(shapely_tiles[tile_id])
+
+                if not intersection.is_empty:
+                    # print(intersection)
+
+                    tile = self.tiles[tile_id]
+                    dims = self._get_dim_for_tile(tile["x"], tile["y"])
+
+                    intersection_trans = shapely.affinity.translate(intersection, -dims[0], -dims[1])
+
+                    # TODO: what about resized tiles?
+
+                    tile = self.tiles[tile_id]
+                    tile["result"].append([intersection_trans, classname])
+
+
+    def get_tile_ground_truth(self, tile_id):
+        return self.tiles[tile_id]["result"]
 
 
     def _get_tile_borders(self):
