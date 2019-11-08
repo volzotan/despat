@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 import io
 
 import tensorflow as tf
-from tfodapi.object_detection.utils import dataset_util
+from object_detection.utils import dataset_util
 
 sys.path.append('..')
 
@@ -23,8 +23,8 @@ INPUT_DIRS          = [
 ]
 
 OUTPUT_DIR          = "data"
-TILESIZE            = 600
-EXPORT_IMAGE_SIZE   = 600
+TILESIZE            = 900
+EXPORT_IMAGE_SIZE   = 900
 TFRECORD_FILE       = "foo.record"
 
 # ignore personS and bicycleS classes for now
@@ -58,7 +58,7 @@ def vocToBbox(filename):
     return res
 
 
-def create_tf_example(filename, image, bboxes, classnames, classints):
+def create_tf_example(filename, image, data):
 
     height = EXPORT_IMAGE_SIZE
     width = EXPORT_IMAGE_SIZE
@@ -71,13 +71,39 @@ def create_tf_example(filename, image, bboxes, classnames, classints):
     classes_text = []
     classes = []
 
-    for i in range(0, len(bboxes)):
-        xmins.append(bboxes[i][0] / width)
-        xmaxs.append(bboxes[i][2] / width)
-        ymins.append(bboxes[i][1] / height)
-        ymaxs.append(bboxes[i][3] / height)
-        classes_text.append(classnames[i])
-        classes.append(classints[i])
+    for i in range(0, len(data)):
+
+        bbox = list(data[i][0].exterior.coords)
+        classname = data[i][1]
+
+        if classname not in CLASSES:
+            classname_new = classname[:-1]
+            if classname_new not in CLASSES:
+                print("ignored classname: {}".format(classname))
+                continue
+            else:
+                classname = classname_new
+
+        # print(bbox)
+
+        xmin = min(bbox[0][0], bbox[1][0], bbox[2][0], bbox[3][0], bbox[4][0])
+        xmax = max(bbox[0][0], bbox[1][0], bbox[2][0], bbox[3][0], bbox[4][0])
+        ymin = min(bbox[0][1], bbox[1][1], bbox[2][1], bbox[3][1], bbox[4][1])
+        ymax = max(bbox[0][1], bbox[1][1], bbox[2][1], bbox[3][1], bbox[4][1])
+
+        # print(xmin)
+        # print(xmax)
+        # print(ymin)
+        # print(ymax)
+
+        xmins.append(xmin / width)
+        xmaxs.append(xmax / width)
+        ymins.append(ymin / height)
+        ymaxs.append(ymax / height)
+        classes_text.append(classname.encode("utf-8"))
+        classes.append(CLASSES[classname])
+
+    # print("saved {} classes".format(len(classes)))
 
     tf_example = tf.train.Example(features=tf.train.Features(feature={
         'image/height': dataset_util.int64_feature(height),
@@ -100,6 +126,8 @@ def create_tf_example(filename, image, bboxes, classnames, classints):
 def write_record(recordname, images):
 
     writer = tf.compat.v1.python_io.TFRecordWriter(recordname)
+
+    num_tiles_written = 0
 
     for image in images:
 
@@ -130,12 +158,22 @@ def write_record(recordname, images):
             tile_image.save(imgByteArr, format='JPEG')
             imgByteArr = imgByteArr.getvalue()
 
-            tf_example = create_tf_example(filename, imgByteArr, [], [], []) # TODO
+            # if len(result) > 0:
+
+            #     print(list(zip(*result))[0])
+            #     print(list(zip(*result))[1])
+            #     exit()
+
+            tf_example = create_tf_example(filename, imgByteArr, result) #[], [], []) # TODO
             writer.write(tf_example.SerializeToString())
 
-            print(filename)
+            num_tiles_written += 1
+
+            # print(filename)
 
     writer.close()
+
+    return num_tiles_written
 
 
 def main(_):
@@ -166,18 +204,25 @@ def main(_):
 
     print("found images: {}".format(len(examples)))
 
-    examples = examples[0:20]
+    # examples = examples[0:20]
 
     random.seed(42)
     random.shuffle(examples)
     num_images = len(examples)
     num_train = int(0.9 * num_images)
+
     train_images = examples[:num_train]
     val_images = examples[num_train:]
 
-    write_record("train.record", train_images)
+    print("train images: {}".format(len(train_images)))
+    print("val images: {}".format(len(val_images)))
+
+    train_tiles_written = write_record("train.record", train_images)
     # write_record("test.record")
-    write_record("val.record", val_images)
+    eval_tiles_written = write_record("val.record", val_images)
+
+    print("train images: {}".format(train_tiles_written))
+    print("val images: {}".format(eval_tiles_written))
 
 
 if __name__ == '__main__':

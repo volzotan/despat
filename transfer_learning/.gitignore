@@ -1,0 +1,7 @@
+object_detection/**
+slim/**
+pycocotools/**
+pycocotools_osx/**
+output_*/**
+
+*.record
