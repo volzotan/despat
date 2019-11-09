@@ -23,8 +23,8 @@ INPUT_DIRS          = [
 ]
 
 OUTPUT_DIR          = "data"
-TILESIZE            = 900
-EXPORT_IMAGE_SIZE   = 900
+TILESIZE            = 800
+EXPORT_IMAGE_SIZE   = TILESIZE
 TFRECORD_FILE       = "foo.record"
 
 # ignore personS and bicycleS classes for now
@@ -154,6 +154,7 @@ def write_record(recordname, images):
             # del draw
             # tile_image.save(os.path.join(OUTPUT_DIR, image[0][:-4]+"-{}.jpg".format(tile_id)))
 
+            # im.thumbnail(, Image.ANTIALIAS)
             imgByteArr = io.BytesIO()
             tile_image.save(imgByteArr, format='JPEG')
             imgByteArr = imgByteArr.getvalue()
@@ -221,8 +222,12 @@ def main(_):
     # write_record("test.record")
     eval_tiles_written = write_record("val.record", val_images)
 
-    print("train images: {}".format(train_tiles_written))
-    print("val images: {}".format(eval_tiles_written))
+    print("images total: {}".format(len(examples)))
+    print("train images: {}".format(len(train_images)))
+    print("val images: {}".format(len(val_images)))
+    print("------------------")
+    print("train image tiles: {}".format(train_tiles_written))
+    print("val image tiles: {}".format(eval_tiles_written))
 
 
 if __name__ == '__main__':
